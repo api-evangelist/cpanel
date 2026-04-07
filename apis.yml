@@ -5,9 +5,9 @@ apis:
   - aid: cpanel:cpanel
     name: cPanel
     tags:
+      - Domains
       - Hosting
       - Websites
-      - Domains
     humanURL: https://api.docs.cpanel.net/
     properties:
       - url: https://api.docs.cpanel.net/
@@ -19,9 +19,9 @@ apis:
       email accounts, and more from one centralized dashboard.
 name: cPanel
 tags:
+  - Domains
   - Hosting
   - Websites
-  - Domains
 type: Index
 image: https://kinlane-productions.s3.amazonaws.com/apis-json/apis-json-logo.jpg
 access: 3rd-Party
