@@ -1,42 +1,56 @@
 # cPanel (cpanel)
-cPanel is a web-based control panel that allows users to easily manage their websites and hosting services. It provides a graphical interface to help users easily navigate and configure various aspects of their website, such as adding domains, creating email accounts, installing applications and monitoring website traffic. With cPanel, users can also set up security measures, manage backups, and access system information to ensure their website runs smoothly and securely. Overall, cPanel simplifies the process of managing and maintaining a website, making it a valuable tool for both experienced webmasters and beginners.
+
+cPanel is a web-based control panel that provides a graphical interface and automation tools to simplify the management of web hosting services. cPanel exposes a family of HTTP APIs (UAPI, WHM API 1, and the legacy cPanel API 2) for automating account, domain, email, database, DNS, and server-wide operations.
 
 **URL:** [Visit APIs.json URL](https://raw.githubusercontent.com/api-evangelist/cpanel/refs/heads/main/apis.yml)
 
 ## Scope
 
-- **Type:** Index 
-- **Position:** Consumer 
-- **Access:** 3rd-Party 
+- **Type:** Index
+- **Position:** Consuming
+- **Access:** 3rd-Party
+- **x-type:** company
 
-## Tags:
+## Tags
 
- - Hosting, Websites, Domains
+- Control Panel, DNS, Domains, Email, Hosting, Reseller, Server Administration, Web Hosting, WHM
 
 ## Timestamps
 
-- **Created:** 2025-02-09 
-- **Modified:** 2025-03-01 
+- **Created:** 2025-02-09
+- **Modified:** 2026-04-28
 
 ## APIs
 
-### cPanel
-cPanel is a web-based control panel that provides a graphical interface and automation tools designed to simplify the process of managing web hosting services. It allows website owners to easily manage their websites, domains, databases, email accounts, and more from one centralized dashboard. With cPanel, users can perform tasks such as creating and managing email accounts, setting up domain pointers, installing and managing applications like WordPress, and monitoring website traffic and performance. Overall, cPanel streamlines the management of web hosting services, making it easier for users to maintain and optimize their websites.
+### cPanel UAPI
 
-**Human URL:** [ https://api.docs.cpanel.net/]( https://api.docs.cpanel.net/)
+The modern HTTP API for cPanel-level operations such as managing email accounts, mailboxes, files, databases, FTP accounts, SSL certificates, and DNS zones.
 
+**Base URL:** `https://hostname:2083/execute`
 
-#### Tags:
+### WHM API 1
 
- - Hosting, Websites, Domains
+HTTP API for server-wide and reseller-level operations including account creation/suspension/termination, package management, DNS clusters, and reseller privileges.
 
-#### Properties
+**Base URL:** `https://hostname:2087/json-api`
 
-- [Documentation]( https://api.docs.cpanel.net/)
+### cPanel API 2 (Legacy)
+
+Legacy XML/JSON API for cPanel user operations, retained for backward compatibility but largely superseded by UAPI.
+
+## Common Properties
+
+- [Website](https://cpanel.net/)
+- [Documentation](https://api.docs.cpanel.net/)
+- [Authentication Guide](https://api.docs.cpanel.net/guides/guide-to-api-authentication/)
+- [Change Log](https://api.docs.cpanel.net/whm/release-notes/)
+- [Forum](https://forums.cpanel.net/)
+- [Support](https://support.cpanel.net/)
+- [Status](https://status.cpanel.net/)
+- [GitHub](https://github.com/CpanelInc)
 
 ## Maintainers
 
 **FN:** Kin Lane
 
-**Email:** info@apievangelist.com
-
+**Email:** kin@apievangelist.com
