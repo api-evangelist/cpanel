@@ -133,6 +133,10 @@ common:
     url: https://cpanel.net/privacy-policy/
   - type: LinkedIn
     url: https://www.linkedin.com/company/cpanel
+  - type: Integrations
+    url: https://www.cpanel.net/partners/
+integrations:
+  - name: License Verification
 maintainers:
   - FN: Kin Lane
     email: kin@apievangelist.com
