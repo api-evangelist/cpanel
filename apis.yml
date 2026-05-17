@@ -1,6 +1,6 @@
 aid: cpanel
 name: cPanel
-x-type: company
+kind: company
 description: >-
   cPanel is a web-based control panel that provides a graphical interface and
   automation tools to simplify the management of web hosting services. cPanel
@@ -123,7 +123,7 @@ common:
     url: https://forums.cpanel.net/
   - type: Support
     url: https://support.cpanel.net/
-  - type: Status
+  - type: StatusPage
     url: https://status.cpanel.net/
   - type: GitHub
     url: https://github.com/CpanelInc
