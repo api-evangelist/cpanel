@@ -135,6 +135,8 @@ common:
     url: https://www.linkedin.com/company/cpanel
   - type: Integrations
     url: https://www.cpanel.net/partners/
+  - type: LLMsTxt
+    url: https://api.docs.cpanel.net/llms.txt
 integrations:
   - name: License Verification
 maintainers:
