@@ -8,7 +8,7 @@ description: >-
   for automating account, domain, email, database, DNS, and server-wide
   operations. APIs accept API tokens or Basic Authentication and return JSON or
   XML responses.
-image: https://kinlane-productions2.s3.amazonaws.com/apis-json/apis-json-logo.jpg
+image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/apis-json-logo.jpg
 url: https://raw.githubusercontent.com/api-evangelist/cpanel/refs/heads/main/apis.yml
 type: Index
 access: 3rd-Party
@@ -35,7 +35,7 @@ apis:
       databases, FTP accounts, SSL certificates, and DNS zones for a single
       cPanel user. UAPI is the recommended replacement for the legacy cPanel
       API 2.
-    image: https://kinlane-productions2.s3.amazonaws.com/apis-json/apis-json-logo.jpg
+    image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/apis-json-logo.jpg
     humanURL: https://api.docs.cpanel.net/cpanel/introduction/
     baseURL: https://hostname:2083/execute
     tags:
@@ -68,7 +68,7 @@ apis:
       operations including creating, suspending, and terminating cPanel
       accounts, managing packages and feature lists, configuring DNS clusters,
       manipulating reseller privileges, and performing system administration.
-    image: https://kinlane-productions2.s3.amazonaws.com/apis-json/apis-json-logo.jpg
+    image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/apis-json-logo.jpg
     humanURL: https://api.docs.cpanel.net/whm/introduction/
     baseURL: https://hostname:2087/json-api
     tags:
@@ -99,7 +99,7 @@ apis:
       cPanel API 2 is the legacy XML/JSON API for cPanel-user operations. It
       remains supported for backward compatibility but has been largely
       superseded by UAPI; new development should target UAPI where possible.
-    image: https://kinlane-productions2.s3.amazonaws.com/apis-json/apis-json-logo.jpg
+    image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/apis-json-logo.jpg
     humanURL: https://api.docs.cpanel.net/cpanel/introduction/
     baseURL: https://hostname:2083/json-api/cpanel
     tags:
