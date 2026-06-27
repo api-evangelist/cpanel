@@ -119,7 +119,7 @@ common:
     url: https://api.docs.cpanel.net/guides/guide-to-api-authentication/
   - type: ChangeLog
     url: https://api.docs.cpanel.net/whm/release-notes/
-  - type: Forum
+  - type: Forums
     url: https://forums.cpanel.net/
   - type: Support
     url: https://support.cpanel.net/
@@ -135,7 +135,7 @@ common:
     url: https://www.linkedin.com/company/cpanel
   - type: Integrations
     url: https://www.cpanel.net/partners/
-  - type: LLMsTxt
+  - type: LlmsText
     url: https://api.docs.cpanel.net/llms.txt
 integrations:
   - name: License Verification
