@@ -1,0 +1,24 @@
+generated: '2026-07-11'
+method: derived
+source: openapi/cpanel-openapi.yml
+summary:
+  types:
+  - http
+schemes:
+- name: BearerAuth
+  type: http
+  scheme: bearer
+  bearerFormat: cPanel API Token
+  description: |-
+    Provide a cPanel API token using
+    `Authorization: cpanel <username>:<token>` (cPanel's documented
+    token header format). Standard `Authorization: Bearer` is also
+    accepted by some deployments.
+  sources:
+  - openapi/cpanel-openapi.yml
+- name: BasicAuth
+  type: http
+  scheme: basic
+  description: HTTP Basic Authentication with cPanel account credentials.
+  sources:
+  - openapi/cpanel-openapi.yml

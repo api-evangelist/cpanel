@@ -1,0 +1,27 @@
+generated: '2026-07-11'
+method: probed
+source: live DNS/TLS/HTTP probes of apis.yml + OpenAPI hosts
+hosts:
+- host: cpanel.net
+  https: true
+  tls_version: TLSv1.3
+  cert_expires: Jan 26 23:59:59 2027 GMT
+  hsts: false
+- host: api.docs.cpanel.net
+  https: true
+  tls_version: TLSv1.3
+  cert_expires: Oct  3 09:32:52 2026 GMT
+  hsts: false
+domains:
+- domain: cpanel.net
+  dnssec: false
+  caa:
+  - 0 issue "pki.goog"
+  - 0 issue "godaddy.com"
+  - 0 iodef "mailto:caa-notify@cpanel.net"
+  - 0 issue "comodoca.com"
+  - 0 issue "letsencrypt.org"
+  - 0 issue "awstrust.com"
+  spf: true
+  dmarc: true
+  dmarc_policy: quarantine

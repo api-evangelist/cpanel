@@ -111,6 +111,12 @@ apis:
       - type: GuideToCPanelAPI2
         url: https://api.docs.cpanel.net/guides/guide-to-cpanel-api-2/
 common:
+  - type: VulnerabilityDisclosure
+    url: security/cpanel-vulnerability-disclosure.yml
+  - type: DomainSecurity
+    url: security/cpanel-domain-security.yml
+  - type: Authentication
+    url: authentication/cpanel-authentication.yml
   - type: Website
     url: https://cpanel.net/
   - type: Documentation
@@ -137,6 +143,8 @@ common:
     url: https://www.cpanel.net/partners/
   - type: LlmsText
     url: https://api.docs.cpanel.net/llms.txt
+  - url: https://www.cpanel.net/blog/
+    type: Blog
 integrations:
   - name: License Verification
 maintainers:
