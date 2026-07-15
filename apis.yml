@@ -111,6 +111,8 @@ apis:
       - type: GuideToCPanelAPI2
         url: https://api.docs.cpanel.net/guides/guide-to-cpanel-api-2/
 common:
+  - type: AgenticAccess
+    url: agentic-access/cpanel-agentic-access.yml
   - type: VulnerabilityDisclosure
     url: security/cpanel-vulnerability-disclosure.yml
   - type: DomainSecurity
