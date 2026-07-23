@@ -1,0 +1,114 @@
+openapi: 3.1.0
+info:
+  title: cPanel U DomainInfo UAPI API
+  description: 'cPanel UAPI is the modern HTTP API exposed by the cPanel web hosting
+
+    control panel. Endpoints follow the pattern
+
+    `/execute/{Module}/{Function}` and accept parameters as query string
+
+    values. UAPI returns JSON responses and authenticates calls via API
+
+    tokens or Basic Authentication. UAPI runs on the cPanel account ports
+
+    (2083 secure, 2082 unsecure) and Webmail ports (2096 secure, 2095
+
+    unsecure).
+
+    '
+  version: '1'
+  contact:
+    name: cPanel
+    url: https://api.docs.cpanel.net/cpanel/introduction/
+servers:
+- url: https://{hostname}:2083
+  description: Secure cPanel account access
+  variables:
+    hostname:
+      default: example.com
+      description: The cPanel server hostname.
+- url: https://{hostname}:2096
+  description: Secure Webmail session
+  variables:
+    hostname:
+      default: example.com
+security:
+- BearerAuth: []
+- BasicAuth: []
+tags:
+- name: UAPI
+  description: Generic UAPI execute endpoint
+paths:
+  /execute/{Module}/{Function}:
+    parameters:
+    - in: path
+      name: Module
+      required: true
+      schema:
+        type: string
+      description: The UAPI module name (e.g. `Email`, `Mysql`, `DomainInfo`).
+    - in: path
+      name: Function
+      required: true
+      schema:
+        type: string
+      description: The function within the module (e.g. `add_pop`, `list_databases`).
+    get:
+      tags:
+      - UAPI
+      summary: Execute any UAPI function
+      description: 'Generic UAPI entry point. Pass module-specific parameters as query
+
+        string values.
+
+        '
+      operationId: executeUapi
+      responses:
+        '200':
+          description: A UAPI response envelope.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UapiResponse'
+components:
+  schemas:
+    UapiResponse:
+      type: object
+      properties:
+        status:
+          type: integer
+          description: 1 on success, 0 on failure.
+        data:
+          description: Function-specific response payload.
+        errors:
+          type: array
+          items:
+            type: string
+        messages:
+          type: array
+          items:
+            type: string
+        warnings:
+          type: array
+          items:
+            type: string
+        metadata:
+          type: object
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: cPanel API Token
+      description: 'Provide a cPanel API token using
+
+        `Authorization: cpanel <username>:<token>` (cPanel''s documented
+
+        token header format). Standard `Authorization: Bearer` is also
+
+        accepted by some deployments.
+
+        '
+    BasicAuth:
+      type: http
+      scheme: basic
+      description: HTTP Basic Authentication with cPanel account credentials.
