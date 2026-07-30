@@ -8,7 +8,20 @@ description: >-
   for automating account, domain, email, database, DNS, and server-wide
   operations. APIs accept API tokens or Basic Authentication and return JSON or
   XML responses.
-image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/apis-json-logo.jpg
+accessModel:
+  pricing: freemium
+  onboarding: self-serve
+  trial: false
+  try_now: true
+  public: false
+  label: Freemium · Self-serve signup
+  confidence: high
+  source:
+  - plans
+  - authentication
+  generated: '2026-07-22'
+  method: derived
+image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/icons/cpanel.png
 url: https://raw.githubusercontent.com/api-evangelist/cpanel/refs/heads/main/apis.yml
 type: Index
 access: 3rd-Party
@@ -27,89 +40,125 @@ tags:
   - WHM
 specificationVersion: '0.19'
 apis:
-  - aid: cpanel:uapi
-    name: cPanel UAPI
-    description: >-
-      The cPanel User API (UAPI) is the modern HTTP API for performing
-      cPanel-level operations such as managing email accounts, mailboxes, files,
-      databases, FTP accounts, SSL certificates, and DNS zones for a single
-      cPanel user. UAPI is the recommended replacement for the legacy cPanel
-      API 2.
-    image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/apis-json-logo.jpg
-    humanURL: https://api.docs.cpanel.net/cpanel/introduction/
-    baseURL: https://hostname:2083/execute
-    tags:
-      - Databases
-      - Email
-      - Files
-      - Hosting
-      - REST
-      - UAPI
-    properties:
-      - type: Documentation
-        url: https://api.docs.cpanel.net/cpanel/introduction/
-      - type: GuideToUAPI
-        url: https://api.docs.cpanel.net/guides/guide-to-uapi/
-      - type: AllUAPIFunctions
-        url: https://api.docs.cpanel.net/openapi/cpanel/tag/Email/
-      - type: Authentication
-        url: https://api.docs.cpanel.net/guides/guide-to-api-authentication/
-    features:
-      - name: Token Authentication
-        description: API tokens scoped per cPanel user.
-      - name: Modular Function Catalog
-        description: Functions grouped into modules such as Email, DNS, Mysql, and Ftp.
-      - name: JSON Responses
-        description: Modern JSON responses with consistent metadata envelope.
-  - aid: cpanel:whm-api-1
-    name: WHM API 1
-    description: >-
-      The WHM API 1 is the HTTP API for server-wide and reseller-level
-      operations including creating, suspending, and terminating cPanel
-      accounts, managing packages and feature lists, configuring DNS clusters,
-      manipulating reseller privileges, and performing system administration.
-    image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/apis-json-logo.jpg
-    humanURL: https://api.docs.cpanel.net/whm/introduction/
-    baseURL: https://hostname:2087/json-api
-    tags:
-      - Accounts
-      - Packages
-      - Reseller
-      - Server Administration
-      - WHM
-    properties:
-      - type: Documentation
-        url: https://api.docs.cpanel.net/whm/introduction/
-      - type: GuideToWHMAPI1
-        url: https://api.docs.cpanel.net/guides/guide-to-whm-api-1/
-      - type: APIReference
-        url: https://api.docs.cpanel.net/openapi/whm/
-      - type: Authentication
-        url: https://api.docs.cpanel.net/guides/guide-to-api-authentication/
-    features:
-      - name: Account Management
-        description: Create, suspend, terminate, modify, and migrate cPanel accounts.
-      - name: Package Management
-        description: Define hosting packages and feature lists.
-      - name: DNS Cluster Operations
-        description: Sync zones across DNS-only servers in a cluster.
-  - aid: cpanel:cpanel-api-2
-    name: cPanel API 2 (Legacy)
-    description: >-
-      cPanel API 2 is the legacy XML/JSON API for cPanel-user operations. It
-      remains supported for backward compatibility but has been largely
-      superseded by UAPI; new development should target UAPI where possible.
-    image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/apis-json-logo.jpg
-    humanURL: https://api.docs.cpanel.net/cpanel/introduction/
-    baseURL: https://hostname:2083/json-api/cpanel
-    tags:
-      - Legacy
-      - cPanel
-    properties:
-      - type: Documentation
-        url: https://api.docs.cpanel.net/cpanel/introduction/
-      - type: GuideToCPanelAPI2
-        url: https://api.docs.cpanel.net/guides/guide-to-cpanel-api-2/
+- aid: cpanel:uapi
+  name: cPanel UAPI
+  description: >-
+    The cPanel User API (UAPI) is the modern HTTP API for performing cPanel-level operations such as managing
+    email accounts, mailboxes, files, databases, FTP accounts, SSL certificates, and DNS zones for a single
+    cPanel user. UAPI is the recommended replacement for the legacy cPanel API 2.
+  image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/apis-json-logo.jpg
+  humanURL: https://api.docs.cpanel.net/cpanel/introduction/
+  baseURL: https://hostname:2083/execute
+  tags:
+  - Databases
+  - Email
+  - Files
+  - Hosting
+  - REST
+  - UAPI
+  properties:
+  - type: Documentation
+    url: https://api.docs.cpanel.net/cpanel/introduction/
+  - type: GuideToUAPI
+    url: https://api.docs.cpanel.net/guides/guide-to-uapi/
+  - type: AllUAPIFunctions
+    url: https://api.docs.cpanel.net/openapi/cpanel/tag/Email/
+  - type: Authentication
+    url: https://api.docs.cpanel.net/guides/guide-to-api-authentication/
+  features:
+  - name: Token Authentication
+    description: API tokens scoped per cPanel user.
+  - name: Modular Function Catalog
+    description: Functions grouped into modules such as Email, DNS, Mysql, and Ftp.
+  - name: JSON Responses
+    description: Modern JSON responses with consistent metadata envelope.
+- aid: cpanel:whm-api-1
+  name: WHM API 1
+  description: >-
+    The WHM API 1 is the HTTP API for server-wide and reseller-level operations including creating, suspending,
+    and terminating cPanel accounts, managing packages and feature lists, configuring DNS clusters, manipulating
+    reseller privileges, and performing system administration.
+  image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/apis-json-logo.jpg
+  humanURL: https://api.docs.cpanel.net/whm/introduction/
+  baseURL: https://hostname:2087/json-api
+  tags:
+  - Accounts
+  - Packages
+  - Reseller
+  - Server Administration
+  - WHM
+  properties:
+  - type: Documentation
+    url: https://api.docs.cpanel.net/whm/introduction/
+  - type: GuideToWHMAPI1
+    url: https://api.docs.cpanel.net/guides/guide-to-whm-api-1/
+  - type: APIReference
+    url: https://api.docs.cpanel.net/openapi/whm/
+  - type: Authentication
+    url: https://api.docs.cpanel.net/guides/guide-to-api-authentication/
+  features:
+  - name: Account Management
+    description: Create, suspend, terminate, modify, and migrate cPanel accounts.
+  - name: Package Management
+    description: Define hosting packages and feature lists.
+  - name: DNS Cluster Operations
+    description: Sync zones across DNS-only servers in a cluster.
+- aid: cpanel:cpanel-api-2
+  name: cPanel API 2 (Legacy)
+  description: >-
+    cPanel API 2 is the legacy XML/JSON API for cPanel-user operations. It remains supported for backward
+    compatibility but has been largely superseded by UAPI; new development should target UAPI where possible.
+  image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/apis-json-logo.jpg
+  humanURL: https://api.docs.cpanel.net/cpanel/introduction/
+  baseURL: https://hostname:2083/json-api/cpanel
+  tags:
+  - Legacy
+  - cPanel
+  properties:
+  - type: Documentation
+    url: https://api.docs.cpanel.net/cpanel/introduction/
+  - type: GuideToCPanelAPI2
+    url: https://api.docs.cpanel.net/guides/guide-to-cpanel-api-2/
+- aid: cpanel:cpanel-domaininfo-api
+  name: cPanel DomainInfo API
+  description: Domain information (DomainInfo module)
+  humanURL: https://api.docs.cpanel.net/cpanel/introduction/
+  baseURL: https://hostname:2083/execute
+  tags:
+  - DomainInfo
+  properties:
+  - type: OpenAPI
+    url: openapi/cpanel-domaininfo-api-openapi.yml
+- aid: cpanel:cpanel-email-api
+  name: cPanel Email API
+  description: Email account management (Email module)
+  humanURL: https://api.docs.cpanel.net/cpanel/introduction/
+  baseURL: https://hostname:2083/execute
+  tags:
+  - Email
+  properties:
+  - type: OpenAPI
+    url: openapi/cpanel-email-api-openapi.yml
+- aid: cpanel:cpanel-mysql-api
+  name: cPanel Mysql API
+  description: MySQL database operations (Mysql module)
+  humanURL: https://api.docs.cpanel.net/cpanel/introduction/
+  baseURL: https://hostname:2083/execute
+  tags:
+  - Mysql
+  properties:
+  - type: OpenAPI
+    url: openapi/cpanel-mysql-api-openapi.yml
+- aid: cpanel:cpanel-uapi-api
+  name: cPanel UAPI API
+  description: Generic UAPI execute endpoint
+  humanURL: https://api.docs.cpanel.net/cpanel/introduction/
+  baseURL: https://hostname:2083/execute
+  tags:
+  - UAPI
+  properties:
+  - type: OpenAPI
+    url: openapi/cpanel-uapi-api-openapi.yml
 common:
   - type: AgenticAccess
     url: agentic-access/cpanel-agentic-access.yml
