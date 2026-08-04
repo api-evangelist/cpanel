@@ -1,0 +1,20 @@
+{
+  "provider": "cpanel",
+  "sources": [
+    "cpanel-domaininfo-api-openapi.yml",
+    "cpanel-email-api-openapi.yml",
+    "cpanel-mysql-api-openapi.yml",
+    "cpanel-uapi-api-openapi.yml"
+  ],
+  "outputs": [
+    "cpanel-domaininfo-api-openapi.yml",
+    "cpanel-email-api-openapi.yml",
+    "cpanel-mysql-api-openapi.yml",
+    "cpanel-uapi-api-openapi.yml"
+  ],
+  "archived": [],
+  "errors": [],
+  "warnings": [],
+  "notes": [],
+  "skipped": []
+}
