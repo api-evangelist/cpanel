@@ -38,7 +38,7 @@ tags:
   - Server Administration
   - Web Hosting
   - WHM
-specificationVersion: '0.19'
+specificationVersion: '0.23'
 apis:
 - aid: cpanel:uapi
   name: cPanel UAPI
