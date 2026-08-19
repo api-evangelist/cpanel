@@ -1,0 +1,277 @@
+{
+  "item": [
+    {
+      "id": "a69ced02-3053-45ce-ac62-9e2f524b1c3d",
+      "name": "Email",
+      "description": {
+        "content": "Email account management (Email module)",
+        "type": "text/plain"
+      },
+      "item": [
+        {
+          "id": "1a8ae563-56b7-4c36-bed6-b29e0198b7d5",
+          "name": "Create an email account",
+          "request": {
+            "name": "Create an email account",
+            "description": {},
+            "url": {
+              "path": [
+                "execute",
+                "Email",
+                "add_pop"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [
+                {
+                  "disabled": false,
+                  "key": "domain",
+                  "value": "<string>",
+                  "description": "(Required) "
+                },
+                {
+                  "disabled": false,
+                  "key": "email",
+                  "value": "<string>",
+                  "description": "(Required) "
+                },
+                {
+                  "disabled": false,
+                  "key": "password",
+                  "value": "<string>",
+                  "description": "(Required) "
+                },
+                {
+                  "disabled": false,
+                  "key": "quota",
+                  "value": "<integer>"
+                }
+              ],
+              "variable": [
+                {
+                  "description": "The cPanel server hostname.",
+                  "type": "any",
+                  "value": "{{hostname}}",
+                  "key": "hostname"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "GET",
+            "auth": null
+          },
+          "response": [
+            {
+              "id": "090b9fbe-5721-46fd-930f-a79417eec186",
+              "name": "Email account creation response.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "execute",
+                    "Email",
+                    "add_pop"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [
+                    {
+                      "key": "domain",
+                      "value": "<string>"
+                    },
+                    {
+                      "key": "email",
+                      "value": "<string>"
+                    },
+                    {
+                      "key": "password",
+                      "value": "<string>"
+                    },
+                    {
+                      "key": "quota",
+                      "value": "<integer>"
+                    }
+                  ],
+                  "variable": [
+                    {
+                      "description": "The cPanel server hostname.",
+                      "type": "any",
+                      "value": "{{hostname}}",
+                      "key": "hostname"
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"status\": 6158,\n  \"data\": {},\n  \"errors\": [\n    \"string\",\n    \"string\"\n  ],\n  \"messages\": [\n    \"string\",\n    \"string\"\n  ],\n  \"warnings\": [\n    \"string\",\n    \"string\"\n  ],\n  \"metadata\": {}\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "a7a751c7-c45f-47f4-9a73-e57e298ba398",
+          "name": "List email accounts",
+          "request": {
+            "name": "List email accounts",
+            "description": {},
+            "url": {
+              "path": [
+                "execute",
+                "Email",
+                "list_pops"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "description": "The cPanel server hostname.",
+                  "type": "any",
+                  "value": "{{hostname}}",
+                  "key": "hostname"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "GET",
+            "auth": null
+          },
+          "response": [
+            {
+              "id": "bd69fe82-c45a-4294-a6d3-8fd0df744d96",
+              "name": "List of email accounts.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "execute",
+                    "Email",
+                    "list_pops"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "description": "The cPanel server hostname.",
+                      "type": "any",
+                      "value": "{{hostname}}",
+                      "key": "hostname"
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"status\": 6158,\n  \"data\": {},\n  \"errors\": [\n    \"string\",\n    \"string\"\n  ],\n  \"messages\": [\n    \"string\",\n    \"string\"\n  ],\n  \"warnings\": [\n    \"string\",\n    \"string\"\n  ],\n  \"metadata\": {}\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        }
+      ],
+      "event": []
+    }
+  ],
+  "event": [],
+  "variable": [
+    {
+      "description": {
+        "content": "The cPanel server hostname.",
+        "type": "text/plain"
+      },
+      "type": "any",
+      "value": "example.com",
+      "key": "hostname"
+    },
+    {
+      "type": "string",
+      "value": "https://{{hostname}}:2083",
+      "key": "baseUrl"
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{bearerToken}}"
+      }
+    ]
+  },
+  "info": {
+    "_postman_id": "08a8d05b-8a6c-4ad7-93f5-f4919da19e90",
+    "name": "cPanel U DomainInfo Email API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": {
+      "content": "cPanel UAPI is the modern HTTP API exposed by the cPanel web hosting\ncontrol panel. Endpoints follow the pattern\n`/execute/{Module}/{Function}` and accept parameters as query string\nvalues. UAPI returns JSON responses and authenticates calls via API\ntokens or Basic Authentication. UAPI runs on the cPanel account ports\n(2083 secure, 2082 unsecure) and Webmail ports (2096 secure, 2095\nunsecure).\n\n\nContact Support:\n Name: cPanel",
+      "type": "text/plain"
+    }
+  }
+}

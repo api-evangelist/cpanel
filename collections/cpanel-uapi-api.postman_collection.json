@@ -1,0 +1,174 @@
+{
+  "item": [
+    {
+      "id": "ae6419f1-a784-4073-9bb5-da0df999dbad",
+      "name": "UAPI",
+      "description": {
+        "content": "Generic UAPI execute endpoint",
+        "type": "text/plain"
+      },
+      "item": [
+        {
+          "id": "c9cfcf14-381d-4c99-a5aa-bd70dfea3f16",
+          "name": "Execute any UAPI function",
+          "request": {
+            "name": "Execute any UAPI function",
+            "description": {
+              "content": "Generic UAPI entry point. Pass module-specific parameters as query\nstring values.\n",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "execute",
+                ":Module",
+                ":Function"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "disabled": false,
+                  "type": "any",
+                  "value": "<string>",
+                  "key": "Module",
+                  "description": "(Required) The UAPI module name (e.g. `Email`, `Mysql`, `DomainInfo`)."
+                },
+                {
+                  "disabled": false,
+                  "type": "any",
+                  "value": "<string>",
+                  "key": "Function",
+                  "description": "(Required) The function within the module (e.g. `add_pop`, `list_databases`)."
+                },
+                {
+                  "description": "The cPanel server hostname.",
+                  "type": "any",
+                  "value": "{{hostname}}",
+                  "key": "hostname"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "GET",
+            "auth": null
+          },
+          "response": [
+            {
+              "id": "7ef5c102-8992-4130-8429-d826694e0a3f",
+              "name": "A UAPI response envelope.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "execute",
+                    ":Module",
+                    ":Function"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<string>",
+                      "key": "Module",
+                      "description": "(Required) The UAPI module name (e.g. `Email`, `Mysql`, `DomainInfo`)."
+                    },
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<string>",
+                      "key": "Function",
+                      "description": "(Required) The function within the module (e.g. `add_pop`, `list_databases`)."
+                    },
+                    {
+                      "description": "The cPanel server hostname.",
+                      "type": "any",
+                      "value": "{{hostname}}",
+                      "key": "hostname"
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"status\": 7026,\n  \"data\": {},\n  \"errors\": [\n    \"string\",\n    \"string\"\n  ],\n  \"messages\": [\n    \"string\",\n    \"string\"\n  ],\n  \"warnings\": [\n    \"string\",\n    \"string\"\n  ],\n  \"metadata\": {}\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        }
+      ],
+      "event": []
+    }
+  ],
+  "event": [],
+  "variable": [
+    {
+      "description": {
+        "content": "The cPanel server hostname.",
+        "type": "text/plain"
+      },
+      "type": "any",
+      "value": "example.com",
+      "key": "hostname"
+    },
+    {
+      "type": "string",
+      "value": "https://{{hostname}}:2083",
+      "key": "baseUrl"
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{bearerToken}}"
+      }
+    ]
+  },
+  "info": {
+    "_postman_id": "e44ef897-5d4e-418b-8386-2748224dceea",
+    "name": "cPanel U DomainInfo UAPI API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": {
+      "content": "cPanel UAPI is the modern HTTP API exposed by the cPanel web hosting\ncontrol panel. Endpoints follow the pattern\n`/execute/{Module}/{Function}` and accept parameters as query string\nvalues. UAPI returns JSON responses and authenticates calls via API\ntokens or Basic Authentication. UAPI runs on the cPanel account ports\n(2083 secure, 2082 unsecure) and Webmail ports (2096 secure, 2095\nunsecure).\n\n\nContact Support:\n Name: cPanel",
+      "type": "text/plain"
+    }
+  }
+}
