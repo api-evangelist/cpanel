@@ -52,6 +52,13 @@ apis:
   tags:
   - Databases
   - Email
+  - File
+  - Hosting
+  - REST
+  - UAPI
+  tags_raw:
+  - Databases
+  - Email
   - Files
   - Hosting
   - REST
@@ -82,6 +89,12 @@ apis:
   humanURL: https://api.docs.cpanel.net/whm/introduction/
   baseURL: https://hostname:2087/json-api
   tags:
+  - Account
+  - Packages
+  - Reseller
+  - Server Administration
+  - WHM
+  tags_raw:
   - Accounts
   - Packages
   - Reseller
@@ -145,6 +158,8 @@ apis:
   humanURL: https://api.docs.cpanel.net/cpanel/introduction/
   baseURL: https://hostname:2083/execute
   tags:
+  - MySQL
+  tags_raw:
   - Mysql
   properties:
   - type: OpenAPI
