@@ -170,7 +170,7 @@ apis:
   humanURL: https://api.docs.cpanel.net/cpanel/introduction/
   baseURL: https://hostname:2083/execute
   tags:
-  - MySQL
+  - Mysql
   tags_raw:
   - Mysql
   properties:
