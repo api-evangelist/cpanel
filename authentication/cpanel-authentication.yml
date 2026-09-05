@@ -1,24 +1,124 @@
-generated: '2026-07-11'
-method: derived
-source: openapi/cpanel-openapi.yml
+generated: '2026-09-05'
+method: searched
+source: >-
+  openapi/_original/cpanel-uapi-openapi.yml + openapi/_original/cpanel-whm-api-openapi.yml
+  (securitySchemes), upgraded from https://api.docs.cpanel.net/guides/guide-to-api-authentication/,
+  https://api.docs.cpanel.net/cpanel/tokens/ and https://api.docs.cpanel.net/whm/tokens/
+docs: https://api.docs.cpanel.net/guides/guide-to-api-authentication/
+provider: cPanel
+providerId: cpanel
+description: >-
+  cPanel & WHM authentication. The OpenAPI documents are thin here — both declare exactly one
+  `BasicAuth` http scheme and nothing else — so the token forms below come from the developer
+  documentation, which is where cPanel actually specifies them. Note the two custom
+  `Authorization` prefixes: they are NOT `Bearer`, and a client that sends `Bearer` will fail.
 summary:
-  types:
-  - http
+  types: [http, api-key-in-authorization-header]
+  spec_declared: [BasicAuth]
+  documented_additional: [cPanel API token, WHM API token, access hash, session security token, SSO]
 schemes:
-- name: BearerAuth
-  type: http
-  scheme: bearer
-  bearerFormat: cPanel API Token
-  description: |-
-    Provide a cPanel API token using
-    `Authorization: cpanel <username>:<token>` (cPanel's documented
-    token header format). Standard `Authorization: Bearer` is also
-    accepted by some deployments.
-  sources:
-  - openapi/cpanel-openapi.yml
-- name: BasicAuth
-  type: http
-  scheme: basic
-  description: HTTP Basic Authentication with cPanel account credentials.
-  sources:
-  - openapi/cpanel-openapi.yml
+  - name: BasicAuth
+    type: http
+    scheme: basic
+    spec_declared: true
+    description: >-
+      HTTP Basic authentication with a cPanel account username and password (UAPI, ports
+      2082/2083 and Webmail 2095/2096) or a WHM/reseller username and password (WHM API 1,
+      ports 2086/2087).
+    sources: [openapi/_original/cpanel-uapi-openapi.yml, openapi/_original/cpanel-whm-api-openapi.yml]
+    caution: >-
+      cPanel's own guidance prefers secure remote logins over username/password in code. Two-factor
+      authentication does not apply to username/password API calls by default, though it can be
+      enforced in WHM's Configure Security Policies interface.
+  - name: cPanelApiToken
+    type: apiKey
+    in: header
+    header: Authorization
+    scheme_prefix: 'cpanel '
+    format: 'Authorization: cpanel <username>:<APITOKEN>'
+    spec_declared: false
+    applies_to: [cPanel UAPI, cPanel API 2]
+    description: >-
+      A cPanel-account API token. Created in cPanel's Manage API Tokens interface or via UAPI
+      Tokens-create_full_access; usable outside a browser session on ports 2082/2083.
+    docs: https://api.docs.cpanel.net/cpanel/tokens/
+    example_call: >-
+      curl -H'Authorization: cpanel username:APITOKEN'
+      'https://example.com:2083/execute/Email/add_pop?email=newuser&password=...'
+  - name: WhmApiToken
+    type: apiKey
+    in: header
+    header: Authorization
+    scheme_prefix: 'whm '
+    format: 'Authorization: whm <username>:<token>'
+    spec_declared: false
+    applies_to: [WHM API 1, cPanel UAPI via WHM API 1]
+    description: >-
+      A WHM API token for the root user or a reseller. Created in WHM's Manage API Tokens
+      interface or via WHM API 1 Tokens-api_token_create; revoked via Tokens-api_token_revoke.
+      Ports 2087, or 443 through a service subdomain.
+    docs: https://api.docs.cpanel.net/whm/tokens/
+    lifecycle_caution: >-
+      cPanel documents that an expired API token is NOT removed automatically — it must be
+      deleted by hand.
+  - name: AccessHash
+    type: apiKey
+    in: header
+    header: Authorization
+    spec_declared: false
+    status: legacy
+    description: >-
+      Access hashes authenticate as the root user. cPanel documents them alongside API tokens
+      but the WHM API 1 operations that expose them — Resellers-accesshash and
+      Resellers-get_remote_access_hash — are marked deprecated: true in the contract.
+    docs: https://api.docs.cpanel.net/guides/guide-to-api-authentication/guide-to-api-authentication-access-hash-authentication/
+  - name: SessionSecurityToken
+    type: session
+    spec_declared: false
+    description: >-
+      Browser/cookie-based calls made from inside a cPanel, Webmail or WHM session must carry the
+      session's security token in the URL path (the `cpsess##########` segment). This is the
+      in-product path, not an integration path.
+    docs: https://api.docs.cpanel.net/guides/guide-to-api-authentication/guide-to-api-authentication-browser-based-authentication/
+  - name: SingleSignOn
+    type: sso
+    spec_declared: false
+    description: Generates a temporary session to authenticate with cPanel & WHM.
+    docs: https://api.docs.cpanel.net/guides/guide-to-api-authentication/guide-to-api-authentication-single-sign-on/
+oauth:
+  rest_apis: false
+  agent_surfaces: true
+  note: >-
+    No OAuth anywhere on the REST surface. OAuth appears only on the two MCP endpoints — see
+    scopes/cpanel-scopes.yml.
+ports:
+  - port: 2082
+    surface: cPanel UAPI / cPanel API 2
+    tls: false
+  - port: 2083
+    surface: cPanel UAPI / cPanel API 2
+    tls: true
+  - port: 2086
+    surface: WHM API 1
+    tls: false
+  - port: 2087
+    surface: WHM API 1
+    tls: true
+  - port: 2095
+    surface: cPanel UAPI via Webmail session
+    tls: false
+  - port: 2096
+    surface: cPanel UAPI via Webmail session
+    tls: true
+ports_note: >-
+  cPanel documents that an otherwise-correct call on the wrong port returns "Permission denied"
+  or "Function not found" — an authentication failure that reads like a routing failure.
+authorization:
+  model: privileges-and-roles
+  notes:
+    - API tokens carry privileges; a full-access cPanel token is created by Tokens-create_full_access.
+    - Reseller privileges bound WHM API 1 access below root.
+    - >-
+      Server profiles (roles) DISABLE whole modules: the contract repeats "When you disable the
+      [role], the system disables this function" across many operations, so a 200-with-error can
+      mean the role is off rather than the credential being wrong.

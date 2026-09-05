@@ -1,67 +1,76 @@
 aid: cpanel
 name: cPanel
 kind: company
-description: >-
-  cPanel is a web-based control panel that provides a graphical interface and
-  automation tools to simplify the management of web hosting services. cPanel
-  exposes a family of HTTP APIs (UAPI, WHM API 1, and the legacy cPanel API 2)
-  for automating account, domain, email, database, DNS, and server-wide
-  operations. APIs accept API tokens or Basic Authentication and return JSON or
-  XML responses.
+description: cPanel is a web-based control panel that provides a graphical interface and automation tools
+  to simplify the management of web hosting services. cPanel exposes a family of HTTP APIs (UAPI, WHM
+  API 1, and the legacy cPanel API 2) for automating account, domain, email, database, DNS, and server-wide
+  operations. APIs accept API tokens or Basic Authentication and return JSON or XML responses.
 deliveryModel:
-  model: saas
+  model: self-hosted
   open_source: false
   commercial: true
   callable_host: false
-  label: Hosted service · you call their endpoint
-  confidence: medium
+  label: Self-hosted software · you run the server that serves the API
+  confidence: high
   source:
   - openapi
   - pricing
-  generated: '2026-08-28'
-  method: derived
+  - docs
+  generated: '2026-09-05'
+  method: searched
+  note: Corrected from saas on 2026-09-05. cPanel & WHM is licensed software installed on the customer's
+    own server; the OpenAPI servers[] are templated https://{host}:{port} against that machine. The one
+    vendor-hosted API is Manage2 (licensing) at manage2.cpanel.net.
 accessModel:
-  pricing: freemium
+  pricing: paid
   onboarding: self-serve
-  trial: false
-  try_now: true
-  public: false
-  label: Freemium · Self-serve signup
-  confidence: medium
+  trial: true
+  try_now: false
+  public: true
+  label: Paid licence · Self-serve signup · 15-day free trial
+  confidence: high
   source:
   - plans
+  - pricing
   - authentication
-  - security
-  generated: '2026-09-03'
-  method: derived
+  - sandbox
+  generated: '2026-09-05'
+  method: searched
+  note: 'Corrected from freemium/trial:false on 2026-09-05 against https://cpanel.net/pricing/. There
+    is no free tier and no metered API pricing: licences start at $29.99/mo for one cPanel account and
+    every API is included at no extra cost. There is a 15-day free trial with no credit card, but it is
+    a licence to install on your own server, not a hosted try-now sandbox.'
 image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/icons/cpanel.png
 url: https://raw.githubusercontent.com/api-evangelist/cpanel/refs/heads/main/apis.yml
 type: Index
 access: 3rd-Party
 position: Consuming
 created: '2025-02-09'
-modified: '2026-04-28'
+modified: '2026-09-05'
 tags:
-  - Control Panel
-  - DNS
-  - Domains
-  - Email
-  - Hosting
-  - Reseller
-  - Server Administration
-  - Web Hosting
-  - WHM
+- Control Panel
+- DNS
+- Domains
+- Email
+- Hosting
+- Reseller
+- Server Administration
+- Web Hosting
+- WHM
 specificationVersion: '0.23'
 apis:
 - aid: cpanel:uapi
   name: cPanel UAPI
-  description: >-
-    The cPanel User API (UAPI) is the modern HTTP API for performing cPanel-level operations such as managing
-    email accounts, mailboxes, files, databases, FTP accounts, SSL certificates, and DNS zones for a single
-    cPanel user. UAPI is the recommended replacement for the legacy cPanel API 2.
+  description: 'The cPanel User API (UAPI) is the modern HTTP API for cPanel-account operations — email
+    accounts, mailboxes, files, MySQL and PostgreSQL databases, FTP accounts, SSL certificates, DNS, backups
+    and more — for a single cPanel user. 657 operations across 101 modules, served at /execute/{Module}/{Function}
+    on the customer''s own cPanel server (port 2083 secure, 2082 unsecure, 2096/2095 for Webmail sessions).
+    Authenticates with HTTP Basic or an ''Authorization: cpanel <user>:<token>'' API token. Every call
+    returns HTTP 200; success is result.status == 1. UAPI is the recommended replacement for the legacy
+    cPanel API 2.'
   image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/apis-json-logo.jpg
   humanURL: https://api.docs.cpanel.net/cpanel/introduction/
-  baseURL: https://hostname:2083/execute
+  baseURL: https://{host}:2083/execute
   tags:
   - Databases
   - Email
@@ -77,14 +86,16 @@ apis:
   - REST
   - UAPI
   properties:
+  - type: OpenAPI
+    url: openapi/cpanel-uapi-openapi.yml
+  - type: Overlay
+    url: overlays/cpanel-uapi-overlay.yaml
   - type: Documentation
     url: https://api.docs.cpanel.net/cpanel/introduction/
-  - type: GuideToUAPI
-    url: https://api.docs.cpanel.net/guides/guide-to-uapi/
-  - type: AllUAPIFunctions
-    url: https://api.docs.cpanel.net/openapi/cpanel/tag/Email/
+  - type: APIReference
+    url: https://api.docs.cpanel.net/specifications/cpanel.openapi
   - type: Authentication
-    url: https://api.docs.cpanel.net/guides/guide-to-api-authentication/
+    url: https://api.docs.cpanel.net/cpanel/tokens/
   features:
   - name: Token Authentication
     description: API tokens scoped per cPanel user.
@@ -94,13 +105,15 @@ apis:
     description: Modern JSON responses with consistent metadata envelope.
 - aid: cpanel:whm-api-1
   name: WHM API 1
-  description: >-
-    The WHM API 1 is the HTTP API for server-wide and reseller-level operations including creating, suspending,
-    and terminating cPanel accounts, managing packages and feature lists, configuring DNS clusters, manipulating
-    reseller privileges, and performing system administration.
+  description: 'WHM API 1 is the HTTP API for server-wide and reseller-level operations on a cPanel &
+    WHM server: creating, suspending, restoring and terminating cPanel accounts, managing hosting packages
+    and feature lists, DNS and DNSSEC, AutoSSL and certificate installation, backups and backup destinations,
+    transfers, ModSecurity, cPHulk and API tokens. 625 operations served at /json-api/{function} on ports
+    2087 (secure) and 2086, or 443 through a service subdomain. Every call requires api.version=1 and
+    an ''Authorization: whm <user>:<token>'' header; every call returns HTTP 200 with the outcome in metadata.result.'
   image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/apis-json-logo.jpg
   humanURL: https://api.docs.cpanel.net/whm/introduction/
-  baseURL: https://hostname:2087/json-api
+  baseURL: https://{host}:2087/json-api
   tags:
   - Account
   - Packages
@@ -114,14 +127,16 @@ apis:
   - Server Administration
   - WHM
   properties:
+  - type: OpenAPI
+    url: openapi/cpanel-whm-api-openapi.yml
+  - type: Overlay
+    url: overlays/cpanel-whm-api-overlay.yaml
   - type: Documentation
     url: https://api.docs.cpanel.net/whm/introduction/
-  - type: GuideToWHMAPI1
-    url: https://api.docs.cpanel.net/guides/guide-to-whm-api-1/
   - type: APIReference
-    url: https://api.docs.cpanel.net/openapi/whm/
+    url: https://api.docs.cpanel.net/specifications/whm.openapi
   - type: Authentication
-    url: https://api.docs.cpanel.net/guides/guide-to-api-authentication/
+    url: https://api.docs.cpanel.net/whm/tokens/
   features:
   - name: Account Management
     description: Create, suspend, terminate, modify, and migrate cPanel accounts.
@@ -131,101 +146,165 @@ apis:
     description: Sync zones across DNS-only servers in a cluster.
 - aid: cpanel:cpanel-api-2
   name: cPanel API 2 (Legacy)
-  description: >-
-    cPanel API 2 is the legacy XML/JSON API for cPanel-user operations. It remains supported for backward
-    compatibility but has been largely superseded by UAPI; new development should target UAPI where possible.
+  description: cPanel API 2 is the legacy XML/JSON API for cPanel-user operations. cPanel marks the whole
+    system deprecated on every function page and directs new development to UAPI, but it remains supported
+    for backward compatibility and no removal date is published. At least one function (MysqlFE::userdbprivs)
+    is documented as deprecated, non-functional and without a UAPI equivalent, so the migration path is
+    not complete.
   image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/apis-json-logo.jpg
   humanURL: https://api.docs.cpanel.net/cpanel/introduction/
-  baseURL: https://hostname:2083/json-api/cpanel
+  baseURL: https://{host}:2083/json-api/cpanel
   tags:
   - Legacy
   - cPanel
   properties:
   - type: Documentation
-    url: https://api.docs.cpanel.net/cpanel/introduction/
-  - type: GuideToCPanelAPI2
-    url: https://api.docs.cpanel.net/guides/guide-to-cpanel-api-2/
-- aid: cpanel:cpanel-domaininfo-api
-  name: cPanel DomainInfo API
-  description: Domain information (DomainInfo module)
-  humanURL: https://api.docs.cpanel.net/cpanel/introduction/
-  baseURL: https://hostname:2083/execute
+    url: https://api.docs.cpanel.net/cpanel-api-2/
+  - type: Deprecation
+    url: https://api.docs.cpanel.net/guides/guide-to-replacing-cpanel-api-1-functions-with-uapi-equivalents/
+- aid: cpanel:manage2
+  name: Manage2 API
+  description: The Manage2 API automates cPanel LICENCE management for cPanel partners and direct licence
+    holders — activating, reactivating, transferring and cancelling licences, changing a licence's IP
+    address, managing groups and pickup phrases. It is the one cPanel API that runs on cPanel's own infrastructure
+    rather than the customer's server, at manage2.cpanel.net. Methods are GET and POST; output is XML,
+    JSON or YAML. Access is gated by an IP allowlist configured in the Manage2 profile before any call
+    is accepted, and cPanel publishes PHP (cPanelLicensing) and Perl helper classes. No OpenAPI is published
+    for it — the function reference is prose.
+  image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/apis-json-logo.jpg
+  humanURL: https://docs.cpanel.net/manage2/knowledge-base/guide-to-the-manage2-api/
+  baseURL: https://manage2.cpanel.net/
   tags:
-  - DomainInfo
+  - Licensing
+  - Partner
+  - Billing
+  - Reseller
   properties:
-  - type: OpenAPI
-    url: openapi/cpanel-domaininfo-api-openapi.yml
-- aid: cpanel:cpanel-email-api
-  name: cPanel Email API
-  description: Email account management (Email module)
-  humanURL: https://api.docs.cpanel.net/cpanel/introduction/
-  baseURL: https://hostname:2083/execute
-  tags:
-  - Email
-  properties:
-  - type: OpenAPI
-    url: openapi/cpanel-email-api-openapi.yml
-- aid: cpanel:cpanel-mysql-api
-  name: cPanel Mysql API
-  description: MySQL database operations (Mysql module)
-  humanURL: https://api.docs.cpanel.net/cpanel/introduction/
-  baseURL: https://hostname:2083/execute
-  tags:
-  - MySQL
-  tags_raw:
-  - Mysql
-  properties:
-  - type: OpenAPI
-    url: openapi/cpanel-mysql-api-openapi.yml
-- aid: cpanel:cpanel-uapi-api
-  name: cPanel UAPI API
-  description: Generic UAPI execute endpoint
-  humanURL: https://api.docs.cpanel.net/cpanel/introduction/
-  baseURL: https://hostname:2083/execute
-  tags:
-  - UAPI
-  properties:
-  - type: OpenAPI
-    url: openapi/cpanel-uapi-api-openapi.yml
-common:
-  - type: AgenticAccess
-    url: agentic-access/cpanel-agentic-access.yml
-  - type: VulnerabilityDisclosure
-    url: security/cpanel-vulnerability-disclosure.yml
-  - type: DomainSecurity
-    url: security/cpanel-domain-security.yml
-  - type: Authentication
-    url: authentication/cpanel-authentication.yml
-  - type: Website
-    url: https://cpanel.net/
   - type: Documentation
-    url: https://api.docs.cpanel.net/
+    url: https://docs.cpanel.net/manage2/knowledge-base/guide-to-the-manage2-api/
+  - type: APIReference
+    url: https://docs.cpanel.net/manage2/
   - type: Authentication
-    url: https://api.docs.cpanel.net/guides/guide-to-api-authentication/
-  - type: ChangeLog
-    url: https://api.docs.cpanel.net/whm/release-notes/
-  - type: Forums
-    url: https://forums.cpanel.net/
-  - type: Support
-    url: https://support.cpanel.net/
-  - type: StatusPage
-    url: https://status.cpanel.net/
-  - type: GitHub
-    url: https://github.com/CpanelInc
-  - type: TermsOfService
-    url: https://cpanel.net/terms-of-service/
-  - type: PrivacyPolicy
-    url: https://cpanel.net/privacy-policy/
-  - type: LinkedIn
-    url: https://www.linkedin.com/company/cpanel
-  - type: Integrations
-    url: https://www.cpanel.net/partners/
-  - type: LlmsText
-    url: https://api.docs.cpanel.net/llms.txt
-  - url: https://www.cpanel.net/blog/
-    type: Blog
+    url: https://docs.cpanel.net/manage2/knowledge-base/manage2-authentication-methods/
+  - type: ErrorCatalog
+    url: https://docs.cpanel.net/manage2/knowledge-base/manage2-return-data/
+  features:
+  - name: Licence Lifecycle
+    description: Add, activate, reactivate, transfer and cancel cPanel licences.
+  - name: IP Allowlist Access Control
+    description: Calls are only accepted from IP addresses added to the Manage2 profile.
+  - name: Multiple Output Formats
+    description: XML, JSON or YAML, selected with the output parameter.
+common:
+- type: Website
+  url: https://cpanel.net/
+- type: DeveloperPortal
+  url: https://www.cpanel.net/developers/
+- type: Documentation
+  url: https://api.docs.cpanel.net/
+- type: APIReference
+  url: https://api.docs.cpanel.net/specifications/cpanel.openapi
+- type: GettingStarted
+  url: https://api.docs.cpanel.net/guides/quickstart-development-guide/
+- type: Tutorials
+  url: https://api.docs.cpanel.net/guides/
+- type: KnowledgeBase
+  url: https://docs.cpanel.net/knowledge-base/
+- type: Authentication
+  url: authentication/cpanel-authentication.yml
+- type: Authentication
+  url: https://api.docs.cpanel.net/guides/guide-to-api-authentication/
+- type: OAuthScopes
+  url: scopes/cpanel-scopes.yml
+- type: MCPServer
+  url: mcp/cpanel-mcp.yml
+- type: ToolCrosswalk
+  url: mcp/cpanel-tool-crosswalk.yml
+- type: AgentSkill
+  url: skills/_index.yml
+- type: AgenticAccess
+  url: agentic-access/cpanel-agentic-access.yml
+- type: LLMsTxt
+  url: llms/cpanel-llms.txt
+- type: LlmsText
+  url: https://api.docs.cpanel.net/llms.txt
+- type: Packages
+  url: packages/cpanel-packages.yml
+- type: SDKs
+  url: packages/cpanel-packages.yml
+- type: CLI
+  url: cli/cpanel-cli.yml
+- type: Conventions
+  url: conventions/cpanel-conventions.yml
+- type: ErrorCatalog
+  url: errors/cpanel-problem-types.yml
+- type: DataModel
+  url: data-model/cpanel-data-model.yml
+- type: Conformance
+  url: conformance/cpanel-conformance.yml
+- type: Lifecycle
+  url: lifecycle/cpanel-lifecycle.yml
+- type: Webhooks
+  url: asyncapi/cpanel-webhooks.yml
+- type: Sandbox
+  url: sandbox/cpanel-sandbox.yml
+- type: Plans
+  url: plans/cpanel-plans-pricing.yml
+- type: RateLimits
+  url: rate-limits/cpanel-rate-limits.yml
+- type: FinOps
+  url: finops/cpanel-finops.yml
+- type: WellKnown
+  url: well-known/cpanel-well-known.yml
+- type: SecurityTxt
+  url: well-known/cpanel-security.txt
+- type: Security
+  url: security/cpanel-vulnerability-disclosure.yml
+- type: VulnerabilityDisclosure
+  url: security/cpanel-vulnerability-disclosure.yml
+- type: DomainSecurity
+  url: security/cpanel-domain-security.yml
+- type: ChangeLog
+  url: changelog/cpanel-changelog.yml
+- type: ChangeLog
+  url: https://docs.cpanel.net/changelogs/
+- type: ReleaseNotes
+  url: https://docs.cpanel.net/release-notes/
+- type: StatusPage
+  url: https://status.cpanel.net/
+- type: Roadmap
+  url: https://features.cpanel.net/
+- type: Pricing
+  url: https://cpanel.net/pricing/
+- type: SignUp
+  url: https://www.cpanel.net/products/trial/
+- type: Support
+  url: https://support.cpanel.net/hc/en-us
+- type: Forums
+  url: https://forums.cpanel.net/
+- type: Blog
+  url: https://www.cpanel.net/blog/
+- type: GitHub
+  url: https://github.com/CpanelInc
+- type: GitHubOrganization
+  url: https://github.com/CpanelInc
+- type: TermsOfService
+  url: https://www.cpanel.net/legal-notices/
+- type: PrivacyPolicy
+  url: https://cpanel.net/privacy-policy/
+- type: LinkedIn
+  url: https://www.linkedin.com/company/cpanel
+- type: Integrations
+  url: https://www.cpanel.net/partners/
+- type: Training
+  url: https://university.cpanel.net/
 integrations:
-  - name: License Verification
+- name: License Verification
 maintainers:
-  - FN: Kin Lane
-    email: kin@apievangelist.com
+- FN: Kin Lane
+  email: kin@apievangelist.com
+x-enrichment:
+  date: '2026-09-05'
+  status: enriched
+  artifacts_added: 32
+  pass: local-v3

@@ -1,0 +1,56 @@
+generated: '2026-09-05'
+method: generated
+source: >-
+  Written from openapi/_original/cpanel-uapi-openapi.yml and
+  openapi/_original/cpanel-whm-api-openapi.yml plus the cPanel developer documentation. Every
+  operationId referenced in these skills was grepped out of the specs; none is invented.
+provider: cPanel
+providerId: cpanel
+description: >-
+  Packaged Agent Skills for the marquee cPanel & WHM flows. cPanel publishes no skills, no
+  AGENTS.md and no llms-full.txt of its own (searched 2026-09-05), so these are generated. Each one
+  is grounded in real operationIds and carries the two rules an agent gets wrong on this API
+  first: the outcome lives in the JSON envelope, not the HTTP status, and mutations are GETs with
+  no idempotency key.
+skills:
+  - name: cpanel-provision-hosting-account
+    file: cpanel-provision-hosting-account.md
+    api: WHM API 1
+    operations: 12
+    summary: Account lifecycle — plan selection, create, verify, modify, suspend, delete, and what deletion costs.
+  - name: cpanel-manage-email-accounts
+    file: cpanel-manage-email-accounts.md
+    api: cPanel UAPI
+    operations: 10
+    summary: Mailboxes, quotas, forwarders and autoresponders on one cPanel account.
+  - name: cpanel-provision-mysql-database
+    file: cpanel-provision-mysql-database.md
+    api: cPanel UAPI
+    operations: 13
+    summary: Database + user bootstrap, privileges, remote access, and an ordered teardown.
+  - name: cpanel-rotate-api-tokens
+    file: cpanel-rotate-api-tokens.md
+    api: cPanel UAPI, WHM API 1
+    operations: 9
+    summary: Credential rotation across cPanel's two independent token systems.
+  - name: cpanel-manage-tls-autossl
+    file: cpanel-manage-tls-autossl.md
+    api: cPanel UAPI, WHM API 1
+    operations: 18
+    summary: TLS coverage diagnosis, AutoSSL/DCV failure triage, exclusions, and manual installation.
+shared_rules:
+  - 'Every operation returns HTTP 200. UAPI success is result.status == 1; WHM API 1 success is metadata.result == 1.'
+  - Booleans are the integers 1 and 0. Literal true/false are rejected.
+  - 1,242 of 1,282 operations are GET, including creates and deletes. Disable automatic retries.
+  - There is no Idempotency-Key header on either API.
+  - 'Port is part of authentication: 2083 for UAPI, 2087 for WHM API 1; the wrong one returns Permission denied.'
+  - "Auth headers are Authorization: cpanel user:TOKEN and Authorization: whm user:TOKEN. Never Bearer."
+  - Pagination is off by default on both APIs.
+  - Server profiles (roles) can disable whole modules; a failure envelope may mean the role is off.
+references:
+  conventions: conventions/cpanel-conventions.yml
+  errors: errors/cpanel-problem-types.yml
+  authentication: authentication/cpanel-authentication.yml
+  data_model: data-model/cpanel-data-model.yml
+  lifecycle: lifecycle/cpanel-lifecycle.yml
+  cli: cli/cpanel-cli.yml

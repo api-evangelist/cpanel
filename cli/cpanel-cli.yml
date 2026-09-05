@@ -1,0 +1,95 @@
+generated: '2026-09-05'
+method: searched
+source: >-
+  https://api.docs.cpanel.net/cpanel/introduction/, https://api.docs.cpanel.net/whm/introduction/,
+  https://api.docs.cpanel.net/cpanel-api-2/, https://api.docs.cpanel.net/guides/guide-to-standardized-hooks/,
+  and the x-codeSamples blocks in openapi/_original/ (a CLI sample on all 1,282 operations)
+provider: cPanel
+providerId: cpanel
+description: >-
+  cPanel ships first-party command-line tools for EVERY published API operation, and this is the
+  most important thing to know about integrating with cPanel: the CLI is not a convenience layer
+  over the HTTP API, it is a co-equal calling convention. The contract proves it — all 657 UAPI
+  and all 625 WHM API 1 operations carry an x-codeSamples entry labelled "CLI" with the exact
+  invocation. The tools are installed on the cPanel & WHM server itself; there is nothing to
+  download and no package to install, which is why they appear here and not in packages/.
+distribution:
+  model: bundled-with-product
+  install: none — shipped inside cPanel & WHM
+  install_path: /usr/local/cpanel/bin/
+  cloudlinux_note: >-
+    cPanel documents that on CloudLinux the full path must be used —
+    /usr/local/cpanel/bin/uapi and /usr/local/cpanel/bin/whmapi1 — because the short names may
+    not resolve.
+  registry: none
+binaries:
+  - name: uapi
+    api: cPanel UAPI
+    scope: one cPanel account
+    synopsis: 'uapi --user=username --output=type Module function parameter=value parameter=value'
+    flags:
+      - name: --user
+        description: The cPanel account username to run as.
+      - name: --output
+        description: json | jsonpretty | yaml
+        default: yaml
+      - name: --help
+        description: Built-in help.
+    example: 'uapi --output=jsonpretty --user=username Email list_pops'
+    introduced: cPanel & WHM version 56
+    docs: https://api.docs.cpanel.net/cpanel/introduction/
+  - name: whmapi1
+    api: WHM API 1
+    scope: server-wide / reseller
+    synopsis: 'whmapi1 function parameter=value parameter=value'
+    flags:
+      - name: --output
+        description: json | jsonpretty | yaml
+        default: yaml
+      - name: --help
+        description: Built-in help.
+    example: 'whmapi1 listaccts api.chunk.enable=1 api.chunk.size=5 api.chunk.start=3'
+    docs: https://api.docs.cpanel.net/whm/introduction/
+  - name: cpapi2
+    api: cPanel API 2 (legacy)
+    scope: one cPanel account
+    status: legacy — cPanel recommends UAPI instead
+    docs: https://api.docs.cpanel.net/cpanel-api-2/
+  - name: manage_hooks
+    purpose: Register, list and remove Standardized Hooks (the server-side event system).
+    install_path: /usr/local/cpanel/bin/manage_hooks
+    docs: https://api.docs.cpanel.net/guides/guide-to-standardized-hooks/guide-to-standardized-hooks-the-manage-hooks-utility/
+command_surface:
+  shape: >-
+    The command surface IS the API surface. There are no bespoke CLI verbs to learn: the module
+    and function names are the same ones in the OpenAPI, and the query parameters become
+    space-separated key=value pairs.
+  uapi_operations: 657
+  whm_operations: 625
+  parameter_grammar:
+    separator: space (the HTTP surface uses &)
+    quoting: >-
+      Special characters must be escaped or quoted. cPanel's own examples show JSON-encoded values
+      passed as key=[\"a\",\"b\"] or key='{"a","b"}'.
+    booleans: 1 and 0, never true/false
+  pagination_filter_sort: >-
+    The same api.* control variables work on the command line — api.chunk.enable, api.filter.a.field,
+    api.sort_column and friends. See conventions/cpanel-conventions.yml.
+  contract_extension:
+    name: x-cpanel-cli-support
+    present_on: 2 cPanel UAPI operations and 17 WHM API 1 operations
+    meaning: Marks operations whose CLI availability differs from the default.
+caveat:
+  metadata_loss: >-
+    cPanel documents that CLI calls do NOT return the metadata that URL-based calls return when a
+    function experiences errors that prevent a successful run. An automation that shells out loses
+    the failure envelope it would have received over HTTP. This is recorded in
+    errors/cpanel-problem-types.yml as well, because it is a correctness trap rather than a
+    convenience note.
+in_product_console:
+  name: WHM API Shell
+  location: WHM » Home » Development » API Shell
+  description: >-
+    An in-product console for executing WHM API 1 functions with the sort/filter/paginate options
+    exposed as form fields. cPanel points at it repeatedly in the API guides as the place to test a
+    call. It executes for real — there is no dry-run.

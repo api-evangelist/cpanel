@@ -1,0 +1,86 @@
+generated: '2026-09-05'
+method: probed
+source: >-
+  https://mcp.webpros.com/.well-known/oauth-protected-resource and
+  https://login.webpros.com/.well-known/openid-configuration and
+  https://api.docs.cpanel.net/.well-known/oauth-authorization-server, fetched anonymously 2026-09-05
+docs: https://api.docs.cpanel.net/guides/guide-to-api-authentication/
+provider: cPanel
+providerId: cpanel
+description: >-
+  OAuth scopes cPanel's surfaces actually advertise. IMPORTANT SCOPE OF THIS FILE: neither the
+  cPanel UAPI nor the WHM API uses OAuth. Both declare a single `BasicAuth` http securityScheme
+  and authenticate with HTTP Basic or an `Authorization: cpanel|whm user:TOKEN` header, and
+  cPanel's authorization model is PRIVILEGES on an API token, not OAuth scopes — so there is no
+  scope vocabulary for the 1,282 REST operations and none is invented here. The scopes below
+  belong to the two OAuth-protected AGENT surfaces in cPanel's orbit, both discovered from
+  documents the providers serve.
+surfaces:
+  - name: WebPros MCP
+    resource: https://mcp.webpros.com/api/mcp
+    authorization_servers: [https://login.webpros.com/]
+    discovery: https://mcp.webpros.com/.well-known/oauth-protected-resource
+    http_status: 200
+    reached_from: >-
+      cPanel UAPI operation /WebProsMCP/get_connection_config, which returns this endpoint to a
+      cPanel user as their MCP connection snippet.
+    scopes:
+      - name: openid
+        description: OpenID Connect authentication; issues an id_token identifying the WebPros account.
+        standard: true
+      - name: profile
+        description: Standard OIDC profile claims for the linked WebPros account.
+        standard: true
+      - name: email
+        description: Standard OIDC email claim for the linked WebPros account.
+        standard: true
+      - name: offline_access
+        description: Refresh-token issuance so an agent can hold a session beyond the access-token lifetime.
+        standard: true
+      - name: mcp
+        description: >-
+          The provider-specific scope that authorizes MCP tool invocation on
+          https://mcp.webpros.com/api/mcp. Its tool-level meaning is not published; tools/list
+          returns {"type":"unauthorized"} (HTTP 401) without it, so the granular permissions
+          behind this scope require an authenticated introspection to enumerate and are NOT
+          guessed here.
+        standard: false
+  - name: cPanel & WHM Developer Portal MCP
+    resource: https://api.docs.cpanel.net/mcp
+    authorization_servers: [https://auth.cloud.redocly.com]
+    discovery: https://api.docs.cpanel.net/.well-known/oauth-authorization-server
+    http_status: 200
+    note: >-
+      Documentation-portal OAuth supplied by the Redocly platform cPanel runs the portal on.
+      Anonymous callers already receive the full public tool set, so these scopes gate
+      non-public documentation teams rather than the API surface.
+    scopes:
+      - name: openid
+        description: OpenID Connect authentication against auth.cloud.redocly.com.
+        standard: true
+      - name: profile
+        description: Standard OIDC profile claims.
+        standard: true
+      - name: email
+        description: Standard OIDC email claim.
+        standard: true
+      - name: offline_access
+        description: Refresh-token issuance.
+        standard: true
+rest_api_authorization:
+  model: api-token-privileges
+  note: >-
+    UAPI and WHM API 1 authorize by ACCOUNT and by API-token privileges, not by OAuth scope. A
+    cPanel API token is created with full access via UAPI Tokens-create_full_access, and WHM
+    tokens are created and revoked via WHM API 1 Tokens-api_token_create and
+    Tokens-api_token_revoke; restriction is expressed as the privileges attached to the token
+    and the reseller/root permission model, plus server-profile roles which DISABLE whole
+    modules. See authentication/cpanel-authentication.yml.
+  references:
+    - https://api.docs.cpanel.net/cpanel/tokens/
+    - https://api.docs.cpanel.net/whm/tokens/
+    - https://api.docs.cpanel.net/guides/guide-to-api-privilege-escalation/
+summary:
+  oauth_surfaces: 2
+  scope_count: 5
+  rest_operations_under_oauth: 0

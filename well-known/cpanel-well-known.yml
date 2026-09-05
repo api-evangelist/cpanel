@@ -1,0 +1,197 @@
+generated: '2026-09-05'
+method: probed
+source: live anonymous GET of /.well-known/* on every host this record knows
+provider: cPanel
+providerId: cpanel
+description: >-
+  Well-known discovery documents probed across every host in this record: the registrable
+  domain and www, the developer-documentation host that also serves the MCP endpoint, the
+  product documentation host, the support and forum hosts, the licensing host named by the
+  Manage2 API docs, and the status page. The OpenAPI servers[] blocks are templated
+  (https://{host}:{port}) against a customer-operated cPanel/WHM server, so there is no
+  vendor-controlled API host to probe.
+hosts:
+  - host: cpanel.net
+    documents:
+      - path: /.well-known/security.txt
+        status: 200
+        file: cpanel-security.txt
+        note: >-
+          Real RFC 9116 document. Canonical points at the parent company
+          (https://webpros.com/.well-known/security.txt); contacts are
+          mailto:security@webpros.com and https://hackerone.com/webpros. Expires 2027-01-01.
+      - path: /.well-known/openid-configuration
+        status: 404
+      - path: /.well-known/oauth-authorization-server
+        status: 404
+      - path: /.well-known/api-catalog
+        status: 404
+      - path: /.well-known/ai-plugin.json
+        status: 404
+      - path: /.well-known/agent-card.json
+        status: 404
+      - path: /.well-known/agent.json
+        status: 404
+  - host: www.cpanel.net
+    documents:
+      - path: /.well-known/security.txt
+        status: 200
+        file: cpanel-security.txt
+        note: Byte-identical to the apex-domain document.
+      - path: /.well-known/openid-configuration
+        status: 404
+      - path: /.well-known/oauth-authorization-server
+        status: 404
+      - path: /.well-known/api-catalog
+        status: 404
+      - path: /.well-known/ai-plugin.json
+        status: 404
+      - path: /.well-known/agent-card.json
+        status: 404
+      - path: /.well-known/agent.json
+        status: 404
+  - host: api.docs.cpanel.net
+    documents:
+      - path: /.well-known/oauth-authorization-server
+        status: 200
+        file: cpanel-oauth-authorization-server.json
+        note: >-
+          Served on cPanel's developer-documentation host for the MCP server it publishes at
+          https://api.docs.cpanel.net/mcp. The issuer is https://auth.cloud.redocly.com — the
+          documentation platform cPanel runs this portal on — while the authorization, token
+          and dynamic-registration endpoints are on cPanel's own host. The MCP endpoint itself
+          answered tools/list anonymously on 2026-09-05, so this metadata describes an optional
+          authenticated mode, not a wall.
+      - path: /.well-known/oauth-protected-resource
+        status: 404
+      - path: /.well-known/security.txt
+        status: 404
+      - path: /.well-known/openid-configuration
+        status: 404
+      - path: /.well-known/api-catalog
+        status: 404
+      - path: /.well-known/ai-plugin.json
+        status: 404
+      - path: /.well-known/agent-card.json
+        status: 404
+      - path: /.well-known/agent.json
+        status: 404
+  - host: docs.cpanel.net
+    documents:
+      - path: /.well-known/security.txt
+        status: 404
+      - path: /.well-known/openid-configuration
+        status: 404
+      - path: /.well-known/oauth-authorization-server
+        status: 404
+      - path: /.well-known/api-catalog
+        status: 404
+      - path: /.well-known/ai-plugin.json
+        status: 404
+      - path: /.well-known/agent-card.json
+        status: 404
+      - path: /.well-known/agent.json
+        status: 404
+  - host: manage2.cpanel.net
+    documents:
+      - path: /.well-known/security.txt
+        status: 404
+      - path: /.well-known/openid-configuration
+        status: 404
+      - path: /.well-known/agent-card.json
+        status: 404
+      - path: /.well-known/agent.json
+        status: 404
+  - host: support.cpanel.net
+    documents:
+      - path: /.well-known/security.txt
+        status: 404
+      - path: /.well-known/openid-configuration
+        status: 404
+      - path: /.well-known/oauth-authorization-server
+        status: 404
+      - path: /.well-known/api-catalog
+        status: 404
+      - path: /.well-known/ai-plugin.json
+        status: 404
+      - path: /.well-known/agent-card.json
+        status: 404
+      - path: /.well-known/agent.json
+        status: 404
+  - host: forums.cpanel.net
+    documents:
+      - path: /.well-known/security.txt
+        status: 403
+        note: Cloudflare interstitial ("Just a moment...") on every path; not a measurement of the document.
+      - path: /.well-known/openid-configuration
+        status: 403
+      - path: /.well-known/oauth-authorization-server
+        status: 403
+      - path: /.well-known/api-catalog
+        status: 403
+      - path: /.well-known/ai-plugin.json
+        status: 403
+      - path: /.well-known/agent-card.json
+        status: 403
+      - path: /.well-known/agent.json
+        status: 403
+  - host: status.cpanel.net
+    documents:
+      - path: /.well-known/security.txt
+        status: 200
+        file: cpanel-status-security.txt
+        note: >-
+          NOT a cPanel-authored document. status.cpanel.net is an Atlassian Statuspage tenant and
+          the served security.txt is Atlassian's own PGP-signed file (Canonical
+          https://www.atlassian.com/.well-known/security.txt). Recorded for completeness; it is
+          not counted as a cPanel security disclosure surface.
+      - path: /.well-known/openid-configuration
+        status: 404
+      - path: /.well-known/oauth-authorization-server
+        status: 404
+      - path: /.well-known/api-catalog
+        status: 404
+      - path: /.well-known/ai-plugin.json
+        status: 404
+      - path: /.well-known/agent-card.json
+        status: 404
+      - path: /.well-known/agent.json
+        status: 404
+  - host: mcp.webpros.com
+    documents:
+      - path: /.well-known/oauth-protected-resource
+        status: 200
+        file: cpanel-webpros-mcp-oauth-protected-resource.json
+        note: >-
+          RFC 9728 protected-resource metadata for the WebPros MCP server at
+          https://mcp.webpros.com/api/mcp. Reached from cPanel's OWN contract: UAPI
+          /WebProsMCP/get_connection_config returns that exact URL as the connection snippet a
+          cPanel user is given. authorization_servers is [https://login.webpros.com/] and
+          scopes_supported is [openid, offline_access, email, profile, mcp].
+      - path: /.well-known/oauth-authorization-server
+        status: 404
+      - path: /.well-known/security.txt
+        status: 200
+        file: cpanel-security.txt
+        note: Byte-identical to the cpanel.net document (both are the WebPros group file).
+      - path: /.well-known/agent-card.json
+        status: 404
+      - path: /.well-known/agent.json
+        status: 404
+  - host: login.webpros.com
+    documents:
+      - path: /.well-known/openid-configuration
+        status: 200
+        file: cpanel-webpros-openid-configuration.json
+        note: >-
+          The authorization server the WebPros MCP protected-resource document names. Probed on
+          the third host per the discovery chain, not guessed. issuer https://login.webpros.com/,
+          authorization_code + device_code + client_credentials + refresh_token grants.
+      - path: /.well-known/oauth-authorization-server
+        status: 404
+        note: 404 returns the SPA shell; only /.well-known/openid-configuration is served here.
+summary:
+  hosts_probed: 10
+  documents_served: 6
+  agent_card: none
+  api_catalog: none

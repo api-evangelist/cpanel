@@ -1,0 +1,172 @@
+generated: '2026-09-05'
+method: searched
+source: >-
+  https://docs.cpanel.net/knowledge-base/cpanel-product/product-versions-and-the-release-process/,
+  https://docs.cpanel.net/release-notes/release-notes/, https://docs.cpanel.net/changelogs/,
+  https://status.cpanel.net/ (Atlassian Statuspage API), and the deprecated:true flags in
+  openapi/_original/
+provider: cPanel
+providerId: cpanel
+description: >-
+  cPanel's API lifecycle is the PRODUCT's lifecycle. There is no separately versioned API: an
+  operation ships in a cPanel & WHM major version, is available from that version onwards, and
+  goes out of support when the version it lives on reaches EOL. That makes cPanel unusually
+  legible on availability — the contract stamps every operation with the version it appeared in —
+  and unusually quiet on removal: there is no Sunset/Deprecation header, no removal calendar for
+  individual functions, and no published API deprecation policy separate from the release process.
+versioning:
+  scheme: product-major-version
+  current_product_version_documented: '138'
+  contract_version_at_harvest: 11.137.9999.106
+  contract_version_note: >-
+    The OpenAPI documents served on the developer portal on 2026-09-05 declare
+    info.version 11.137.9999.106 while the documentation's current production release is 138.
+    Odd major values are EDGE development builds, so 137 is the development tree behind 138 — the
+    published contract therefore tracks the development branch, not the shipped release.
+  version_number_parts:
+    parent: Legacy grouping (the leading 11); deprecated as a numbering concept in version 11.52 but still visible in API function output.
+    major: Feature set. EVEN majors are production releases across all tiers; ODD majors are EDGE development releases.
+    minor: Always 0 for cPanel & WHM installations.
+    build: A unique build.
+  api_version_parameter:
+    whm_api_1: api.version=1, required on every call
+    uapi: apiversion 3, reported in the response
+  per_operation_availability:
+    extension: x-cpanel-available-version
+    coverage: 655 of 657 cPanel UAPI operations and 625 of 625 WHM API 1 operations
+    example: '"cPanel 98", "cPanel 138"'
+    value: >-
+      A machine-readable availability floor per operation. An agent can decide from the contract
+      alone whether a call exists on the server it is pointed at.
+  downgrade: Not possible between major versions or between release tiers (cPanel states this explicitly).
+release_tiers:
+  - name: LTS
+    detail: >-
+      One LTS version per year. Security and other critical updates for the supported year; no new
+      features unless critical. LTS-tier servers move to the next LTS when it appears, possibly
+      before their current version reaches EOL.
+  - name: STABLE
+  - name: RELEASE
+  - name: CURRENT
+  - name: EDGE
+    detail: Odd-numbered development majors appear here.
+release_tiers_note: >-
+  A version becomes unsupported when it exists in no tier and reaches EOL; unsupported versions
+  receive neither security updates nor bug fixes. cPanel emails an EOL notice, and states that a
+  previous version is not EOL until the upcoming version reaches the RELEASE tier.
+extended_support:
+  name: Extended Lifecycle Support (ELS) program
+  documented: true
+  detail: Documented on the same page; terms are not restated here.
+supported_versions:
+  source: https://docs.cpanel.net/knowledge-base/cpanel-product/product-versions-and-the-release-process/
+  as_of: '2026-09-05'
+  table:
+    - version: '110'
+      tier: LTS
+      released_approx: 2023-03
+      eol_approx: 2026-12
+    - version: '134'
+      tier: LTS
+      released_approx: 2026-01
+      eol_approx: 2027-06
+    - version: '136'
+      released_approx: 2026-04
+      eol_approx: 2026-08
+    - version: '138'
+      released_approx: 2026-07
+      eol_approx: 2026-11
+  security_update_scope_observed: >-
+    The 2026-05-08 security update was released for versions 136, 134, 132, 130, 126, 124, 118,
+    110, 102, 94 and 86 — a materially longer support tail than the four rows above suggest, and
+    worth knowing before assuming an old server is unpatched.
+deprecation:
+  policy_published: false
+  sunset_header: false
+  deprecation_header: false
+  rfc8594: false
+  statement: >-
+    cPanel publishes NO API deprecation policy, no removal timeline for individual functions, and
+    neither RFC 8594 Sunset nor Deprecation response headers. Deprecation is expressed two ways:
+    a deprecated:true flag in the OpenAPI, and prose warnings in the documentation.
+  deprecated_api_family:
+    name: cPanel API 2
+    status: deprecated
+    statement: >-
+      "The cPanel API 2 system is deprecated. We strongly recommend that you use UAPI instead of
+      cPanel API 2." — repeated on every cPanel API 2 function page.
+    replacement: cPanel UAPI
+    removal_date: none published
+    caveat: >-
+      cPanel documents at least one API 2 function (MysqlFE::userdbprivs) that is deprecated AND
+      non-functional AND has no UAPI equivalent — so the migration path is not complete.
+    migration_guide: https://api.docs.cpanel.net/guides/guide-to-replacing-cpanel-api-1-functions-with-uapi-equivalents/
+  deprecated_operations:
+    total: 13
+    cpanel_uapi:
+      count: 5
+      operations:
+        - operationId: DCV-ensure_domains_can_pass_dcv
+          path: /DCV/ensure_domains_can_pass_dcv
+        - operationId: SSL-check_shared_cert
+          path: /SSL/check_shared_cert
+        - operationId: get_sitejet_templates
+          path: /Sitejet/get_templates
+        - operationId: set_sitejet_template
+          path: /Sitejet/set_template
+        - operationId: Themes-get_theme_base
+          path: /Themes/get_theme_base
+    whm_api_1:
+      count: 8
+      operations:
+        - operationId: Resellers-accesshash
+          path: /accesshash
+        - operationId: Resellers-get_remote_access_hash
+          path: /get_remote_access_hash
+        - operationId: SSL-disable_mail_sni
+          path: /disable_mail_sni
+        - operationId: DNS-dumpzone
+          path: /dumpzone
+        - operationId: FeatureLists-get_available_featurelists
+          path: /get_available_featurelists
+        - operationId: FeatureLists-read_featurelist
+          path: /read_featurelist
+        - operationId: get_ecommerce
+          path: /get_ecommerce
+        - operationId: set_ecommerce
+          path: /set_ecommerce
+    note: >-
+      13 of 1,282 operations carry deprecated:true. Both access-hash operations are on the list,
+      which matters: access-hash authentication is still documented as a supported method while the
+      operations that mint the hash are marked deprecated in the contract.
+  internal_only:
+    extension: x-cpanel-internal-only
+    count: 3
+    note: Operations cPanel reserves for itself; published in the contract but not for third-party use.
+change_log:
+  published: true
+  index: https://docs.cpanel.net/changelogs/
+  release_notes: https://docs.cpanel.net/release-notes/
+  detail: See changelog/cpanel-changelog.yml.
+status_page:
+  url: https://status.cpanel.net/
+  vendor: Atlassian Statuspage
+  machine_readable: true
+  endpoints:
+    summary: https://status.cpanel.net/api/v2/summary.json
+    status: https://status.cpanel.net/api/v2/status.json
+  probed:
+    - url: https://status.cpanel.net/api/v2/summary.json
+      status: 200
+    - url: https://status.cpanel.net/api/v2/status.json
+      status: 200
+  note: >-
+    A real machine-readable status feed, which is more than a status page — an agent can poll it.
+    Scope is cPanel's own hosted services (store, licensing, update servers), NOT a customer's
+    cPanel server, which is self-hosted and has no vendor status to report.
+sla:
+  published: false
+  note: >-
+    No uptime SLA is published for the APIs, which follows from the deployment model: UAPI and WHM
+    API 1 run on the customer's own server. The Technical Support Agreements page
+    (https://www.cpanel.net/technical-support-agreements/) governs support, not API availability.

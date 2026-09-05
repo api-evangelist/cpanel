@@ -1,0 +1,186 @@
+generated: '2026-09-05'
+method: derived
+source: >-
+  openapi/_original/cpanel-uapi-openapi.yml, openapi/_original/cpanel-whm-api-openapi.yml,
+  well-known/ probe results, mcp/cpanel-mcp.yml, and the cPanel developer documentation
+provider: cPanel
+providerId: cpanel
+description: >-
+  Standards this contract and these surfaces actually declare, each with the exact place the
+  declaration lives. Nothing is asserted from a marketing claim. Where cPanel does not conform,
+  the entry says so and says where the gap is.
+entries:
+  - id: openapi-3.0
+    label: OpenAPI 3.0.2
+    conforms: true
+    evidence: >-
+      Both documents declare `openapi: 3.0.2` with complete paths, parameters and response
+      schemas. 657 + 625 = 1,282 operations, all with operationIds.
+      openapi/_original/cpanel-uapi-openapi.yml and openapi/_original/cpanel-whm-api-openapi.yml.
+  - id: mcp
+    label: Model Context Protocol
+    conforms: true
+    version: '2025-06-18'
+    evidence: >-
+      https://api.docs.cpanel.net/mcp answered initialize and tools/list anonymously over
+      Streamable HTTP on 2026-09-05, returning six tools with valid JSON Schema inputSchema.
+      A second server, https://mcp.webpros.com/api/mcp, returns HTTP 401 with RFC 9728
+      protected-resource metadata.
+  - id: rfc9728
+    label: RFC 9728 OAuth 2.0 Protected Resource Metadata
+    conforms: true
+    evidence: >-
+      https://mcp.webpros.com/.well-known/oauth-protected-resource returns 200 with resource,
+      authorization_servers and scopes_supported. Saved verbatim to
+      well-known/cpanel-webpros-mcp-oauth-protected-resource.json.
+  - id: oidc-discovery
+    label: OpenID Connect Discovery 1.0
+    conforms: true
+    evidence: >-
+      https://login.webpros.com/.well-known/openid-configuration returns 200 with issuer,
+      authorization_endpoint, token_endpoint, jwks_uri, userinfo_endpoint and the
+      authorization_code / refresh_token / client_credentials / device_code grants.
+      Saved to well-known/cpanel-webpros-openid-configuration.json.
+  - id: oauth2
+    label: OAuth 2.0
+    conforms: partial
+    evidence: >-
+      Present on the two MCP surfaces (see scopes/cpanel-scopes.yml) and used as a CLIENT for
+      third-party integrations (WHM's /backup_generate_google_oauth_uri walks a Google Drive
+      OAuth flow). NOT used to authorize the 1,282 REST operations, which declare only
+      BasicAuth.
+  - id: rfc9116
+    label: RFC 9116 security.txt
+    conforms: true
+    evidence: >-
+      https://cpanel.net/.well-known/security.txt returns 200 with Canonical, two Contact
+      values, Encryption, Expires (2027-01-01) and Preferred-Languages.
+      Saved to well-known/cpanel-security.txt.
+  - id: rfc9457
+    label: RFC 9457 Problem Details for HTTP APIs
+    conforms: false
+    evidence: >-
+      Zero application/problem+json responses in either document. All 1,282 declared responses
+      are 200 application/json with a proprietary success/failure envelope. See
+      errors/cpanel-problem-types.yml.
+  - id: rfc8594
+    label: RFC 8594 Sunset header
+    conforms: false
+    evidence: >-
+      No Sunset or Deprecation response header in either contract or the documentation.
+      13 operations carry deprecated:true and none carries a removal date.
+      See lifecycle/cpanel-lifecycle.yml.
+  - id: http-semantics
+    label: HTTP method semantics
+    conforms: false
+    evidence: >-
+      1,242 of 1,282 operations are GET, including creates and deletes — /Email/add_pop and
+      /Accounts/removeacct are both GET. Safe-method semantics are not observed, which is a
+      correctness hazard for any client with automatic retries.
+  - id: idempotency
+    label: Idempotency
+    conforms: partial
+    evidence: >-
+      No Idempotency-Key header and no request key. Six UAPI operations declare idempotent
+      behaviour in prose. conventions/cpanel-conventions.yml records coverage: partial.
+  - id: pagination
+    label: Pagination
+    conforms: partial
+    evidence: >-
+      Both APIs publish pagination, but as proprietary opt-in query variables with different
+      grammars (api.paginate* for UAPI, api.chunk.* for WHM API 1) and no Link header. Off by
+      default. https://api.docs.cpanel.net/cpanel/paginate/ and /whm/paginate-output/.
+  - id: rate-limit-headers
+    label: RateLimit header fields
+    conforms: false
+    evidence: No rate-limit header of any form is declared or documented. See rate-limits/cpanel-rate-limits.yml.
+domain_standards:
+  market: web hosting control plane (DNS, email authentication, TLS issuance, groupware)
+  note: >-
+    cPanel's market has no single interoperability standard the way banking has FDX, so this
+    section records the domain protocol standards the CONTRACT itself implements and cites by
+    number. These citations are in the operation and schema descriptions of
+    openapi/_original/cpanel-whm-api-openapi.yml unless stated otherwise.
+  entries:
+    - id: dns-rfc1035
+      label: DNS (RFC 1035 and the record-type RFC family)
+      conforms: true
+      evidence: >-
+        The WHM DNS operations cite the record-type RFCs by number in their own schema
+        descriptions: RFC 1035 (24 occurrences), RFC 1183, RFC 1464 (TXT), RFC 1700, RFC 1876
+        (LOC), RFC 2672 (DNAME), RFC 2782 (SRV), RFC 3596 (AAAA) and RFC 9460 (SVCB/HTTPS).
+        32 DNS operations in WHM API 1, 10 in UAPI.
+    - id: dnssec-rfc4034
+      label: DNSSEC (RFC 4034, RFC 5155 NSEC3)
+      conforms: true
+      evidence: >-
+        A dedicated DNSSEC module — 12 UAPI operations (/DNSSEC/add_zone_key,
+        activate_zone_key, enable_dnssec, export_zone_dnskey, …) plus
+        /enable_dnssec_for_domains and /disable_dnssec_for_domains in WHM API 1. RFC 4034 and
+        RFC 5155 are cited in the schema descriptions.
+    - id: spf-rfc7208
+      label: SPF (RFC 7208)
+      conforms: true
+      evidence: >-
+        RFC 7208 is cited 21 times in the WHM contract and once in UAPI. Operations
+        /EmailAuth/install_spf_records and /EmailAuth/validate_current_spfs (UAPI) and the
+        matching WHM pair.
+    - id: dkim
+      label: DKIM
+      conforms: true
+      evidence: >-
+        6 dedicated operations per API — enable_dkim, disable_dkim, ensure_dkim_keys_exist,
+        fetch_dkim_private_keys, install_dkim_private_keys, validate_current_dkims. "dkim"
+        appears 166 times in the UAPI contract.
+    - id: dmarc
+      label: DMARC
+      conforms: true
+      evidence: >-
+        /EmailAuth/apply_dmarc, /EmailAuth/remove_dmarc, /EmailAuth/validate_current_dmarcs in
+        UAPI; /apply_dmarc, /get_default_dmarc_record, /set_default_dmarc_record in WHM API 1.
+    - id: caa-rfc6844
+      label: CAA (RFC 6844)
+      conforms: true
+      evidence: RFC 6844 cited in the WHM DNS record schema descriptions.
+    - id: sshfp-rfc4255
+      label: SSHFP (RFC 4255)
+      conforms: true
+      evidence: RFC 4255 cited in the WHM DNS record schema descriptions.
+    - id: acme
+      label: ACME / Let's Encrypt certificate issuance
+      conforms: true
+      evidence: >-
+        AutoSSL exposes 8 UAPI and 18 WHM operations, and the AutoSSL provider schemas carry
+        Let's Encrypt ACME account URLs (x_account_id
+        https://acme-v01.api.letsencrypt.org/acme/reg/…) and provider terms-of-service URLs.
+        Domain Control Validation has its own module (/DCV/check_domains_via_dns,
+        /DCV/check_domains_via_http).
+    - id: caldav-carddav
+      label: CalDAV / CardDAV
+      conforms: true
+      evidence: >-
+        The Calendar and Contacts Server modules — /CCS/* (5 operations) and /CPDAVD/* (6
+        operations) plus /DAV/get_calendar_contacts_config. "caldav" appears 10 times and
+        "carddav" 7 times in the UAPI contract.
+    - id: webdav
+      label: WebDAV
+      conforms: true
+      evidence: >-
+        The Web Disk feature (/WebDisk/set_password, /WebDisk/set_permissions) and 34 "webdav"
+        occurrences in the WHM contract, including a WebDAV backup destination schema
+        (BackupDestinationGetResponseWebDAV).
+    - id: totp-2fa
+      label: TOTP two-factor authentication
+      conforms: true
+      evidence: >-
+        /TwoFactorAuth/* — 5 UAPI and 11 WHM operations including twofactorauth_get_issuer and
+        generate_tfa_config. cPanel's 2026-07-14 security update extended 2FA coverage to API
+        requests.
+compliance:
+  certifications_published: false
+  trust_center: false
+  note: >-
+    No SOC 2, ISO 27001, PCI or HIPAA attestation is published on cPanel's or WebPros' public
+    pages, and probe-security-programs.py found no trust center. What cPanel does publish is a
+    coordinated vulnerability disclosure programme (security.txt + HackerOne). See
+    security/cpanel-vulnerability-disclosure.yml.

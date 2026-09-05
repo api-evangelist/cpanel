@@ -1,0 +1,69 @@
+generated: '2026-09-05'
+method: searched
+source: >-
+  https://www.cpanel.net/products/trial/, https://api.docs.cpanel.net/guides/guide-to-testing-custom-code/,
+  https://api.docs.cpanel.net/whm/paginate-output/ (API Shell), https://cpanel.net/pricing/,
+  and a probe of https://demo.cpanel.net/
+provider: cPanel
+providerId: cpanel
+description: >-
+  cPanel publishes no hosted API sandbox. There is no test-mode key, no test-vs-live key prefix,
+  no fixture data, no time simulation and no vendor-operated endpoint an integrator can call
+  without first standing up a server. That follows from the deployment model — the API lives on
+  the customer's machine — but it is a real cost to an integrator, so it is recorded rather than
+  left blank.
+hosted_sandbox: false
+test_mode: false
+key_prefixes:
+  test: null
+  live: null
+  note: >-
+    cPanel has no key-prefix convention. An API token is an opaque string used with
+    `Authorization: cpanel user:TOKEN` or `Authorization: whm user:TOKEN`; nothing in the token
+    distinguishes a test credential from a production one, because there is no test mode to
+    distinguish.
+test_values:
+  cards: none
+  bank_accounts: none
+  tokens: none
+  note: Not a payments API; no test instruments exist and none are invented here.
+time_simulation: false
+fixtures: false
+what_exists:
+  - name: 15-day free trial
+    url: https://www.cpanel.net/products/trial/
+    type: full-product trial licence
+    hosted_by: the customer
+    credit_card_required: false
+    prerequisites:
+      - A server (VPS, cloud hyperscaler, dedicated or other hardware)
+      - An approved Linux distribution (AlmaLinux, Ubuntu or CloudLinux)
+      - Full root access
+      - The server meets cPanel's minimum system requirements
+      - A registered domain with nameservers configured at the registrar
+    assessment: >-
+      This is the closest thing to a sandbox cPanel offers and it is a real one — a fully
+      functional cPanel & WHM install with the complete 1,282-operation API surface — but the
+      integrator provisions and pays for the infrastructure, and the setup is measured in hours,
+      not in a signup form.
+  - name: WHM API Shell
+    location: WHM » Home » Development » API Shell
+    type: in-product console
+    description: >-
+      Executes WHM API 1 functions from the WHM interface with the sort, filter and paginate
+      options exposed as form fields. cPanel points integrators at it throughout the API guides.
+    caveat: It executes against the live server. There is no dry-run or preview.
+  - name: Guide to Testing Custom Code
+    url: https://api.docs.cpanel.net/guides/guide-to-testing-custom-code/
+    type: documentation
+probes:
+  - url: https://demo.cpanel.net/
+    status: 200
+    finding: >-
+      Serves a 163-byte placeholder with no content. Not a demo environment despite the hostname.
+  - url: https://cpanel.net/demo/
+    status: 200
+    finding: Redirects to https://www.cpanel.net/products/trial/ — the trial, not a demo.
+  - url: https://demo.cpanel.net:2083/
+    status: 0
+    finding: No response; no cPanel service is listening on the demo host's cPanel port.

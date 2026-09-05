@@ -1,0 +1,125 @@
+generated: '2026-09-05'
+method: derived
+source: >-
+  openapi/_original/cpanel-uapi-openapi.yml and openapi/_original/cpanel-whm-api-openapi.yml
+  (all 1,282 response objects), plus https://api.docs.cpanel.net/cpanel/introduction/ and
+  https://api.docs.cpanel.net/whm/introduction/
+provider: cPanel
+providerId: cpanel
+format: envelope
+rfc9457: false
+description: >-
+  cPanel does not publish an error catalogue, and it cannot be derived the usual way: there are
+  no 4xx or 5xx responses in either contract to derive from. Every one of the 1,282 published
+  operations declares exactly ONE response — HTTP 200, application/json — and failure is
+  reported inside the JSON body. This file records that envelope, because for cPanel it IS the
+  error model, and an integrator who does not know it will silently treat failures as successes.
+derivation_note: >-
+  Derived by walking every responses[] object in both documents: 657 UAPI operations and 625 WHM
+  operations, 1,282 declared responses, 1,282 of them HTTP 200. Zero 4xx. Zero 5xx. Zero
+  application/problem+json.
+envelopes:
+  - api: cPanel UAPI
+    success_test: result.status == 1
+    failure_test: result.status == 0
+    fields:
+      - name: result.status
+        type: integer
+        values: [0, 1]
+        meaning: 1 success, 0 failure. THE outcome field.
+      - name: result.errors
+        type: array of strings
+        meaning: The failure messages. null on success.
+      - name: result.messages
+        type: array of strings
+        meaning: Informational messages.
+      - name: result.warnings
+        type: array of strings
+        meaning: Non-fatal warnings; present on partial success.
+      - name: result.data
+        type: object or array
+        meaning: The payload.
+      - name: result.metadata
+        type: object
+        meaning: Pagination/filter/sort control block when those features were requested.
+      - name: apiversion
+        type: integer
+        meaning: Reports 3 for UAPI.
+      - name: module
+        type: string
+      - name: func
+        type: string
+  - api: WHM API 1
+    success_test: metadata.result == 1
+    failure_test: metadata.result == 0
+    fields:
+      - name: metadata.result
+        type: integer
+        values: [0, 1]
+        meaning: 1 success, 0 failure. THE outcome field.
+      - name: metadata.reason
+        type: string
+        meaning: >-
+          The reason the function failed when metadata.result is 0. cPanel notes it may also carry
+          a success message when the call succeeds, so `reason` being non-empty does not imply
+          failure — only metadata.result does.
+      - name: metadata.command
+        type: string
+        meaning: The method name called; useful for correlating a batched client.
+      - name: metadata.version
+        type: integer
+        meaning: The API function version.
+      - name: data
+        type: object
+        meaning: The payload, sibling to metadata rather than nested under it.
+    divergence_warning: >-
+      The two APIs place the outcome flag in DIFFERENT places under DIFFERENT names —
+      result.status for UAPI, metadata.result for WHM API 1 — and UAPI nests data inside result
+      while WHM API 1 puts data at the top level. Shared error handling must branch on the API.
+documented_failure_modes:
+  - id: wrong-port
+    title: Permission denied / Function not found from a correct call on the wrong port
+    detail: >-
+      cPanel documents that otherwise-correct calls return "Permission denied" or "Function not
+      found" when they use the wrong port. UAPI is 2082/2083 (2095/2096 for Webmail); WHM API 1 is
+      2086/2087. UAPI cannot be called on WHM ports except through WHM API 1.
+    remediation: Check the port before debugging the credential.
+    source: https://api.docs.cpanel.net/guides/guide-to-api-authentication/
+  - id: role-disabled
+    title: Function disabled by the server profile
+    detail: >-
+      When a non-Standard Node server profile is in effect, the system DISABLES the API calls tied
+      to that profile's disabled roles, and hundreds of operation descriptions repeat "When you
+      disable the [role], the system disables this function". The call returns 200 with a failure
+      envelope.
+    remediation: Check the server's profile/roles, not the request.
+    source: https://api.docs.cpanel.net/cpanel/introduction/
+  - id: missing-api-version
+    title: WHM API 1 call without api.version
+    detail: cPanel marks api.version=1 as required on every WHM API 1 call.
+    remediation: Always send api.version=1.
+    source: https://api.docs.cpanel.net/whm/introduction/
+  - id: boolean-literal
+    title: true/false rejected
+    detail: >-
+      cPanel & WHM's APIs do not support literal true and false; booleans are 1 and 0. Both
+      introductions state this explicitly.
+    remediation: Serialize booleans as integers.
+  - id: sort-method-unset
+    title: Function fails when sorting numeric values without api.sort_method
+    detail: >-
+      cPanel warns that the function will FAIL — not mis-sort — if numeric values are sorted
+      without setting api.sort_method.
+    remediation: Set api.sort_method=numeric (or numeric_zero_as_max / ipv4) explicitly.
+    source: https://api.docs.cpanel.net/cpanel/sorting/
+  - id: cli-metadata-loss
+    title: CLI calls lose the failure metadata
+    detail: >-
+      cPanel documents that uapi and whmapi1 calls do not return the metadata that URL-based calls
+      return when a function experiences errors that prevent a successful run.
+    remediation: Use the HTTP surface when the failure envelope matters.
+gaps:
+  - No published catalogue of error strings, codes or reasons for either API.
+  - No RFC 9457 problem+json anywhere.
+  - No HTTP status taxonomy — the contract admits only 200, so transport-level failures are undescribed.
+  - No error identifier an operator could quote to support.

@@ -3,173 +3,114 @@ specificationVersion: '0.1'
 schema: https://raw.githubusercontent.com/api-evangelist/interface-research/main/schema/api-commons.yml#/$defs/Plans
 provider: cPanel
 providerId: cpanel
+generated: '2026-09-05'
 created: '2026-05-04'
-# Provenance stamped 2026-08-11: this artifact was written by the API Evangelist
-# bulk sweep dated 2026-05-04, not harvested from the provider. See roadmap#35.
-method: generated
-modified: '2026-05-04'
-tags:
-  - Control Panel
-  - DNS
-  - Domains
-  - Email
-  - Hosting
-  - Reseller
-  - Server Administration
-  - Web Hosting
-  - WHM
-description: Machine-readable plans and pricing scaffold for this API provider. Conforms to the API Commons
-  Plans schema. Tier limits and prices are scaffold defaults; replace with provider-published values.
+modified: '2026-09-05'
+method: searched
+source: https://cpanel.net/pricing/
+description: >-
+  cPanel's published plans, read from its pricing page on 2026-09-05. They replace a 2026-05-04
+  bulk-sweep scaffold that invented a free tier and a 1,000-requests-per-month API quota; neither
+  exists. THE CRITICAL FACT FOR AN API CONSUMER: cPanel does not sell API access and does not
+  meter API calls. It licenses the cPanel & WHM software per server, priced by the number of
+  cPanel ACCOUNTS the server hosts, and the UAPI, WHM API 1, cPanel API 2 and Manage2 APIs are
+  included with every licence at no additional cost and with no published call quota. The unit of
+  pricing is accounts, not requests.
+pricing_model: per-server-licence-by-account-count
+currency: USD
+billing_periods: [monthly, annual]
+annual_discount: 8.4%
+tax_note: All prices exclude tax.
 plans:
-  - id: cpanel-free
-    name: Free
-    type: freemium
-    description: Free entry tier for the cPanel API surface. Intended for evaluation, prototyping, and
-      low-volume integrations. Real limits and pricing must be reconciled with the provider's published
-      plan documentation.
-    entries:
-      - label: API Requests
-        description: Monthly API request quota across all included endpoints
-        name: api_requests
-        type: quota
-        metric: requests
-        limit: 1000
-        timeFrame: month
-        geo: global
-        domains:
-          - https://hostname:2083/execute
-          - https://hostname:2087/json-api
-          - https://hostname:2083/json-api/cpanel
-        unit: 1
-        price: '0.00'
-        userMultiplied: false
-      - label: Rate Limit
-        description: Maximum requests per minute on the free tier
-        name: rate_limit
-        type: rate
-        metric: requests_per_minute
-        limit: 10
-        timeFrame: minute
-        geo: global
-        domains:
-          - https://hostname:2083/execute
-          - https://hostname:2087/json-api
-          - https://hostname:2083/json-api/cpanel
-        unit: 1
-        price: '0.00'
-        userMultiplied: false
-    elements:
-      - name: Public Documentation
-      - name: Community Support
-      - name: Sandbox Access
-      - name: cPanel UAPI
-      - name: WHM API 1
-      - name: cPanel API 2 (Legacy)
-  - id: cpanel-pro
-    name: Professional
-    type: paid
-    description: Production tier for cPanel. Provides higher quotas, priority support, and access to the
-      broader API portfolio. Pricing placeholder; align with the provider's pricing page.
-    entries:
-      - label: API Requests
-        description: Monthly API request quota
-        name: api_requests
-        type: quota
-        metric: requests
-        limit: 100000
-        timeFrame: month
-        geo: global
-        domains:
-          - https://hostname:2083/execute
-          - https://hostname:2087/json-api
-          - https://hostname:2083/json-api/cpanel
-        unit: 1
-        price: TBD
-        userMultiplied: false
-      - label: Rate Limit
-        description: Maximum requests per minute on the professional tier
-        name: rate_limit
-        type: rate
-        metric: requests_per_minute
-        limit: 100
-        timeFrame: minute
-        geo: global
-        domains:
-          - https://hostname:2083/execute
-          - https://hostname:2087/json-api
-          - https://hostname:2083/json-api/cpanel
-        unit: 1
-        price: '0.00'
-        userMultiplied: false
-      - label: Overage
-        description: Per-request price after monthly quota is exceeded
-        name: overage
-        type: metered
-        metric: requests
-        limit: -1
-        timeFrame: month
-        geo: global
-        domains:
-          - https://hostname:2083/execute
-          - https://hostname:2087/json-api
-          - https://hostname:2083/json-api/cpanel
-        unit: 1000
-        price: TBD
-        userMultiplied: false
-    elements:
-      - name: All Production Endpoints
-      - name: Email Support
-      - name: SLA Targets
-      - name: Webhook Subscriptions
-      - name: cPanel UAPI
-      - name: WHM API 1
-      - name: cPanel API 2 (Legacy)
-  - id: cpanel-enterprise
-    name: Enterprise
-    type: enterprise
-    description: Custom-negotiated tier for cPanel. Includes dedicated capacity, contractual SLAs, security
-      review, data residency options, and named technical account management.
-    entries:
-      - label: API Requests
-        description: Negotiated request volume; -1 indicates uncapped subject to fair use
-        name: api_requests
-        type: quota
-        metric: requests
-        limit: -1
-        timeFrame: month
-        geo: configurable
-        domains:
-          - https://hostname:2083/execute
-          - https://hostname:2087/json-api
-          - https://hostname:2083/json-api/cpanel
-        unit: 1
-        price: custom
-        userMultiplied: false
-      - label: Rate Limit
-        description: Negotiated burst and steady-state rate
-        name: rate_limit
-        type: rate
-        metric: requests_per_minute
-        limit: 1000
-        timeFrame: minute
-        geo: configurable
-        domains:
-          - https://hostname:2083/execute
-          - https://hostname:2087/json-api
-          - https://hostname:2083/json-api/cpanel
-        unit: 1
-        price: custom
-        userMultiplied: false
-    elements:
-      - name: Unlimited / Negotiated Volume
-      - name: 24/7 Dedicated Support
-      - name: Contractual SLA
-      - name: Security & Compliance Review
-      - name: Dedicated Account Manager
-      - name: Custom Data Residency
-      - name: cPanel UAPI
-      - name: WHM API 1
-      - name: cPanel API 2 (Legacy)
-maintainers:
-  - FN: Kin Lane
-    email: kin@apievangelist.com
+  - id: solo
+    name: Solo
+    audience: Freelancers and small agencies managing a single server
+    price_monthly: 29.99
+    price_annual_per_month: 27.46
+    currency: USD
+    included_accounts: 1
+    overage: null
+    platform: Cloud/VPS only
+    api_access: full — all APIs included, no call quota published
+  - id: admin
+    name: Admin
+    audience: Application developers and small dev shops
+    price_monthly: 35.99
+    price_annual_per_month: 32.96
+    currency: USD
+    included_accounts: 5
+    included_accounts_qualifier: up to
+    overage: null
+    platform: Cloud/VPS only
+    api_access: full — all APIs included, no call quota published
+  - id: pro
+    name: Pro
+    audience: Large agencies and growing hosting businesses
+    price_monthly: 53.99
+    price_annual_per_month: 49.46
+    currency: USD
+    included_accounts: 30
+    included_accounts_qualifier: up to
+    overage: null
+    platform: Cloud/VPS only
+    api_access: full — all APIs included, no call quota published
+  - id: premier
+    name: Premier
+    audience: Data centers and enterprise hosting operations
+    price_monthly: 69.99
+    price_annual_per_month: null
+    currency: USD
+    included_accounts: 100
+    included_accounts_qualifier: up to
+    overage:
+      unit: account
+      price: 0.49
+      period: month
+    platform: Cloud/VPS and Metal/Dedicated
+    extras: [Custom branding]
+    api_access: full — all APIs included, no call quota published
+  - id: wp-squared
+    name: WP Squared
+    audience: Managed WordPress delivery, built on cPanel with WHM retained
+    price_monthly: 84.99
+    price_annual_per_month: null
+    currency: USD
+    included_units:
+      unit: WordPress site
+      count: 10
+    overage:
+      unit: WordPress site
+      price: 0.40
+      period: month
+    api_access: full — all APIs included, no call quota published
+included_in_every_plan:
+  - WP Toolkit
+  - Website Builder
+  - Email accounts
+  - Unlimited websites
+  - SSL certificates
+  - Self-guided Migration
+  - Website Monitoring
+free_tier:
+  exists: false
+  trial:
+    exists: true
+    length_days: 15
+    credit_card_required: false
+    url: https://www.cpanel.net/products/trial/
+    caveat: >-
+      The trial is not a hosted sandbox — it is a licence to install cPanel & WHM on a server you
+      already have, on an approved Linux distribution with root access and a registered domain.
+add_ons:
+  note: >-
+    The pricing page lists partner add-ons with "starting from" prices only and no included
+    quantities; they are recorded as prices, not as plans.
+  observed_starting_prices_usd_per_month: [45, 34.95, 16.8, 29, 3, 25, 8.95]
+  store: https://store.cpanel.net/
+plan_count: 5
+api_metering:
+  metered: false
+  quota_published: false
+  note: >-
+    Searched the pricing page, the FAQ on it, the developer documentation and both OpenAPI
+    documents. No per-call price, no request quota and no API-tier distinction exists anywhere.

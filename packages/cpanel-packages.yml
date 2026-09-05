@@ -1,0 +1,106 @@
+generated: '2026-09-05'
+method: searched
+source: >-
+  registry.npmjs.org, pypi.org, rubygems.org, repo.packagist.org, api.github.com (CpanelInc and
+  cpanel orgs) and the cPanel developer documentation, probed 2026-09-05
+provider: cPanel
+providerId: cpanel
+description: >-
+  First-party client libraries for the cPanel UAPI, WHM API 1, cPanel API 2 and Manage2 APIs.
+  cPanel's own distribution model is unusual and worth stating plainly: the primary integration
+  surfaces are the LiveAPI classes and the uapi/whmapi1/cpapi2 command-line tools that ship
+  INSIDE cPanel & WHM itself (see cli/cpanel-cli.yml), so most cPanel code never installs a
+  package at all. Only one first-party library is published to a public package registry.
+  The cPanel/WHM package ecosystem on npm, Packagist and RubyGems is overwhelmingly
+  third-party; those are deliberately excluded rather than listed as cPanel's.
+packages:
+  - name: '@cpanel/api'
+    registry: npm
+    url: https://www.npmjs.com/package/@cpanel/api
+    official: true
+    version: 6.0.1
+    published: '2026-08-28'
+    first_published: '2021-02-16'
+    language: javascript
+    languages: [javascript, typescript]
+    license: MIT
+    repository: https://github.com/cpanel/cpanel-node-api
+    apis: [cPanel UAPI, WHM API 1]
+    description: >-
+      cPanel API JavaScript and TypeScript interface libraries. Builds the request syntax for
+      WHM API 1 and UAPI calls behind a common object model; the consumer supplies the HTTP
+      transport.
+    evidence:
+      - https://registry.npmjs.org/@cpanel/api
+      - https://github.com/cpanel/cpanel-node-api
+    first_party_basis: >-
+      Published under the @cpanel npm scope by the npm user tom.green_cpanel and sourced from
+      the cpanel GitHub organization (github.com/cpanel, "cPanel LLC", blog https://cpanel.net).
+  - name: cPanel::APIClient
+    registry: cpan
+    url: https://metacpan.org/pod/cPanel::APIClient
+    official: true
+    version: '0.10'
+    published: '2022-11-01'
+    language: perl
+    repository: https://github.com/cpanel/p5-cPanel-APIClient
+    apis: [cPanel UAPI, WHM API 1, cPanel API 2]
+    description: Perl client for cPanel & WHM's HTTP APIs, published by cPanel to CPAN.
+    evidence:
+      - https://github.com/cpanel/p5-cPanel-APIClient
+    note: >-
+      version/published were read from the git tag 0.10 (tagged 2022-11-01) in cPanel's own
+      repository, NOT from CPAN: both fastapi.metacpan.org and metacpan.org returned HTTP 402
+      to this run on 2026-09-05, so the registry's own metadata could not be read. The library
+      has had no release in nearly four years while the APIs it wraps shipped through version
+      11.137 — an abandonment signal, recorded as observed.
+  - name: cpanel/publicapi-php
+    registry: github
+    url: https://github.com/CpanelInc/publicapi-php
+    official: true
+    version: null
+    published: null
+    language: php
+    repository: https://github.com/CpanelInc/publicapi-php
+    apis: [cPanel UAPI, WHM API 1, cPanel API 2]
+    description: cPanel PublicAPI PHP client and cPanel PHP library.
+    evidence:
+      - https://github.com/CpanelInc/publicapi-php
+    note: >-
+      version and published are null because there is nothing to read: the repository carries no
+      GitHub releases and no tags, and cPanel publishes no corresponding Packagist package (the
+      packagist vendor "cpanel" holds one unrelated package, cpanel/apime, whose source is
+      github.com/Snappyo/CpanelAPI — third party, not cPanel's). Distribution is git clone only.
+      Last push to the repository was 2021-06-23.
+  - name: cpanel/xmlapi-php
+    registry: github
+    url: https://github.com/CpanelInc/xmlapi-php
+    official: true
+    version: v1.0.13
+    published: null
+    language: php
+    repository: https://github.com/CpanelInc/xmlapi-php
+    apis: [cPanel API 2, WHM XML-API]
+    description: A PHP class for interacting with cPanel's XML-API (legacy).
+    evidence:
+      - https://github.com/CpanelInc/xmlapi-php
+    note: >-
+      Latest git tag is v1.0.13; the tag's date could not be resolved because api.github.com
+      rate-limited this unauthenticated run mid-probe. Repository last pushed 2018-08-16, and
+      the XML-API it wraps is itself legacy — superseded by UAPI and WHM API 1.
+excluded_third_party:
+  note: >-
+    Recorded so a later pass does not mistake popularity for provenance. These are real, some are
+    well used, and none is published by cPanel.
+  npm: [cpanel, cpanel-node, cpanel-lib, cpanel-whm, cpanel-mcp, cpanel-pilot-mcp, obambu-cpanel-mcp, '@terynas/cpanel-mcp', colorfulbox-mcp, n8n-nodes-cpanel-whm, '@appigram/cpanel-rest-api']
+  packagist: [gufy/cpanel-php, gufy/cpanel-whm, zanysoft/cpanel-api, previewtechs/cpanel-whm-api, eugenevdm/whm-api, cpanel/apime]
+  pypi: [cpanel, cpanel-api]
+  rubygems: [cpanel, cpanel_ruby, lumberg, panelbeater, whm_xml]
+summary:
+  official_count: 4
+  registries: [npm, cpan, github]
+  languages: [javascript, typescript, perl, php]
+  currency_finding: >-
+    One of four first-party libraries has shipped in the last four years. @cpanel/api is current
+    (6.0.1, 2026-08-28); the Perl, PublicAPI-PHP and XML-API-PHP clients last moved in 2022, 2021
+    and 2018 respectively, against an API surface that is on version 11.137.

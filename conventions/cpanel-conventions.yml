@@ -1,0 +1,265 @@
+generated: '2026-09-05'
+method: searched
+source: >-
+  https://api.docs.cpanel.net/cpanel/introduction/, /cpanel/paginate/, /cpanel/filters/,
+  /cpanel/sorting/, /whm/introduction/, /whm/paginate-output/, /whm/filter-output/,
+  /whm/output-columns/, /cpanel/tokens/, /whm/tokens/ — cross-checked against
+  openapi/_original/cpanel-uapi-openapi.yml and openapi/_original/cpanel-whm-api-openapi.yml
+provider: cPanel
+providerId: cpanel
+description: >-
+  Cross-cutting runtime semantics for cPanel & WHM's HTTP APIs. The single most important thing
+  for an agent to know is that these are NOT REST-shaped APIs: they are RPC-over-HTTP. Every one
+  of the 1,282 published operations answers HTTP 200 — including the failures — and the real
+  outcome lives in a JSON envelope. A client that branches on the HTTP status code will treat
+  every error as a success.
+transport:
+  style: rpc-over-http
+  method_shape: >-
+    UAPI is /execute/{Module}/{Function}; WHM API 1 is /json-api/{function}?api.version=1.
+    636 of 657 UAPI operations and 606 of 625 WHM operations are declared as GET, including
+    mutating ones — creating an email account is a GET.
+  content_type: application/json
+  cli_parity: >-
+    Every operation has a documented CLI equivalent (uapi / whmapi1 / cpapi2) and the contract
+    carries an x-codeSamples block per operation with CLI, URL, LiveAPI Perl and LiveAPI PHP
+    forms. See cli/cpanel-cli.yml.
+  boolean_convention: >-
+    cPanel states explicitly that its APIs do NOT accept literal true/false. Booleans are the
+    integers 1 and 0. This is repeated in both introductions and is a common integration failure.
+auth:
+  style: basic-or-token-header
+  summary: >-
+    HTTP Basic, or an Authorization header with a cPanel-specific prefix —
+    `Authorization: cpanel user:TOKEN` for UAPI and `Authorization: whm user:TOKEN` for WHM API 1.
+    Not Bearer. Port choice is part of authentication: a right call on the wrong port returns
+    "Permission denied".
+  see: authentication/cpanel-authentication.yml
+error_envelope:
+  http_status_is_not_the_outcome: true
+  uapi:
+    shape:
+      apiversion: integer
+      module: string
+      func: string
+      result:
+        status: 1 success / 0 failure
+        errors: array of strings, null on success
+        messages: array of strings
+        warnings: array of strings
+        data: the payload
+        metadata: pagination/filter/sort control block when those features are enabled
+    check: result.status
+  whm_api_1:
+    shape:
+      data: the payload
+      metadata:
+        command: the method name called
+        result: 1 success / 0 failure
+        reason: the failure reason when result is 0; may carry a success message when result is 1
+        version: the API function version
+    check: metadata.result
+  cli_caveat: >-
+    cPanel documents that CLI calls do NOT return the metadata that URL-based calls return when a
+    function fails before it runs. An agent driving the CLI loses the failure envelope it would
+    have got over HTTP.
+  see: errors/cpanel-problem-types.yml
+pagination:
+  uapi:
+    style: opt-in query parameters
+    enable: api.paginate=1
+    params: [api.paginate_start, api.paginate_size, api.paginate_page]
+    response_fields:
+      location: result.metadata.paginate
+      fields: [total_pages, total_results, current_page, results_per_page, start_result]
+    docs: https://api.docs.cpanel.net/cpanel/paginate/
+  whm_api_1:
+    style: opt-in query parameters ("chunking")
+    enable: api.chunk.enable=1
+    params: [api.chunk.size, api.chunk.start]
+    indexing: api.chunk.start is 1-indexed, not 0-indexed
+    docs: https://api.docs.cpanel.net/whm/paginate-output/
+  note: >-
+    Pagination is OFF by default on both APIs. An unbounded list call returns everything, which
+    is why cPanel strongly recommends pagination for Mail Delivery Report functions.
+filtering:
+  uapi:
+    enable: api.filter=1
+    params: [api.filter_column, api.filter_term, api.filter_type]
+    numeric_operators: [eq, lt, lt_handle_unlimited, gt, gt_handle_unlimited, ne]
+    string_operators: [contains, begins, ends, matches]
+    other_operators: [defined, undefined]
+    default_type: contains
+    docs: https://api.docs.cpanel.net/cpanel/filters/
+  whm_api_1:
+    enable: api.filter.enable=1
+    params: [api.filter.a.field, api.filter.a.arg0, api.filter.a.type]
+    multiple_filters: >-
+      Increment the letter — api.filter.b.field, api.filter.c.field — and send api.filter.enable
+      exactly once.
+    wildcard_field: "The asterisk (*) matches across all of a function's returns."
+    numeric_operators: ['==', lt, lt_equal, lt_handle_unlimited, gt, gt_equal, gt_handle_unlimited]
+    string_operators: [begins, contains, eq]
+    default_type: contains
+    docs: https://api.docs.cpanel.net/whm/filter-output/
+  divergence_warning: >-
+    The two APIs use DIFFERENT filter vocabularies and DIFFERENT parameter grammars for the same
+    idea. UAPI uses api.filter_column / eq; WHM API 1 uses api.filter.a.field / '=='. Code written
+    against one will not work against the other.
+sorting:
+  uapi:
+    enable: api.sort=1
+    params: [api.sort_column, api.sort_method, api.sort_reverse]
+    methods: [lexicographic, numeric, numeric_zero_as_max, ipv4]
+    default_method: lexicographic
+    hazard: >-
+      cPanel warns that sorting numeric values without setting api.sort_method will make the
+      function FAIL, not merely mis-sort.
+    docs: https://api.docs.cpanel.net/cpanel/sorting/
+  whm_api_1:
+    docs: https://api.docs.cpanel.net/whm/sort-output/
+field_selection:
+  whm_api_1:
+    enable: api.columns.enable=1
+    params: [api.columns.a, 'api.columns.b …']
+    constraint: A sort key must be one of the displayed columns.
+    docs: https://api.docs.cpanel.net/whm/output-columns/
+  uapi: none published
+metadata_and_tracing:
+  request_id: none
+  correlation_header: none
+  note: >-
+    Neither API documents a request-id or correlation header, and neither OpenAPI declares one.
+    There is no published way to reference a single API call back to cPanel support.
+versioning:
+  scheme: product-version + api-version parameter
+  product_version_at_harvest: 11.137.9999.106
+  api_version_parameter:
+    whm_api_1: api.version=1 is REQUIRED on every WHM API 1 call
+    uapi: apiversion 3 is reported in the response envelope; the path itself carries no version
+  contract_extensions:
+    x-cpanel-api-version: The API family an operation belongs to (e.g. UAPI).
+    x-cpanel-available-version: >-
+      The cPanel & WHM version an operation became available in (e.g. "cPanel 98", "cPanel 138").
+      Present on 655 of 657 UAPI and all 625 WHM operations — a per-operation availability floor
+      published in the contract, which is unusual and directly useful to an agent deciding whether
+      a call will exist on the server in front of it.
+    x-cpanel-internal-only: Marks operations cPanel reserves for itself (2 UAPI, 1 WHM).
+    x-cpanel-cli-support: Marks CLI availability where it differs.
+  api_generations: >-
+    Three generations coexist: UAPI (current), WHM API 1 (current, server side), and cPanel API 2
+    (legacy, still supported, superseded by UAPI). cPanel publishes a migration guide from
+    cPanel API 1 to UAPI.
+  see: lifecycle/cpanel-lifecycle.yml
+idempotency:
+  coverage: partial
+  mechanism: per-operation semantics
+  header: none
+  key_parameter: none
+  retention: not applicable
+  scope:
+    - operationId: remove
+      path: /Trash/remove
+    - operationId: WebApp_deploy
+      path: /WebApp/deploy
+    - operationId: WebApp_redeploy
+      path: /WebApp/redeploy
+    - operationId: reset
+      path: /BackupInfo/reset
+    - operationId: finish
+      path: /ExtractInfo/finish
+    - operationId: unlink_webpros_account
+      path: /WebProsMCP/unlink_webpros_account
+  evidence: >-
+    Six operations in the cPanel UAPI contract state idempotent behaviour in their own
+    description — /Trash/remove ("If the target is already absent, this is an idempotent success
+    rather than an error"), /WebApp/deploy and /WebApp/redeploy ("This function is idempotent. If
+    you call it while a deploy for the same application is already running, it returns the
+    in-flight task's identity"), /BackupInfo/reset, /ExtractInfo/finish and
+    /WebProsMCP/unlink_webpros_account. No WHM API 1 operation makes the claim.
+  verdict: >-
+    partial, and thinly so: 6 declarations against roughly 400 mutating UAPI operations and 625
+    WHM operations. There is NO Idempotency-Key header, no request-key parameter, and no replay
+    window anywhere in either contract or the documentation. Because mutations are issued as GETs,
+    a naive HTTP client's automatic retry on a timeout will re-run the mutation.
+reversibility:
+  grade: documented
+  window_published: false
+  contract_signal:
+    extension: x-rollback
+    present_on: 345 of 657 cPanel UAPI operations
+    values:
+      none: 317
+      clean: 27
+      lossy: 1
+    reading: >-
+      cPanel publishes a per-operation rollback classification INSIDE the contract, which is rare
+      and genuinely useful. cPanel does not define the vocabulary in its developer portal (searched
+      2026-09-05, including the portal's own MCP search tool — the only "rollback" documentation is
+      the unrelated Standardized Hooks rollback dispatch loop), so it is read literally here:
+      `clean` = the operation can be undone without loss, `lossy` = it can be undone but something
+      is lost, `none` = no rollback. WHM API 1 carries no x-rollback at all.
+    absent_on: >-
+      312 UAPI operations and all 625 WHM API 1 operations carry no rollback declaration, so their
+      reversibility is unstated rather than declared irreversible.
+  reversal_pairs:
+    - action: Email-add_pop
+      rollback: clean
+      reverses_with: Email-delete_pop
+      note: The delete side is itself declared `lossy` — removing a mailbox destroys its mail.
+    - action: Mime-add_redirect
+      rollback: clean
+      reverses_with: Mime-delete_redirect
+    - action: Mime-add_hotlink
+      rollback: clean
+      reverses_with: Mime-delete_hotlink
+    - action: KnownHosts-create
+      rollback: clean
+      reverses_with: KnownHosts-delete
+    - action: AddonDomain-addaddondomain
+      rollback: none
+      reverses_with: AddonDomain-deladdondomain
+      note: >-
+        A reversal operation exists but the contract declares no rollback, which is exactly the
+        distinction this field is for: an agent can undo the record, not the side effects.
+    - action: Tokens-api_token_create
+      api: WHM API 1
+      reverses_with: Tokens-api_token_revoke
+    - action: Accounts-createacct
+      api: WHM API 1
+      reverses_with: Accounts-removeacct
+      note: >-
+        Account termination is not a reversal — recovery is a restore from backup
+        (Backup-restore_files, Backup-restore_databases, and the WHM restore/transfer functions),
+        which depends on a backup existing.
+    - action: Transfers-abort_transfer_session
+      api: WHM API 1
+      note: Aborts an in-flight transfer; the closest thing to a cancel-before-commit path.
+  windows:
+    published: false
+    statement: >-
+      No time window is stated anywhere for any reversal — not in the contract, not in the guides,
+      not on the pricing or legal pages. None is asserted here. Retention of the backups that
+      actually make destructive cPanel operations recoverable is configured by the SERVER OPERATOR,
+      not by cPanel, so no vendor-side window could exist.
+  grade_basis: >-
+    documented (0.4) rather than verified (1.0): reversal paths exist and are named, and the
+    contract even classifies rollback per operation, but no window is published.
+rate_limit_signaling:
+  headers: none
+  status_on_exhaustion: none published
+  note: >-
+    Neither contract declares a rate-limit header and neither API documents a published limit; the
+    only response code either spec declares is 200. See rate-limits/cpanel-rate-limits.yml.
+dry_run_mode:
+  available: false
+  note: >-
+    No dry-run, preview or validate-only parameter is documented on either API. WHM's in-product
+    API Shell interface is the nearest equivalent and it executes for real.
+cross_references:
+  errors: errors/cpanel-problem-types.yml
+  lifecycle: lifecycle/cpanel-lifecycle.yml
+  authentication: authentication/cpanel-authentication.yml
+  rate_limits: rate-limits/cpanel-rate-limits.yml
+  scopes: scopes/cpanel-scopes.yml
+  cli: cli/cpanel-cli.yml

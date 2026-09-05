@@ -1,0 +1,134 @@
+generated: '2026-09-05'
+method: searched
+source: https://docs.cpanel.net/release-notes/release-notes/
+provider: cPanel
+providerId: cpanel
+description: >-
+  cPanel publishes a dated release-notes feed and a separate per-version change log, both on the
+  product documentation host. They cover the PRODUCT; there is no API-only changelog, so an API
+  change is discoverable only as part of the major version that carried it. The recent window is
+  recorded below with the dates cPanel itself prints.
+scheme: product-major-version
+current_version: '138'
+contract_version: 11.137.9999.106
+cadence:
+  major_releases_per_year: about 4 even-numbered production majors
+  lts: one LTS version per year
+  security_updates: out of band, applied across the supported version tail
+  release_windows: >-
+    cPanel states it avoids releasing on international holidays and weekends (Thursday evening
+    through Sunday afternoon).
+surfaces:
+  release_notes: https://docs.cpanel.net/release-notes/
+  release_notes_feed: https://docs.cpanel.net/release-notes/release-notes/
+  change_logs: https://docs.cpanel.net/changelogs/
+  current_change_log: https://docs.cpanel.net/changelogs/138-change-log/
+  blog: https://www.cpanel.net/blog/
+  additional_component_logs:
+    - EasyApache 4
+    - WP Toolkit
+    - Sitejet Builder
+    - ConfigServer Security & Firewall (CSF)
+    - Comet Backup
+    - Site Quality Monitoring
+    - Server Monitoring (360 Monitoring)
+    - Calendar and Contacts Server
+    - cPanel Analytics
+  rss: none published
+  machine_readable: false
+page_last_modified: '2026-09-03'
+entries:
+  - version: '138'
+    date: '2026-07-27'
+    type: major
+    breaking: false
+    highlights:
+      - >-
+        Introduced Meridian, a new goal-based cPanel interface organizing common hosting tasks
+        into six purpose-built hubs (Websites, Email, Files, Databases, Security and more).
+  - version: security-update
+    date: '2026-07-14'
+    type: security
+    breaking: false
+    api_relevant: true
+    highlights:
+      - >-
+        Added a Security Policy that closes a gap in API authentication — when enabled alongside
+        two-factor authentication, API requests are covered by 2FA. Directly relevant to anyone
+        integrating against UAPI or WHM API 1 with username/password authentication.
+  - version: security-update
+    date: '2026-05-21'
+    type: security
+    breaking: false
+    highlights:
+      - >-
+        Security update for cPanel & WHM 136, 134 and 126; updates cpanel-unbound to 1.25.1,
+        addressing 11 vulnerabilities including CVE-2026-33278.
+  - version: security-update
+    date: '2026-05-08'
+    type: security
+    breaking: false
+    highlights:
+      - >-
+        Security update for all supported versions (136, 134, 132, 130, 126, 124, 118, 110, 102,
+        94 and 86), patching three vulnerabilities.
+  - version: '136'
+    date: '2026-04-07'
+    type: major
+    breaking: false
+    highlights:
+      - >-
+        cPanel & WHM updates now provide ConfigServer Security & Firewall (CSF); WebPros
+        International, LLC forked CSF for cPanel & WHM and distributes it.
+  - version: '134'
+    date: '2026-01-07'
+    type: major
+    tier: LTS
+    breaking: false
+    highlights:
+      - Added CloudLinux 10 operating-system support.
+  - version: '132'
+    date: '2025-09-30'
+    type: major
+    breaking: true
+    highlights:
+      - >-
+        Upgrade blockers — servers running cPanel-provided MySQL 5.5 or 5.6 must act before
+        upgrading. cPanel's "Upgrade Blockers" section is where breaking changes surface.
+  - version: '130'
+    date: '2025-07-02'
+    type: major
+    breaking: false
+    highlights:
+      - Added temporary domains for cPanel accounts.
+  - version: '128'
+    date: '2025-03-27'
+    type: major
+    breaking: false
+    highlights:
+      - Updated Feature Manager options for WHM's Zone Editor. No upgrade blockers.
+  - version: '126'
+    date: '2025-01-08'
+    type: major
+    breaking: false
+    highlights:
+      - Added a new HTML Editor to cPanel.
+  - version: '124'
+    date: '2024-10-01'
+    type: major
+    breaking: false
+    highlights:
+      - Added account-type selection to the cPanel Analytics consent form.
+  - version: '122'
+    date: '2024-07-09'
+    type: major
+    breaking: false
+    highlights:
+      - Added experimental ALIAS DNS record support to WHM's DNS Zone Manager.
+gaps:
+  - No API-specific changelog; API additions and removals are only visible as part of a major release.
+  - No RSS or JSON feed for release notes.
+  - >-
+    The per-operation x-cpanel-available-version extension in the OpenAPI is a better API change
+    record than the changelog itself — it is the only place a consumer can see when a specific
+    function appeared.

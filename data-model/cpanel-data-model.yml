@@ -1,0 +1,215 @@
+generated: '2026-09-05'
+method: derived
+source: >-
+  openapi/_original/cpanel-uapi-openapi.yml (657 operations, 101 modules, 42 component schemas)
+  and openapi/_original/cpanel-whm-api-openapi.yml (625 operations, 155 component schemas)
+provider: cPanel
+providerId: cpanel
+description: >-
+  The entity graph behind cPanel & WHM's APIs, derived from the module namespaces and the
+  identifier parameters that actually recur across operations. A caveat that shapes everything
+  below: cPanel's contracts are RPC-shaped, so there is no $ref-linked resource graph to walk.
+  Response schemas are mostly inline and anonymous — 42 named schemas across 657 UAPI operations,
+  155 across 625 WHM operations — and entities are identified by NATURAL KEYS carried as query
+  parameters (a username, a domain name, an email address), not by opaque ids. The relationships
+  recorded here are therefore read from parameter usage, and each one names the field that carries
+  it.
+identity_model:
+  style: natural-keys
+  no_opaque_ids: >-
+    cPanel does not use prefixed opaque identifiers. The primary keys are the cPanel account
+    username, the domain name, and the email address. The exceptions are few and local — SSL
+    certificate `id`, `key_id`, DNS record ids and transfer_session_id.
+  scoping: >-
+    Everything in UAPI is implicitly scoped to the authenticated cPanel account; the account is not
+    a parameter, it is the credential. WHM API 1 inverts this: `user` is the single most common
+    parameter (86 operations) because WHM acts ON accounts.
+root_entities:
+  - name: Server
+    api: WHM API 1
+    description: The cPanel & WHM machine itself. Not addressable as a resource; it is the host.
+  - name: Account
+    aka: cPanel account, user
+    api: WHM API 1 (managed), cPanel UAPI (implicit subject)
+    key: user
+    key_field_occurrences: 86 WHM operations, 38 UAPI operations
+    lifecycle_operations:
+      create: Accounts-createacct
+      read: Accounts-accountsummary
+      list: Accounts-listaccts
+      delete: Accounts-removeacct
+    description: The tenant that owns domains, mailboxes, databases and files.
+  - name: Reseller
+    api: WHM API 1
+    key: user
+    description: An account with privileges to manage other accounts. 17 dedicated operations.
+  - name: Package
+    aka: hosting plan
+    api: WHM API 1
+    key: name
+    description: The resource template an account is created from. 8 dedicated operations.
+  - name: FeatureList
+    api: WHM API 1
+    key: featurelist
+    description: The set of cPanel features an account may use. 11 dedicated operations.
+entities:
+  - name: Domain
+    module: DomainInfo, UserDomains, SubDomain, AddonDomain, ParkedDomain
+    key: domain
+    key_field_occurrences: 118 UAPI operations, 58 WHM operations
+    description: >-
+      The most-referenced entity in the whole surface. Sub-types are distinguished by module rather
+      than by a type field — main domain, addon domain, subdomain, parked/alias domain.
+  - name: EmailAccount
+    module: Email
+    key: email
+    key_field_occurrences: 55 UAPI operations
+    operations: 96
+    description: A mailbox. The largest single module in UAPI.
+  - name: EmailForwarder
+    module: Email
+    key: email
+  - name: EmailFilter
+    module: Email
+    key: filtername
+  - name: MysqlDatabase
+    module: Mysql (UAPI), DB / Mysql / RemoteMySQL (WHM)
+    key: name
+  - name: MysqlUser
+    module: Mysql
+    key: user
+  - name: PostgresqlDatabase
+    module: Postgresql
+    key: name
+  - name: FtpAccount
+    module: Ftp
+    key: user
+    operations: 20
+  - name: DnsZone
+    module: DNS, DNSSEC (UAPI), DNS (WHM, 32 operations)
+    key: domain / zone
+  - name: SslCertificate
+    module: SSL
+    key: id, friendly_name
+    operations: 50 UAPI, 39 WHM
+    note: One of the few entities with a real opaque id.
+  - name: ApiToken
+    module: Tokens
+    key: name
+    operations:
+      create_cpanel: Tokens-create_full_access
+      create_whm: Tokens-api_token_create
+      revoke_whm: Tokens-api_token_revoke
+      rename: Tokens-rename
+  - name: TeamUser
+    module: Team
+    key: user
+    operations: 17
+    description: Sub-users of a cPanel account (the Team feature).
+  - name: UserManagerAccount
+    module: UserManager
+    key: username, full_username
+    description: Unified view over email, FTP and Web Disk sub-accounts for a domain.
+  - name: WebApplication
+    module: WebApp, PassengerApps
+    key: name
+    note: Carries the only idempotent deploy/redeploy operations in the surface.
+  - name: BackupDestination
+    module: Backup (WHM, 40 operations)
+    types: [AmazonS3, Backblaze, Custom, FTP, GoogleDrive, Local, Rsync, S3Compatible, SFTP, WebDAV]
+    note: >-
+      The richest schema family in either contract — BackupDestinationGetResponseBase plus ten
+      typed subclasses in WHM's components.schemas. This is the one place cPanel models
+      polymorphism properly.
+  - name: TransferSession
+    module: Transfers
+    key: transfer_session_id
+    operations: 15
+  - name: Hook
+    module: Hooks (WHM)
+    description: A registered Standardized Hook. Managed by API and by the manage_hooks CLI.
+relationships:
+  - from: Account
+    to: Domain
+    type: has_many
+    via: user
+    evidence: WHM UserDomains and Accounts operations take `user` and return the account's domains.
+  - from: Account
+    to: Package
+    type: belongs_to
+    via: pkg
+    evidence: Accounts-createacct accepts a package name; Packages operations define them.
+  - from: Account
+    to: FeatureList
+    type: belongs_to
+    via: featurelist
+  - from: Reseller
+    to: Account
+    type: has_many
+    via: user
+  - from: Domain
+    to: EmailAccount
+    type: has_many
+    via: domain
+    evidence: 25 of the 96 Email operations take `domain`; add_pop takes email + domain.
+  - from: Domain
+    to: SubDomain
+    type: has_many
+    via: rootdomain
+  - from: Domain
+    to: AddonDomain
+    type: has_many
+    via: newdomain / subdomain
+  - from: Domain
+    to: DnsZone
+    type: has_one
+    via: domain
+  - from: DnsZone
+    to: DnsRecord
+    type: has_many
+    via: zone
+  - from: Domain
+    to: SslCertificate
+    type: has_many
+    via: domains
+    evidence: SSL operations take a `domains` array (10 operations) alongside `id`/`friendly_name`.
+  - from: Account
+    to: MysqlDatabase
+    type: has_many
+    via: user
+  - from: MysqlDatabase
+    to: MysqlUser
+    type: has_many
+    via: user + database
+    evidence: Mysql operations pair `database` with `user` for privilege grants.
+  - from: Account
+    to: FtpAccount
+    type: has_many
+    via: user + domain
+  - from: Account
+    to: ApiToken
+    type: has_many
+    via: name
+  - from: Account
+    to: TeamUser
+    type: has_many
+    via: user
+  - from: Account
+    to: WebApplication
+    type: has_many
+    via: name
+  - from: Server
+    to: BackupDestination
+    type: has_many
+    via: id
+  - from: Server
+    to: TransferSession
+    type: has_many
+    via: transfer_session_id
+gaps:
+  - No $ref graph to traverse — most response payloads are inline anonymous objects.
+  - No id-prefix scheme, so an identifier cannot be typed by inspection.
+  - No hypermedia links between related resources.
+  - >-
+    UAPI and WHM API 1 model the same entities with different parameter names (e.g. `user` vs
+    `username`), so a shared client must normalise.

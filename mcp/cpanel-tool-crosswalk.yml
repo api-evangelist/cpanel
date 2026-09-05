@@ -1,0 +1,94 @@
+generated: '2026-09-05'
+method: derived
+source: >-
+  mcp/cpanel-mcp-tools.json (live tools/list from https://api.docs.cpanel.net/mcp) bound against
+  openapi/_original/cpanel-uapi-openapi.yml and openapi/_original/cpanel-whm-api-openapi.yml
+provider: cPanel
+providerId: cpanel
+description: >-
+  Binding between cPanel's published MCP tools and its OpenAPI operations. The finding is a
+  clean separation of planes rather than a mapping: cPanel's MCP server sits on the
+  DOCUMENTATION plane and every one of its six tools reads the OpenAPI descriptions, while all
+  1,282 UAPI and WHM API operations sit on the CONTROL plane of a customer-operated server and
+  have no MCP tool at all. An agent can therefore learn the whole cPanel surface over MCP and
+  execute none of it over MCP.
+surfaces:
+  openapi:
+    - name: cPanel UAPI
+      file: openapi/_original/cpanel-uapi-openapi.yml
+      operations: 657
+      server: https://{host}:{port}/execute
+      gated: false
+      note: Public specification; the SERVER it describes is a customer-operated host requiring that host's credentials.
+    - name: WHM API
+      file: openapi/_original/cpanel-whm-api-openapi.yml
+      operations: 625
+      server: https://{host}:{port}/json-api
+      gated: false
+      note: As above; WHM ports 2086/2087.
+  graphql: none
+  mcp:
+    url: https://api.docs.cpanel.net/mcp
+    gated: false
+    plane: documentation
+crosswalk: []
+mcp_only:
+  - tool: list-apis
+    reason: >-
+      Portal metadata operation. Enumerates the two API descriptions the docs host serves; there is
+      no cPanel REST operation that returns a catalog of cPanel's own APIs.
+  - tool: get-endpoints
+    reason: Reads paths[] out of an OpenAPI document. No REST counterpart.
+  - tool: get-endpoint-info
+    reason: >-
+      Reads one OpenAPI operation object (parameters, security, examples). This is the tool that
+      supplies an agent with the real inputSchema for any of the 1,282 operations, but it
+      describes them rather than invoking them.
+  - tool: get-security-schemes
+    reason: >-
+      Reads components.securitySchemes. Both documents declare a single BasicAuth http scheme; the
+      API-token header forms are documented in prose, not in the schemes.
+  - tool: get-full-api-description
+    reason: >-
+      Returns the entire OpenAPI document. This is the tool that made this repo's harvest possible
+      after /openapi.json, /openapi.yaml, /swagger.json and the Redocly spec paths all 404'd.
+  - tool: search
+    reason: Full-text search over the developer portal. No REST counterpart.
+rest_only:
+  count: 1282
+  note: >-
+    Every published operation is rest_only. Listing 1,282 operationIds here would duplicate the
+    specs; they are enumerable from openapi/_original/. Representative examples follow.
+  examples:
+    - api: cPanel UAPI
+      operationId: Email-list_pops
+      path: /Email/list_pops
+    - api: cPanel UAPI
+      operationId: Email-add_pop
+      path: /Email/add_pop
+    - api: cPanel UAPI
+      operationId: Mysql-list_databases
+      path: /Mysql/list_databases
+    - api: cPanel UAPI
+      operationId: Tokens-create_full_access
+      path: /Tokens/create_full_access
+    - api: WHM API
+      operationId: Accounts-listaccts
+      path: /listaccts
+    - api: WHM API
+      operationId: Accounts-createacct
+      path: /createacct
+    - api: WHM API
+      operationId: Tokens-api_token_create
+      path: /api_token_create
+coverage:
+  mcp_tools: 6
+  mcp_tools_bound_to_rest: 0
+  mcp_only: 6
+  rest_operations: 1282
+  rest_operations_with_a_tool: 0
+  binding_confidence: high
+  note: >-
+    Confidence is high precisely because there is nothing to guess: both sides were read live —
+    the tool list from tools/list and the operations from the OpenAPI documents the same server
+    returned.

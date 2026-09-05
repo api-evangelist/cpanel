@@ -1,0 +1,62 @@
+overlay: 1.0.0
+info:
+  title: API Evangelist enrichment overlay — cPanel UAPI
+  version: 1.0.0
+  x-generated: '2026-09-05'
+  x-method: generated
+  x-source: >-
+    Enhancements API Evangelist derived from cPanel's own published contract and documentation.
+    The original document is never mutated; apply this overlay to
+    openapi/_original/cpanel-uapi-openapi.yml.
+extends: ../openapi/_original/cpanel-uapi-openapi.yml
+actions:
+  - target: $.info
+    description: Record provenance and the calling conventions the contract does not state in-band.
+    update:
+      x-apis-io:
+        provider: cPanel
+        providerId: cpanel
+        harvested: '2026-09-05'
+        harvest_method: >-
+          MCP tools/call get-full-api-description against https://api.docs.cpanel.net/mcp, after
+          /openapi.json, /openapi.yaml, /swagger.json and the Redocly /specifications/*.yaml paths
+          all returned 404 HTML shells.
+        operations: 657
+      x-calling-conventions:
+        outcome_field: result.status
+        outcome_note: >-
+          Every operation answers HTTP 200. Failure is reported as result.status == 0 with
+          result.errors[]. Branching on the HTTP status code will read every failure as a success.
+        booleans: Integers 1 and 0. Literal true/false are not accepted.
+        ports: 2083 (secure cPanel), 2082 (unsecure), 2096/2095 (Webmail). Wrong port returns "Permission denied".
+        auth_header: 'Authorization: cpanel <username>:<APITOKEN>' 
+        pagination: api.paginate=1 with api.paginate_start / api.paginate_size / api.paginate_page (off by default)
+        filtering: api.filter=1 with api.filter_column / api.filter_term / api.filter_type
+        sorting: api.sort=1 with api.sort_column / api.sort_method / api.sort_reverse
+        sorting_hazard: Sorting numeric values without api.sort_method makes the function fail.
+      x-artifacts:
+        conventions: conventions/cpanel-conventions.yml
+        errors: errors/cpanel-problem-types.yml
+        authentication: authentication/cpanel-authentication.yml
+        lifecycle: lifecycle/cpanel-lifecycle.yml
+        data_model: data-model/cpanel-data-model.yml
+        cli: cli/cpanel-cli.yml
+  - target: $.info
+    description: Restate the license and terms the provider declares, for downstream tooling that drops them.
+    update:
+      x-license-note: >-
+        cPanel License, https://cpanel.net/legal-notices/. info.contact is WebPros International,
+        LLC (cs@cpanel.net) — cPanel's parent company.
+  - target: $
+    description: Record the reversibility signal cPanel already publishes per operation.
+    update:
+      x-reversibility:
+        extension: x-rollback
+        present_on: 345 of 657 operations
+        values:
+          none: 317
+          clean: 27
+          lossy: 1
+        note: >-
+          cPanel does not define this vocabulary in its developer portal (searched 2026-09-05),
+          so it is read literally. No reversal WINDOW is published for any operation.

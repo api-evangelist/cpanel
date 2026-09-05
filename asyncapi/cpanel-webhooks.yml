@@ -1,0 +1,126 @@
+generated: '2026-09-05'
+method: searched
+source: >-
+  https://api.docs.cpanel.net/guides/guide-to-report-receiver-apis-for-the-modsecurity-rule-reports/
+  and https://api.docs.cpanel.net/guides/guide-to-standardized-hooks/
+provider: cPanel
+providerId: cpanel
+description: >-
+  cPanel's event surface, honestly scoped. cPanel publishes NO AsyncAPI document and no general
+  webhook system — you cannot subscribe an HTTPS endpoint to cPanel account or server events. It
+  does publish exactly ONE outbound HTTP callback, documented with a full request and response
+  contract, and one server-side event system that fires local code rather than HTTP. Both are
+  recorded; neither is inflated into an event platform it is not.
+asyncapi:
+  published: false
+  probed:
+    - url: https://api.docs.cpanel.net/asyncapi.yaml
+      status: 404
+    - url: https://api.docs.cpanel.net/asyncapi.json
+      status: 404
+  note: >-
+    No AsyncAPI document exists on the developer portal, in the GitHub organizations, or in the
+    MCP server's API catalog (list-apis returns exactly two APIs, both OpenAPI).
+webhooks:
+  count: 1
+  general_subscription_api: false
+  note: >-
+    There is no /webhooks endpoint, no subscription resource, no delivery-retry policy and no
+    signing scheme in either OpenAPI document. The single callback below is configured through a
+    ModSecurity vendor metadata file, not through an API.
+  catalog:
+    - id: modsecurity-rule-report
+      name: ModSecurity Rule Report receiver
+      direction: outbound
+      audience: >-
+        ModSecurity rule VENDORS (cPanel names OWASP as the example), not cPanel & WHM
+        integrators. cPanel says so explicitly in a warning at the top of the guide.
+      trigger: >-
+        A server administrator submits feedback about a ModSecurity rule hit from WHM; cPanel & WHM
+        transmits the hit to the rule distributor's endpoint.
+      configuration: >-
+        The receiver URL is set in the vendor's metadata file — the same file WHM API 1 reads to
+        identify and download the vendor's rules. It is not settable per account or by API.
+      transport: HTTPS
+      method: POST
+      content_type: application/json
+      payload:
+        top_level_fields:
+          - name: hits
+            type: array
+            description: The rule hits being reported.
+          - name: email
+            type: string
+            description: Contact address the submitter gives the rule maintainers.
+          - name: type
+            type: string
+            description: Report type. Freeform text; no format specified.
+          - name: message
+            type: string
+            description: Short message from the submitter about the rule's issue.
+          - name: rule_text
+            type: string
+            description: >-
+              The exact rule text at submission time. cPanel warns a report may arrive after the
+              rule was updated — use meta_rev to identify the revision that actually failed.
+        hit_fields:
+          - meta_id
+          - id
+          - ip
+          - http_version
+          - http_method
+          - http_status
+          - meta_line
+          - meta_uri
+          - meta_file
+          - meta_offset
+          - meta_rev
+          - meta_severity
+          - meta_msg
+          - meta_logdata
+          - timestamp
+          - timezone
+          - action_desc
+          - justification
+          - path
+          - host
+          - handler
+          - file_exists
+      response_contract:
+        status_code: >-
+          200 on success. cPanel instructs receivers to ALSO return 200 for failures that can be
+          expressed as JSON, so that the sender parses the body; 4xx/5xx only when no relevant JSON
+          response can be produced.
+        content_type: application/json
+        body:
+          - name: status
+            type: boolean
+            values: [0, 1]
+            description: 1 accepted, 0 receiver error.
+          - name: error
+            type: string
+            required_when: status is 0
+            description: Short message about the error.
+        note: >-
+          The same envelope-over-status-code pattern as cPanel's own REST APIs — the receiver is
+          asked to answer 200 and put the failure in the body.
+      signing: none published
+      retries: none published
+      docs: https://api.docs.cpanel.net/guides/guide-to-report-receiver-apis-for-the-modsecurity-rule-reports/
+local_event_system:
+  name: Standardized Hooks
+  transport: local process execution — NOT HTTP
+  description: >-
+    cPanel & WHM's event system fires hook action CODE on the server when the product performs an
+    action (account creation, password change and many more). A hook is a hookable event plus hook
+    action code plus a registration, managed with the /usr/local/cpanel/bin/manage_hooks CLI and
+    the WHM API 1 Hooks operations. Hook data lives in /var/cpanel/hooks/data/.
+  rollback_dispatch: >-
+    If any hook action returns failure, the system can run an alternate dispatch loop in reverse
+    that executes each previous hook's `rollback` descriptor. This is a genuine compensating
+    mechanism, but it applies to hook code — it is unrelated to the x-rollback classification on
+    API operations recorded in conventions/cpanel-conventions.yml.
+  why_not_a_webhook: >-
+    Nothing leaves the machine. Delivering a cPanel event to an external service means writing hook
+    code that makes the HTTP call yourself.
+  docs: https://api.docs.cpanel.net/guides/guide-to-standardized-hooks/

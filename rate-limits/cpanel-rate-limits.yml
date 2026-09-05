@@ -3,104 +3,60 @@ specificationVersion: '0.1'
 schema: https://raw.githubusercontent.com/api-evangelist/interface-research/main/schema/api-commons.yml#/$defs/RateLimits
 provider: cPanel
 providerId: cpanel
+generated: '2026-09-05'
 created: '2026-05-04'
-# Provenance stamped 2026-08-11: this artifact was written by the API Evangelist
-# bulk sweep dated 2026-05-04, not harvested from the provider. See roadmap#35.
-method: generated
-modified: '2026-05-04'
-tags:
-  - Control Panel
-  - DNS
-  - Domains
-  - Email
-  - Hosting
-  - Reseller
-  - Server Administration
-  - Web Hosting
-  - WHM
-  - Rate Limiting
-  - Quotas
-  - Throttling
-description: Machine-readable rate limit definitions for the cPanel API surface. Captures per-tier quotas,
-  burst behavior, response signaling, and recovery semantics. Defaults are scaffold values to be replaced
-  with published provider limits.
+modified: '2026-09-05'
+method: searched
+source: >-
+  https://api.docs.cpanel.net/cpanel/introduction/, https://api.docs.cpanel.net/whm/introduction/,
+  https://api.docs.cpanel.net/faq/, the developer portal's own MCP search tool, and every response
+  object in openapi/_original/
+description: >-
+  cPanel publishes NO API rate limits. This is an honest zero, searched rather than assumed, and
+  it replaces a 2026-05-04 bulk-sweep scaffold that asserted X-RateLimit-* headers, a 429
+  response and per-tier quotas — none of which cPanel documents or declares. The absence is
+  structural rather than an oversight: UAPI and WHM API 1 run on the CUSTOMER'S OWN SERVER, so
+  there is no vendor-side meter to enforce. The real ceiling is that server's CPU, memory and
+  process limits, which the server operator sets.
+limit_count: 0
+limits: []
 headers:
-  limit: X-RateLimit-Limit
-  remaining: X-RateLimit-Remaining
-  reset: X-RateLimit-Reset
-  retryAfter: Retry-After
-  policy: RateLimit-Policy
-responseCodes:
-  throttled: 429
-  quotaExceeded: 429
-  serviceUnavailable: 503
-limits:
-  - tier: free
-    name: Free Tier Default
-    scope: api-key
-    metric: requests_per_minute
-    limit: 10
-    burst: 20
-    timeFrame: minute
-    applies:
-      - cPanel UAPI
-      - WHM API 1
-      - cPanel API 2 (Legacy)
-  - tier: free
-    name: Free Tier Monthly Quota
-    scope: api-key
-    metric: requests_per_month
-    limit: 1000
-    timeFrame: month
-    applies:
-      - cPanel UAPI
-      - WHM API 1
-      - cPanel API 2 (Legacy)
-  - tier: professional
-    name: Professional Tier Default
-    scope: api-key
-    metric: requests_per_minute
-    limit: 100
-    burst: 200
-    timeFrame: minute
-    applies:
-      - cPanel UAPI
-      - WHM API 1
-      - cPanel API 2 (Legacy)
-  - tier: professional
-    name: Professional Tier Monthly Quota
-    scope: api-key
-    metric: requests_per_month
-    limit: 100000
-    timeFrame: month
-    applies:
-      - cPanel UAPI
-      - WHM API 1
-      - cPanel API 2 (Legacy)
-  - tier: enterprise
-    name: Enterprise Negotiated Limit
-    scope: contract
-    metric: requests_per_minute
-    limit: 1000
-    burst: 5000
-    timeFrame: minute
-    applies:
-      - cPanel UAPI
-      - WHM API 1
-      - cPanel API 2 (Legacy)
-policies:
-  - name: Backoff Strategy
-    description: Clients should implement exponential backoff with jitter, honoring the Retry-After header
-      when present.
-  - name: Burst Handling
-    description: Short bursts above the steady-state limit are tolerated up to the documented burst ceiling
-      before throttling engages.
-  - name: Quota Reset
-    description: Monthly quotas reset at the start of each calendar month in UTC. Per-minute and per-second
-      windows reset on a sliding-window basis.
-  - name: Fair Use
-    description: Even on uncapped enterprise tiers, sustained usage that materially impacts shared infrastructure
-      may be subject to fair-use throttling.
-maintainers:
-  - FN: Kin Lane
-    email: kin@apievangelist.com
+  limit: null
+  remaining: null
+  reset: null
+  retry_after: null
+  policy: null
+  note: >-
+    No rate-limit response header is declared in either OpenAPI document or documented anywhere on
+    the developer portal.
+response_codes:
+  throttled: null
+  note: >-
+    Every one of the 1,282 published operations declares exactly one response — HTTP 200. There is
+    no 429 in either contract, and failures are reported inside the JSON envelope. A client cannot
+    detect throttling from the status code. See errors/cpanel-problem-types.yml.
+practical_ceilings:
+  - factor: Server resources
+    detail: >-
+      Throughput is bounded by the customer's own hardware and by cPanel's process limits, not by
+      a published quota.
+  - factor: Unbounded list responses
+    detail: >-
+      Pagination is OFF by default on both APIs, so a list call returns everything. cPanel
+      explicitly recommends pagination for Mail Delivery Report functions — the closest thing to a
+      volume warning it publishes. See conventions/cpanel-conventions.yml.
+  - factor: cPHulk brute-force protection
+    detail: >-
+      cPanel & WHM ships cPHulk, which blocks repeated FAILED authentication attempts (16 WHM
+      operations manage it, including delete_cphulk_record and batch_create_cphulk_records). It
+      throttles bad credentials, not API volume — but an integration with a wrong token will be
+      locked out by it, which is the failure most often mistaken for a rate limit.
+  - factor: Manage2 access-IP allowlist
+    detail: >-
+      The licensing API (manage2.cpanel.net) requires the calling IP to be added to a Manage2
+      profile before any call is accepted. An access control, not a rate limit, but it is the one
+      vendor-side gate on a cPanel API.
+gaps:
+  - No published limit, window, burst or quota for any API.
+  - No rate-limit headers, so no runtime signal an agent could back off on.
+  - No 429 or any non-200 status in the contract.
