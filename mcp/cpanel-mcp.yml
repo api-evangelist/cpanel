@@ -4,30 +4,31 @@ source: https://api.docs.cpanel.net/mcp
 provider: cPanel
 providerId: cpanel
 name: cPanel & WHM Developer Portal MCP Server
-description: >-
-  cPanel publishes a live, anonymously reachable remote MCP server on its own developer
-  documentation host. It is a DOCUMENTATION/DISCOVERY server, not a control-plane server: its
-  six tools read the cPanel UAPI and WHM API OpenAPI descriptions and the portal's prose, so an
-  agent can enumerate APIs, list endpoints, inspect one endpoint's parameters and security,
-  read the security schemes, pull the complete OpenAPI description, and search the docs. It
-  does NOT call a cPanel server — the operations it describes are executed against a
-  customer-operated cPanel/WHM host on ports 2083/2087 with that host's own credentials.
+description: 'cPanel publishes a live, anonymously reachable remote MCP server on its own developer documentation
+  host. It is a DOCUMENTATION/DISCOVERY server, not a control-plane server: its six tools read the cPanel
+  UAPI and WHM API OpenAPI descriptions and the portal''s prose, so an agent can enumerate APIs, list
+  endpoints, inspect one endpoint''s parameters and security, read the security schemes, pull the complete
+  OpenAPI description, and search the docs. It does NOT call a cPanel server — the operations it describes
+  are executed against a customer-operated cPanel/WHM host on ports 2083/2087 with that host''s own credentials.'
 deployment:
   mode: remote
   endpoint: https://api.docs.cpanel.net/mcp
   auth: none
   verified: probed
-  second_server: >-
-    cPanel ships a SECOND, product-level remote MCP server — https://mcp.webpros.com/api/mcp,
-    OAuth-protected — which its own UAPI contract hands to users. It is recorded in full under
-    additional_servers[] below. deployment.endpoint stays on the documentation server because
-    that is the one whose tool schemas this run actually read.
-  note: >-
-    Probed anonymously on 2026-09-05: initialize returned protocolVersion 2025-06-18 and
-    serverInfo {name "MCP server", version "2026-09-05"}; tools/list returned six tools with
-    full inputSchema. No stdio package is published by cPanel — every npx-installable cPanel
-    MCP server on npm (cpanel-mcp, cpanel-pilot-mcp, obambu-cpanel-mcp, @terynas/cpanel-mcp,
-    colorfulbox-mcp) is third-party and is deliberately NOT recorded here.
+  second_server: cPanel ships a SECOND, product-level remote MCP server — https://mcp.webpros.com/api/mcp,
+    OAuth-protected — which its own UAPI contract hands to users. It is recorded in full under additional_servers[]
+    below. deployment.endpoint stays on the documentation server because that is the one whose tool schemas
+    this run actually read.
+  note: 'Probed anonymously on 2026-09-05: initialize returned protocolVersion 2025-06-18 and serverInfo
+    {name "MCP server", version "2026-09-05"}; tools/list returned six tools with full inputSchema. No
+    stdio package is published by cPanel — every npx-installable cPanel MCP server on npm (cpanel-mcp,
+    cpanel-pilot-mcp, obambu-cpanel-mcp, @terynas/cpanel-mcp, colorfulbox-mcp) is third-party and is deliberately
+    NOT recorded here.'
+  probe_prior: (never probed)
+  probe: live
+  probe_why: live
+  checked: '2026-09-11'
+  source: claimed-backlog re-probe 2026-09-11
 transport: streamable-http
 protocol_version: '2025-06-18'
 server_info:
@@ -41,89 +42,107 @@ authentication:
     authorization_endpoint: https://api.docs.cpanel.net/_mcp/oauth2/auth
     token_endpoint: https://api.docs.cpanel.net/_mcp/oauth2/token-portal
     registration_endpoint: https://api.docs.cpanel.net/_mcp/register
-    scopes: [openid, profile, email, offline_access]
-    note: >-
-      Portal-platform OAuth (Redocly) that gates non-public documentation teams. Anonymous
-      callers are served the public API surface without it, which is what we observed.
+    scopes:
+    - openid
+    - profile
+    - email
+    - offline_access
+    note: Portal-platform OAuth (Redocly) that gates non-public documentation teams. Anonymous callers
+      are served the public API surface without it, which is what we observed.
 tools_file: mcp/cpanel-mcp-tools.json
 tools:
-  - name: list-apis
-    description: Lists available APIs with their context and purpose
-    inputs: [filter, page, limit]
-  - name: get-endpoints
-    description: Get all endpoints for a specific API
-    inputs: [name]
-  - name: get-endpoint-info
-    description: Get comprehensive information about specific endpoint including parameters, security, and examples
-    inputs: [name, path, method]
-  - name: get-security-schemes
-    description: Get the security schemes for a specific API
-    inputs: [name]
-  - name: get-full-api-description
-    description: Get the complete OpenAPI description
-    inputs: [name]
-  - name: search
-    description: Search across the documentation to fetch relevant content for a given query
-    inputs: [query]
+- name: list-apis
+  description: Lists available APIs with their context and purpose
+  inputs:
+  - filter
+  - page
+  - limit
+- name: get-endpoints
+  description: Get all endpoints for a specific API
+  inputs:
+  - name
+- name: get-endpoint-info
+  description: Get comprehensive information about specific endpoint including parameters, security, and
+    examples
+  inputs:
+  - name
+  - path
+  - method
+- name: get-security-schemes
+  description: Get the security schemes for a specific API
+  inputs:
+  - name
+- name: get-full-api-description
+  description: Get the complete OpenAPI description
+  inputs:
+  - name
+- name: search
+  description: Search across the documentation to fetch relevant content for a given query
+  inputs:
+  - query
 apis_exposed:
-  - name: cPanel UAPI
-    version: 11.137.9999.106
-    server: https://{host}:{port}/execute
-  - name: WHM API
-    version: 11.137.9999.106
-    server: https://{host}:{port}/json-api
+- name: cPanel UAPI
+  version: 11.137.9999.106
+  server: https://{host}:{port}/execute
+- name: WHM API
+  version: 11.137.9999.106
+  server: https://{host}:{port}/json-api
 additional_servers:
-  - name: WebPros MCP
-    endpoint: https://mcp.webpros.com/api/mcp
-    mode: remote
-    auth: oauth
-    verified: probed
-    plane: control
-    owner_note: >-
-      Recorded under cPanel because cPanel's OWN published contract hands users this exact URL:
-      UAPI operation /WebProsMCP/get_connection_config (module WebProsMCP, "The WebProsMCP module
-      for UAPI") returns an mcp_config snippet whose url is https://mcp.webpros.com/api/mcp, and
-      the companion operation /WebProsMCP/unlink_webpros_account disconnects the cPanel account
-      from it. WebPros International, LLC is cPanel's parent and is the info.contact on both
-      OpenAPI documents. This is the parent-brand case the ownership rule allows, stated from the
-      provider's own docs.
-    evidence:
-      fetched: '2026-09-05'
-      tools_list:
-        url: https://mcp.webpros.com/api/mcp
-        http_status: 401
-        body: '{"type":"unauthorized"}'
-        note: >-
-          A live MCP endpoint that refuses anonymous callers, not a missing one. The tool schemas
-          are therefore auth-gated and are NOT recorded here; obtaining them requires an
-          authenticated introspection with a WebPros account.
-      protected_resource:
-        url: https://mcp.webpros.com/.well-known/oauth-protected-resource
-        http_status: 200
-        file: well-known/cpanel-webpros-mcp-oauth-protected-resource.json
-        authorization_servers: [https://login.webpros.com/]
-        scopes_supported: [openid, offline_access, email, profile, mcp]
-      authorization_server:
-        url: https://login.webpros.com/.well-known/openid-configuration
-        http_status: 200
-        file: well-known/cpanel-webpros-openid-configuration.json
-    linking_operations:
-      - operationId: get_connection_config
-        path: /WebProsMCP/get_connection_config
-        api: cPanel UAPI
-      - operationId: unlink_webpros_account
-        path: /WebProsMCP/unlink_webpros_account
-        api: cPanel UAPI
+- name: WebPros MCP
+  endpoint: https://mcp.webpros.com/api/mcp
+  mode: remote
+  auth: oauth
+  verified: probed
+  plane: control
+  owner_note: 'Recorded under cPanel because cPanel''s OWN published contract hands users this exact URL:
+    UAPI operation /WebProsMCP/get_connection_config (module WebProsMCP, "The WebProsMCP module for UAPI")
+    returns an mcp_config snippet whose url is https://mcp.webpros.com/api/mcp, and the companion operation
+    /WebProsMCP/unlink_webpros_account disconnects the cPanel account from it. WebPros International,
+    LLC is cPanel''s parent and is the info.contact on both OpenAPI documents. This is the parent-brand
+    case the ownership rule allows, stated from the provider''s own docs.'
+  evidence:
+    fetched: '2026-09-05'
+    tools_list:
+      url: https://mcp.webpros.com/api/mcp
+      http_status: 401
+      body: '{"type":"unauthorized"}'
+      note: A live MCP endpoint that refuses anonymous callers, not a missing one. The tool schemas are
+        therefore auth-gated and are NOT recorded here; obtaining them requires an authenticated introspection
+        with a WebPros account.
+    protected_resource:
+      url: https://mcp.webpros.com/.well-known/oauth-protected-resource
+      http_status: 200
+      file: well-known/cpanel-webpros-mcp-oauth-protected-resource.json
+      authorization_servers:
+      - https://login.webpros.com/
+      scopes_supported:
+      - openid
+      - offline_access
+      - email
+      - profile
+      - mcp
+    authorization_server:
+      url: https://login.webpros.com/.well-known/openid-configuration
+      http_status: 200
+      file: well-known/cpanel-webpros-openid-configuration.json
+  linking_operations:
+  - operationId: get_connection_config
+    path: /WebProsMCP/get_connection_config
+    api: cPanel UAPI
+  - operationId: unlink_webpros_account
+    path: /WebProsMCP/unlink_webpros_account
+    api: cPanel UAPI
 x-evidence:
   fetched: '2026-09-05'
   url: https://api.docs.cpanel.net/mcp
   method: POST
   http_status: 200
   content_type: text/event-stream
-  jsonrpc_methods_observed: [initialize, tools/list, tools/call]
-  note: >-
-    tools/call get-full-api-description returned the complete 657-operation cPanel UAPI and
-    625-operation WHM API OpenAPI documents. Those documents are archived in openapi/_original/
-    and are the source of every derived artifact in this repo. They are byte-faithful except for
-    a mechanical redaction of PEM private-key/certificate and AWS-key-shaped EXAMPLE values, which
-    is declared in each document's info.x-api-evangelist-provenance.
+  jsonrpc_methods_observed:
+  - initialize
+  - tools/list
+  - tools/call
+  note: tools/call get-full-api-description returned the complete 657-operation cPanel UAPI and 625-operation
+    WHM API OpenAPI documents. Those documents are archived in openapi/_original/ and are the source of
+    every derived artifact in this repo. They are byte-faithful except for a mechanical redaction of PEM
+    private-key/certificate and AWS-key-shaped EXAMPLE values, which is declared in each document's info.x-api-evangelist-provenance.
