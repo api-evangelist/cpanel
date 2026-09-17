@@ -355,28 +355,6 @@ apis:
     url: https://api.docs.cpanel.net/specifications/whm.openapi
   - type: Authentication
     url: https://api.docs.cpanel.net/whm/tokens/
-- aid: cpanel:cpanel-backupinfo-api
-  name: cPanel Backup Info API
-  description: The BackupInfo module for UAPI.
-  humanURL: https://api.docs.cpanel.net/cpanel/introduction/
-  baseURL: https://{host}:2083/execute
-  tags:
-  - BackupInfo
-  properties:
-  - type: OpenAPI
-    url: openapi/cpanel-backupinfo-api-openapi.yml
-  - type: Documentation
-    url: https://api.docs.cpanel.net/cpanel/introduction/
-  - type: APIReference
-    url: https://api.docs.cpanel.net/specifications/cpanel.openapi
-  - type: Authentication
-    url: https://api.docs.cpanel.net/cpanel/tokens/
-  - type: Documentation
-    url: https://api.docs.cpanel.net/whm/introduction/
-  - type: APIReference
-    url: https://api.docs.cpanel.net/specifications/whm.openapi
-  - type: Authentication
-    url: https://api.docs.cpanel.net/whm/tokens/
 - aid: cpanel:cpanel-backups-api
   name: cPanel Backups API
   description: The Backups module for WHM API 1.
@@ -553,28 +531,6 @@ apis:
     url: https://api.docs.cpanel.net/specifications/whm.openapi
   - type: Authentication
     url: https://api.docs.cpanel.net/whm/tokens/
-- aid: cpanel:cpanel-ccs-api
-  name: cPanel CCS API
-  description: The CCS module for UAPI.
-  humanURL: https://api.docs.cpanel.net/cpanel/introduction/
-  baseURL: https://{host}:2083/execute
-  tags:
-  - CCS
-  properties:
-  - type: OpenAPI
-    url: openapi/cpanel-ccs-api-openapi.yml
-  - type: Documentation
-    url: https://api.docs.cpanel.net/cpanel/introduction/
-  - type: APIReference
-    url: https://api.docs.cpanel.net/specifications/cpanel.openapi
-  - type: Authentication
-    url: https://api.docs.cpanel.net/cpanel/tokens/
-  - type: Documentation
-    url: https://api.docs.cpanel.net/whm/introduction/
-  - type: APIReference
-    url: https://api.docs.cpanel.net/specifications/whm.openapi
-  - type: Authentication
-    url: https://api.docs.cpanel.net/whm/tokens/
 - aid: cpanel:cpanel-chkservd-api
   name: cPanel Chkservd API
   description: The Chkservd module for UAPI.
@@ -651,50 +607,6 @@ apis:
   properties:
   - type: OpenAPI
     url: openapi/cpanel-configurations-api-openapi.yml
-  - type: Documentation
-    url: https://api.docs.cpanel.net/cpanel/introduction/
-  - type: APIReference
-    url: https://api.docs.cpanel.net/specifications/cpanel.openapi
-  - type: Authentication
-    url: https://api.docs.cpanel.net/cpanel/tokens/
-  - type: Documentation
-    url: https://api.docs.cpanel.net/whm/introduction/
-  - type: APIReference
-    url: https://api.docs.cpanel.net/specifications/whm.openapi
-  - type: Authentication
-    url: https://api.docs.cpanel.net/whm/tokens/
-- aid: cpanel:cpanel-contactinformation-api
-  name: cPanel Contact Information API
-  description: The ContactInformation module for UAPI.
-  humanURL: https://api.docs.cpanel.net/cpanel/introduction/
-  baseURL: https://{host}:2083/execute
-  tags:
-  - ContactInformation
-  properties:
-  - type: OpenAPI
-    url: openapi/cpanel-contactinformation-api-openapi.yml
-  - type: Documentation
-    url: https://api.docs.cpanel.net/cpanel/introduction/
-  - type: APIReference
-    url: https://api.docs.cpanel.net/specifications/cpanel.openapi
-  - type: Authentication
-    url: https://api.docs.cpanel.net/cpanel/tokens/
-  - type: Documentation
-    url: https://api.docs.cpanel.net/whm/introduction/
-  - type: APIReference
-    url: https://api.docs.cpanel.net/specifications/whm.openapi
-  - type: Authentication
-    url: https://api.docs.cpanel.net/whm/tokens/
-- aid: cpanel:cpanel-contactus-api
-  name: cPanel Contactus API
-  description: The Contactus module for UAPI.
-  humanURL: https://api.docs.cpanel.net/cpanel/introduction/
-  baseURL: https://{host}:2083/execute
-  tags:
-  - Contactus
-  properties:
-  - type: OpenAPI
-    url: openapi/cpanel-contactus-api-openapi.yml
   - type: Documentation
     url: https://api.docs.cpanel.net/cpanel/introduction/
   - type: APIReference
@@ -1069,28 +981,6 @@ apis:
   properties:
   - type: OpenAPI
     url: openapi/cpanel-domaininfo-api-openapi.yml
-  - type: Documentation
-    url: https://api.docs.cpanel.net/cpanel/introduction/
-  - type: APIReference
-    url: https://api.docs.cpanel.net/specifications/cpanel.openapi
-  - type: Authentication
-    url: https://api.docs.cpanel.net/cpanel/tokens/
-  - type: Documentation
-    url: https://api.docs.cpanel.net/whm/introduction/
-  - type: APIReference
-    url: https://api.docs.cpanel.net/specifications/whm.openapi
-  - type: Authentication
-    url: https://api.docs.cpanel.net/whm/tokens/
-- aid: cpanel:cpanel-domainlookup-api
-  name: cPanel Domain Lookup API
-  description: The DomainLookup module for UAPI.
-  humanURL: https://api.docs.cpanel.net/cpanel/introduction/
-  baseURL: https://{host}:2083/execute
-  tags:
-  - DomainLookup
-  properties:
-  - type: OpenAPI
-    url: openapi/cpanel-domainlookup-api-openapi.yml
   - type: Documentation
     url: https://api.docs.cpanel.net/cpanel/introduction/
   - type: APIReference
@@ -1509,28 +1399,6 @@ apis:
   properties:
   - type: OpenAPI
     url: openapi/cpanel-ip-addresses-api-openapi.yml
-  - type: Documentation
-    url: https://api.docs.cpanel.net/cpanel/introduction/
-  - type: APIReference
-    url: https://api.docs.cpanel.net/specifications/cpanel.openapi
-  - type: Authentication
-    url: https://api.docs.cpanel.net/cpanel/tokens/
-  - type: Documentation
-    url: https://api.docs.cpanel.net/whm/introduction/
-  - type: APIReference
-    url: https://api.docs.cpanel.net/specifications/whm.openapi
-  - type: Authentication
-    url: https://api.docs.cpanel.net/whm/tokens/
-- aid: cpanel:cpanel-knownhosts-api
-  name: cPanel Known Hosts API
-  description: The KnownHosts module for UAPI.
-  humanURL: https://api.docs.cpanel.net/cpanel/introduction/
-  baseURL: https://{host}:2083/execute
-  tags:
-  - KnownHosts
-  properties:
-  - type: OpenAPI
-    url: openapi/cpanel-knownhosts-api-openapi.yml
   - type: Documentation
     url: https://api.docs.cpanel.net/cpanel/introduction/
   - type: APIReference
@@ -2159,28 +2027,6 @@ apis:
     url: https://api.docs.cpanel.net/specifications/whm.openapi
   - type: Authentication
     url: https://api.docs.cpanel.net/whm/tokens/
-- aid: cpanel:cpanel-resourceusage-api
-  name: cPanel Resource Usage API
-  description: The ResourceUsage module for UAPI.
-  humanURL: https://api.docs.cpanel.net/cpanel/introduction/
-  baseURL: https://{host}:2083/execute
-  tags:
-  - ResourceUsage
-  properties:
-  - type: OpenAPI
-    url: openapi/cpanel-resourceusage-api-openapi.yml
-  - type: Documentation
-    url: https://api.docs.cpanel.net/cpanel/introduction/
-  - type: APIReference
-    url: https://api.docs.cpanel.net/specifications/cpanel.openapi
-  - type: Authentication
-    url: https://api.docs.cpanel.net/cpanel/tokens/
-  - type: Documentation
-    url: https://api.docs.cpanel.net/whm/introduction/
-  - type: APIReference
-    url: https://api.docs.cpanel.net/specifications/whm.openapi
-  - type: Authentication
-    url: https://api.docs.cpanel.net/whm/tokens/
 - aid: cpanel:cpanel-rpm-api
   name: cPanel RPM API
   description: The RPM module for WHM API 1.
@@ -2257,28 +2103,6 @@ apis:
   properties:
   - type: OpenAPI
     url: openapi/cpanel-server-administration-api-openapi.yml
-  - type: Documentation
-    url: https://api.docs.cpanel.net/cpanel/introduction/
-  - type: APIReference
-    url: https://api.docs.cpanel.net/specifications/cpanel.openapi
-  - type: Authentication
-    url: https://api.docs.cpanel.net/cpanel/tokens/
-  - type: Documentation
-    url: https://api.docs.cpanel.net/whm/introduction/
-  - type: APIReference
-    url: https://api.docs.cpanel.net/specifications/whm.openapi
-  - type: Authentication
-    url: https://api.docs.cpanel.net/whm/tokens/
-- aid: cpanel:cpanel-serverinformation-api
-  name: cPanel Server Information API
-  description: The ServerInformation module for UAPI.
-  humanURL: https://api.docs.cpanel.net/cpanel/introduction/
-  baseURL: https://{host}:2083/execute
-  tags:
-  - ServerInformation
-  properties:
-  - type: OpenAPI
-    url: openapi/cpanel-serverinformation-api-openapi.yml
   - type: Documentation
     url: https://api.docs.cpanel.net/cpanel/introduction/
   - type: APIReference
@@ -2577,28 +2401,6 @@ apis:
     url: https://api.docs.cpanel.net/specifications/whm.openapi
   - type: Authentication
     url: https://api.docs.cpanel.net/whm/tokens/
-- aid: cpanel:cpanel-subdomain-api
-  name: cPanel Sub Domain API
-  description: The SubDomain module for UAPI.
-  humanURL: https://api.docs.cpanel.net/cpanel/introduction/
-  baseURL: https://{host}:2083/execute
-  tags:
-  - SubDomain
-  properties:
-  - type: OpenAPI
-    url: openapi/cpanel-subdomain-api-openapi.yml
-  - type: Documentation
-    url: https://api.docs.cpanel.net/cpanel/introduction/
-  - type: APIReference
-    url: https://api.docs.cpanel.net/specifications/cpanel.openapi
-  - type: Authentication
-    url: https://api.docs.cpanel.net/cpanel/tokens/
-  - type: Documentation
-    url: https://api.docs.cpanel.net/whm/introduction/
-  - type: APIReference
-    url: https://api.docs.cpanel.net/specifications/whm.openapi
-  - type: Authentication
-    url: https://api.docs.cpanel.net/whm/tokens/
 - aid: cpanel:cpanel-subdomains-api
   name: cPanel Subdomains API
   description: The SubDomain module for cPanel UAPI.
@@ -2797,28 +2599,6 @@ apis:
     url: https://api.docs.cpanel.net/specifications/whm.openapi
   - type: Authentication
     url: https://api.docs.cpanel.net/whm/tokens/
-- aid: cpanel:cpanel-twofactorauth-api
-  name: cPanel Two Factor Auth API
-  description: The TwoFactorAuth module for UAPI.
-  humanURL: https://api.docs.cpanel.net/cpanel/introduction/
-  baseURL: https://{host}:2083/execute
-  tags:
-  - TwoFactorAuth
-  properties:
-  - type: OpenAPI
-    url: openapi/cpanel-twofactorauth-api-openapi.yml
-  - type: Documentation
-    url: https://api.docs.cpanel.net/cpanel/introduction/
-  - type: APIReference
-    url: https://api.docs.cpanel.net/specifications/cpanel.openapi
-  - type: Authentication
-    url: https://api.docs.cpanel.net/cpanel/tokens/
-  - type: Documentation
-    url: https://api.docs.cpanel.net/whm/introduction/
-  - type: APIReference
-    url: https://api.docs.cpanel.net/specifications/whm.openapi
-  - type: Authentication
-    url: https://api.docs.cpanel.net/whm/tokens/
 - aid: cpanel:cpanel-updates-api
   name: cPanel Updates API
   description: Server Administration / Updates
@@ -2829,28 +2609,6 @@ apis:
   properties:
   - type: OpenAPI
     url: openapi/cpanel-updates-api-openapi.yml
-  - type: Documentation
-    url: https://api.docs.cpanel.net/cpanel/introduction/
-  - type: APIReference
-    url: https://api.docs.cpanel.net/specifications/cpanel.openapi
-  - type: Authentication
-    url: https://api.docs.cpanel.net/cpanel/tokens/
-  - type: Documentation
-    url: https://api.docs.cpanel.net/whm/introduction/
-  - type: APIReference
-    url: https://api.docs.cpanel.net/specifications/whm.openapi
-  - type: Authentication
-    url: https://api.docs.cpanel.net/whm/tokens/
-- aid: cpanel:cpanel-userdata-api
-  name: cPanel User Data API
-  description: The UserData module for cPanel UAPI.
-  humanURL: https://api.docs.cpanel.net/cpanel/introduction/
-  baseURL: https://{host}:2083/execute
-  tags:
-  - UserData
-  properties:
-  - type: OpenAPI
-    url: openapi/cpanel-userdata-api-openapi.yml
   - type: Documentation
     url: https://api.docs.cpanel.net/cpanel/introduction/
   - type: APIReference
@@ -2907,28 +2665,6 @@ apis:
     url: https://api.docs.cpanel.net/specifications/whm.openapi
   - type: Authentication
     url: https://api.docs.cpanel.net/whm/tokens/
-- aid: cpanel:cpanel-usertasks-api
-  name: cPanel User Tasks API
-  description: The UserTasks module for UAPI.
-  humanURL: https://api.docs.cpanel.net/cpanel/introduction/
-  baseURL: https://{host}:2083/execute
-  tags:
-  - UserTasks
-  properties:
-  - type: OpenAPI
-    url: openapi/cpanel-usertasks-api-openapi.yml
-  - type: Documentation
-    url: https://api.docs.cpanel.net/cpanel/introduction/
-  - type: APIReference
-    url: https://api.docs.cpanel.net/specifications/cpanel.openapi
-  - type: Authentication
-    url: https://api.docs.cpanel.net/cpanel/tokens/
-  - type: Documentation
-    url: https://api.docs.cpanel.net/whm/introduction/
-  - type: APIReference
-    url: https://api.docs.cpanel.net/specifications/whm.openapi
-  - type: Authentication
-    url: https://api.docs.cpanel.net/whm/tokens/
 - aid: cpanel:cpanel-variables-api
   name: cPanel Variables API
   description: The Variables module for UAPI.
@@ -2939,28 +2675,6 @@ apis:
   properties:
   - type: OpenAPI
     url: openapi/cpanel-variables-api-openapi.yml
-  - type: Documentation
-    url: https://api.docs.cpanel.net/cpanel/introduction/
-  - type: APIReference
-    url: https://api.docs.cpanel.net/specifications/cpanel.openapi
-  - type: Authentication
-    url: https://api.docs.cpanel.net/cpanel/tokens/
-  - type: Documentation
-    url: https://api.docs.cpanel.net/whm/introduction/
-  - type: APIReference
-    url: https://api.docs.cpanel.net/specifications/whm.openapi
-  - type: Authentication
-    url: https://api.docs.cpanel.net/whm/tokens/
-- aid: cpanel:cpanel-versioncontrol-api
-  name: cPanel Version Control API
-  description: The VersionControl module for UAPI.
-  humanURL: https://api.docs.cpanel.net/cpanel/introduction/
-  baseURL: https://{host}:2083/execute
-  tags:
-  - VersionControl
-  properties:
-  - type: OpenAPI
-    url: openapi/cpanel-versioncontrol-api-openapi.yml
   - type: Documentation
     url: https://api.docs.cpanel.net/cpanel/introduction/
   - type: APIReference
@@ -3225,6 +2939,292 @@ apis:
   properties:
   - type: OpenAPI
     url: openapi/cpanel-zoneedit-api-openapi.yml
+  - type: Documentation
+    url: https://api.docs.cpanel.net/cpanel/introduction/
+  - type: APIReference
+    url: https://api.docs.cpanel.net/specifications/cpanel.openapi
+  - type: Authentication
+    url: https://api.docs.cpanel.net/cpanel/tokens/
+  - type: Documentation
+    url: https://api.docs.cpanel.net/whm/introduction/
+  - type: APIReference
+    url: https://api.docs.cpanel.net/specifications/whm.openapi
+  - type: Authentication
+    url: https://api.docs.cpanel.net/whm/tokens/
+- aid: cpanel:cpanel-backup-info-api
+  name: cPanel Backup Info API
+  description: The BackupInfo module for UAPI.
+  humanURL: https://api.docs.cpanel.net/cpanel/introduction/
+  baseURL: https://{host}:2083/json-api/cpanel
+  tags:
+  - Backup Info
+  properties:
+  - type: OpenAPI
+    url: openapi/cpanel-backup-info-api-openapi.yml
+  - type: Documentation
+    url: https://api.docs.cpanel.net/cpanel/introduction/
+  - type: APIReference
+    url: https://api.docs.cpanel.net/specifications/cpanel.openapi
+  - type: Authentication
+    url: https://api.docs.cpanel.net/cpanel/tokens/
+  - type: Documentation
+    url: https://api.docs.cpanel.net/whm/introduction/
+  - type: APIReference
+    url: https://api.docs.cpanel.net/specifications/whm.openapi
+  - type: Authentication
+    url: https://api.docs.cpanel.net/whm/tokens/
+- aid: cpanel:cpanel-c-cs-api
+  name: cPanel C Cs API
+  description: The CCS module for UAPI.
+  humanURL: https://api.docs.cpanel.net/cpanel/introduction/
+  baseURL: https://{host}:2083/json-api/cpanel
+  tags:
+  - C Cs
+  properties:
+  - type: OpenAPI
+    url: openapi/cpanel-c-cs-api-openapi.yml
+  - type: Documentation
+    url: https://api.docs.cpanel.net/cpanel/introduction/
+  - type: APIReference
+    url: https://api.docs.cpanel.net/specifications/cpanel.openapi
+  - type: Authentication
+    url: https://api.docs.cpanel.net/cpanel/tokens/
+  - type: Documentation
+    url: https://api.docs.cpanel.net/whm/introduction/
+  - type: APIReference
+    url: https://api.docs.cpanel.net/specifications/whm.openapi
+  - type: Authentication
+    url: https://api.docs.cpanel.net/whm/tokens/
+- aid: cpanel:cpanel-contact-information-api
+  name: cPanel Contact Information API
+  description: The ContactInformation module for UAPI.
+  humanURL: https://api.docs.cpanel.net/cpanel/introduction/
+  baseURL: https://{host}:2083/json-api/cpanel
+  tags:
+  - Contact Information
+  properties:
+  - type: OpenAPI
+    url: openapi/cpanel-contact-information-api-openapi.yml
+  - type: Documentation
+    url: https://api.docs.cpanel.net/cpanel/introduction/
+  - type: APIReference
+    url: https://api.docs.cpanel.net/specifications/cpanel.openapi
+  - type: Authentication
+    url: https://api.docs.cpanel.net/cpanel/tokens/
+  - type: Documentation
+    url: https://api.docs.cpanel.net/whm/introduction/
+  - type: APIReference
+    url: https://api.docs.cpanel.net/specifications/whm.openapi
+  - type: Authentication
+    url: https://api.docs.cpanel.net/whm/tokens/
+- aid: cpanel:cpanel-contact-us-api
+  name: cPanel Contact Us API
+  description: The Contactus module for UAPI.
+  humanURL: https://api.docs.cpanel.net/cpanel/introduction/
+  baseURL: https://{host}:2083/json-api/cpanel
+  tags:
+  - Contact Us
+  properties:
+  - type: OpenAPI
+    url: openapi/cpanel-contact-us-api-openapi.yml
+  - type: Documentation
+    url: https://api.docs.cpanel.net/cpanel/introduction/
+  - type: APIReference
+    url: https://api.docs.cpanel.net/specifications/cpanel.openapi
+  - type: Authentication
+    url: https://api.docs.cpanel.net/cpanel/tokens/
+  - type: Documentation
+    url: https://api.docs.cpanel.net/whm/introduction/
+  - type: APIReference
+    url: https://api.docs.cpanel.net/specifications/whm.openapi
+  - type: Authentication
+    url: https://api.docs.cpanel.net/whm/tokens/
+- aid: cpanel:cpanel-domain-lookup-api
+  name: cPanel Domain Lookup API
+  description: The DomainLookup module for UAPI.
+  humanURL: https://api.docs.cpanel.net/cpanel/introduction/
+  baseURL: https://{host}:2083/json-api/cpanel
+  tags:
+  - Domain Lookup
+  properties:
+  - type: OpenAPI
+    url: openapi/cpanel-domain-lookup-api-openapi.yml
+  - type: Documentation
+    url: https://api.docs.cpanel.net/cpanel/introduction/
+  - type: APIReference
+    url: https://api.docs.cpanel.net/specifications/cpanel.openapi
+  - type: Authentication
+    url: https://api.docs.cpanel.net/cpanel/tokens/
+  - type: Documentation
+    url: https://api.docs.cpanel.net/whm/introduction/
+  - type: APIReference
+    url: https://api.docs.cpanel.net/specifications/whm.openapi
+  - type: Authentication
+    url: https://api.docs.cpanel.net/whm/tokens/
+- aid: cpanel:cpanel-known-hosts-api
+  name: cPanel Known Hosts API
+  description: The KnownHosts module for UAPI.
+  humanURL: https://api.docs.cpanel.net/cpanel/introduction/
+  baseURL: https://{host}:2083/json-api/cpanel
+  tags:
+  - Known Hosts
+  properties:
+  - type: OpenAPI
+    url: openapi/cpanel-known-hosts-api-openapi.yml
+  - type: Documentation
+    url: https://api.docs.cpanel.net/cpanel/introduction/
+  - type: APIReference
+    url: https://api.docs.cpanel.net/specifications/cpanel.openapi
+  - type: Authentication
+    url: https://api.docs.cpanel.net/cpanel/tokens/
+  - type: Documentation
+    url: https://api.docs.cpanel.net/whm/introduction/
+  - type: APIReference
+    url: https://api.docs.cpanel.net/specifications/whm.openapi
+  - type: Authentication
+    url: https://api.docs.cpanel.net/whm/tokens/
+- aid: cpanel:cpanel-resource-usage-api
+  name: cPanel Resource Usage API
+  description: The ResourceUsage module for UAPI.
+  humanURL: https://api.docs.cpanel.net/cpanel/introduction/
+  baseURL: https://{host}:2083/json-api/cpanel
+  tags:
+  - Resource Usage
+  properties:
+  - type: OpenAPI
+    url: openapi/cpanel-resource-usage-api-openapi.yml
+  - type: Documentation
+    url: https://api.docs.cpanel.net/cpanel/introduction/
+  - type: APIReference
+    url: https://api.docs.cpanel.net/specifications/cpanel.openapi
+  - type: Authentication
+    url: https://api.docs.cpanel.net/cpanel/tokens/
+  - type: Documentation
+    url: https://api.docs.cpanel.net/whm/introduction/
+  - type: APIReference
+    url: https://api.docs.cpanel.net/specifications/whm.openapi
+  - type: Authentication
+    url: https://api.docs.cpanel.net/whm/tokens/
+- aid: cpanel:cpanel-server-information-api
+  name: cPanel Server Information API
+  description: The ServerInformation module for UAPI.
+  humanURL: https://api.docs.cpanel.net/cpanel/introduction/
+  baseURL: https://{host}:2083/json-api/cpanel
+  tags:
+  - Server Information
+  properties:
+  - type: OpenAPI
+    url: openapi/cpanel-server-information-api-openapi.yml
+  - type: Documentation
+    url: https://api.docs.cpanel.net/cpanel/introduction/
+  - type: APIReference
+    url: https://api.docs.cpanel.net/specifications/cpanel.openapi
+  - type: Authentication
+    url: https://api.docs.cpanel.net/cpanel/tokens/
+  - type: Documentation
+    url: https://api.docs.cpanel.net/whm/introduction/
+  - type: APIReference
+    url: https://api.docs.cpanel.net/specifications/whm.openapi
+  - type: Authentication
+    url: https://api.docs.cpanel.net/whm/tokens/
+- aid: cpanel:cpanel-sub-domain-api
+  name: cPanel Sub Domain API
+  description: The SubDomain module for UAPI.
+  humanURL: https://api.docs.cpanel.net/cpanel/introduction/
+  baseURL: https://{host}:2083/json-api/cpanel
+  tags:
+  - Sub Domain
+  properties:
+  - type: OpenAPI
+    url: openapi/cpanel-sub-domain-api-openapi.yml
+  - type: Documentation
+    url: https://api.docs.cpanel.net/cpanel/introduction/
+  - type: APIReference
+    url: https://api.docs.cpanel.net/specifications/cpanel.openapi
+  - type: Authentication
+    url: https://api.docs.cpanel.net/cpanel/tokens/
+  - type: Documentation
+    url: https://api.docs.cpanel.net/whm/introduction/
+  - type: APIReference
+    url: https://api.docs.cpanel.net/specifications/whm.openapi
+  - type: Authentication
+    url: https://api.docs.cpanel.net/whm/tokens/
+- aid: cpanel:cpanel-two-factor-auth-api
+  name: cPanel Two Factor Auth API
+  description: The TwoFactorAuth module for UAPI.
+  humanURL: https://api.docs.cpanel.net/cpanel/introduction/
+  baseURL: https://{host}:2083/json-api/cpanel
+  tags:
+  - Two Factor Auth
+  properties:
+  - type: OpenAPI
+    url: openapi/cpanel-two-factor-auth-api-openapi.yml
+  - type: Documentation
+    url: https://api.docs.cpanel.net/cpanel/introduction/
+  - type: APIReference
+    url: https://api.docs.cpanel.net/specifications/cpanel.openapi
+  - type: Authentication
+    url: https://api.docs.cpanel.net/cpanel/tokens/
+  - type: Documentation
+    url: https://api.docs.cpanel.net/whm/introduction/
+  - type: APIReference
+    url: https://api.docs.cpanel.net/specifications/whm.openapi
+  - type: Authentication
+    url: https://api.docs.cpanel.net/whm/tokens/
+- aid: cpanel:cpanel-user-data-api
+  name: cPanel User Data API
+  description: The UserData module for cPanel UAPI.
+  humanURL: https://api.docs.cpanel.net/cpanel/introduction/
+  baseURL: https://{host}:2083/json-api/cpanel
+  tags:
+  - User Data
+  properties:
+  - type: OpenAPI
+    url: openapi/cpanel-user-data-api-openapi.yml
+  - type: Documentation
+    url: https://api.docs.cpanel.net/cpanel/introduction/
+  - type: APIReference
+    url: https://api.docs.cpanel.net/specifications/cpanel.openapi
+  - type: Authentication
+    url: https://api.docs.cpanel.net/cpanel/tokens/
+  - type: Documentation
+    url: https://api.docs.cpanel.net/whm/introduction/
+  - type: APIReference
+    url: https://api.docs.cpanel.net/specifications/whm.openapi
+  - type: Authentication
+    url: https://api.docs.cpanel.net/whm/tokens/
+- aid: cpanel:cpanel-user-tasks-api
+  name: cPanel User Tasks API
+  description: The UserTasks module for UAPI.
+  humanURL: https://api.docs.cpanel.net/cpanel/introduction/
+  baseURL: https://{host}:2083/json-api/cpanel
+  tags:
+  - User Tasks
+  properties:
+  - type: OpenAPI
+    url: openapi/cpanel-user-tasks-api-openapi.yml
+  - type: Documentation
+    url: https://api.docs.cpanel.net/cpanel/introduction/
+  - type: APIReference
+    url: https://api.docs.cpanel.net/specifications/cpanel.openapi
+  - type: Authentication
+    url: https://api.docs.cpanel.net/cpanel/tokens/
+  - type: Documentation
+    url: https://api.docs.cpanel.net/whm/introduction/
+  - type: APIReference
+    url: https://api.docs.cpanel.net/specifications/whm.openapi
+  - type: Authentication
+    url: https://api.docs.cpanel.net/whm/tokens/
+- aid: cpanel:cpanel-version-control-api
+  name: cPanel Version Control API
+  description: The VersionControl module for UAPI.
+  humanURL: https://api.docs.cpanel.net/cpanel/introduction/
+  baseURL: https://{host}:2083/json-api/cpanel
+  tags:
+  - Version Control
+  properties:
+  - type: OpenAPI
+    url: openapi/cpanel-version-control-api-openapi.yml
   - type: Documentation
     url: https://api.docs.cpanel.net/cpanel/introduction/
   - type: APIReference
