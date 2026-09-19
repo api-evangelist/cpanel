@@ -94,6 +94,11 @@ apis:
   baseURL: https://manage2.cpanel.net/
   tags:
   - Licensing
+  - Partners
+  - Billing
+  - Reseller
+  tags_raw:
+  - Licensing
   - Partner
   - Billing
   - Reseller
@@ -229,6 +234,8 @@ apis:
   humanURL: https://api.docs.cpanel.net/cpanel/introduction/
   baseURL: https://{host}:2083/execute
   tags:
+  - Account
+  tags_raw:
   - Accounts
   properties:
   - type: OpenAPI
@@ -295,6 +302,8 @@ apis:
   humanURL: https://api.docs.cpanel.net/cpanel/introduction/
   baseURL: https://{host}:2083/execute
   tags:
+  - Application
+  tags_raw:
   - Applications
   properties:
   - type: OpenAPI
@@ -713,6 +722,8 @@ apis:
   humanURL: https://api.docs.cpanel.net/cpanel/introduction/
   baseURL: https://{host}:2083/execute
   tags:
+  - CSV Import
+  tags_raw:
   - CSVImport
   properties:
   - type: OpenAPI
@@ -757,6 +768,8 @@ apis:
   humanURL: https://api.docs.cpanel.net/cpanel/introduction/
   baseURL: https://{host}:2083/execute
   tags:
+  - Database
+  tags_raw:
   - Databases
   properties:
   - type: OpenAPI
@@ -1263,6 +1276,8 @@ apis:
   humanURL: https://api.docs.cpanel.net/cpanel/introduction/
   baseURL: https://{host}:2083/execute
   tags:
+  - FTP
+  tags_raw:
   - Ftp
   properties:
   - type: OpenAPI
@@ -1395,6 +1410,8 @@ apis:
   humanURL: https://api.docs.cpanel.net/cpanel/introduction/
   baseURL: https://{host}:2083/execute
   tags:
+  - IP Address
+  tags_raw:
   - IP Addresses
   properties:
   - type: OpenAPI
@@ -1549,6 +1566,8 @@ apis:
   humanURL: https://api.docs.cpanel.net/cpanel/introduction/
   baseURL: https://{host}:2083/execute
   tags:
+  - Markets
+  tags_raw:
   - Market
   properties:
   - type: OpenAPI
@@ -1615,6 +1634,8 @@ apis:
   humanURL: https://api.docs.cpanel.net/cpanel/introduction/
   baseURL: https://{host}:2083/execute
   tags:
+  - MySQL
+  tags_raw:
   - Mysql
   properties:
   - type: OpenAPI
@@ -1681,6 +1702,8 @@ apis:
   humanURL: https://api.docs.cpanel.net/cpanel/introduction/
   baseURL: https://{host}:2083/execute
   tags:
+  - Notification
+  tags_raw:
   - Notifications
   properties:
   - type: OpenAPI
@@ -1945,6 +1968,8 @@ apis:
   humanURL: https://api.docs.cpanel.net/cpanel/introduction/
   baseURL: https://{host}:2083/execute
   tags:
+  - PostgreSQL
+  tags_raw:
   - Postgresql
   properties:
   - type: OpenAPI
@@ -2165,6 +2190,8 @@ apis:
   humanURL: https://api.docs.cpanel.net/cpanel/introduction/
   baseURL: https://{host}:2083/execute
   tags:
+  - Sessions
+  tags_raw:
   - Session
   properties:
   - type: OpenAPI
@@ -2649,6 +2676,8 @@ apis:
   humanURL: https://api.docs.cpanel.net/cpanel/introduction/
   baseURL: https://{host}:2083/execute
   tags:
+  - User
+  tags_raw:
   - Users
   properties:
   - type: OpenAPI
@@ -2737,6 +2766,8 @@ apis:
   humanURL: https://api.docs.cpanel.net/cpanel/introduction/
   baseURL: https://{host}:2083/execute
   tags:
+  - Web App
+  tags_raw:
   - WebApp
   properties:
   - type: OpenAPI
