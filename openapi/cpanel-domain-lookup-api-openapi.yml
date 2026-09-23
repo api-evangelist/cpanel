@@ -1,0 +1,603 @@
+openapi: 3.2.0
+info:
+  contact:
+    email: cs@cpanel.net
+    name: WebPros International, LLC
+    url: https://cpanel.net/support/
+  description: UAPI accesses the cPanel interface's features. Use this API to access and modify cPanel account data and settings.
+  license:
+    name: cPanel License
+    url: https://cpanel.net/legal-notices/
+  termsOfService: https://cpanel.net/legal-notices/
+  title: cPanel U Domain Lookup API
+  version: 11.137.9999.106
+  x-api-evangelist-provenance: 'Harvested verbatim from cPanel''s developer portal on 2026-09-05 via the MCP tool get-full-api-description at https://api.docs.cpanel.net/mcp. ONE mechanical change was made before storage: example values containing PEM private-key or certificate blocks, and AWS-access-key-shaped example strings, were replaced with REDACTED_* placeholders so the file can be stored in a public git repository without tripping secret scanning. No path, operation, parameter, schema or description was altered, added or removed.'
+servers:
+- description: A server running cPanel.
+  url: https://{host}:{port}/execute
+  variables:
+    host:
+      default: cpanel-server.tld
+      description: The hostname of a server running cPanel.
+    port:
+      default: '2083'
+      description: The cPanel port.
+security:
+- BasicAuth: []
+tags:
+- description: The DomainLookup module for UAPI.
+  name: Domain Lookup
+paths:
+  /DomainLookup/countbasedomains:
+    get:
+      description: 'This function counts the cPanel account''s base domains: the primary
+
+        domain, its addon domains and its parked domains.
+
+
+        **Note:**
+
+
+        The count excludes temporary domains, and matches the number of entries
+
+        that the `DomainLookup::getbasedomains` function returns by default.'
+      operationId: DomainLookup-countbasedomains
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    description: A single entry holding the count.
+                    items:
+                      properties:
+                        count:
+                          description: The number of base domains on the account.
+                          example: 3
+                          minimum: 0
+                          type: integer
+                      type: object
+                    type: array
+                  errors:
+                    items:
+                      type: string
+                    type:
+                    - array
+                    - 'null'
+                  messages:
+                    items:
+                      type: string
+                    type:
+                    - array
+                    - 'null'
+                  metadata:
+                    properties:
+                      transformed:
+                        type: integer
+                    type: object
+                  status:
+                    description: '* `1` — Success.
+
+                      * `0` — Failed. Check the `errors` field for more details.'
+                    enum:
+                    - 0
+                    - 1
+                    example: 1
+                    type: integer
+                  warnings:
+                    items:
+                      type: string
+                    type:
+                    - array
+                    - 'null'
+                type: object
+          description: HTTP Request was successful.
+      summary: Count the domains that have their own DNS zone
+      tags:
+      - Domain Lookup
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "uapi --output=jsonpretty \\\n  --user=username \\\n  DomainLookup \\\n  countbasedomains\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2083/cpsess##########/execute/DomainLookup/countbasedomains
+      - label: LiveAPI Perl
+        lang: Perl
+        source: "#--------------------------------------------------------------------------------------\n# Instructions:\n#--------------------------------------------------------------------------------------\n# <theme-name> is the theme assigned to cPanel account, where theme-name represents\n# jupiter.\n# 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n# 2) mkdir api_examples\n# 3) cd api_examples\n# 4) create a file DomainLookup_countbasedomains.live.pl and put this code into that file.\n# 5) In your browser login to a cPanel account.\n# 6) Manually change the url from: .../frontend/<theme-name>/\n#    to .../frontend/<theme-name>/api_examples/DomainLookup_countbasedomains.live.pl\n#--------------------------------------------------------------------------------------\n\nuse strict;\n\nuse Cpanel::LiveAPI ();\n\nmy $cpanel = Cpanel::LiveAPI->new(); # Connect to cPanel - only do this once.\n\n# Print the header\nprint \"Content-type: text/plain\\r\\n\\r\\n\";\n\n# Call the API\nmy $response = $cpanel->uapi(\n    q/DomainLookup/,\n    q/countbasedomains/\n);\n\n# Handle the response\nif ($response->{cpanelresult}{result}{status}) {\n    my $data = $response->{cpanelresult}{result}{data};\n    # Do something with the $data\n    # So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    # Report errors:\n    print to_json($response->{cpanelresult}{result}{errors});\n}\n\n# Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n#--------------------------------------------------------------------------------------\n# Helper function to convert a perl object to html printable json\n#--------------------------------------------------------------------------------------\nsub to_json {\n    require JSON;\n    my $str = JSON->new->pretty->encode($_[0]);\n    return $str;\n}\n"
+      - label: LiveAPI PHP
+        lang: PHP
+        source: "<?php\n//--------------------------------------------------------------------------------------\n// Instructions:\n//--------------------------------------------------------------------------------------\n// <theme-name> is the theme assigned to cPanel account, where theme-name represents\n// jupiter.\n// 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n// 2) mkdir api_examples\n// 3) cd api_examples\n// 4) create a file DomainLookup_countbasedomains.live.php and put this code into that file.\n// 5) In your browser login to a cPanel account.\n// 6) Manually change the url from: .../frontend/<theme-name>/\n//    to .../frontend/<theme-name>/api_examples/DomainLookup_countbasedomains.live.php\n//--------------------------------------------------------------------------------------\n\n// Instantiate the CPANEL object.\nrequire_once \"/usr/local/cpanel/php/cpanel.php\";\n\n// Print the header\nheader('Content-Type: text/plain');\n\n// Connect to cPanel - only do this once.\n$cpanel = new CPANEL();\n\n// Call the API\n$response = $cpanel->uapi(\n    'DomainLookup',\n    'countbasedomains'\n);\n\n// Handle the response\nif ($response['cpanelresult']['result']['status']) {\n    $data = $response['cpanelresult']['result']['data'];\n    // Do something with the $data\n    // So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    // Report errors:\n    print to_json($response['cpanelresult']['result']['errors']);\n}\n\n// Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n//--------------------------------------------------------------------------------------\n// Helper function to convert a PHP value to html printable json\n//--------------------------------------------------------------------------------------\nfunction to_json($data) {\n    return json_encode($data, JSON_PRETTY_PRINT);\n}\n"
+      x-cpanel-api-version: UAPI
+      x-cpanel-available-version: cPanel 138
+      x-readonly: true
+  /DomainLookup/getbasedomains:
+    get:
+      description: 'This function lists the cPanel account''s base domains: the primary
+
+        domain, its addon domains and its parked domains.
+
+
+        **Note:**
+
+
+        Subdomains are **not** base domains and this function does not return
+
+        them. Use the `SubDomain::listsubdomains` function for those.'
+      operationId: DomainLookup-getbasedomains
+      parameters:
+      - description: 'Whether to include the account''s temporary domains in the result.
+
+          * `1` - Include temporary domains.
+
+          * `0` - Exclude temporary domains.'
+        in: query
+        name: return_temporary_domain
+        required: false
+        schema:
+          default: 0
+          enum:
+          - 0
+          - 1
+          example: 1
+          type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    description: One entry for each base domain on the account, sorted by domain name.
+                    items:
+                      properties:
+                        domain:
+                          description: The base domain.
+                          example: example.com
+                          format: domain
+                          type: string
+                      type: object
+                    type: array
+                  errors:
+                    items:
+                      type: string
+                    type:
+                    - array
+                    - 'null'
+                  messages:
+                    items:
+                      type: string
+                    type:
+                    - array
+                    - 'null'
+                  metadata:
+                    properties:
+                      transformed:
+                        type: integer
+                    type: object
+                  status:
+                    description: '* `1` — Success.
+
+                      * `0` — Failed. Check the `errors` field for more details.'
+                    enum:
+                    - 0
+                    - 1
+                    example: 1
+                    type: integer
+                  warnings:
+                    items:
+                      type: string
+                    type:
+                    - array
+                    - 'null'
+                type: object
+          description: HTTP Request was successful.
+      summary: List the domains that have their own DNS zone
+      tags:
+      - Domain Lookup
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "uapi --output=jsonpretty \\\n  --user=username \\\n  DomainLookup \\\n  getbasedomains\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2083/cpsess##########/execute/DomainLookup/getbasedomains
+      - label: LiveAPI Perl
+        lang: Perl
+        source: "#--------------------------------------------------------------------------------------\n# Instructions:\n#--------------------------------------------------------------------------------------\n# <theme-name> is the theme assigned to cPanel account, where theme-name represents\n# jupiter.\n# 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n# 2) mkdir api_examples\n# 3) cd api_examples\n# 4) create a file DomainLookup_getbasedomains.live.pl and put this code into that file.\n# 5) In your browser login to a cPanel account.\n# 6) Manually change the url from: .../frontend/<theme-name>/\n#    to .../frontend/<theme-name>/api_examples/DomainLookup_getbasedomains.live.pl\n#--------------------------------------------------------------------------------------\n\nuse strict;\n\nuse Cpanel::LiveAPI ();\n\nmy $cpanel = Cpanel::LiveAPI->new(); # Connect to cPanel - only do this once.\n\n# Print the header\nprint \"Content-type: text/plain\\r\\n\\r\\n\";\n\n# Call the API\nmy $response = $cpanel->uapi(\n    q/DomainLookup/,\n    q/getbasedomains/\n);\n\n# Handle the response\nif ($response->{cpanelresult}{result}{status}) {\n    my $data = $response->{cpanelresult}{result}{data};\n    # Do something with the $data\n    # So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    # Report errors:\n    print to_json($response->{cpanelresult}{result}{errors});\n}\n\n# Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n#--------------------------------------------------------------------------------------\n# Helper function to convert a perl object to html printable json\n#--------------------------------------------------------------------------------------\nsub to_json {\n    require JSON;\n    my $str = JSON->new->pretty->encode($_[0]);\n    return $str;\n}\n"
+      - label: LiveAPI PHP
+        lang: PHP
+        source: "<?php\n//--------------------------------------------------------------------------------------\n// Instructions:\n//--------------------------------------------------------------------------------------\n// <theme-name> is the theme assigned to cPanel account, where theme-name represents\n// jupiter.\n// 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n// 2) mkdir api_examples\n// 3) cd api_examples\n// 4) create a file DomainLookup_getbasedomains.live.php and put this code into that file.\n// 5) In your browser login to a cPanel account.\n// 6) Manually change the url from: .../frontend/<theme-name>/\n//    to .../frontend/<theme-name>/api_examples/DomainLookup_getbasedomains.live.php\n//--------------------------------------------------------------------------------------\n\n// Instantiate the CPANEL object.\nrequire_once \"/usr/local/cpanel/php/cpanel.php\";\n\n// Print the header\nheader('Content-Type: text/plain');\n\n// Connect to cPanel - only do this once.\n$cpanel = new CPANEL();\n\n// Call the API\n$response = $cpanel->uapi(\n    'DomainLookup',\n    'getbasedomains'\n);\n\n// Handle the response\nif ($response['cpanelresult']['result']['status']) {\n    $data = $response['cpanelresult']['result']['data'];\n    // Do something with the $data\n    // So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    // Report errors:\n    print to_json($response['cpanelresult']['result']['errors']);\n}\n\n// Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n//--------------------------------------------------------------------------------------\n// Helper function to convert a PHP value to html printable json\n//--------------------------------------------------------------------------------------\nfunction to_json($data) {\n    return json_encode($data, JSON_PRETTY_PRINT);\n}\n"
+      x-cpanel-api-version: UAPI
+      x-cpanel-available-version: cPanel 138
+      x-readonly: true
+  /DomainLookup/getdocroot:
+    get:
+      description: 'This function retrieves the document root for a single domain on the
+
+        cPanel account.
+
+
+        **Note:**
+
+
+        If the domain does not exist on the account, the system returns the
+
+        account''s `public_html` directory rather than an error.'
+      operationId: DomainLookup-getdocroot
+      parameters:
+      - description: 'The domain to look up. The system converts this value to lowercase.
+
+
+          Omit this parameter to retrieve the document root for the account''s primary domain.'
+        in: query
+        name: domain
+        required: false
+        schema:
+          example: example.com
+          format: domain
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    description: A single entry for the requested domain.
+                    items:
+                      properties:
+                        docroot:
+                          description: The absolute path to the domain's document root.
+                          example: /home/username/public_html
+                          format: path
+                          type: string
+                        reldocroot:
+                          description: The domain's document root, relative to the account's home directory.
+                          example: public_html
+                          type: string
+                      type: object
+                    type: array
+                  errors:
+                    items:
+                      type: string
+                    type:
+                    - array
+                    - 'null'
+                  messages:
+                    items:
+                      type: string
+                    type:
+                    - array
+                    - 'null'
+                  metadata:
+                    properties:
+                      transformed:
+                        type: integer
+                    type: object
+                  status:
+                    description: '* `1` — Success.
+
+                      * `0` — Failed. Check the `errors` field for more details.'
+                    enum:
+                    - 0
+                    - 1
+                    example: 1
+                    type: integer
+                  warnings:
+                    items:
+                      type: string
+                    type:
+                    - array
+                    - 'null'
+                type: object
+          description: HTTP Request was successful.
+      summary: Return a domain's document root
+      tags:
+      - Domain Lookup
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "uapi --output=jsonpretty \\\n  --user=username \\\n  DomainLookup \\\n  getdocroot\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2083/cpsess##########/execute/DomainLookup/getdocroot
+      - label: LiveAPI Perl
+        lang: Perl
+        source: "#--------------------------------------------------------------------------------------\n# Instructions:\n#--------------------------------------------------------------------------------------\n# <theme-name> is the theme assigned to cPanel account, where theme-name represents\n# jupiter.\n# 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n# 2) mkdir api_examples\n# 3) cd api_examples\n# 4) create a file DomainLookup_getdocroot.live.pl and put this code into that file.\n# 5) In your browser login to a cPanel account.\n# 6) Manually change the url from: .../frontend/<theme-name>/\n#    to .../frontend/<theme-name>/api_examples/DomainLookup_getdocroot.live.pl\n#--------------------------------------------------------------------------------------\n\nuse strict;\n\nuse Cpanel::LiveAPI ();\n\nmy $cpanel = Cpanel::LiveAPI->new(); # Connect to cPanel - only do this once.\n\n# Print the header\nprint \"Content-type: text/plain\\r\\n\\r\\n\";\n\n# Call the API\nmy $response = $cpanel->uapi(\n    q/DomainLookup/,\n    q/getdocroot/\n);\n\n# Handle the response\nif ($response->{cpanelresult}{result}{status}) {\n    my $data = $response->{cpanelresult}{result}{data};\n    # Do something with the $data\n    # So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    # Report errors:\n    print to_json($response->{cpanelresult}{result}{errors});\n}\n\n# Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n#--------------------------------------------------------------------------------------\n# Helper function to convert a perl object to html printable json\n#--------------------------------------------------------------------------------------\nsub to_json {\n    require JSON;\n    my $str = JSON->new->pretty->encode($_[0]);\n    return $str;\n}\n"
+      - label: LiveAPI PHP
+        lang: PHP
+        source: "<?php\n//--------------------------------------------------------------------------------------\n// Instructions:\n//--------------------------------------------------------------------------------------\n// <theme-name> is the theme assigned to cPanel account, where theme-name represents\n// jupiter.\n// 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n// 2) mkdir api_examples\n// 3) cd api_examples\n// 4) create a file DomainLookup_getdocroot.live.php and put this code into that file.\n// 5) In your browser login to a cPanel account.\n// 6) Manually change the url from: .../frontend/<theme-name>/\n//    to .../frontend/<theme-name>/api_examples/DomainLookup_getdocroot.live.php\n//--------------------------------------------------------------------------------------\n\n// Instantiate the CPANEL object.\nrequire_once \"/usr/local/cpanel/php/cpanel.php\";\n\n// Print the header\nheader('Content-Type: text/plain');\n\n// Connect to cPanel - only do this once.\n$cpanel = new CPANEL();\n\n// Call the API\n$response = $cpanel->uapi(\n    'DomainLookup',\n    'getdocroot'\n);\n\n// Handle the response\nif ($response['cpanelresult']['result']['status']) {\n    $data = $response['cpanelresult']['result']['data'];\n    // Do something with the $data\n    // So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    // Report errors:\n    print to_json($response['cpanelresult']['result']['errors']);\n}\n\n// Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n//--------------------------------------------------------------------------------------\n// Helper function to convert a PHP value to html printable json\n//--------------------------------------------------------------------------------------\nfunction to_json($data) {\n    return json_encode($data, JSON_PRETTY_PRINT);\n}\n"
+      x-cpanel-api-version: UAPI
+      x-cpanel-available-version: cPanel 138
+      x-readonly: true
+  /DomainLookup/getdocroots:
+    get:
+      description: This function retrieves the document root for every domain on the cPanel account, including the primary domain, addon domains, parked domains and subdomains.
+      operationId: DomainLookup-getdocroots
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    description: One entry for each domain on the account, sorted by domain name.
+                    items:
+                      properties:
+                        docroot:
+                          description: The absolute path to the domain's document root.
+                          example: /home/username/public_html
+                          format: path
+                          type: string
+                        domain:
+                          description: The domain.
+                          example: example.com
+                          format: domain
+                          type: string
+                      type: object
+                    type: array
+                  errors:
+                    items:
+                      type: string
+                    type:
+                    - array
+                    - 'null'
+                  messages:
+                    items:
+                      type: string
+                    type:
+                    - array
+                    - 'null'
+                  metadata:
+                    properties:
+                      transformed:
+                        type: integer
+                    type: object
+                  status:
+                    description: '* `1` — Success.
+
+                      * `0` — Failed. Check the `errors` field for more details.'
+                    enum:
+                    - 0
+                    - 1
+                    example: 1
+                    type: integer
+                  warnings:
+                    items:
+                      type: string
+                    type:
+                    - array
+                    - 'null'
+                type: object
+          description: HTTP Request was successful.
+      summary: Return every domain's document root
+      tags:
+      - Domain Lookup
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "uapi --output=jsonpretty \\\n  --user=username \\\n  DomainLookup \\\n  getdocroots\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2083/cpsess##########/execute/DomainLookup/getdocroots
+      - label: LiveAPI Perl
+        lang: Perl
+        source: "#--------------------------------------------------------------------------------------\n# Instructions:\n#--------------------------------------------------------------------------------------\n# <theme-name> is the theme assigned to cPanel account, where theme-name represents\n# jupiter.\n# 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n# 2) mkdir api_examples\n# 3) cd api_examples\n# 4) create a file DomainLookup_getdocroots.live.pl and put this code into that file.\n# 5) In your browser login to a cPanel account.\n# 6) Manually change the url from: .../frontend/<theme-name>/\n#    to .../frontend/<theme-name>/api_examples/DomainLookup_getdocroots.live.pl\n#--------------------------------------------------------------------------------------\n\nuse strict;\n\nuse Cpanel::LiveAPI ();\n\nmy $cpanel = Cpanel::LiveAPI->new(); # Connect to cPanel - only do this once.\n\n# Print the header\nprint \"Content-type: text/plain\\r\\n\\r\\n\";\n\n# Call the API\nmy $response = $cpanel->uapi(\n    q/DomainLookup/,\n    q/getdocroots/\n);\n\n# Handle the response\nif ($response->{cpanelresult}{result}{status}) {\n    my $data = $response->{cpanelresult}{result}{data};\n    # Do something with the $data\n    # So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    # Report errors:\n    print to_json($response->{cpanelresult}{result}{errors});\n}\n\n# Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n#--------------------------------------------------------------------------------------\n# Helper function to convert a perl object to html printable json\n#--------------------------------------------------------------------------------------\nsub to_json {\n    require JSON;\n    my $str = JSON->new->pretty->encode($_[0]);\n    return $str;\n}\n"
+      - label: LiveAPI PHP
+        lang: PHP
+        source: "<?php\n//--------------------------------------------------------------------------------------\n// Instructions:\n//--------------------------------------------------------------------------------------\n// <theme-name> is the theme assigned to cPanel account, where theme-name represents\n// jupiter.\n// 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n// 2) mkdir api_examples\n// 3) cd api_examples\n// 4) create a file DomainLookup_getdocroots.live.php and put this code into that file.\n// 5) In your browser login to a cPanel account.\n// 6) Manually change the url from: .../frontend/<theme-name>/\n//    to .../frontend/<theme-name>/api_examples/DomainLookup_getdocroots.live.php\n//--------------------------------------------------------------------------------------\n\n// Instantiate the CPANEL object.\nrequire_once \"/usr/local/cpanel/php/cpanel.php\";\n\n// Print the header\nheader('Content-Type: text/plain');\n\n// Connect to cPanel - only do this once.\n$cpanel = new CPANEL();\n\n// Call the API\n$response = $cpanel->uapi(\n    'DomainLookup',\n    'getdocroots'\n);\n\n// Handle the response\nif ($response['cpanelresult']['result']['status']) {\n    $data = $response['cpanelresult']['result']['data'];\n    // Do something with the $data\n    // So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    // Report errors:\n    print to_json($response['cpanelresult']['result']['errors']);\n}\n\n// Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n//--------------------------------------------------------------------------------------\n// Helper function to convert a PHP value to html printable json\n//--------------------------------------------------------------------------------------\nfunction to_json($data) {\n    return json_encode($data, JSON_PRETTY_PRINT);\n}\n"
+      x-cpanel-api-version: UAPI
+      x-cpanel-available-version: cPanel 138
+      x-readonly: true
+components:
+  securitySchemes:
+    BasicAuth:
+      scheme: basic
+      type: http
+externalDocs:
+  url: https://cpanel.net/developers/
+x-tagGroups:
+- name: API Development Tools
+  tags:
+  - API Token Management
+  - Batch
+  - SSE Task Management
+  - URL Parsing
+- name: Authentication
+  tags:
+  - External Authentication
+  - Two-Factor Settings
+- name: Backup Information
+  tags:
+  - BackupInfo
+  - BackupInfo Status
+- name: Block Ip Addresses
+  tags:
+  - Block IP
+- name: Commerce Integration
+  tags:
+  - Market Integration
+  - SSL Certificates
+- name: Contact Information
+  tags:
+  - Contact Information
+- name: cPanel Account
+  tags:
+  - Account Enhancements
+  - Account Information
+  - Account Management
+  - AuditLog
+  - Contact Information
+  - cPanel Features
+  - Disk Quotas
+  - DomainRecommendations
+  - Personalization
+  - Resource Usage and Statistics
+  - Subaccount Management
+  - Team Roles
+  - Team Users
+- name: cPanel Account Backups
+  tags:
+  - Backup
+  - File Restoration
+- name: cPanel Plugin Framework
+  tags:
+  - Formbricks
+  - Plugins
+- name: cPanel Theme Management
+  tags:
+  - Application Information
+  - Brand Management
+  - Branding Files
+  - Browser Cache Management
+  - Language
+  - Theme Settings
+- name: Directory Management
+  tags:
+  - Directory Indexes
+  - Directory Privacy
+  - Directory Protection
+- name: DNS
+  tags:
+  - DNS
+  - DNS Information
+  - DNS Security
+  - Dynamic DNS
+  - Email DNS Settings
+  - ZoneEdit
+- name: Domain
+  tags:
+  - Domain
+- name: Domain Management
+  tags:
+  - AddonDomain
+  - Direct Link Protection (Hotlink)
+  - Domain
+  - Domain Information
+  - Domain Redirection
+  - DomainLookup
+  - Park
+  - SubDomain
+  - Virtual Host Information
+- name: Domains
+  tags:
+  - Subdomains
+- name: Email
+  tags:
+  - Email Accounts
+  - Email Filtering
+  - Email Forwarding
+  - Email Server Information
+  - Email Suspensions
+  - Mail Server Information
+  - Mailbox Management
+  - Mailing Lists
+  - Signing and Encryption (GnuPG Keys)
+  - Spam Filtering (Greylisting)
+  - Spam Management
+  - Spam Prevention (BoxTrapper)
+  - Webmail Applications
+  - Webmail Sessions
+- name: Extract Information
+  tags:
+  - ExtractInfo
+  - ExtractInfo Status
+- name: File Manager
+  tags:
+  - Trash
+- name: Files
+  tags:
+  - FTP Accounts
+  - FTP Server Settings
+  - Image Tools
+  - Jodit
+  - Manage Files
+  - Manage Files
+  - WebDisk Settings
+- name: GIT Management
+  tags:
+  - Deployment Settings
+  - Repository Management
+- name: InProductSurvey
+  tags:
+  - InProductSurvey
+- name: MySQL and MariaDB
+  tags:
+  - Database Information
+  - Database Management
+  - Remote Databases
+  - User Management
+- name: Notifications
+  tags:
+  - Pushbullet
+- name: Optional Applications
+  tags:
+  - Antivirus Protection (ClamAV)
+  - Calendar and Contacts (DAV)
+  - Calendar and Contacts Server
+  - WordPress Manager Backups
+- name: PostgreSQL
+  tags:
+  - PostgreSQL Database Management
+  - PostgreSQL User Management
+- name: Retrieve bandwidth information
+  tags:
+  - Bandwidth
+- name: Security
+  tags:
+  - Known SSH Hosts Management
+  - Login Information
+- name: Server Information
+  tags:
+  - cPanel Server Information
+  - Notifications
+  - Password Strength
+  - SSH
+  - WebPros MCP
+  - WebProsMCP
+- name: ServiceProxy
+  tags:
+  - ServiceProxy
+- name: Site Quality Monitoring
+  tags:
+  - SiteQuality
+- name: SSL Certificates
+  tags:
+  - Auto-generated SSL Certificates
+  - cPanel Account SSL Management
+  - SNI Email Settings
+  - SSL Certificate Management
+  - Verify Domain Ownership
+- name: Statistics
+  tags:
+  - Domain Statistics
+  - Weblog Settings
+- name: UserData
+  tags:
+  - UserData
+- name: Web Server Configuration
+  tags:
+  - EA4
+  - EasyApache Settings
+  - PHP
+- name: Web Server Management
+  tags:
+  - Application Manager
+  - ModSecurity
+  - NginxCaching
+  - PHP Settings
+  - Web Apps
+- name: Website Configuration
+  tags:
+  - Handler Management
+  - Logs
+  - Mime Type Management
+  - Nova
+  - Site Information
+  - Site Installation
+  - Sitejet
+  - WPX

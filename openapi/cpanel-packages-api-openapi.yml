@@ -1,0 +1,5233 @@
+openapi: 3.2.0
+info:
+  contact:
+    email: cs@cpanel.net
+    name: WebPros International, LLC
+    url: https://cpanel.net/support/
+  description: WHM API.
+  license:
+    name: cPanel License
+    url: https://cpanel.net/legal-notices/
+  termsOfService: https://cpanel.net/legal-notices/
+  title: WHM Packages API
+  version: 11.137.9999.106
+  x-api-evangelist-provenance: 'Harvested verbatim from cPanel''s developer portal on 2026-09-05 via the MCP tool get-full-api-description at https://api.docs.cpanel.net/mcp. ONE mechanical change was made before storage: example values containing PEM private-key or certificate blocks, and AWS-access-key-shaped example strings, were replaced with REDACTED_* placeholders so the file can be stored in a public git repository without tripping secret scanning. No path, operation, parameter, schema or description was altered, added or removed.'
+servers:
+- description: A server running WHM.
+  url: https://{host}:{port}/json-api
+  variables:
+    host:
+      default: whm-server.tld
+      description: The hostname of a server running WHM.
+    port:
+      default: '2087'
+      description: The WHM port.
+security:
+- BasicAuth: []
+tags:
+- description: The Packages module for WHM API 1.
+  name: Packages
+paths:
+  /_getpkgextensionform:
+    get:
+      description: 'This function retrieves a hosting plan''s package extension templates. When you call this
+
+        function, the system checks the hosting plan''s `_PACKAGE_EXTENSIONS` value. The function
+
+        returns the contents of the `/var/cpanel/packages/extensions/name.tt2` file for each package
+
+        extension in the list, where name represents the package extension''s name.
+
+
+        For more information, read our
+
+        Guide to Package Extensions.
+
+
+        **Note:**
+
+
+        This function returns only metadata if the hosting plan does not use package extensions, or
+
+        if the extensions'' template files are empty.'
+      operationId: Accounts-_getpkgextensionform
+      parameters:
+      - description: The hosting plan's name.
+        in: query
+        name: pkg
+        required: true
+        schema:
+          example: package1
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      html:
+                        description: The HTML and Template Toolkit soure code for the hosting plan's extensions' templates.
+                        example: <div class="fatBorder" id="dog_Extension"> <fieldset class="groupEditor"> <div class="propertyGroup"> <h3>Dog Settings</h3> <div class="propertyEditor"> <div class="propertyLabel">Dog Species</div> <div class="propertyValue"><input id="dog_species" type="text" name="dog_species" value="dalmatian"></div> </div> <div class="propertyEditor"> <div class="propertyLabel">Tail Length</div> <div class="propertyValue"> <input type="radio" id="dogTailLengthTiny" name="dog_tail_length" value="tiny"> <label for="dogTailLengthTiny">Tiny</label><br> <input type="radio" id="dogTailLengthNormal" name="dog_tail_length" value="normal"> <label for="dogTailLengthNormal">Normal</label><br> <input type="radio" id="dogTailLengthLong" name="dog_tail_length" value="long"> <label for="dogTailLengthLong">Long</label> </div> </div> <div class="propertyEditor"> <div class="propertyLabel"><label for="dog_spots">Has Spots</label></div> <div class="propertyValue"> <input id="dog_spots" type="checkbox" name="dog_spots" value="y" checked="checked"> </div> </div> </div> </fieldset> </div>
+                        type: string
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: _getpkgextensionform
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is 0. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` - Success
+
+                          * `0` - Failed: Check the reason field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Return hosting plan extension templates
+      tags:
+      - Packages
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  _getpkgextensionform \\\n  pkg='package1'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/_getpkgextensionform?api.version=1&pkg=package1
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11.40'
+  /add_override_features_for_user:
+    get:
+      description: This function adds feature overrides to a cPanel account.
+      operationId: Accounts-add_override_features_for_user
+      parameters:
+      - content:
+          application/json:
+            schema:
+              additionalProperties:
+                description: 'Whether to enable or disable a feature.
+
+
+                  * `1` — Enable.
+
+                  * `0` — Disable.
+
+
+                  **Note:**
+
+
+                  For a list of available features, use WHM API 1''s `get_feature_names` function.'
+                enum:
+                - 1
+                - 0
+                type: integer
+              example:
+                backup: 1
+              type: object
+        description: A JSON-encoded list of features to override and whether to enable or disable them.
+        in: query
+        name: features
+        required: true
+      - description: The cPanel username.
+        in: query
+        name: user
+        required: true
+        schema:
+          example: username
+          format: username
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: add_override_features_for_user
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 1
+                        - 0
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Add cPanel account feature list overrides
+      tags:
+      - Packages
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  add_override_features_for_user \\\n  user='username' \\\n  features='{\"backup\":\"1\"}'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/add_override_features_for_user?api.version=1&user=username&features=%7b%22backup%22%3a%221%22%7d
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '56'
+  /addpkg:
+    get:
+      description: 'This function creates a hosting plan (package).
+
+
+        **Note:**
+
+
+        The Access Control Lists
+
+        restricts some of this function''s parameters, which limit the features that
+
+        WHM users can access.'
+      operationId: Packages-addpkg
+      parameters:
+      - description: 'The new hosting plan''s name.
+
+
+          **Note:**
+
+
+          * You **cannot** use the name `extensions` for a hosting plan.
+
+          * You **cannot** modify hosting plan names after creation. Do **not**
+
+          include details that may change over time, such as price.'
+        in: query
+        name: name
+        required: true
+        schema:
+          example: package1
+          type: string
+      - description: 'A space-separated list of the hosting plan''s
+
+          [package extensions](https://go.cpanel.net/GuidetoPackageExtensions).
+
+
+          If you do **not** provide a value, the hosting plan will **not** include package
+
+          extensions.
+
+
+          **Note:**
+
+
+          * We **strongly** recommend that you manage package extensions through WHM API
+
+          1''s `addpkgext` and `delpkgext` functions.
+
+          * You can include the extension''s variables in your function call, in `key=value` format.
+
+          Consult the extension''s documentation for a list of possible variables.
+
+          * Extension names and variables are case-sensitive.'
+        in: query
+        name: _PACKAGE_EXTENSIONS
+        required: false
+        schema:
+          example: '''extension1 extension2 extension3'''
+          type: string
+      - description: 'The hosting plan''s maximum bandwidth use, in megabytes (MB).
+
+
+          * `0`, `unlimited`, or `null` — The hosting plan allows unlimited bandwidth.
+
+
+          **Note:**
+
+
+          The `0`, `unlimited`, and `null` values are **only** available to users that possess
+
+          the corresponding unlimited ACL permission.'
+        in: query
+        name: bwlimit
+        required: false
+        schema:
+          default: 1048576
+          example: 1048576
+          oneOf:
+          - maximum: 999999
+            minimum: 0
+            type: integer
+          - description: The hosting plan allows unlimited bandwidth.
+          - enum:
+            - null
+          - enum:
+            - unlimited
+            type: string
+      - description: 'Whether CGI access is enabled for the account.
+
+
+          * `1` — Enabled.
+
+          * `0` — Disabled.
+
+
+          **Note:**
+
+
+          When a
+
+          [server profile](https://go.cpanel.net/whmdocsServerProfile) disables the
+
+          [Web Server role](https://go.cpanel.net/serverroles#roles), this parameter
+
+          defaults to `0`. On these servers, you **cannot** enable CGI access.'
+        in: query
+        name: cgi
+        required: false
+        schema:
+          default: 1
+          enum:
+          - 1
+          - 0
+          example: 1
+          type: integer
+      - description: 'The hosting plan''s cPanel theme.
+
+
+          This parameter defaults to the server''s
+
+          [default cPanel theme](https://go.cpanel.net/whmdocsBasicasisWebHostManagerSetup#select-a-default-theme-for-the-cpanel-interface).'
+        in: query
+        name: cpmod
+        required: false
+        schema:
+          example: jupiter
+          type: string
+      - description: 'Whether to enable Digest Authentication for accounts on the hosting plan.
+
+
+          * `1` — Enable.
+
+          * `0` — Disable.'
+        in: query
+        name: digestauth
+        required: false
+        schema:
+          default: 0
+          enum:
+          - 1
+          - 0
+          example: 1
+          type: integer
+      - description: 'The hosting plan''s feature list.
+
+
+          If you do **not** use this parameter, the function assigns the `default`
+
+          feature list to the account.'
+        in: query
+        name: featurelist
+        required: false
+        schema:
+          default: default
+          example: feature_list
+          type: string
+      - deprecated: true
+        description: 'Whether Microsoft® FrontPage® Extensions are enabled for the account.
+
+
+          * `1` — Enabled.
+
+          * `0` — Disabled.
+
+
+          **Note:**
+
+
+          cPanel & WHM ignores all FrontPage settings and parameters.'
+        in: query
+        name: frontpage
+        required: false
+        schema:
+          default: 0
+          enum:
+          - 1
+          - 0
+          example: 0
+          type: integer
+      - description: 'Whether the hosting plan allows shell access.
+
+
+          * `1` — The hosting plan allows shell access.
+
+          * `0` — The hosting plan does **not** allows shell access.'
+        in: query
+        name: hasshell
+        required: false
+        schema:
+          default: 0
+          enum:
+          - 1
+          - 0
+          example: 1
+          type: integer
+      - description: 'Whether the account has a dedicated IP address.
+
+
+          * `y` — The account possesses a dedicated IP address.
+
+          * `n` — The account does not possess a dedicated IP address.'
+        in: query
+        name: ip
+        required: false
+        schema:
+          default: n
+          enum:
+          - y
+          - n
+          example: n
+          type: string
+      - description: 'The hosting plan''s default locale, in its two-letter
+
+          [ISO-3166 code](http://www.iso.org/iso/country_codes.htm)
+
+          format.
+
+
+          This parameter defaults to the server''s default locale.'
+        in: query
+        name: language
+        required: false
+        schema:
+          example: en
+          format: ISO-3166-1 (alpha-2)
+          type: string
+      - description: 'The percentage of failed or deferred email messages that the hosting plan allows users
+
+          to send per hour before outgoing mail is rate-limited.
+
+
+          * `0` or `unlimited` — The hosting plan allows users ot send an unlimited number of
+
+          failed or deferred messages.'
+        in: query
+        name: MAX_DEFER_FAIL_PERCENTAGE
+        required: false
+        schema:
+          default: unlimited
+          example: unlimited
+          oneOf:
+          - minimum: 0
+            type: integer
+          - description: The hosting plan allows users ot send an unlimited number of failed or deferred messages.
+            enum:
+            - unlimited
+            type: string
+      - description: 'The maximum number of emails that the hosting plan allows users to send in one hour.
+
+
+          * `0` or `unlimited` — The hosting plan allows users to send an unlimited number of emails.'
+        in: query
+        name: MAX_EMAIL_PER_HOUR
+        required: false
+        schema:
+          default: unlimited
+          example: unlimited
+          oneOf:
+          - minimum: 0
+            type: integer
+          - description: The hosting plan allows users to send an unlimited number of emails.
+            enum:
+            - unlimited
+            type: string
+      - description: 'The hosting plan''s maximum email account quota size, in megabytes (MB).
+
+
+          * `0`, `unlimited`, or `null` — The hosting plan allows unlimited email account quota.
+
+
+          **Note:**
+
+
+          The `0`, `unlimited`, and `null` values are **only** available to users that possess
+
+          the corresponding unlimited ACL permission.'
+        in: query
+        name: max_emailacct_quota
+        required: false
+        schema:
+          default: 1024
+          example: 1024
+          oneOf:
+          - maximum: 4294967296
+            minimum: 0
+            type: integer
+          - description: The hosting plan allows unlimited email account quota.
+          - enum:
+            - null
+          - enum:
+            - unlimited
+            type: string
+      - description: The hosting plan's maximum number of Team users.
+        in: query
+        name: max_team_users
+        required: false
+        schema:
+          example: 7
+          maximum: 7
+          minimum: 0
+          type: integer
+      - description: 'The hosting plan''s maximum number of addon domains.
+
+
+          * `unlimited` or `null` — The hosting plan allows unlimited addon domains.'
+        in: query
+        name: maxaddon
+        required: false
+        schema:
+          default: 0
+          example: unlimited
+          oneOf:
+          - maximum: 999999
+            minimum: 0
+            type: integer
+          - description: The hosting plan allows unlimited addon domains.
+          - enum:
+            - null
+          - enum:
+            - unlimited
+            type: string
+      - description: 'The hosting plan''s maximum number of FTP accounts.
+
+
+          * `unlimited`, or `null` — The hosting plan allows unlimited FTP accounts.'
+        in: query
+        name: maxftp
+        required: false
+        schema:
+          default: unlimited
+          example: unlimited
+          oneOf:
+          - maximum: 999999
+            minimum: 0
+            type: integer
+          - description: The hosting plan allows unlimited FTP accounts.
+          - enum:
+            - null
+          - enum:
+            - unlimited
+            type: string
+      - description: 'The hosting plan''s maximum number of mailing lists.
+
+
+          * `unlimited`, or `null` — The hosting plan allows unlimited mailing lists.'
+        in: query
+        name: maxlst
+        required: false
+        schema:
+          default: unlimited
+          example: unlimited
+          oneOf:
+          - maximum: 999999
+            minimum: 0
+            type: integer
+          - description: The hosting plan allows unlimited mailing lists.
+          - enum:
+            - null
+          - enum:
+            - unlimited
+            type: string
+      - description: 'The hosting plan''s maximum number of parked domains (aliases).
+
+
+          * `unlimited` or `null` — The hosting plan allows unlimited parked domains.'
+        in: query
+        name: maxpark
+        required: false
+        schema:
+          default: 0
+          example: unlimited
+          oneOf:
+          - maximum: 999999
+            minimum: 0
+            type: integer
+          - description: The hosting plan allows unlimited parked domains.
+          - enum:
+            - null
+          - enum:
+            - unlimited
+            type: string
+      - description: 'The hosting plan''s maximum number of email accounts.
+
+
+          * `unlimited`, or `null` — The hosting plan allows unlimited email accounts.'
+        in: query
+        name: maxpop
+        required: false
+        schema:
+          default: unlimited
+          example: unlimited
+          oneOf:
+          - maximum: 999999
+            minimum: 0
+            type: integer
+          - description: The hosting plan allows unlimited email accounts.
+          - enum:
+            - null
+          - enum:
+            - unlimited
+            type: string
+      - description: 'The hosting plan''s maximum number of each available type of SQL
+
+          database.
+
+
+          For example, if you set this value to `5` and the system administrator
+
+          allows MySQL® and PostgreSQL® databases, users can create up to five MySQL
+
+          databases and up to five PostgreSQL databases.
+
+
+          * `unlimited`, or `null` — The hosting allows unlimited databases.'
+        in: query
+        name: maxsql
+        required: false
+        schema:
+          default: unlimited
+          example: unlimited
+          oneOf:
+          - maximum: 999999
+            minimum: 0
+            type: integer
+          - description: The hosting plan allows unlimited databases.
+          - enum:
+            - null
+          - enum:
+            - unlimited
+            type: string
+      - description: 'The hosting plan''s maximum number of subdomains.
+
+
+          * `unlimited`, or `null` — The hosting plan allows unlimited subdomains.'
+        in: query
+        name: maxsub
+        required: false
+        schema:
+          default: unlimited
+          example: unlimited
+          oneOf:
+          - maximum: 999999
+            minimum: 0
+            type: integer
+          - description: The hosting plan allows unlimited subdomains.
+          - enum:
+            - null
+          - enum:
+            - unlimited
+            type: string
+      - description: 'The hosting plan''s disk space quota, in megabytes (MB).
+
+
+          * `0`, `unlimited`, or `null` — The hosting plan allows unlimited disk space.
+
+
+          **Note:**
+
+
+          The `0`, `unlimited`, and `null` values are **only** available to users that possess
+
+          the corresponding unlimited ACL permission.'
+        in: query
+        name: quota
+        required: false
+        schema:
+          default: 10240
+          example: 10240
+          oneOf:
+          - maximum: 999999
+            minimum: 0
+            type: integer
+          - description: The hosting plan allows unlimited disk space.
+          - enum:
+            - null
+          - enum:
+            - unlimited
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      pkg:
+                        description: The new hosting plan's name.
+                        example: package1
+                        type: string
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: addpkg
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 1
+                        - 0
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Create hosting plan
+      tags:
+      - Packages
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  addpkg \\\n  name='package1'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/addpkg?api.version=1&name=package1
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11'
+  /addpkgext:
+    get:
+      description: 'This function adds a package extension to a hosting plan (package).
+
+
+        **Notes:**
+
+
+        * If you need to edit a package extension''s parameters, call this function again
+
+        with the same package extension name and the updated package extension variables.
+
+
+        * You can include the extension''s variables in your function call, in `key=value` format.
+
+        Consult the extension''s documentation for a list of possible variables. Extension variables
+
+        are case-sensitive.'
+      operationId: Packages-addpkgext
+      parameters:
+      - description: 'The hosting plan''s
+
+          [package extensions](https://go.cpanel.net/GuidetoPackageExtensions).
+
+
+          **Note:**
+
+
+          * Use space-delimited format to add multiple package extensions.
+
+          * Extension names are case-sensitive.'
+        examples:
+          multiple:
+            summary: Add multiple package extensions.
+            value: extension1 extension2 extension3
+          single:
+            summary: Add a single package extension.
+            value: extension1
+        explode: false
+        in: query
+        name: _PACKAGE_EXTENSIONS
+        required: true
+        schema:
+          type: string
+        style: spaceDelimited
+      - description: 'The hosting plan''s name.
+
+
+          **Note:**
+
+
+          You **cannot** use the `extensions` name for a hosting plan.'
+        in: query
+        name: name
+        required: true
+        schema:
+          example: package1
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      pkg:
+                        description: The hosting plan's name.
+                        example: package1
+                        type: string
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: addpkgext
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 1
+                        - 0
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Add hosting plan extension
+      tags:
+      - Packages
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  addpkgext \\\n  name='package1' \\\n  _PACKAGE_EXTENSIONS='extension1'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/addpkgext?api.version=1&name=package1&_PACKAGE_EXTENSIONS=extension1
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '68'
+  /changepackage:
+    get:
+      description: This function changes a cPanel account's hosting plan (package).
+      operationId: Accounts-changepackage
+      parameters:
+      - description: The hosting plan's name.
+        in: query
+        name: pkg
+        required: true
+        schema:
+          example: package1
+          type: string
+      - description: The cPanel account's username.
+        in: query
+        name: user
+        required: true
+        schema:
+          example: username
+          format: username
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: changepackage
+                        type: string
+                      output:
+                        properties:
+                          raw:
+                            example: '<pre>
+
+                              Changing the account bandwidth limit from “0” to “unlimited”.
+
+                              Changing Feature List to default
+
+                              Changing the maximum email accounts from “unlimited” to “unlimited”.
+
+                              Changing the maximum SQL databases from “unlimited” to “unlimited”.
+
+                              Changing the maximum FTP accounts from “unlimited” to “unlimited”.
+
+                              Changing the maximum mailing lists from “unlimited” to “unlimited”.
+
+                              Changing the maximum subdomains from “unlimited” to “unlimited”.
+
+                              Changing the maximum email quota from “unlimited” to “unlimited” …
+
+                              Changing "Maximum Hourly Email by Domain Relayed" from unlimited to unlimited
+
+                              Changing "Maximum percentage of failed or deferred messages a domain may send per hour" from unlimited to unlimited
+
+                              Changing the maximum parked domains from “unlimited” to “0”.
+
+                              Changing the maximum addon domains from “unlimited” to “0”.
+
+                              Removing Shell Access
+
+                              Shell changed
+
+                              Changing cPanel theme from jupiter to jupiter
+
+                              Changing plan from default to boo
+
+                              Bandwidth limit (unlimited) is lower than (unlimited) (all limits removed)<br /><blockquote><div style=''float:left;''>Enabling...</div><div style=''float:left;''>...exampleaddon.com...</div><div style=''float:left;''>...exampleaddon.example.com...</div><div style=''float:left;''>...example.com...</div><div style=''float:left;''>Done</div></blockquote><br /><div class=''clearit'' style=''clear:both; width:80%;''> </div>Setting quota to “unlimited”.
+
+                              <span class="b2">Warning, this will not change shared IP accounts to dedicated IP accounts, or the reverse.</span>
+
+                              <span class="b2">Warning: Changing a user’s package does not affect their Digest Authentication settings.</span>
+
+                              </pre>'
+                            type: string
+                        type: object
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Update user hosting plan
+      tags:
+      - Packages
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  changepackage \\\n  user='username' \\\n  pkg='package1'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/changepackage?api.version=1&user=username&pkg=package1
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11'
+  /create_featurelist:
+    get:
+      description: 'This function creates or updates a feature list.
+
+
+        **Note:**
+
+
+        A reseller **must** possess the
+
+        Add/Remove Package feature
+
+        to use this function.'
+      operationId: FeatureLists-create_featurelist
+      parameters:
+      - description: The feature list's name.
+        in: query
+        name: featurelist
+        required: true
+        schema:
+          example: CustomFeatureList
+          type: string
+      - description: 'Whether to add a specific feature in the feature list.
+
+
+          * `1` — Add the feature.
+
+          * `0` — Do **not** add the feature.
+
+
+          **Note:**
+
+
+          * The parameter''s name is a feature''s name. For example, the `changemx=1`
+
+          adds the *Change Mail Exchanger* feature to the feature list.
+
+
+          * You can add or omit multiple features.'
+        in: query
+        name: featurelistname
+        required: false
+        schema:
+          default: 0
+          enum:
+          - 1
+          - 0
+          example: 1
+          type: integer
+      - description: 'Whether to overwrite an existing feature list.
+
+
+          * `1` — Overwrite.
+
+          * `0` — Do **not** overwrite.'
+        in: query
+        name: overwrite
+        required: false
+        schema:
+          default: 0
+          enum:
+          - 1
+          - 0
+          example: 1
+          type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      featurelist:
+                        description: The feature list's name.
+                        example: Arthur
+                        type: string
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: create_featurelist
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 1
+                        - 0
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Create feature list
+      tags:
+      - Packages
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  create_featurelist \\\n  featurelist=Arthur webmail=1 changemx=1 overwrite=1\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/create_featurelist?api.version=1&featurelist=Arthur&webmail=1&changemx=1&overwrite=1
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11.46'
+  /delete_featurelist:
+    get:
+      description: This function deletes a feature list.
+      operationId: FeatureLists-delete_featurelist
+      parameters:
+      - description: The feature list's name.
+        in: query
+        name: featurelist
+        required: true
+        schema:
+          example: TestList
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      deleted_featurelist:
+                        description: The deleted feature list's name.
+                        example: TestList
+                        type: string
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: delete_featurelist
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 1
+                        - 0
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Delete feature list
+      tags:
+      - Packages
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  delete_featurelist \\\n  featurelist='TestList'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/delete_featurelist?api.version=1&featurelist=TestList
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11'
+  /delpkgext:
+    get:
+      description: 'This function deletes a package extension from a hosting plan (package).
+
+
+        **Note:**
+
+
+        * You can additionally include extension''s variables in your function call, in `key=value` format.
+
+        Consult the extension''s documentation for a list of possible variables. Extension variable names are case-sensitive.'
+      operationId: Packages-delpkgext
+      parameters:
+      - description: 'The space delimited
+
+          [package extensions](https://go.cpanel.net/GuidetoPackageExtensions)
+
+          to delete.
+
+
+          **Note:**
+
+
+          * Extension names are case-sensitive.'
+        explode: true
+        in: query
+        name: _DELETE_EXTENSIONS
+        required: true
+        schema:
+          example: extension1 extension2
+          type: string
+        style: spaceDelimited
+      - description: The hosting plan's name.
+        in: query
+        name: name
+        required: true
+        schema:
+          example: package1
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      pkg:
+                        description: The deleted hosting plan's name.
+                        example: package1
+                        type: string
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: delpkgext
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 1
+                        - 0
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Remove hosting plan extension
+      tags:
+      - Packages
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  delpkgext \\\n  name='package1' \\\n  _DELETE_EXTENSIONS='extension1 extension2'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/delpkgext?api.version=1&name=package1&_DELETE_EXTENSIONS=extension1%20extension2
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '68'
+  /editpkg:
+    get:
+      description: 'This function edits a hosting plan (package).
+
+
+        **Note:**
+
+
+        * The
+
+        Access Control List (ACL)
+
+        restricts some of the function''s parameters, which limit the features that WHM
+
+        users can access.
+
+        * This function applies any changes you make to **all** accounts that exist on
+
+        the hosting plan.
+
+        * This function **cannot** modify hosting plan names.'
+      operationId: Packages-editpkg
+      parameters:
+      - description: The hosting plan's name. If the hosting plan does not exist, the system will create it.
+        in: query
+        name: name
+        required: true
+        schema:
+          example: package1
+          type: string
+      - description: 'The hosting plan''s [package extensions](https://go.cpanel.net/GuidetoPackageExtensions).
+
+
+          If you do **not** provide a value, the hosting plan will **not** include package
+
+          extensions.
+
+
+          **Note:**
+
+
+          * We **strongly** recommend that you manage package extensions through WHM API
+
+          1''s `addpkgext` and `delpkgext` functions.
+
+          * You can include the extension''s variables in your function call, in `key=value` format.
+
+          Consult the extension''s documentation for a list of possible variables.
+
+          * Extension names and variables are case-sensitive.
+
+          * Use space-delimited format to add multiple package extensions.'
+        examples:
+          multiple:
+            summary: Add multiple package extensions.
+            value: extension1 extension2 extension3
+          single:
+            summary: Add a single package.
+            value: extension1
+        in: query
+        name: _PACKAGE_EXTENSIONS
+        required: false
+        schema:
+          type: string
+      - description: 'The hosting plan''s maximum bandwidth use, in megabytes (MB).
+
+
+          * `0`, `unlimited`, or `null` — The hosting plan allows unlimited
+
+          bandwidth.
+
+
+          **Note:**
+
+
+          The `0`, `unlimited`, or `null` values are **only** available to
+
+          users that possess the corresponding `unlimited` ACL permission.'
+        in: query
+        name: bwlimit
+        required: false
+        schema:
+          default: 1048576
+          example: 1048576
+          oneOf:
+          - maximum: 999999
+            minimum: 0
+            type: integer
+          - enum:
+            - null
+          - enum:
+            - unlimited
+            type: string
+      - description: 'Whether CGI access is enabled for the hosting plan.
+
+
+          * `1` — Enabled.
+
+          * `0` — Disabled.
+
+
+          **Note:**
+
+
+          When a [server profile](https://go.cpanel.net/whmdocsServerProfile) disables
+
+          the [Web Server role](https://go.cpanel.net/serverroles#roles), this parameter
+
+          defaults to `0`. On these servers, you **cannot** enable CGI access.'
+        in: query
+        name: cgi
+        required: false
+        schema:
+          default: 1
+          enum:
+          - 1
+          - 0
+          example: 1
+          type: integer
+      - description: 'The hosting plan''s cPanel theme.
+
+
+          This parameter defaults to the server''s
+
+          [default cPanel theme](https://go.cpanel.net/whmdocsBasicasisWebHostManagerSetup).'
+        in: query
+        name: cpmod
+        required: false
+        schema:
+          example: jupiter
+          type: string
+      - description: 'Whether to enable Digest Authentication for accounts on the hosting plan.
+
+
+          * `1` — Enable.
+
+          * `0` — Disable.'
+        in: query
+        name: digestauth
+        required: false
+        schema:
+          default: 0
+          enum:
+          - 1
+          - 0
+          example: 1
+          type: integer
+      - description: 'The hosting plan''s feature list.
+
+
+          If you do **not** use this parameter, the function assigns the `default`
+
+          feature list to the hosting plan''s accounts.'
+        in: query
+        name: featurelist
+        required: false
+        schema:
+          default: default
+          example: default
+          type: string
+      - deprecated: true
+        description: 'Whether Microsoft® FrontPage Extensions are enabled for the account.
+
+
+          **Note:**
+
+
+          cPanel & WHM ignores all FrontPage settings and parameters.'
+        in: query
+        name: frontpage
+        required: false
+        schema:
+          default: 0
+          enum:
+          - 1
+          - 0
+          example: 0
+          type: integer
+      - description: 'Whether the hosting plan allows shell access.
+
+
+          * `1` — The hosting plan allows shell access.
+
+          * `0` — The hosting plan does **not** allow shell access.'
+        in: query
+        name: hasshell
+        required: false
+        schema:
+          default: 0
+          enum:
+          - 1
+          - 0
+          example: 1
+          type: integer
+      - description: 'Whether the hosting plan uses a dedicated IP address.
+
+
+          * `y` — The hosting plan uses a dedicated IP address.
+
+          * `n` — The hosting plan does **not** use a dedicated IP address.'
+        in: query
+        name: ip
+        required: false
+        schema:
+          default: n
+          enum:
+          - y
+          - n
+          example: n
+          type: string
+      - description: 'The hosting plan''s default locale.
+
+
+          This parameter defaults to the server''s default locale.'
+        in: query
+        name: language
+        required: false
+        schema:
+          example: en
+          format: ISO-3166-1 (alpha-2)
+          type: string
+      - description: 'The percentage of failed or deferred email messages that an account on the
+
+          hosting plan can send per hour before outgoing mail is rate-limited.
+
+
+          * `0` or `unlimited` — The hosting plan allows unlimited email messages per hour.'
+        in: query
+        name: max_defer_fail_percentage
+        required: false
+        schema:
+          default: unlimited
+          example: unlimited
+          oneOf:
+          - minimum: 0
+            type: integer
+          - enum:
+            - unlimited
+            type: string
+      - description: 'The maximum number of emails that the hosting plan allows accounts to send
+
+          in one hour.
+
+
+          * `0` or `unlimited` — The hosting plan allows unlimited emails per hour.'
+        in: query
+        name: max_email_per_hour
+        required: false
+        schema:
+          default: unlimited
+          example: unlimited
+          oneOf:
+          - maximum: 999999
+            minimum: 0
+            type: integer
+          - enum:
+            - unlimited
+            type: string
+      - description: 'The hosting plan''s maximum email account quota size, in megabytes (MB).
+
+
+          * `0`, `null, or `unlimited` — The hosting plan allows unlimited quota.
+
+
+          **Note:**
+
+
+          * This parameter does **not** affect any existing email accounts.
+
+          * The `unlimited` value is **only** available to users that possess
+
+          the corresponding `unlimited` ACL permission.'
+        in: query
+        name: max_emailacct_quota
+        required: false
+        schema:
+          default: 1024
+          example: 1024
+          oneOf:
+          - maximum: 4294967296
+            minimum: 0
+            type: integer
+          - enum:
+            - null
+          - enum:
+            - unlimited
+            type: string
+      - description: The hosting plan's maximum number of Team users.
+        in: query
+        name: max_team_users
+        required: false
+        schema:
+          example: 7
+          maximum: 7
+          minimum: 0
+          type:
+          - integer
+          - 'null'
+      - description: 'The hosting plan''s maximum number of addon domains.
+
+
+          * `unlimited` or `null` — The hosting plan allows unlimited
+
+          addon domains.'
+        in: query
+        name: maxaddon
+        required: false
+        schema:
+          default: 0
+          example: unlimited
+          oneOf:
+          - maximum: 999999
+            minimum: 0
+            type: integer
+          - enum:
+            - null
+          - enum:
+            - unlimited
+            type: string
+      - description: 'The hosting plan''s maximum number of FTP accounts.
+
+
+          * `unlimited`, or `null` — The hosting plan allows unlimited databases.'
+        in: query
+        name: maxftp
+        required: false
+        schema:
+          default: unlimited
+          example: unlimited
+          oneOf:
+          - maximum: 999999
+            minimum: 0
+            type: integer
+          - enum:
+            - null
+          - enum:
+            - unlimited
+            type: string
+      - description: 'The hosting plan''s maximum number of mailing lists.
+
+
+          * `unlimited`, or `null` — The hosting plan allows unlimited
+
+          mailing lists.'
+        in: query
+        name: maxlst
+        required: false
+        schema:
+          default: unlimited
+          example: unlimited
+          oneOf:
+          - maximum: 999999
+            minimum: 0
+            type: integer
+          - enum:
+            - null
+          - enum:
+            - unlimited
+            type: string
+      - description: 'The hosting plan''s maximum number of parked domains (aliases).
+
+
+          * `unlimited` or `null` — The hosting plan allows unlimited parked
+
+          domains.'
+        in: query
+        name: maxpark
+        required: false
+        schema:
+          default: 0
+          example: unlimited
+          oneOf:
+          - maximum: 999999
+            minimum: 0
+            type: integer
+          - enum:
+            - null
+          - enum:
+            - unlimited
+            type: string
+      - description: 'The hosting plan''s maximum number of email accounts.
+
+
+          * `unlimited`, or `null` — The hosting plan allows unlimited
+
+          email accounts.'
+        in: query
+        name: maxpop
+        required: false
+        schema:
+          default: unlimited
+          example: unlimited
+          oneOf:
+          - maximum: 999999
+            minimum: 0
+            type: integer
+          - enum:
+            - null
+          - enum:
+            - unlimited
+            type: string
+      - description: 'The hosting plan''s maximum number of each available type of SQL
+
+          database.
+
+
+          For example, if you set this value to `5` and the system administrator
+
+          allows MySQL® and PostgreSQL® databases, users with this hosting plan
+
+          can create up to five MySQL databases and up to five PostgreSQL databases.
+
+
+          * `unlimited`, or `null` — The hosting plan allows unlimited
+
+          databases.'
+        in: query
+        name: maxsql
+        required: false
+        schema:
+          default: unlimited
+          example: unlimited
+          oneOf:
+          - maximum: 999999
+            minimum: 0
+            type: integer
+          - enum:
+            - null
+          - enum:
+            - unlimited
+            type: string
+      - description: 'The hosting plan''s maximum number of subdomains.
+
+
+          * `unlimited`, or `null` — The hosting plan allows unlimited
+
+          subdomains.'
+        in: query
+        name: maxsub
+        required: false
+        schema:
+          default: unlimited
+          example: unlimited
+          oneOf:
+          - maximum: 999999
+            minimum: 0
+            type: integer
+          - enum:
+            - null
+          - enum:
+            - unlimited
+            type: string
+      - description: 'The hosting plan''s disk space quota, in megabytes (MB).
+
+
+          * `0`, `unlimited`, or `null` — The hosting plan allows unlimited
+
+          disk space quota.
+
+
+          **Note:**
+
+
+          The `0`, `unlimited`, or `null` values are **only** available to
+
+          users that possess the corresponding `unlimited` ACL permission.'
+        in: query
+        name: quota
+        required: false
+        schema:
+          default: 10240
+          example: 10240
+          oneOf:
+          - maximum: 999999
+            minimum: 0
+            type: integer
+          - enum:
+            - null
+          - enum:
+            - unlimited
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      pkg:
+                        description: The new hosting plan's name.
+                        example: package1
+                        type: string
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: editpkg
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 1
+                        - 0
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Update hosting plan
+      tags:
+      - Packages
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  editpkg \\\n  name='package1'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/editpkg?api.version=1&name=package1
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11'
+  /get_available_applications:
+    get:
+      description: 'This function returns the contents of a `dynamicui` file. For more
+
+        information, read our
+
+        Guide to WHM dynamicui Files
+
+        documentation.'
+      operationId: DynamicUI-get_available_applications
+      parameters:
+      - description: 'A comma-separated list of the application entries to return.
+
+
+          To determine the application''s name, find its
+
+          [`file` value in the `dynamicui.conf` file](https://go.cpanel.net/GuidetoWHMdynamicuiFiles),
+
+          and then remove the file extension.
+
+
+          If you do not specify this value, the function returns the entire `dynamicui.conf`
+
+          file.'
+        in: query
+        name: applications_list
+        required: false
+        schema:
+          example: create_support_ticket
+          type: string
+      - description: The `dynamicui` configuration file to retrieve, relative to the `/usr/local/cpanel/whostmgr/docroot/themes/x/` directory.
+        in: query
+        name: file
+        required: false
+        schema:
+          default: dynamicui.conf
+          example: dynamicui.conf
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      groups:
+                        description: An array of objects containing the file's contents.
+                        items:
+                          $ref: '#/components/schemas/Group'
+                      raw:
+                        description: An array of objects containing the file's raw data for template directives.
+                        items:
+                          $ref: '#/components/schemas/Raw'
+                        type: array
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: get_available_applications
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` - Success
+
+                          * `0` - Failed: Check the reason field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Return dynamicui file
+      tags:
+      - Packages
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  get_available_applications\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/get_available_applications?api.version=1
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '76'
+  /get_available_featurelists:
+    get:
+      deprecated: true
+      description: '**DEPRECATED:** Use `get_featurelists` instead.
+
+
+        This function lists the authenticated user''s available feature lists.
+
+
+        **Notes:**
+
+
+        * This function is deprecated because it treats a lack of available feature lists as an error for non-admin resellers, which is incorrect behavior.
+
+        * When you call this function with the `root` account, it returns **all** feature lists on the server.
+
+        * When you call this function with a reseller account, it **only** returns feature lists that the account owns.'
+      operationId: FeatureLists-get_available_featurelists
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      available_featurelists:
+                        description: An array of available feature lists.
+                        example:
+                        - default
+                        - disabled
+                        - reseller1_test1
+                        items:
+                          example: default
+                          type: string
+                        type: array
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: get_available_featurelists
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                    type: object
+              examples:
+                success:
+                  value:
+                    metadata:
+                      command: get_available_featurelists
+                      reason: OK
+                      result: 1
+                      version: 1
+                    data:
+                      available_featurelists:
+                      - default
+                      - disabled
+                      - reseller1_test1
+                error:
+                  value:
+                    metadata:
+                      command: get_available_featurelists
+                      reason: Unable to retrieve list of available featurelists
+                      result: 0
+                      version: 1
+          description: HTTP Request was successful.
+      summary: (Deprecated) Get available feature lists
+      tags:
+      - Packages
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  get_available_featurelists\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/get_available_featurelists?api.version=1
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11.0'
+  /get_feature_metadata:
+    get:
+      description: This function lists the details of the authenticated user's available feature lists.
+      operationId: FeatureLists-get_feature_metadata
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      features:
+                        description: An array of objects containing information about a feature.
+                        items:
+                          properties:
+                            id:
+                              description: The feature's ID.
+                              example: addondomains
+                              type: string
+                            is_plugin:
+                              description: 'Whether the feature is a plugin.
+
+
+                                * `1` — Plugin.
+
+                                * `0` — **Not** a plugin.'
+                              enum:
+                              - 1
+                              - 0
+                              example: 0
+                              type: integer
+                            name:
+                              description: The feature's name.
+                              example: Addon Domain Manager
+                              type: string
+                          type: object
+                        type: array
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: get_feature_metadata
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 1
+                        - 0
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Return current user's available feature lists info
+      tags:
+      - Packages
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  get_feature_metadata\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/get_feature_metadata?api.version=1
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11'
+  /get_feature_names:
+    get:
+      description: This function lists all available features.
+      operationId: FeatureLists-get_feature_names
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      feature:
+                        description: An array of objects that contain a list of available features.
+                        items:
+                          properties:
+                            id:
+                              description: The feature's ID.
+                              example: sslmanager
+                              type: string
+                            name:
+                              description: The feature's name.
+                              example: SSL Manager
+                              type: string
+                          type: object
+                        type: array
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: get_feature_names
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Return all features
+      tags:
+      - Packages
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  get_feature_names\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/get_feature_names?api.version=1
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11'
+  /get_featurelist_data:
+    get:
+      description: This function lists features in a specific feature list.
+      operationId: FeatureLists-get_featurelist_data
+      parameters:
+      - description: The feature list for which to list information.
+        in: query
+        name: featurelist
+        required: true
+        schema:
+          example: '"Mail Only"'
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      featurelist:
+                        description: The feature list's name.
+                        example: Mail Only
+                        type: string
+                      features:
+                        description: An array of objects containing the feature's information.
+                        items:
+                          properties:
+                            dependencies:
+                              description: List of feature names that are required dependencies for this feature to function properly.
+                              example:
+                              - ssl
+                              - dns
+                              items:
+                                type: string
+                              type: array
+                            id:
+                              description: The feature's ID.
+                              example: email_trace
+                              type: string
+                            name:
+                              description: The feature's name.
+                              example: Email Trace
+                              type: string
+                            is_disabled:
+                              description: 'Whether the feature is disabled.
+
+
+                                * `1` — Disabled.
+
+                                * `0` — **Not** disabled.
+
+
+                                **Note:**
+
+
+                                * The `disabled` feature list does **not** use this return.
+
+                                * Users on your server can''t access disabled features. For more
+
+                                information, read our
+
+                                [Feature Manager](https://go.cpanel.net/whmdocsFeatureManager)
+
+                                documentation.'
+                              enum:
+                              - 1
+                              - 0
+                              example: 0
+                              type: integer
+                            is_standalone_experience:
+                              description: 'Whether the system auto-redirects the user to the redirect_url when this feature is enabled. Only one such feature may be enabled for a feature list.
+
+
+                                * `1` — The feature supports standalone mode.
+
+                                * `0` — The feature does not support standalone mode.'
+                              enum:
+                              - 1
+                              - 0
+                              example: 0
+                              type: integer
+                            badge_label:
+                              description: Custom label shown on the feature manager interfaces. This label will be localized into the current users language.
+                              example: Auto Launch
+                              type: string
+                            badge_class:
+                              description: CSS class name to apply styling to the custom label in the feature manager interfaces.
+                              example: label-blue
+                              type: string
+                            required_package_extension:
+                              description: The ID of a package extension this feature depends on. Empty if the feature needs no extension.
+                              example: ai-app-builder
+                              type: string
+                            is_meridian_only:
+                              description: 'Whether this feature is a Meridian (theme-integrated) experience.
+
+
+                                * `1` — The feature is Meridian-only.
+
+                                * `0` — The feature is explicitly **not** Meridian-only.
+
+                                * `null` — Not explicitly set. The system derives this from
+
+                                `badge_label` for features shipped before this attribute existed.'
+                              enum:
+                              - 1
+                              - 0
+                              - null
+                              example: null
+                              type:
+                              - integer
+                              - 'null'
+                            redirect_url:
+                              description: The URL where users should be redirected to when logging into cPanel.
+                              example: https://example.com/standalone
+                              type: string
+                            suppress_plugin_label:
+                              description: 'Whether to suppress the display of the standard ''plugin'' label in the feature manager.
+
+
+                                * `1` — Hide the plugin label.
+
+                                * `0` — Show the plugin label.'
+                              enum:
+                              - 1
+                              - 0
+                              example: 0
+                              type: integer
+                            only_one_rules:
+                              description: 'Array of regular expression patterns used to enforce mutual exclusion with other features. When this feature is enabled, any features matching these patterns cannot be enabled simultaneously. This is primarily used for standalone experiences where only one feature should redirect users upon login.
+
+
+                                Each pattern in the array is a regular expression that matches against feature IDs. For example, a pattern like `^standalone-.*` would match any feature starting with "standalone-".'
+                              example:
+                              - ^(standalone-email_trace|email_trace)$
+                              - ^standalone-.*$
+                              items:
+                                type: string
+                              type: array
+                            value:
+                              description: 'Whether the feature list includes the feature.
+
+
+                                * `1` — The feature list includes this feature.
+
+                                * `0` — The feature list does **not** include this feature.
+
+
+                                **Note:**
+
+
+                                The `disabled` feature list uses the **opposite** logic for this return.
+
+
+                                * `1` — The `disabled` feature list does **not** include this feature.
+
+                                * `0` — The `disabled` feature list includes this feature.'
+                              enum:
+                              - 1
+                              - 0
+                              example: 1
+                              type: integer
+                          required:
+                          - id
+                          - is_disabled
+                          - value
+                          type: object
+                        type: array
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: get_featurelist_data
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 1
+                        - 0
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Return feature list configuration
+      tags:
+      - Packages
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  get_featurelist_data \\\n  featurelist='Mail Only'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/get_featurelist_data?api.version=1&featurelist=%22Mail%20Only%22
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11'
+  /get_featurelists:
+    get:
+      description: 'This function lists the authenticated user''s available feature lists.
+
+
+        **Notes:**
+
+
+        * When you call this function with the `root` account, it returns **all** feature lists on the server.
+
+        * When you call this function with a reseller account, it **only** returns feature lists that the account owns.'
+      operationId: FeatureLists-get_featurelists
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      featurelists:
+                        description: An array of available feature lists.
+                        example:
+                        - default
+                        - disabled
+                        - reseller1_test1
+                        - reseller1_test2
+                        items:
+                          example: default
+                          type: string
+                        type: array
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: get_featurelists
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Return current user's available feature lists
+      tags:
+      - Packages
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  get_featurelists\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/get_featurelists?api.version=1
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11.52'
+  /get_featurelists_by_package_types:
+    get:
+      description: This function lists features grouped by package type.
+      operationId: FeatureLists-get_featurelists_by_package_types
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    example:
+                      package_types_feature_lists:
+                        nova:
+                        - __default_nova
+                        - nova_custom
+                        standard:
+                        - Mail Only
+                        - default
+                        - disabled
+                        - basic_plan
+                    properties:
+                      package_types_feature_lists:
+                        description: An object that contains package types as keys and arrays of feature list names as values.
+                        properties:
+                          nova:
+                            description: An array of feature list names associated with this package type.
+                            items:
+                              type: string
+                            type: array
+                          standard:
+                            description: An array of feature list names associated with this package type.
+                            items:
+                              type: string
+                            type: array
+                        required:
+                        - standard
+                        type: object
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: get_featurelists_by_package_types
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 1
+                        - 0
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Return feature lists by package type
+      tags:
+      - Packages
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  get_featurelists_by_package_types\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/get_featurelists_by_package_types?api.version=1
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11'
+  /get_users_features_settings:
+    get:
+      description: This function lists the features settings of cPanel accounts.
+      operationId: FeatureLists-get_users_features_settings
+      parameters:
+      - description: 'The user''s username.
+
+
+          **Note:**
+
+
+          To check multiple users, increment the parameter name. For example, `user-1`, `user-2`, and `user-3`.'
+        examples:
+          multiple:
+            description: Multiple users.
+            value: user-1=example1 user-2=example2 user-3=example3
+          single:
+            description: A single user.
+            value: example
+        in: query
+        name: user
+        required: true
+        schema:
+          type: string
+      - description: 'The feature''s name.
+
+
+          **Note:**
+
+
+          * To check multiple features, increment the parameter name. For example, `feature-1`, `feature-2`, and `feature-3`.
+
+          * If you use this parameter, you **must** enter a feature name, or the function returns an error. If you do **not** use this parameter, the function returns data for all features on the server.'
+        examples:
+          multiple:
+            description: Multiple feature.
+            value: feature-1=autossl feature-2=changemx feature-3=addondomains
+          single:
+            description: A single feature.
+            value: autossl
+        in: query
+        name: feature
+        required: false
+        schema:
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      users_features_settings:
+                        description: An array of objects that contain information about the feature list settings.
+                        items:
+                          properties:
+                            cpuser_setting:
+                              description: 'The user''s setting for the feature in their `cpuser` file, which overrides the `feature_list_setting` return.
+
+                                * `1` - Enabled.
+
+                                * `0` - Disabled.
+
+                                * `null` — The feature is **not** defined in the feature list.'
+                              enum:
+                              - 1
+                              - 0
+                              example: 1
+                              type:
+                              - integer
+                              - 'null'
+                            feature:
+                              description: The feature name.
+                              example: autossl
+                              type: string
+                            feature_list:
+                              description: The feature list's name.
+                              example: autossl
+                              type: string
+                            feature_list_setting:
+                              description: 'The user''s feature list setting.
+
+                                * `1` - Enabled.
+
+                                * `0` - Disabled.'
+                              enum:
+                              - 1
+                              - 0
+                              example: 1
+                              type: integer
+                            user:
+                              description: The user's username.
+                              example: example
+                              format: username
+                              type: string
+                          type: object
+                        type: array
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: get_users_features_settings
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                    type: object
+                type: object
+          description: HTTP Request was successful.
+      summary: Return cPanel accounts' feature settings
+      tags:
+      - Packages
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  get_users_features_settings \\\n  user='example'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/get_users_features_settings?api.version=1&user=example
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '58'
+  /getpkginfo:
+    get:
+      description: This function lists a hosting plan's (package's) settings.
+      operationId: Packages-getpkginfo
+      parameters:
+      - description: The hosting plan's name.
+        in: query
+        name: pkg
+        required: true
+        schema:
+          example: package1
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      pkg:
+                        description: 'A list of the hosting plan''s settings.
+
+
+                          **Note:**
+
+
+                          * The function will only return the package''s enabled resources and settings.
+
+                          * If the account or its hosting plan use package extensions, the list also
+
+                          includes the extension''s variables.'
+                        properties:
+                          BWLIMIT:
+                            description: 'The hosting plan''s bandwidth limit, in megabytes (MB).
+
+
+                              * `unlimited` — The hosting plan allows unlimited bandwidth.'
+                            example: unlimited
+                            oneOf:
+                            - minimum: 0
+                              type: integer
+                            - description: The hosting plan allows unlimited bandwidth.
+                            - enum:
+                              - null
+                            - enum:
+                              - unlimited
+                              type: string
+                          CGI:
+                            description: 'Whether CGI is enabled for the hosting plan.
+
+
+                              * `1` — Enabled.
+
+                              * `0` — Disabled.'
+                            enum:
+                            - 1
+                            - 0
+                            example: 1
+                            type: integer
+                          CPMOD:
+                            description: The hosting plan's cPanel interface theme.
+                            example: jupiter
+                            type: string
+                          DIGESTAUTH:
+                            description: 'Whether the hosting plan enables Digest Authentication.
+
+
+                              * `y` — Enabled.
+
+                              * `n` — Disabled.'
+                            example: n
+                            type: string
+                          FEATURELIST:
+                            description: The hosting plan's [feature list](https://go.cpanel.net/whmdocsFeatureManager).
+                            example: myfeaturelist
+                            type: string
+                          FRONTPAGE:
+                            deprecated: true
+                            description: 'Whether Microsoft® FrontPage Extensions are enabled for the account.
+
+
+                              **Note:**
+
+
+                              cPanel & WHM ignores all FrontPage settings and parameters.'
+                            enum:
+                            - 1
+                            - 0
+                            example: 0
+                            type: integer
+                          HASSHELL:
+                            description: 'Whether shell access is enabled for the hosting plan.
+
+
+                              * `1` — Enabled.
+
+                              * `0` — Disabled.'
+                            enum:
+                            - 1
+                            - 0
+                            example: 1
+                            type: integer
+                          IP:
+                            description: 'Whether the hosting plan grants accounts a dedicated IP address.
+
+
+                              * `1` — Dedicated IP address.
+
+                              * `0` — Shared IP address.'
+                            enum:
+                            - 1
+                            - 0
+                            example: 1
+                            type: integer
+                          LANG:
+                            description: The hosting plan's locale.
+                            example: en
+                            format: ISO-3166-1 (alpha-2)
+                            type: string
+                          MAXADDON:
+                            description: 'The hosting plan''s maximum number of addon domains.
+
+
+                              * `unlimited` — The hosting plan allows unlimited addon domains.'
+                            example: 1
+                            oneOf:
+                            - minimum: 0
+                              type: integer
+                            - description: The hosting plan allows unlimited addon domains.
+                            - enum:
+                              - null
+                            - enum:
+                              - unlimited
+                              type: string
+                          MAXFTP:
+                            description: 'The hosting plan''s maximum number of FTP accounts.
+
+
+                              * `unlimited` — The hosting plan allows unlimited FTP accounts.'
+                            example: 2
+                            oneOf:
+                            - minimum: 0
+                              type: integer
+                            - description: The hosting plan allows unlimited FTP accounts.
+                            - enum:
+                              - null
+                            - enum:
+                              - unlimited
+                              type: string
+                          MAXLST:
+                            description: 'The hosting plan''s maximum number of mailing lists.
+
+
+                              * `unlimited` — The hosting plan allows unlimited mailing lists.'
+                            example: unlimited
+                            oneOf:
+                            - minimum: 0
+                              type: integer
+                            - description: The hosting plan allows unlimited mailing lists.
+                            - enum:
+                              - null
+                            - enum:
+                              - unlimited
+                              type: string
+                          MAXPARK:
+                            description: 'The hosting plan''s maximum number of parked domains (aliases).
+
+
+                              * `unlimited` — The hosting plan allows unlimited parked domains.'
+                            example: 1
+                            oneOf:
+                            - minimum: 0
+                              type: integer
+                            - description: The hosting plan allows unlimited parked domains.
+                              enum:
+                              - unlimited
+                              type: string
+                          MAXPOP:
+                            description: 'The hosting plan''s maximum number of email accounts.
+
+
+                              * `unlimited` — The hosting plan allows unlimited email accounts.'
+                            example: 20
+                            oneOf:
+                            - minimum: 0
+                              type: integer
+                            - description: The hosting plan allows unlimited email accounts.
+                            - enum:
+                              - null
+                            - enum:
+                              - unlimited
+                              type: string
+                          MAXSQL:
+                            description: 'The hosting plan''s maximum number of SQL databases.
+
+
+                              * `unlimited` — The hosting plan allows unlimited SQL databases.'
+                            example: 1
+                            oneOf:
+                            - minimum: 0
+                              type: integer
+                            - description: The hosting plan allows unlimited SQL databases.
+                            - enum:
+                              - null
+                            - enum:
+                              - unlimited
+                              type: string
+                          MAXSUB:
+                            description: 'The hosting plan''s maximum number of subdomains.
+
+
+                              * `unlimited` — The hosting plan allows unlimited subdomains.'
+                            example: 5
+                            oneOf:
+                            - minimum: 0
+                              type: integer
+                            - description: The hosting plan allows unlimited subdomains.
+                            - enum:
+                              - null
+                            - enum:
+                              - unlimited
+                              type: string
+                          MAX_DEFER_FAIL_PERCENTAGE:
+                            description: 'The
+
+                              [percentage of failed or deferred email messages](https://go.cpanel.net/howtopreventspam)
+
+                              that the hosting plan can send per hour before the system rate-limits
+
+                              outgoing mail.
+
+
+                              * `unlimited` — The hosting plan allows unlimited email messages.'
+                            example: 10
+                            oneOf:
+                            - minimum: 0
+                              type: integer
+                            - description: The hosting plan allows unlimited email messages.
+                              enum:
+                              - unlimited
+                              type: string
+                          MAX_EMAILACCT_QUOTA:
+                            description: 'The hosting plan''s maximum email account quota size, in megabytes (MB).
+
+
+                              * `unlimited` — The hosting plan allows an unlimited email account quota size.'
+                            example: unlimited
+                            oneOf:
+                            - minimum: 1
+                              type: integer
+                            - description: The hosting plan allows an unlimited email account quota size.
+                              enum:
+                              - unlimited
+                              type: string
+                          MAX_EMAIL_PER_HOUR:
+                            description: 'The [maximum number of emails](https://go.cpanel.net/howtopreventspam)
+
+                              that the hosting plan can send in one hour.
+
+
+                              * `unlimited` — The hosting plan allows unlimited emails per hour.'
+                            example: 100
+                            oneOf:
+                            - minimum: 0
+                              type: integer
+                            - description: The hosting plan allows unlimited emails per hour.
+                              enum:
+                              - unlimited
+                              type: string
+                          MAX_TEAM_USERS:
+                            description: The hosting plan's maximum number of Team users.
+                            example: 7
+                            maximum: 7
+                            minimum: 0
+                            type:
+                            - integer
+                            - 'null'
+                          QUOTA:
+                            description: "The hosting plan's disk space limit, in megabytes (MB).\n\n * `unlimited` — The hosting plan has unlimited disk space."
+                            example: 100
+                            oneOf:
+                            - minimum: 0
+                              type: integer
+                            - description: The hosting plan has unlimited disk space.
+                            - enum:
+                              - null
+                            - enum:
+                              - unlimited
+                              type: string
+                          _PACKAGE_EXTENSIONS:
+                            description: A list of one or more of the hosting plan's package extensions, if any exist.
+                            example: ''
+                            type: string
+                        type: object
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: getpkginfo
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 1
+                        - 0
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Return hosting plan configuration
+      tags:
+      - Packages
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  getpkginfo \\\n  pkg='package1'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/getpkginfo?api.version=1&pkg=package1
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11'
+  /killpkg:
+    get:
+      description: This function deletes a hosting plan (package).
+      operationId: Packages-killpkg
+      parameters:
+      - description: "The hosting plan's name.\n\n**Note:**\n\n You **cannot** delete a hosting plan that a cPanel account currently uses."
+        in: query
+        name: pkgname
+        required: true
+        schema:
+          example: package1
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: killpkg
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` — Success
+
+                          * `0` — Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Delete hosting plan
+      tags:
+      - Packages
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  killpkg \\\n  pkgname='package1'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/killpkg?api.version=1&pkgname=package1
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11'
+  /listpkgs:
+    get:
+      description: 'This function lists the authenticated user''s available hosting plans (packages).
+
+
+        **Important:**
+
+
+        This function **only** returns packages that the authenticated user can access and
+
+        use during account creation.'
+      operationId: Packages-listpkgs
+      parameters:
+      - description: 'The permissions of packages that you wish to list.
+
+
+          * `all` — All packages on the system.
+
+          * `creatable` — Packages that the authenticated user can use for accounts.
+
+          * `editable` — Packages that the authenticated user can edit.
+
+          * `viewable` — Packages that the authenticated user can view.'
+        in: query
+        name: want
+        required: false
+        schema:
+          default: all
+          enum:
+          - all
+          - creatable
+          - editable
+          - viewable
+          example: all
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      pkg:
+                        description: An array of objects that contains hosting plans and their settings.
+                        items:
+                          properties:
+                            BWLIMIT:
+                              description: 'The hosting plan''s bandwidth limit, in megabytes (MB).
+
+
+                                * `unlimited` — The hosting plan allows unlimited bandwidth.'
+                              example: unlimited
+                              oneOf:
+                              - minimum: 0
+                                type: integer
+                              - description: The hosting plan allows unlimited bandwidth.
+                                enum:
+                                - unlimited
+                                type: string
+                            CGI:
+                              description: 'Whether CGI is enabled for the hosting plan.
+
+
+                                * `y` — Enabled.
+
+                                * `n` — Disabled.'
+                              enum:
+                              - y
+                              - n
+                              example: y
+                              type: string
+                            CPMOD:
+                              description: The hosing plan's cPanel interface theme.
+                              example: jupiter
+                              type: string
+                            DIGESTAUTH:
+                              description: 'Whether the hosting plan enables Digest Authentication.
+
+
+                                * `y` — Enabled.
+
+                                * `n` — Disabled.'
+                              enum:
+                              - y
+                              - n
+                              example: n
+                              type: string
+                            FEATURELIST:
+                              description: The hosting plan's [feature list](https://go.cpanel.net/whmdocsFeatureManager).
+                              example: myfeaturelist
+                              type: string
+                            HASSHELL:
+                              description: 'Whether shell access is enabled for the hosting plan.
+
+
+                                * `y` — Enabled.
+
+                                * `n` — Disabled.'
+                              enum:
+                              - y
+                              - n
+                              example: n
+                              type: string
+                            IP:
+                              description: 'Whether the hosting plan grants accounts a dedicated IP address.
+
+
+                                * `y` — Dedicated IP address.
+
+                                * `n` — Shared IP address.'
+                              enum:
+                              - y
+                              - n
+                              example: n
+                              type: string
+                            LANG:
+                              description: The hosting plan's locale.
+                              example: en
+                              format: ISO-3166-1 (alpha-2)
+                              type: string
+                            MAXADDON:
+                              description: 'The hosting plan''s maximum number of addon domains.
+
+
+                                * `unlimited` — The hosting plan allows unlimited addon domains.'
+                              example: unlimited
+                              oneOf:
+                              - minimum: 0
+                                type: integer
+                              - description: The hosting plan allows unlimited addon domains.
+                                enum:
+                                - unlimited
+                                type: string
+                            MAXFTP:
+                              description: 'The hosting plan''s maximum number of FTP accounts.
+
+
+                                * `unlimited` — The hosting plan allows unlimited FTP accounts.'
+                              example: unlimited
+                              oneOf:
+                              - minimum: 0
+                                type: integer
+                              - description: The hosting plan allows unlimited FTP accounts.
+                                enum:
+                                - unlimited
+                                type: string
+                            MAXLST:
+                              description: 'The hosting plan''s maximum number of mailing lists.
+
+
+                                * `unlimited` — The hosting plan allows an unlimited number of mailing lists.'
+                              example: unlimited
+                              oneOf:
+                              - minimum: 0
+                                type: integer
+                              - description: The hosting plan allows an unlimited number of mailing lists.
+                                enum:
+                                - unlimited
+                                type: string
+                            MAXPARK:
+                              description: 'The hosting plan''s maximum number of parked domains (aliases).
+
+
+                                * `unlimited` — The hosting plan allows unlimited parked domains.'
+                              example: unlimited
+                              oneOf:
+                              - minimum: 0
+                                type: integer
+                              - description: The hosting plan allows unlimited parked domains.
+                                enum:
+                                - unlimited
+                                type: string
+                            MAXPOP:
+                              description: 'The hosting plan''s maximum number of email accounts.
+
+
+                                * `unlimited` — The hosting plan allows unlimited email accounts.'
+                              example: unlimited
+                              oneOf:
+                              - minimum: 0
+                                type: integer
+                              - description: The hosting plan allows unlimited email accounts.
+                                enum:
+                                - unlimited
+                                type: string
+                            MAXSQL:
+                              description: 'The hosting plan''s maximum number of each available type of SQL
+
+                                database.
+
+
+                                For example, if this value is `5`, and the system administrator
+
+                                allows MySQL® and PostgreSQL® databases, users can create up to
+
+                                five MySQL databases and up to five PostgreSQL databases.
+
+
+                                * `unlimited` — The hosting plan allows unlimited SQL databases.'
+                              example: unlimited
+                              oneOf:
+                              - minimum: 0
+                                type: integer
+                              - description: The hosting plan allows unlimited SQL databases.
+                                enum:
+                                - unlimited
+                                type: string
+                            MAXSUB:
+                              description: 'The hosting plan''s maximum number of subdomains.
+
+
+                                * `unlimited` — The hosting plan allows unlimited subdomains.'
+                              example: unlimited
+                              oneOf:
+                              - minimum: 0
+                                type: integer
+                              - description: The hosting plan allows unlimited subdomains.
+                                enum:
+                                - unlimited
+                                type: string
+                            MAX_DEFER_FAIL_PERCENTAGE:
+                              description: 'The
+
+                                [percentage of failed or deferred email messages](https://go.cpanel.net/howtopreventspam)
+
+                                that the hosting plan can send per hour before the system rate-limits
+
+                                outgoing mail.
+
+
+                                * `unlimited` — The hosting plan allows unlimited email messages.'
+                              example: unlimited
+                              oneOf:
+                              - minimum: 0
+                                type: integer
+                              - description: The hosting plan allows unlimited email messages.
+                                enum:
+                                - unlimited
+                                type: string
+                            MAX_EMAILACCT_QUOTA:
+                              description: 'The hosting plan''s maximum email account quota size, in megabytes (MB).
+
+
+                                * `unlimited` — The hosting plan allows an unlimited email account quota size.'
+                              example: unlimited
+                              oneOf:
+                              - minimum: 0
+                                type: integer
+                              - description: The hosting plan allows an unlimited email account quota size.
+                                enum:
+                                - unlimited
+                                type: string
+                            MAX_EMAIL_PER_HOUR:
+                              description: 'The
+
+                                [maximum number of emails](https://go.cpanel.net/howtopreventspam)
+
+                                that the hosting plan can send in one hour.
+
+
+                                * `unlimited` — The hosting plan allows unlimited emails per hour.'
+                              example: unlimited
+                              oneOf:
+                              - minimum: 0
+                                type: integer
+                              - description: The hosting plan allows unlimited emails per hour.
+                                enum:
+                                - unlimited
+                                type: string
+                            MAX_TEAM_USERS:
+                              description: The hosting plan's maximum number of Team users.
+                              example: 7
+                              maximum: 7
+                              minimum: 0
+                              type:
+                              - integer
+                              - 'null'
+                            QUOTA:
+                              description: 'The hosting plan''s disk space limit, in megabytes (MB).
+
+
+                                * `unlimited` — The hosting plan allows unlimited disk space.'
+                              example: unlimited
+                              oneOf:
+                              - minimum: 0
+                                type: integer
+                              - description: The hosting plan allows unlimited disk space.
+                                enum:
+                                - unlimited
+                                type: string
+                            _PACKAGE_EXTENSIONS:
+                              description: A space-separated list of one or more of the hosting plan's package extensions, if any exist.
+                              example: ''
+                              type: string
+                            name:
+                              description: The hosting plan's name.
+                              example: package1
+                              type: string
+                          type: object
+                        type: array
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: listpkgs
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 1
+                        - 0
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Return current user's available hosting plans
+      tags:
+      - Packages
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  listpkgs\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/listpkgs?api.version=1
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11'
+  /manage_features:
+    get:
+      description: 'This function lists and manages items in the
+
+        Feature Showcase.
+
+
+        **Note:**
+
+
+        * This function''s output changes, depending on which value you pass to the `action` parameter.
+
+        * The example in this document displays the function''s return when the `action`
+
+        parameter value is `info`.'
+      operationId: ManageFeatures-manage_features
+      parameters:
+      - description: 'The function''s action.
+
+
+          * `info` — List full details for all available features.
+
+          * `list` — List the feature IDs for all available features.
+
+          * `enable` — Enable the feature or features called in the `features` parameter.
+
+          * `disable` — Disable the feature or features called in the `features` parameter.'
+        in: query
+        name: action
+        required: true
+        schema:
+          enum:
+          - info
+          - list
+          - enable
+          - disable
+          example: info
+          type: string
+      - description: 'The feature''s ID.
+
+
+          **Note:**
+
+
+          You **must** use this parameter if you pass the `enable` or `disable` value for
+
+          the `action` parameter.'
+        in: query
+        name: features
+        required: false
+        schema:
+          example: features_example1
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    example:
+                      feature:
+                      - description: This feature does things.
+                        enabled: 1
+                        feature_key: featured_example1
+                        link: https://go.cpanel.net/featureshowcasefeatured_example1
+                        name: Featured Example 1
+                        recommended: 1
+                        vendor: Third Party, Inc.
+                      - description: This feature also does things.
+                        enabled: 1
+                        feature_key: featured_example2
+                        link: https://go.cpanel.net/featureshowcasefeatured_example2
+                        name: Featured Example 2
+                        recommended: 1
+                        vendor: WebPros International, LLC
+                    properties:
+                      action:
+                        description: 'An array of objects containing feature information.
+
+
+                          **Note:**
+
+
+                          The function **only** returns this array if you pass the `enabled`
+
+                          or `disabled` values to the `action` parameter.'
+                        items:
+                          properties:
+                            feature:
+                              description: The feature's ID.
+                              example: mysql8
+                              type: string
+                            status:
+                              description: The feature's state.
+                              example: Successfully performed 'enable' for mysql8
+                              type: string
+                          type: object
+                        type: array
+                      feature:
+                        description: 'An array of objects containing feature information.
+
+
+                          **Note:**
+
+
+                          The function **only** returns this array if you pass the `info`
+
+                          or `list` values to the `action` parameter.'
+                        items:
+                          properties:
+                            description:
+                              description: 'The feature''s description.
+
+
+                                **Note:**
+
+
+                                The function **only** returns this value if you pass the `info`
+
+                                value to the `action` parameter.'
+                              example: MySQL® 8 is now available in cPanel and WHM for all supported operated operating systems. For more information, read our documentation (https://go.cpanel.net/whmdocsUpgradeDBVersion).
+                              type: string
+                            enabled:
+                              description: 'Whether the feature is enabled.
+
+
+                                * `1` — Enabled.
+
+                                * `0` — Disabled.
+
+
+                                **Note:**
+
+
+                                The function **only** returns this value if you pass the `info`
+
+                                or `list` values to the `action` parameter.'
+                              enum:
+                              - 1
+                              - 0
+                              example: 0
+                              type: integer
+                            feature_key:
+                              description: 'The feature''s ID.
+
+
+                                **Note:**
+
+
+                                The function **only** returns this value if you pass the `info`
+
+                                or `list` values to the `action` parameter.'
+                              example: mysql8
+                              type: string
+                            link:
+                              description: 'The feature''s documentation link.
+
+
+                                **Note:**
+
+
+                                The function **only** returns this value if you pass the `info`
+
+                                value to the `action` parameter.'
+                              example: https://go.cpanel.net/whmdocsUpgradeDBVersion
+                              format: url
+                              type: string
+                            name:
+                              description: 'The feature''s name.
+
+
+                                **Note:**
+
+
+                                The function **only** returns this value if you pass the `info`
+
+                                value to the `action` parameter.'
+                              example: MySQL® 8 Now Available For Upgrade
+                              type: string
+                            recommended:
+                              description: 'Whether we recommend that you install the feature.
+
+
+                                * `1` — Recommended.
+
+                                * `0` — **Not** recommended.
+
+
+                                **Note:**
+
+
+                                The function **only** returns this value if you pass the `info`
+
+                                value to the `action` parameter.'
+                              enum:
+                              - 1
+                              - 0
+                              example: 0
+                              type: integer
+                            vendor:
+                              description: 'The feature''s vendor.
+
+
+                                **Note:**
+
+
+                                The function **only** returns this value if you pass the `info`
+
+                                value to the `action` parameter.'
+                              example: WebPros International, LLC
+                              type: string
+                          type: object
+                        type: array
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: manage_features
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 1
+                        - 0
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Update Feature Showcase
+      tags:
+      - Packages
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  manage_features \\\n  action='info'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/manage_features?api.version=1&action=info
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11.32'
+  /matchpkgs:
+    get:
+      description: 'This function matches the server''s hosting plans (packages) against
+
+        your criteria.
+
+
+        **Note:**
+
+
+        If you do not include **any** input parameters, the function lists **all** of
+
+        the server''s packages.'
+      operationId: Packages-matchpkgs
+      parameters:
+      - description: A space-separated list of one or more of the hosting plan's package extensions.
+        in: query
+        name: _PACKAGE_EXTENSIONS
+        required: false
+        schema:
+          example: '''ext1 ext2 ext3'''
+          type: string
+      - description: 'The hosting plan''s bandwidth limit.
+
+
+          * `unlimited` — The hosting plan allows unlimited bandwidth.'
+        in: query
+        name: BWLIMIT
+        required: false
+        schema:
+          example: unlimited
+          oneOf:
+          - format: megabytes
+            minimum: 0
+            type: integer
+          - description: The hosting plan allows unlimited bandwidth.
+            enum:
+            - unlimited
+            type: string
+      - description: 'Whether CGI is enabled for the hosting plan.
+
+
+          * `1` — Enabled.
+
+          * `0` — Disabled.'
+        in: query
+        name: CGI
+        required: false
+        schema:
+          enum:
+          - 1
+          - 0
+          example: 1
+          type: integer
+      - description: The hosting plan's cPanel interface theme.
+        in: query
+        name: CPMOD
+        required: false
+        schema:
+          example: jupiter
+          type: string
+      - description: 'Whether the hosting plan enables Digest Authentication.
+
+
+          * `y` — Enabled.
+
+          * `n` — Disabled.'
+        in: query
+        name: DIGESTAUTH
+        required: false
+        schema:
+          enum:
+          - y
+          - n
+          example: n
+          type: string
+      - description: The hosting plan's [feature list](https://go.cpanel.net/whmdocsFeatureManager).
+        in: query
+        name: FEATURELIST
+        required: false
+        schema:
+          example: myfeaturelist
+          type: string
+      - description: 'Whether shell access is enabled for the hosting plan.
+
+
+          * `1` — Enabled
+
+          * `0` — Disabled.'
+        in: query
+        name: HASSHELL
+        required: false
+        schema:
+          enum:
+          - 1
+          - 0
+          example: 1
+          type: integer
+      - description: 'Whether the hosting plan grants accounts a dedicated IP address.
+
+
+          * `y` — Dedicated IP address.
+
+          * `n` — Shared IP address.'
+        in: query
+        name: IP
+        required: false
+        schema:
+          enum:
+          - y
+          - n
+          example: n
+          type: string
+      - description: The hosting plan's locale.
+        in: query
+        name: LANG
+        required: false
+        schema:
+          example: en
+          format: ISO-3166-1 (alpha-2)
+          type: string
+      - description: 'The
+
+          [percentage of failed or deferred email messages](https://go.cpanel.net/howtopreventspam)
+
+          that the hosting plan can send per hour before the system rate-limits
+
+          outgoing mail.
+
+
+          * `unlimited` — The hosting plan allows unlimited email messages.'
+        in: query
+        name: MAX_DEFER_FAIL_PERCENTAGE
+        required: false
+        schema:
+          example: unlimited
+          oneOf:
+          - minimum: 0
+            type: integer
+          - description: The hosting plan allows unlimited email messages.
+            enum:
+            - unlimited
+            type: string
+      - description: 'The [maximum number of emails](https://go.cpanel.net/howtopreventspam)
+
+          that the hosting plan can send in one hour.
+
+
+          * `unlimited` — The hosting plan allows unlimited emails per hour.'
+        in: query
+        name: MAX_EMAIL_PER_HOUR
+        required: false
+        schema:
+          example: unlimited
+          oneOf:
+          - minimum: 0
+            type: integer
+          - description: The hosting plan allows unlimited emails per hour.
+            enum:
+            - unlimited
+            type: string
+      - description: 'The hosting plan''s maximum email account quota size, in megabytes (MB).
+
+
+          * `unlimited` — The hosting plan allows an unlimited email account quota size.'
+        in: query
+        name: MAX_EMAILACCT_QUOTA
+        required: false
+        schema:
+          example: unlimited
+          oneOf:
+          - format: megabytes
+            minimum: 1
+            type: integer
+          - description: The hosting plan allows an unlimited email account quota size.
+            enum:
+            - unlimited
+            type: string
+      - description: The hosting plan's maximum number of Team users.
+        in: query
+        name: MAX_TEAM_USERS
+        required: false
+        schema:
+          example: 7
+          maximum: 7
+          minimum: 0
+          type:
+          - integer
+          - 'null'
+      - description: 'The hosting plan''s maximum number of addon domains.
+
+
+          * `unlimited` — The hosting plan allows unlimited addon domains.'
+        in: query
+        name: MAXADDON
+        required: false
+        schema:
+          example: unlimited
+          oneOf:
+          - minimum: 0
+            type: integer
+          - description: The hosting plan allows unlimited addon domains.
+            enum:
+            - unlimited
+            type: string
+      - description: 'The hosting plan''s maximum number of FTP accounts.
+
+
+          * `unlimited` — The hosting plan allows for unlimited FTP accounts.'
+        in: query
+        name: MAXFTP
+        required: false
+        schema:
+          example: 2
+          oneOf:
+          - minimum: 0
+            type: integer
+          - description: The hosting plan allows for unlimited FTP accounts.
+            enum:
+            - unlimited
+            type: string
+      - description: 'The hosting plan''s maximum number of mailing lists.
+
+
+          * `unlimited` — The hosting plan allows an unlimited number of mailing lists.'
+        in: query
+        name: MAXLST
+        required: false
+        schema:
+          example: unlimited
+          oneOf:
+          - minimum: 0
+            type: integer
+          - description: The hosting plan allows an unlimited number of mailing lists.
+            enum:
+            - unlimited
+            type: string
+      - description: 'The hosting plan''s maximum number of parked domains (aliases).
+
+
+          * `unlimited` — The hosting plan allows unlimited parked domains.'
+        in: query
+        name: MAXPARK
+        required: false
+        schema:
+          example: unlimited
+          oneOf:
+          - minimum: 0
+            type: integer
+          - description: The hosting plan allows unlimited parked domains.
+            enum:
+            - unlimited
+            type: string
+      - description: 'The hosing plan''s maximum number of email accounts.
+
+
+          * `unlimited` — The hosting plan''s can create unlimited email accounts.'
+        in: query
+        name: MAXPOP
+        required: false
+        schema:
+          example: unlimited
+          oneOf:
+          - minimum: 0
+            type: integer
+          - description: The hosting plan's can create unlimited email accounts.
+            enum:
+            - unlimited
+            type: string
+      - description: 'The hosting plan''s maximum number of SQL databases.
+
+
+          * `unlimited` — The hosting plan allows unlimited SQL databases.'
+        in: query
+        name: MAXSQL
+        required: false
+        schema:
+          example: unlimited
+          oneOf:
+          - minimum: 0
+            type: integer
+          - description: The hosting plan allows unlimited SQL databases.
+            enum:
+            - unlimited
+            type: string
+      - description: 'The hosting plan''s maximum number of subdomains.
+
+
+          * `unlimited` — The hosting plan allows unlimited subdomains.'
+        in: query
+        name: MAXSUB
+        required: false
+        schema:
+          example: unlimited
+          oneOf:
+          - minimum: 0
+            type: integer
+          - description: The hosting plan allows unlimited subdomains.
+            enum:
+            - unlimited
+            type: string
+      - description: 'The hosting plan''s disk space limit.
+
+
+          * `unlimited` — The hosting plan has unlimited disk space.'
+        in: query
+        name: QUOTA
+        required: false
+        schema:
+          example: unlimited
+          oneOf:
+          - format: megabytes
+            minimum: 0
+            type: integer
+          - description: The hosting plan has unlimited disk space.
+            enum:
+            - unlimited
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      pkg:
+                        description: A list of hosting plan settings.
+                        properties:
+                          BWLIMIT:
+                            description: 'The hosting plan''s bandwidth limit, in megabytes (MB).
+
+
+                              * `unlimited` — The hosting plan allows unlimited bandwidth.'
+                            example: unlimited
+                            oneOf:
+                            - format: megabytes
+                              minimum: 0
+                              type: integer
+                            - description: The hosting plan allows unlimited bandwidth.
+                              enum:
+                              - unlimited
+                              type: string
+                          CGI:
+                            description: 'Whether CGI is enabled for the hosting plan.
+
+
+                              * `1` — Enabled.
+
+                              * `0` — Disabled.'
+                            enum:
+                            - 1
+                            - 0
+                            example: 1
+                            type: integer
+                          CPMOD:
+                            description: The hosting plan's cPanel interface theme.
+                            example: jupiter
+                            type: string
+                          DIGESTAUTH:
+                            description: 'Whether the hosting plan enables Digest Authentication.
+
+
+                              * `y` — Enable.
+
+                              * `n` — Disable.'
+                            enum:
+                            - y
+                            - n
+                            example: y
+                            type: string
+                          FEATURELIST:
+                            description: 'The hosting plan''s
+
+                              [feature list](https://go.cpanel.net/whmdocsFeatureManager).'
+                            example: myfeaturelist
+                            type: string
+                          FRONTPAGE:
+                            default: 0
+                            deprecated: true
+                            description: 'Whether Microsoft® FrontPage Extensions are enabled for the account.
+
+
+                              **Note:**
+
+
+                              cPanel & WHM ignores all FrontPage settings and parameters.'
+                            enum:
+                            - 0
+                            example: 0
+                            type: integer
+                          HASSHELL:
+                            description: 'Whether shell access is enabled for the hosting plan.
+
+                              * `y` — Enabled. * `n` — Disabled.'
+                            enum:
+                            - y
+                            - n
+                            example: n
+                            type: string
+                          IP:
+                            description: 'Whether the hosting plan grants accounts a dedicated IP address.
+
+
+                              * `y` — Dedicated IP address.
+
+                              * `n` — Shared IP address.'
+                            enum:
+                            - y
+                            - n
+                            example: n
+                            type: string
+                          LANG:
+                            description: The hosting plan's locale.
+                            example: en
+                            format: ISO-3166-1 (alpha-2)
+                            type: string
+                          MAXADDON:
+                            description: 'The hosting plan''s maximum number of addon domains.
+
+
+                              * `unlimited` — The hosting plan allows unlimited addon domains.'
+                            example: 1
+                            oneOf:
+                            - minimum: 0
+                              type: integer
+                            - description: The hosting plan allows unlimited addon domains.
+                              enum:
+                              - unlimited
+                              type: string
+                          MAXFTP:
+                            description: 'The hosting plan''s maximum number of FTP accounts.
+
+
+                              * `unlimited` — The hosting plan allows for unlimited FTP accounts.'
+                            example: unlimited
+                            oneOf:
+                            - minimum: 0
+                              type: integer
+                            - description: The hosting plan allows for unlimited FTP accounts.
+                              enum:
+                              - unlimited
+                              type: string
+                          MAXLST:
+                            description: 'The hosting plan''s maximum number of mailing lists.
+
+
+                              * `unlimited` — The hosting plan allows an unlimited number of mailing lists.'
+                            example: 5
+                            oneOf:
+                            - minimum: 0
+                              type: integer
+                            - description: The hosting plan allows an unlimited number of mailing lists.
+                              enum:
+                              - unlimited
+                              type: string
+                          MAXPARK:
+                            description: 'The hosting plan''s maximum number of parked domains.
+
+
+                              * `unlimited` — The hosting plan allows unlimited parked domains.'
+                            example: 1
+                            oneOf:
+                            - minimum: 0
+                              type: integer
+                            - description: The hosting plan allows unlimited parked domains.
+                              enum:
+                              - unlimited
+                              type: string
+                          MAXPOP:
+                            description: 'The hosting plan''s maximum number of email accounts.
+
+
+                              * `unlimited` — The hosting plan''s can create unlimited email accounts.'
+                            example: 20
+                            oneOf:
+                            - minimum: 0
+                              type: integer
+                            - description: The hosting plan's can create unlimited email accounts.
+                              enum:
+                              - unlimited
+                              type: string
+                          MAXSQL:
+                            description: 'The hosting plan''s maximum number of SQL databases.
+
+
+                              * `unlimited` — The hosting plan allows unlimited SQL databases.'
+                            example: 1
+                            oneOf:
+                            - minimum: 0
+                              type: integer
+                            - description: The hosting plan allows unlimited SQL databases.
+                              enum:
+                              - unlimited
+                              type: string
+                          MAXSUB:
+                            description: 'The hosting plan''s maximum number of subdomains.
+
+
+                              * `unlimited` — The hosting plan allows unlimited subdomains.'
+                            example: 5
+                            oneOf:
+                            - minimum: 0
+                              type: integer
+                            - description: The hosting plan allows unlimited subdomains.
+                              enum:
+                              - unlimited
+                              type: string
+                          MAX_DEFER_FAIL_PERCENTAGE:
+                            description: 'The
+
+                              [percentage of failed or deferred email messages](https://go.cpanel.net/howtopreventspam)
+
+                              that the hosting plan can send per hour before outgoing mail is rate-limited.
+
+
+                              * `unlimited` — The hosting plan allows unlimited email messages.'
+                            example: 10
+                            oneOf:
+                            - minimum: 0
+                              type: integer
+                            - description: The hosting plan allows unlimited email messages.
+                              enum:
+                              - unlimited
+                              type: string
+                          MAX_EMAILACCT_QUOTA:
+                            description: 'The maximum size that the account can define when it
+
+                              creates an email account.
+
+
+                              * `unlimited` — The hosting plan allows an unlimited email account quota size.'
+                            example: unlimited
+                            oneOf:
+                            - format: megabytes
+                              minimum: 0
+                              type: integer
+                            - description: The hosting plan allows an unlimited email account quota size.
+                              enum:
+                              - unlimited
+                              type: string
+                          MAX_EMAIL_PER_HOUR:
+                            description: 'The [maximum number of emails](https://go.cpanel.net/howtopreventspam)
+
+                              that the hosting plan can send in one hour.
+
+
+                              * `unlimited` — The hosting plan allows unlimited emails per hour.'
+                            example: 100
+                            oneOf:
+                            - minimum: 0
+                              type: integer
+                            - description: The hosting plan allows unlimited emails per hour.
+                              enum:
+                              - unlimited
+                              type: string
+                          QUOTA:
+                            description: 'The hosting plan''s disk space limit.
+
+
+                              * `unlimited` — The hosting plan has unlimited disk space.'
+                            example: 100
+                            oneOf:
+                            - format: megabytes
+                              minimum: 0
+                              type: integer
+                            - description: The hosting plan has unlimited disk space.
+                              enum:
+                              - unlimited
+                              type: string
+                          _PACKAGE_EXTENSIONS:
+                            description: A list of one or more of the hosting plan's package extensions.
+                            example: ext1 ext2 ext3
+                            type: string
+                        type: object
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: matchpkgs
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` – Success.
+
+                          * `0` – Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 1
+                        - 0
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Return filtered hosting plans
+      tags:
+      - Packages
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  matchpkgs\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/matchpkgs?api.version=1
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11'
+  /read_featurelist:
+    get:
+      deprecated: true
+      description: '**DEPRECATED:** Use `get_featurelist_data` instead.
+
+
+        This function reads a feature list and returns a hash that maps feature IDs to values indicating whether each feature is enabled.
+
+
+        **Notes:**
+
+
+        * The function requires the `featurelist` parameter to specify which feature list to read.
+
+        * Access is controlled based on user permissions. Resellers can only access their own feature lists.'
+      operationId: FeatureLists-read_featurelist
+      parameters:
+      - description: The name of the feature list to read.
+        example: default
+        in: query
+        name: featurelist
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      featurelist:
+                        description: The name of the feature list that was read.
+                        example: default
+                        type: string
+                      features:
+                        additionalProperties:
+                          description: Feature enabled status. `1` indicates enabled, `0` indicates disabled.
+                          enum:
+                          - 0
+                          - 1
+                          type: integer
+                        description: A map of feature IDs to their enabled status.
+                        example:
+                          addondomains: 1
+                          changemx: 1
+                          webmail: 0
+                          ssl: 1
+                        type: object
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: read_featurelist
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                    type: object
+              examples:
+                success:
+                  value:
+                    metadata:
+                      command: read_featurelist
+                      reason: OK
+                      result: 1
+                      version: 1
+                    data:
+                      featurelist: default
+                      features:
+                        addondomains: 1
+                        changemx: 1
+                        webmail: 1
+                        ssl: 1
+                error_no_featurelist:
+                  value:
+                    metadata:
+                      command: read_featurelist
+                      reason: No featurelist name specified.
+                      result: 0
+                      version: 1
+                error_access_denied:
+                  value:
+                    metadata:
+                      command: read_featurelist
+                      reason: 'Unable to access featurelist specified: "unauthorized_list"'
+                      result: 0
+                      version: 1
+                error_not_found:
+                  value:
+                    metadata:
+                      command: read_featurelist
+                      reason: 'Specified featurelist does not exist: "nonexistent"'
+                      result: 0
+                      version: 1
+          description: HTTP Request was successful.
+      summary: (Deprecated) Read feature list settings
+      tags:
+      - Packages
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  read_featurelist \\\n  featurelist='default'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/read_featurelist?api.version=1&featurelist=default
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11.0'
+  /remove_override_features_for_user:
+    get:
+      description: This function removes feature overrides from a cPanel account.
+      operationId: Accounts-remove_override_features_for_user
+      parameters:
+      - content:
+          application/json:
+            schema:
+              example:
+              - sslinstall
+              - videotut
+              items:
+                type: string
+              type: array
+        description: 'An array that contains the features'' names.
+
+
+          **Note:**
+
+
+          * Call WHM API 1''s `get_feature_names` function to view available features.'
+        in: query
+        name: features
+        required: true
+      - description: The user's username.
+        in: query
+        name: user
+        required: true
+        schema:
+          example: username
+          format: username
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: remove_override_features_for_user
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Remove cPanel account feature list overrides
+      tags:
+      - Packages
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  remove_override_features_for_user \\\n  user='username' \\\n  features='[\"sslinstall\",\"videotut\"]'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/remove_override_features_for_user?api.version=1&user=username&features=%5b%22sslinstall%22%2c%22videotut%22%5d
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '56'
+  /update_featurelist:
+    get:
+      description: This function creates or updates a feature list.
+      operationId: FeatureLists-update_featurelist
+      parameters:
+      - description: The feature list's name.
+        in: query
+        name: featurelist
+        required: true
+        schema:
+          example: TheBlackLagoon
+          type: string
+      - description: "Whether to include the feature in the feature list.\n\n**Notes:**\n\n This parameter's name is the feature's name. If you do not specify any features, the system will disable all features in the feature list."
+        in: query
+        name: feature name
+        required: false
+        schema:
+          enum:
+          - 0
+          - 1
+          example: 1
+          type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      featurelist:
+                        description: The feature list's name. A valid string.
+                        example: TheBlackLagoon
+                        type: string
+                      invalid_features:
+                        description: An array of invalid feature names. This array includes the invalid  feature return.
+                        items:
+                          properties:
+                            invalid feature:
+                              description: "Whether the feature exists in the feature list.\n\n**Note:**\n\n The feature's name is the return's name.\n- 1  The feature exists in the feature list.\n- 0  The feature does not exist in the feature list."
+                              enum:
+                              - 0
+                              - 1
+                              example: 1
+                              type: integer
+                          type: object
+                        type: array
+                      updated_features:
+                        description: hash of features in the feature list. This hash includes the feature  name return.
+                        properties:
+                          autoresponders: {}
+                          feature name:
+                            description: "Whether the feature exists in the feature list.\n\n**Note:**\n\n The feature's name is the return's name.\n- 1  The feature exists in the feature list.\n- 0  The feature does not exist in the feature list."
+                            enum:
+                            - 0
+                            - 1
+                            example: 1
+                            type: integer
+                        type: object
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: update_featurelist
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is 0. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` - Success
+
+                          * `0` - Failed: Check the reason field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Update feature list
+      tags:
+      - Packages
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  update_featurelist \\\n  featurelist='TheBlackLagoon'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/update_featurelist?api.version=1&featurelist=TheBlackLagoon
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11'
+  /verify_user_has_feature:
+    get:
+      description: This function checks whether a user has access to a feature on a feature list.
+      operationId: Accounts-verify_user_has_feature
+      parameters:
+      - description: 'The feature''s ID.
+
+
+          **Note:**
+
+
+          Call WHM API 1''s `get_feature_names` function to view available features.'
+        in: query
+        name: feature
+        required: true
+        schema:
+          example: sslinstall
+          type: string
+      - description: The cPanel account username.
+        in: query
+        name: user
+        required: true
+        schema:
+          example: username
+          format: username
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      has_feature:
+                        description: 'Whether the user can access the feature.
+
+
+                          * `1` — The user can access the feature.
+
+                          * `0` — The user **cannot** access the feature.
+
+
+                          **Note:**
+
+
+                          This function returns a `1` value for any feature that does **not** exist in
+
+                          a [feature list](https://go.cpanel.net/whmdocsFeatureManager). This is because
+
+                          the system presumes users have access to features that exist outside of the
+
+                          system''s feature lists.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      query_feature:
+                        description: The queried feature's ID.
+                        example: sslinstall
+                        type: string
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: verify_user_has_feature
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Return cPanel account feature access
+      tags:
+      - Packages
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  verify_user_has_feature \\\n  user='username' \\\n  feature='sslinstall'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/verify_user_has_feature?api.version=1&user=username&feature=sslinstall
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '56'
+components:
+  schemas:
+    Service:
+      description: 'The [cPanel Service Daemon](https://go.cpanel.net/ThecPanelWHMServiceDaemons) that monitors the feature.
+
+
+        **Warning:**
+
+
+        The server creates this parameter automatically. Do **not** edit this parameter''s value. We do not support customizations to this parameter.
+
+
+        **Note:**
+
+
+        * This icon only appears on servers with the service enabled.
+
+        * For a complete list of service daemons, read our [cPanel Service Daemons](https://go.cpanel.net/ThecPanelWHMServiceDaemons) documentation.'
+      example: mysql
+      oneOf:
+      - properties:
+          match:
+            description: 'Whether to require all services in the services parameter to match enabled services on the server.
+
+
+              * `all` - Require the server to match **all** services under the `services` key to display the feature. (AND condition)
+
+              * `any` - Require the server to match any service under the `services` key to display the feature. (OR condition)'
+            enum:
+            - any
+            example: any
+            type: string
+          services:
+            description: An array of services.
+            example:
+            - mysql
+            - ftp
+            items:
+              type: string
+            type: array
+        type: object
+      - example: mysql
+        type: string
+    Image:
+      description: An individual WHM feature.
+      properties:
+        acl:
+          description: 'The feature''s Access Control Lists (ACLs).
+
+
+            **Note:**
+
+
+            * Only WHM users who possess the specified ACLs can view or use the item.
+
+            * System administrators can configure users'' ACLs in WHM''s [*Edit Reseller Nameservers and Privileges*](https://go.cpanel.net/whmdocsEditResellerNameserversandPrivileges) interface (*WHM >> Home >> Resellers >> Edit Reseller Nameservers and Privileges*).
+
+            * For a complete list of available ACLs, read our [Guide to WHM Plugins - ACL Reference Chart](https://go.cpanel.net/ACLReferenceChart) documentation.'
+          example: ACL=all
+          type:
+          - string
+          - 'null'
+        description:
+          description: 'The feature''s description that displays when the feature appears on the WHM Home interface.
+
+
+            **Note:**
+
+
+            You can localize this string to display it in the user''s preferred language in the WHM interface. For more information, read our [Guide to Locales](https://go.cpanel.net/guide-to-locales) documentation.'
+          example: View and manage reseller accounts on your server. Resellers manage other [asis,cPanel] accounts and can access [asis,cPanel].
+          type: string
+        dnsonly_ok:
+          description: 'The group''s status for [cPanel DNSOnly](https://go.cpanel.net/cpanel-dnsonly)™ servers.
+
+
+            * `dns` - The group appears on cPanel DNSOnly servers.
+
+            * `` - The group does not appear on cPanel DNSOnly servers.'
+          enum:
+          - dns
+          example: dns
+          type:
+          - string
+          - 'null'
+        file:
+          description: 'The icon file to display for the group.
+
+
+            **Note:**
+
+
+            * Icons for any WHM plugins exist separately from the server''s theme. For more information, read our [Guide to WHM Plugins - Plugin Files](https://go.cpanel.net/whmpluginfiles) documentation.
+
+            * A valid `.png` or `.svg` image file, relative to the theme''s icon directory.'
+          example: feature_name.png
+          type: string
+        group:
+          description: The group in which the item appears. This is a value of an existing group object.
+          example: group_name
+          type: string
+        imgtype:
+          description: 'The feature''s image type.
+
+
+            * `icon` - The only possible value.'
+          enum:
+          - icon
+          example: icon
+          type: string
+        itemdesc:
+          description: 'The feature''s display name.
+
+
+            **Note:**
+
+
+            * You can localize this string to display it in the user''s preferred language in the WHM interface. For more information, read our [Guide to Locales](https://go.cpanel.net/guide-to-locales) documentation.
+
+            * This should be a [Template Toolkit](https://go.cpanel.net/tmpltoolkit) directive.'
+          example: $LANG{'Feature Name'}
+          type: string
+        itemorder:
+          description: 'The feature''s display order within its group.
+
+
+            **Note:**
+
+
+            Lower values appear earlier in the group.'
+          example: 1
+          minimum: 1
+          type: integer
+        key:
+          description: 'A key to uniquely identify WHM interfaces and their associated assets for the [cPanel Analytics](https://go.cpanel.net/analytics) program.
+
+
+            **Note:**
+
+
+            Generally, this value matches the `file` parameter''s value without the file''s extension.'
+          example: feature_name
+          type: string
+        minimum_accounts_needed:
+          description: The minimum number of accounts required to display the feature icon.
+          example: 2
+          minimum: 1
+          type: integer
+        multiuser_required:
+          description: 'Whether the server allows for the creation of more than a single user.
+
+
+            * `1` — Display the feature icon.
+
+            * `0` — Do **not** display the feature icon.
+
+
+            **Note:**
+
+
+            You **cannot** use this parameter on servers with a [cPanel Solo License](https://go.cpanel.net/cpanel-solo-license).'
+          enum:
+          - 1
+          example: 1
+          type: integer
+        role:
+          $ref: '#/components/schemas/Role'
+        searchtext:
+          description: A list search terms for the feature, space delimited.
+          example: search keywords
+          type: string
+        service:
+          $ref: '#/components/schemas/Service'
+        subitems:
+          items:
+            $ref: '#/components/schemas/Subitem'
+          type: array
+        subtype:
+          description: 'The icon type to use.
+
+
+            * `img` - The only possible value.'
+          enum:
+          - img
+          example: img
+          type: string
+        target:
+          description: 'The area of the interface in which the feature appears.
+
+
+            A valid HTML `<a>` target attribute.'
+          example: _blank
+          type: string
+        type:
+          description: 'The object''s type.
+
+
+            * `image` - The only possible value.'
+          enum:
+          - image
+          example: image
+          type: string
+        url:
+          description: The feature's interface location. This path is relative to the `/usr/local/cpanel/` directory.
+          example: /example_plugin/feature_name
+          format: url-path
+          type: string
+      required:
+      - type
+      - acl
+      - description
+      - dnsonly_ok
+      - file
+      - group
+      - itemorder
+      - url
+      type: object
+    Group:
+      description: A group of features.
+      properties:
+        acl:
+          description: 'The group''s Access Control Lists (ACLs).
+
+
+            **Note:**
+
+
+            * Only WHM users who possess the specified ACLs can view or use the item.
+
+            * System administrators can configure users'' ACLs in WHM''s [*Edit Reseller Nameservers and Privileges*](https://go.cpanel.net/whmdocsEditResellerNameserversandPrivileges) interface (*WHM >> Home >> Resellers >> Edit Reseller Nameservers and Privileges*).
+
+            * For a complete list of available ACLs, read our [Guide to WHM Plugins - ACL Reference Chart](https://go.cpanel.net/ACLReferenceChart) documentation.'
+          example: ACL=all
+          type:
+          - string
+          - 'null'
+        dnsonly_ok:
+          description: 'The group''s status for [cPanel DNSOnly](https://go.cpanel.net/cpanel-dnsonly)™ servers.
+
+
+            * `dns` - The group appears on cPanel DNSOnly servers.
+
+            * `` - The group does not appear on cPanel DNSOnly servers.'
+          enum:
+          - dns
+          example: dns
+          type:
+          - string
+          - 'null'
+        file:
+          description: 'The icon file to display for the group.
+
+
+            **Note:**
+
+
+            * Icons for any WHM plugins exist separately from the server''s theme. For more information, read our [Guide to WHM Plugins - Plugin Files](https://go.cpanel.net/whmpluginfiles) documentation.
+
+            * A valid `.png` or `.svg` image file, relative to the theme''s icon directory.'
+          example: feature_name.png
+          type: string
+        group:
+          description: The group name.
+          example: group_name
+          type: string
+        groupdesc:
+          description: 'The group''s display name.
+
+
+            **Note:**
+
+
+            You can localize this string to display it in the user''s preferred language in the WHM interface. For more information, read our [Guide to Locales](https://go.cpanel.net/guide-to-locales) documentation'
+          example: $LANG{'Group Name'}
+          type: string
+        grouporder:
+          description: 'The group''s display order in the WHM interface.
+
+
+            **Note:**
+
+
+            Lower values appear at the top of the interface'
+          example: 1
+          minimum: 1
+          type: integer
+        imgtype:
+          description: 'The group''s image type.
+
+
+            * `icon` - The only possible value.'
+          enum:
+          - icon
+          example: icon
+          type: string
+        items:
+          items:
+            $ref: '#/components/schemas/Image'
+          type: array
+        key:
+          description: 'A key to uniquely identify WHM interfaces and their associated assets for the [cPanel Analytics](https://go.cpanel.net/analytics) program.
+
+
+            **Note:**
+
+
+            Generally, this value matches the `file` parameter''s value without the file''s extension.'
+          example: feature_name
+          type: string
+        searchtext:
+          description: A list of the group's search terms, space delimited.
+          example: search keywords
+          type: string
+        subtype:
+          description: 'The icon type to use.
+
+
+            * `img` - The only possible value.'
+          enum:
+          - img
+          example: img
+          type: string
+        target:
+          description: 'The area of the interface in which the feature appears.
+
+
+            A valid HTML `<a>` target attribute.'
+          example: _blank
+          type: string
+        type:
+          description: The object's type.
+          example: group
+          type: string
+      required:
+      - type
+      - acl
+      - dnsonly_ok
+      - file
+      - group
+      - groupdesc
+      - grouporder
+      type: object
+    Role:
+      anyOf:
+      - properties:
+          match:
+            description: 'Whether to require all roles in the roles parameter to match the server''s roles.
+
+
+              * `all` - Require the server to match all roles in the roles parameter to display the feature. (AND condition)
+
+              * `any` - Require the server to match any role in the roles parameter to display the feature. (OR condition)'
+            enum:
+            - any
+            example: any
+            type: string
+          roles:
+            description: The array of role names.
+            example:
+            - MailLocal
+            - MailSend
+            items:
+              type: string
+            type: array
+        type: object
+      - example: MailSend
+        type: string
+      description: 'The feature''s server role.
+
+
+        **Warning:**
+
+
+        The server creates this parameter automatically. Do **not** edit this parameter''s value. We do **not** support customizations to this parameter.
+
+
+        **Note:**
+
+
+        * The icon only appears in the interface if the server configuration uses this role.
+
+        * For more information about roles and server configurations, read our [How to Use Server Profiles](https://go.cpanel.net/howtouseserverprofiles) documentation.'
+    Raw:
+      description: Raw data for template directives.
+      properties:
+        itemdesc:
+          description: A valid [Template Toolkit](https://go.cpanel.net/tmpltoolkit) directive.
+          example: '[% PROCESS ''menu/plugins_list.tmpl'' target=''mainFrame'' -%]'
+          type: string
+        type:
+          description: 'The object''s type.
+
+
+            * `raw` - The only possible value. Raw data for template directives.'
+          enum:
+          - raw
+          example: raw
+          type: string
+      required:
+      - type
+      - itemdesc
+      type: object
+    Subitem:
+      description: A subsection of an individual WHM feature.
+      properties:
+        acl:
+          description: 'The subitem''s Access Control Lists (ACLs).
+
+
+            **Note:**
+
+
+            * Only WHM users who possess the specified ACLs can view or use the item.
+
+            * System administrators can configure users'' ACLs in WHM''s [*Edit Reseller Nameservers and Privileges*](https://go.cpanel.net/whmdocsEditResellerNameserversandPrivileges) interface (*WHM >> Home >> Resellers >> Edit Reseller Nameservers and Privileges*).
+
+            * For a complete list of available ACLs, read our [Guide to WHM Plugins - ACL Reference Chart](https://go.cpanel.net/ACLReferenceChart) documentation.'
+          example: ACL=all
+          type:
+          - string
+          - 'null'
+        breadcrumb:
+          description: 'A subitem''s parent feature''s location.
+
+
+            * The system uses this value to generate breadcrumbs at the top of each WHM interface.
+
+            * The subitem''s parent feature''s `url` value.'
+          example: /example_plugin/feature_name
+          format: url-path
+          type: string
+        dnsonly_ok:
+          description: 'The subitem''s status for [cPanel DNSOnly](https://go.cpanel.net/cpanel-dnsonly)™ servers.
+
+
+            * `dns` - The subitem appears on cPanel DNSOnly servers.
+
+            * `` - The subitem does not appear on cPanel DNSOnly servers.'
+          enum:
+          - dns
+          example: dns
+          type:
+          - string
+          - 'null'
+        file:
+          description: 'The icon file to display for the subitem.
+
+
+            **Note:**
+
+
+            * Icons for any WHM plugins exist separately from the server''s theme. For more information, read our [Guide to WHM Plugins - Plugin Files](https://go.cpanel.net/whmpluginfiles) documentation.
+
+            * A valid `.png` or `.svg` image file, relative to the theme''s icon directory.'
+          example: feature_name.png
+          type: string
+        group:
+          description: The group in which the subitem appears. This is a value of an existing group object.
+          example: group_name
+          type: string
+        itemdesc:
+          description: 'The subitem''s display name.
+
+
+            **Note:**
+
+
+            * You can localize this string to display it in the user''s preferred language in the WHM interface. For more information, read our [Guide to Locales](https://go.cpanel.net/guide-to-locales) documentation.'
+          example: $LANG{'Feature Name'}
+          type: string
+        key:
+          description: 'A key to uniquely identify WHM interfaces and their associated assets for the [cPanel Analytics](https://go.cpanel.net/analytics) program.
+
+
+            **Note:**
+
+
+            Generally, this value matches the `file` parameter''s value without the file''s extension.'
+          example: feature_name
+          type: string
+        parent:
+          description: The subitem's parent feature's display order in the WHM interface. This is the parent feature's `itemorder` value.
+          example: 1
+          minimum: 1
+          type: integer
+        searchtext:
+          description: A list search terms for the subitem, space delimited.
+          example: search keywords
+          type: string
+        target:
+          description: 'The area of the interface in which the subitem displays.
+
+
+            A valid HTML `<a>` target attribute.'
+          example: _blank
+          type: string
+        type:
+          description: 'The object''s type.
+
+
+            * `subitem` - The only possible value.'
+          enum:
+          - subitem
+          example: subitem
+          type: string
+        url:
+          description: The subitem's interface location. This path is relative to the `/usr/local/cpanel/` directory.
+          example: /example_plugin/feature_name
+          format: url-path
+          type: string
+      required:
+      - type
+      - acl
+      - breadcrumb
+      - dnsonly_ok
+      - file
+      - group
+      - parent
+      - url
+      type: object
+  securitySchemes:
+    BasicAuth:
+      scheme: basic
+      type: http
+externalDocs:
+  url: https://cpanel.net/developers/
+x-tagGroups:
+- name: Account Restoration
+  tags:
+  - Restore Account
+  - Restore Queue Management
+  - Restore Queue Reporting
+- name: Accounts
+  tags:
+  - Account Creation
+  - Account Enhancements
+  - Account Management
+  - Bandwidth and Disk Quotas
+  - Domain Information
+  - Passwords
+  - Styles
+  - Suspensions
+- name: API Development Tools
+  tags:
+  - API Execution
+  - API Statistics
+  - API Token Management
+  - Applications
+  - Session
+- name: Authentication
+  tags:
+  - Authentication Providers
+  - External Authentication
+  - Login URL
+  - SSH Keys and Connections
+  - Two-Factor Authentication
+- name: Backups
+  tags:
+  - Backup Destination
+  - Backup or Restore
+  - Backup Settings
+  - Legacy Migration
+- name: Commerce Integration
+  tags:
+  - Market Integration
+  - Sitejet
+- name: cPanel Market
+  tags:
+  - Product Management
+  - Provider Management
+- name: cPanel Support Tickets
+  tags:
+  - Support Access
+  - Ticket Management
+- name: Customizations
+  tags:
+  - Brand
+  - Customizations
+- name: Databases
+  tags:
+  - Manage MySQL Server
+  - MySQL Databases
+  - PostgreSQL Databases
+  - Remote MySQL Databases
+- name: DNS
+  tags:
+  - DNS Cluster Settings
+  - DNS Security
+  - DNS Zones
+  - Domain Management
+  - Domain Management
+  - Resolvers
+  - Service Records
+- name: Hosting Plans
+  tags:
+  - Feature Access
+  - Feature Lists
+  - Hosting Plan Extensions
+  - Hosting Plans
+- name: InProductSurvey
+  tags:
+  - InProductSurvey
+- name: Integrations
+  tags:
+  - API Authentication
+  - Links
+  - Scripts Hooks
+- name: IP Address Management
+  tags:
+  - IPv4 Address Settings
+  - IPv6 Address Settings
+  - Network Address Translation
+- name: Login Security (cPHulk)
+  tags:
+  - Management
+  - Reporting
+  - Settings
+- name: Logs
+  tags:
+  - Web Log Retention
+- name: Mail
+  tags:
+  - cPanel Account Mail Management
+  - Mail DNS Settings
+  - Mail Server Settings
+  - Spam Management
+  - Spam Protection (Greylisting)
+- name: Monitoring
+  tags:
+  - 360 Monitoring
+- name: NGINX Manager
+  tags:
+  - NGINX Manager
+- name: Resellers
+  tags:
+  - Account Enhancement Limit
+  - Account Limits
+  - Account Permissions
+  - Account Settings
+  - Reseller Account Management
+- name: Security
+  tags:
+  - WHM Access
+- name: Server Administration
+  tags:
+  - Configuration Clusters
+  - Configurations
+  - Connected Applications
+  - Connections
+  - cPanel Analytics
+  - License Management
+  - Notifications
+  - Plugin-Based Features
+  - Security
+  - Server Nodes
+  - Server Profiles
+  - Services
+  - System Information
+  - Updates
+- name: SSL Certificates
+  tags:
+  - Auto-Generated Certificates
+  - cPanel Account Settings
+  - SSL Server Settings
+- name: System Package Management
+  tags:
+  - Install or Uninstall Package
+  - List Package Information
+  - Package Manager Settings
+- name: Transfers
+  tags:
+  - cPanel Account Transfer
+  - Transfer Configuration
+  - Transfer Monitoring
+- name: UserData
+  tags:
+  - UserData
+- name: Web Server Configuration
+  tags:
+  - EasyApache Settings
+  - PHP
+  - PHP-FPM
+- name: Web Server Security (ModSecurity)
+  tags:
+  - Rule Settings
+  - Rule Vendor Settings
+  - Server Settings

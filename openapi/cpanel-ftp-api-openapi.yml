@@ -1,0 +1,2843 @@
+openapi: 3.2.0
+info:
+  contact:
+    email: cs@cpanel.net
+    name: WebPros International, LLC
+    url: https://cpanel.net/support/
+  description: UAPI accesses the cPanel interface's features. Use this API to access and modify cPanel account data and settings.
+  license:
+    name: cPanel License
+    url: https://cpanel.net/legal-notices/
+  termsOfService: https://cpanel.net/legal-notices/
+  title: cPanel U Ftp API
+  version: 11.137.9999.106
+  x-api-evangelist-provenance: 'Harvested verbatim from cPanel''s developer portal on 2026-09-05 via the MCP tool get-full-api-description at https://api.docs.cpanel.net/mcp. ONE mechanical change was made before storage: example values containing PEM private-key or certificate blocks, and AWS-access-key-shaped example strings, were replaced with REDACTED_* placeholders so the file can be stored in a public git repository without tripping secret scanning. No path, operation, parameter, schema or description was altered, added or removed.'
+servers:
+- description: A server running cPanel.
+  url: https://{host}:{port}/execute
+  variables:
+    host:
+      default: cpanel-server.tld
+      description: The hostname of a server running cPanel.
+    port:
+      default: '2083'
+      description: The cPanel port.
+security:
+- BasicAuth: []
+tags:
+- description: The FTP module for UAPI.
+  name: Ftp
+paths:
+  /Ftp/add_ftp:
+    get:
+      x-readonly: false
+      x-rollback: none
+      description: 'This function creates an FTP account.
+
+
+        **Important:**
+
+
+        When you disable the FTP role, the system **disables** this function.'
+      operationId: Ftp-add_ftp
+      parameters:
+      - description: The new FTP account username.
+        in: query
+        name: user
+        required: true
+        schema:
+          example: username
+          type: string
+      - description: 'Whether to strip dots (`.`) from the username.
+
+
+          * `1` — Strip dots.
+
+          * `0` — Do **not** strip dots.'
+        in: query
+        name: disallowdot
+        required: false
+        schema:
+          default: 1
+          enum:
+          - 0
+          - 1
+          example: 1
+          type: integer
+      - description: 'The FTP user''s associated domain. This must be a domain that the cPanel account owns.
+
+
+          **Note:**
+
+
+          This parameter defaults to the cPanel account''s primary domain.'
+        in: query
+        name: domain
+        required: false
+        schema:
+          example: example.com
+          format: domain
+          type: string
+      - description: The path to the FTP account's root directory, relative to the cPanel account's home directory. If you don't set this, it defaults to a directory with the same name as the FTP account.
+        in: query
+        name: homedir
+        required: false
+        schema:
+          example: exampleftp
+          format: path
+          type: string
+      - description: 'The new FTP account password.
+
+
+          **Note:**
+
+
+          You can use the `pass_hash` parameter in place of this parameter. However, you **cannot** use both the `pass` and `pass_hash` parameters in the same request.'
+        in: query
+        name: pass
+        required: false
+        schema:
+          example: 123456luggage
+          type: string
+      - description: 'The account''s password hash.
+
+
+          **Note:**
+
+
+          * You can use this parameter in place of the `pass` parameter. However, you **cannot** use both the `pass` and `pass_hash` parameters in the same request.
+
+          * You can find your server''s password hash type in the `/etc/sysconfig/authconfig` file.'
+        in: query
+        name: pass_hash
+        required: false
+        schema:
+          default: ''
+          example: $6$1sOyHP5ZDYp3pGUz$R0TSgfPRHfDjT5PP5RJGv39FhiGTNNPvM7IFpCBjXijMmlMZk9yI8T3LqGuntc9fdKb5eX.lGL7wBS9e4DAWn/
+          type: string
+      - description: 'The FTP account''s maximum disk usage quota, in megabytes (MB).
+
+
+          **Note:**
+
+
+          A value of `0` grants the FTP account unlimited disk space.'
+        in: query
+        name: quota
+        required: false
+        schema:
+          default: 0
+          example: 42
+          minimum: 0
+          type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  apiversion:
+                    description: The version of the API.
+                    example: 3
+                    type: integer
+                  func:
+                    description: The name of the method called.
+                    example: add_ftp
+                    type: string
+                  module:
+                    description: The name of the module called.
+                    example: Ftp
+                    type: string
+                  result:
+                    properties:
+                      data:
+                        enum:
+                        - null
+                        example: null
+                        type:
+                        - object
+                        - 'null'
+                      errors:
+                        description: List of errors if the API failed.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      messages:
+                        description: List of messages generated by the API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      metadata:
+                        properties: {}
+                      status:
+                        description: '- 1 - Success
+
+                          - 0 - Failed: Check the errors field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      warnings:
+                        description: List of warnings generated by the API. Warnings describe non-critical failures or other problematic conditions noted while running a API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                type: object
+          description: HTTP Request was successful.
+      summary: Create FTP account
+      tags:
+      - Ftp
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "uapi --output=jsonpretty \\\n  --user=username \\\n  Ftp \\\n  add_ftp \\\n  user='username2' \\\n  pass='123456luggage'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2083/cpsess##########/execute/Ftp/add_ftp?user=username
+      - label: LiveAPI Perl
+        lang: Perl
+        source: "#--------------------------------------------------------------------------------------\n# Instructions:\n#--------------------------------------------------------------------------------------\n# <theme-name> is the theme assigned to cPanel account.\n# 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n# 2) mkdir api_examples\n# 3) cd api_examples\n# 4) create a file Ftp_add_ftp.live.pl and put this code into that file.\n# 5) In your browser login to a cPanel account.\n# 6) Manually change the url from: .../frontend/<theme-name>\n#    to .../frontend/<theme-name>/api_examples/Ftp_add_ftp.live.pl\n#--------------------------------------------------------------------------------------\n\nuse strict;\n\nuse Cpanel::LiveAPI ();\n\nmy $cpanel = Cpanel::LiveAPI->new(); # Connect to cPanel - only do this once.\n\n# Print the header\nprint \"Content-type: text/plain\\r\\n\\r\\n\";\n\n# Call the API\nmy $response = $cpanel->uapi(\n    q/Ftp/,\n    q/add_ftp/,\n    {\n        'user' => 'username',\n    }\n);\n\n# Handle the response\nif ($response->{cpanelresult}{result}{status}) {\n    my $data = $response->{cpanelresult}{result}{data};\n    # Do something with the $data\n    # So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    # Report errors:\n    print to_json($response->{cpanelresult}{result}{errors});\n}\n\n# Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n#--------------------------------------------------------------------------------------\n# Helper function to convert a perl object to html printable json\n#--------------------------------------------------------------------------------------\nsub to_json {\n    require JSON;\n    my $str = JSON->new->pretty->encode($_[0]);\n    return $str;\n}\n"
+      - label: LiveAPI PHP
+        lang: PHP
+        source: "<?php\n//--------------------------------------------------------------------------------------\n// Instructions:\n//--------------------------------------------------------------------------------------\n// <theme-name> is the theme assigned to cPanel account.\n// 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n// 2) mkdir api_examples\n// 3) cd api_examples\n// 4) create a file Ftp_add_ftp.live.php and put this code into that file.\n// 5) In your browser login to a cPanel account.\n// 6) Manually change the url from: .../frontend/<theme-name>\n//    to .../frontend/<theme-name>/api_examples/Ftp_add_ftp.live.php\n//--------------------------------------------------------------------------------------\n\n// Instantiate the CPANEL object.\nrequire_once \"/usr/local/cpanel/php/cpanel.php\";\n\n// Print the header\nheader('Content-Type: text/plain');\n\n// Connect to cPanel - only do this once.\n$cpanel = new CPANEL();\n\n// Call the API\n$response = $cpanel->uapi(\n    'Ftp',\n    'add_ftp',\n    array (\n        'user' => 'username',\n    )\n);\n\n// Handle the response\nif ($response['cpanelresult']['result']['status']) {\n    $data = $response['cpanelresult']['result']['data'];\n    // Do something with the $data\n    // So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    // Report errors:\n    print to_json($response['cpanelresult']['result']['errors']);\n}\n\n// Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n//--------------------------------------------------------------------------------------\n// Helper function to convert a PHP value to html printable json\n//--------------------------------------------------------------------------------------\nfunction to_json($data) {\n    return json_encode($data, JSON_PRETTY_PRINT);\n}"
+      x-cpanel-api-version: UAPI
+      x-cpanel-available-version: cPanel 11.42
+  /Ftp/allows_anonymous_ftp:
+    get:
+      x-readonly: true
+      description: 'This function checks whether the account allows anonymous FTP connections.
+
+
+        **Important:**
+
+
+        When you disable the *FTP* role, the system **disables** this function.'
+      operationId: Ftp-allows_anonymous_ftp
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  apiversion:
+                    description: The version of the API.
+                    example: 3
+                    type: integer
+                  func:
+                    description: The name of the method called.
+                    example: allows_anonymous_ftp
+                    type: string
+                  module:
+                    description: The name of the module called.
+                    example: Ftp
+                    type: string
+                  result:
+                    properties:
+                      data:
+                        properties:
+                          allows:
+                            description: 'Whether the cPanel account allows anonymous FTP connections.
+
+                              * `1` - Allowed.
+
+                              * `0` - **Not** allowed.'
+                            enum:
+                            - 0
+                            - 1
+                            example: 1
+                            type: integer
+                        type: object
+                      errors:
+                        description: List of errors if the API failed.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      messages:
+                        description: List of messages generated by the API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      metadata:
+                        properties: {}
+                      status:
+                        description: '* `1` - Success
+
+                          * `0` - Failed: Check the errors field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      warnings:
+                        description: List of warnings generated by the API. Warnings describe non-critical failures or other problematic conditions noted while running a API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                    type: object
+                type: object
+          description: HTTP Request was successful.
+      summary: Return if anonymous FTP connections allowed
+      tags:
+      - Ftp
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "uapi --output=jsonpretty \\\n  --user=username \\\n  Ftp \\\n  allows_anonymous_ftp\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2083/cpsess##########/execute/Ftp/allows_anonymous_ftp
+      - label: LiveAPI Perl
+        lang: Perl
+        source: "#--------------------------------------------------------------------------------------\n# Instructions:\n#--------------------------------------------------------------------------------------\n# <theme-name> is the theme assigned to cPanel account.\n# 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n# 2) mkdir api_examples\n# 3) cd api_examples\n# 4) create a file Ftp_allows_anonymous_ftp.live.pl and put this code into that file.\n# 5) In your browser login to a cPanel account.\n# 6) Manually change the url from: .../frontend/<theme-name>\n#    to .../frontend/<theme-name>/api_examples/Ftp_allows_anonymous_ftp.live.pl\n#--------------------------------------------------------------------------------------\n\nuse strict;\n\nuse Cpanel::LiveAPI ();\n\nmy $cpanel = Cpanel::LiveAPI->new(); # Connect to cPanel - only do this once.\n\n# Print the header\nprint \"Content-type: text/plain\\r\\n\\r\\n\";\n\n# Call the API\nmy $response = $cpanel->uapi(\n    q/Ftp/,\n    q/allows_anonymous_ftp/\n);\n\n# Handle the response\nif ($response->{cpanelresult}{result}{status}) {\n    my $data = $response->{cpanelresult}{result}{data};\n    # Do something with the $data\n    # So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    # Report errors:\n    print to_json($response->{cpanelresult}{result}{errors});\n}\n\n# Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n#--------------------------------------------------------------------------------------\n# Helper function to convert a perl object to html printable json\n#--------------------------------------------------------------------------------------\nsub to_json {\n    require JSON;\n    my $str = JSON->new->pretty->encode($_[0]);\n    return $str;\n}\n"
+      - label: LiveAPI PHP
+        lang: PHP
+        source: "<?php\n//--------------------------------------------------------------------------------------\n// Instructions:\n//--------------------------------------------------------------------------------------\n// <theme-name> is the theme assigned to cPanel account.\n// 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n// 2) mkdir api_examples\n// 3) cd api_examples\n// 4) create a file Ftp_allows_anonymous_ftp.live.php and put this code into that file.\n// 5) In your browser login to a cPanel account.\n// 6) Manually change the url from: .../frontend/<theme-name>\n//    to .../frontend/<theme-name>/api_examples/Ftp_allows_anonymous_ftp.live.php\n//--------------------------------------------------------------------------------------\n\n// Instantiate the CPANEL object.\nrequire_once \"/usr/local/cpanel/php/cpanel.php\";\n\n// Print the header\nheader('Content-Type: text/plain');\n\n// Connect to cPanel - only do this once.\n$cpanel = new CPANEL();\n\n// Call the API\n$response = $cpanel->uapi(\n    'Ftp',\n    'allows_anonymous_ftp'\n);\n\n// Handle the response\nif ($response['cpanelresult']['result']['status']) {\n    $data = $response['cpanelresult']['result']['data'];\n    // Do something with the $data\n    // So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    // Report errors:\n    print to_json($response['cpanelresult']['result']['errors']);\n}\n\n// Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n//--------------------------------------------------------------------------------------\n// Helper function to convert a PHP value to html printable json\n//--------------------------------------------------------------------------------------\nfunction to_json($data) {\n    return json_encode($data, JSON_PRETTY_PRINT);\n}"
+      x-cpanel-api-version: UAPI
+      x-cpanel-available-version: cPanel 11.42
+  /Ftp/allows_anonymous_ftp_incoming:
+    get:
+      x-readonly: true
+      description: 'This function checks whether the account allows inbound anonymous FTP transfers.
+
+
+        **Important:**
+
+
+        When you disable the *FTP* role, the system **disables** this function.'
+      operationId: Ftp-allows_anonymous_ftp_incoming
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  apiversion:
+                    description: The version of the API.
+                    example: 3
+                    type: integer
+                  func:
+                    description: The name of the method called.
+                    example: allows_anonymous_ftp_incoming
+                    type: string
+                  module:
+                    description: The name of the module called.
+                    example: Ftp
+                    type: string
+                  result:
+                    properties:
+                      data:
+                        properties:
+                          allows:
+                            description: 'Whether the cPanel account allows inbound anonymous FTP transfers.
+
+                              * `1` - Allowed.
+
+                              * `0` - Not allowed.'
+                            enum:
+                            - 0
+                            - 1
+                            example: 1
+                            type: integer
+                        type: object
+                      errors:
+                        description: List of errors if the API failed.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      messages:
+                        description: List of messages generated by the API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      metadata:
+                        properties: {}
+                      status:
+                        description: '* `1` - Success
+
+                          * `0` - Failed: Check the errors field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      warnings:
+                        description: List of warnings generated by the API. Warnings describe non-critical failures or other problematic conditions noted while running a API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                    type: object
+                type: object
+          description: HTTP Request was successful.
+      summary: Return if anonymous FTP transfers allowed
+      tags:
+      - Ftp
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "uapi --output=jsonpretty \\\n  --user=username \\\n  Ftp \\\n  allows_anonymous_ftp_incoming\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2083/cpsess##########/execute/Ftp/allows_anonymous_ftp_incoming
+      - label: LiveAPI Perl
+        lang: Perl
+        source: "#--------------------------------------------------------------------------------------\n# Instructions:\n#--------------------------------------------------------------------------------------\n# <theme-name> is the theme assigned to cPanel account.\n# 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n# 2) mkdir api_examples\n# 3) cd api_examples\n# 4) create a file Ftp_allows_anonymous_ftp_incoming.live.pl and put this code into that file.\n# 5) In your browser login to a cPanel account.\n# 6) Manually change the url from: .../frontend/<theme-name>\n#    to .../frontend/<theme-name>/api_examples/Ftp_allows_anonymous_ftp_incoming.live.pl\n#--------------------------------------------------------------------------------------\n\nuse strict;\n\nuse Cpanel::LiveAPI ();\n\nmy $cpanel = Cpanel::LiveAPI->new(); # Connect to cPanel - only do this once.\n\n# Print the header\nprint \"Content-type: text/plain\\r\\n\\r\\n\";\n\n# Call the API\nmy $response = $cpanel->uapi(\n    q/Ftp/,\n    q/allows_anonymous_ftp_incoming/\n);\n\n# Handle the response\nif ($response->{cpanelresult}{result}{status}) {\n    my $data = $response->{cpanelresult}{result}{data};\n    # Do something with the $data\n    # So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    # Report errors:\n    print to_json($response->{cpanelresult}{result}{errors});\n}\n\n# Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n#--------------------------------------------------------------------------------------\n# Helper function to convert a perl object to html printable json\n#--------------------------------------------------------------------------------------\nsub to_json {\n    require JSON;\n    my $str = JSON->new->pretty->encode($_[0]);\n    return $str;\n}\n"
+      - label: LiveAPI PHP
+        lang: PHP
+        source: "<?php\n//--------------------------------------------------------------------------------------\n// Instructions:\n//--------------------------------------------------------------------------------------\n// <theme-name> is the theme assigned to cPanel account.\n// 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n// 2) mkdir api_examples\n// 3) cd api_examples\n// 4) create a file Ftp_allows_anonymous_ftp_incoming.live.php and put this code into that file.\n// 5) In your browser login to a cPanel account.\n// 6) Manually change the url from: .../frontend/<theme-name>\n//    to .../frontend/<theme-name>/api_examples/Ftp_allows_anonymous_ftp_incoming.live.php\n//--------------------------------------------------------------------------------------\n\n// Instantiate the CPANEL object.\nrequire_once \"/usr/local/cpanel/php/cpanel.php\";\n\n// Print the header\nheader('Content-Type: text/plain');\n\n// Connect to cPanel - only do this once.\n$cpanel = new CPANEL();\n\n// Call the API\n$response = $cpanel->uapi(\n    'Ftp',\n    'allows_anonymous_ftp_incoming'\n);\n\n// Handle the response\nif ($response['cpanelresult']['result']['status']) {\n    $data = $response['cpanelresult']['result']['data'];\n    // Do something with the $data\n    // So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    // Report errors:\n    print to_json($response['cpanelresult']['result']['errors']);\n}\n\n// Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n//--------------------------------------------------------------------------------------\n// Helper function to convert a PHP value to html printable json\n//--------------------------------------------------------------------------------------\nfunction to_json($data) {\n    return json_encode($data, JSON_PRETTY_PRINT);\n}"
+      x-cpanel-api-version: UAPI
+      x-cpanel-available-version: cPanel 11.42
+  /Ftp/delete_ftp:
+    get:
+      x-readonly: false
+      x-rollback: none
+      description: 'This function deletes an FTP account.
+
+
+        **Important:**
+
+
+        When you disable the *FTP* role, the system **disables** this function.'
+      operationId: Ftp-delete_ftp
+      parameters:
+      - description: The FTP account's username.
+        in: query
+        name: user
+        required: true
+        schema:
+          example: username
+          type: string
+      - description: 'Whether to delete the FTP account''s home directory.
+
+
+          * `1` — Delete the home directory.
+
+          * `0` — Do **not** delete the home directory.'
+        in: query
+        name: destroy
+        required: false
+        schema:
+          default: 0
+          enum:
+          - 0
+          - 1
+          example: 1
+          type: integer
+      - description: 'The user''s associated domain.
+
+
+          **Note:**
+
+
+          This parameter defaults to the cPanel account''s primary domain.'
+        in: query
+        name: domain
+        required: false
+        schema:
+          example: example.com
+          format: domain
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  apiversion:
+                    description: The version of the API.
+                    example: 3
+                    type: integer
+                  func:
+                    description: The name of the method called.
+                    example: delete_ftp
+                    type: string
+                  module:
+                    description: The name of the module called.
+                    example: Ftp
+                    type: string
+                  result:
+                    properties:
+                      data:
+                        default: null
+                        type:
+                        - object
+                        - 'null'
+                      errors:
+                        description: List of errors if the API failed.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      messages:
+                        description: List of messages generated by the API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      metadata:
+                        properties: {}
+                      status:
+                        description: '* `1` - Success.
+
+                          * `0` - Failed. Check the `errors` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      warnings:
+                        description: List of warnings generated by the API. Warnings describe non-critical failures or other problematic conditions noted while running a API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                type: object
+          description: HTTP Request was successful.
+      summary: Delete FTP account
+      tags:
+      - Ftp
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "uapi --output=jsonpretty \\\n  --user=username \\\n  Ftp \\\n  delete_ftp \\\n  user='username2'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2083/cpsess##########/execute/Ftp/delete_ftp?user=username
+      - label: LiveAPI Perl
+        lang: Perl
+        source: "#--------------------------------------------------------------------------------------\n# Instructions:\n#--------------------------------------------------------------------------------------\n# <theme-name> is the theme assigned to cPanel account.\n# 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n# 2) mkdir api_examples\n# 3) cd api_examples\n# 4) create a file Ftp_delete_ftp.live.pl and put this code into that file.\n# 5) In your browser login to a cPanel account.\n# 6) Manually change the url from: .../frontend/<theme-name>\n#    to .../frontend/<theme-name>/api_examples/Ftp_delete_ftp.live.pl\n#--------------------------------------------------------------------------------------\n\nuse strict;\n\nuse Cpanel::LiveAPI ();\n\nmy $cpanel = Cpanel::LiveAPI->new(); # Connect to cPanel - only do this once.\n\n# Print the header\nprint \"Content-type: text/plain\\r\\n\\r\\n\";\n\n# Call the API\nmy $response = $cpanel->uapi(\n    q/Ftp/,\n    q/delete_ftp/,\n    {\n        'user' => 'username',\n    }\n);\n\n# Handle the response\nif ($response->{cpanelresult}{result}{status}) {\n    my $data = $response->{cpanelresult}{result}{data};\n    # Do something with the $data\n    # So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    # Report errors:\n    print to_json($response->{cpanelresult}{result}{errors});\n}\n\n# Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n#--------------------------------------------------------------------------------------\n# Helper function to convert a perl object to html printable json\n#--------------------------------------------------------------------------------------\nsub to_json {\n    require JSON;\n    my $str = JSON->new->pretty->encode($_[0]);\n    return $str;\n}\n"
+      - label: LiveAPI PHP
+        lang: PHP
+        source: "<?php\n//--------------------------------------------------------------------------------------\n// Instructions:\n//--------------------------------------------------------------------------------------\n// <theme-name> is the theme assigned to cPanel account.\n// 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n// 2) mkdir api_examples\n// 3) cd api_examples\n// 4) create a file Ftp_delete_ftp.live.php and put this code into that file.\n// 5) In your browser login to a cPanel account.\n// 6) Manually change the url from: .../frontend/<theme-name>\n//    to .../frontend/<theme-name>/api_examples/Ftp_delete_ftp.live.php\n//--------------------------------------------------------------------------------------\n\n// Instantiate the CPANEL object.\nrequire_once \"/usr/local/cpanel/php/cpanel.php\";\n\n// Print the header\nheader('Content-Type: text/plain');\n\n// Connect to cPanel - only do this once.\n$cpanel = new CPANEL();\n\n// Call the API\n$response = $cpanel->uapi(\n    'Ftp',\n    'delete_ftp',\n    array (\n        'user' => 'username',\n    )\n);\n\n// Handle the response\nif ($response['cpanelresult']['result']['status']) {\n    $data = $response['cpanelresult']['result']['data'];\n    // Do something with the $data\n    // So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    // Report errors:\n    print to_json($response['cpanelresult']['result']['errors']);\n}\n\n// Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n//--------------------------------------------------------------------------------------\n// Helper function to convert a PHP value to html printable json\n//--------------------------------------------------------------------------------------\nfunction to_json($data) {\n    return json_encode($data, JSON_PRETTY_PRINT);\n}"
+      x-cpanel-api-version: UAPI
+      x-cpanel-available-version: cPanel 11.42
+  /Ftp/ftp_exists:
+    get:
+      x-readonly: true
+      description: 'This function checks whether an FTP account exists.
+
+
+        **Note:**
+
+
+        This function returns only metadata if the FTP account exists, or an error if the FTP account does **not** exist.'
+      operationId: Ftp-ftp_exists
+      parameters:
+      - description: The FTP account's username.
+        in: query
+        name: user
+        required: true
+        schema:
+          example: us_chickens
+          type: string
+      - description: 'The user''s associated domain.
+
+
+          **Note:**
+
+
+          This parameter defaults to the cPanel account''s primary domain.'
+        in: query
+        name: domain
+        required: false
+        schema:
+          example: example.com
+          format: domain
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  apiversion:
+                    description: The version of the API.
+                    example: 3
+                    type: integer
+                  func:
+                    description: The name of the method called.
+                    example: ftp_exists
+                    type: string
+                  module:
+                    description: The name of the module called.
+                    example: Ftp
+                    type: string
+                  result:
+                    properties:
+                      data:
+                        default: null
+                        type:
+                        - object
+                        - 'null'
+                      errors:
+                        description: List of errors if the API failed.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      messages:
+                        description: List of messages generated by the API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      metadata:
+                        properties: {}
+                      status:
+                        description: '* `1` - Success.
+
+                          * `0` - Failed. Check the `errors` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      warnings:
+                        description: List of warnings generated by the API. Warnings describe non-critical failures or other problematic conditions noted while running an API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                type: object
+          description: HTTP Request was successful.
+      summary: Return whether an FTP account exists
+      tags:
+      - Ftp
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "uapi --output=jsonpretty \\\n  --user=username \\\n  Ftp \\\n  ftp_exists \\\n  user='us_chickens'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2083/cpsess##########/execute/Ftp/ftp_exists?user=us_chickens
+      - label: LiveAPI Perl
+        lang: Perl
+        source: "#--------------------------------------------------------------------------------------\n# Instructions:\n#--------------------------------------------------------------------------------------\n# <theme-name> is the theme assigned to cPanel account.\n# 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n# 2) mkdir api_examples\n# 3) cd api_examples\n# 4) create a file Ftp_ftp_exists.live.pl and put this code into that file.\n# 5) In your browser login to a cPanel account.\n# 6) Manually change the url from: .../frontend/<theme-name>\n#    to .../frontend/<theme-name>/api_examples/Ftp_ftp_exists.live.pl\n#--------------------------------------------------------------------------------------\n\nuse strict;\n\nuse Cpanel::LiveAPI ();\n\nmy $cpanel = Cpanel::LiveAPI->new(); # Connect to cPanel - only do this once.\n\n# Print the header\nprint \"Content-type: text/plain\\r\\n\\r\\n\";\n\n# Call the API\nmy $response = $cpanel->uapi(\n    q/Ftp/,\n    q/ftp_exists/,\n    {\n        'user' => 'us_chickens',\n    }\n);\n\n# Handle the response\nif ($response->{cpanelresult}{result}{status}) {\n    my $data = $response->{cpanelresult}{result}{data};\n    # Do something with the $data\n    # So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    # Report errors:\n    print to_json($response->{cpanelresult}{result}{errors});\n}\n\n# Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n#--------------------------------------------------------------------------------------\n# Helper function to convert a perl object to html printable json\n#--------------------------------------------------------------------------------------\nsub to_json {\n    require JSON;\n    my $str = JSON->new->pretty->encode($_[0]);\n    return $str;\n}\n"
+      - label: LiveAPI PHP
+        lang: PHP
+        source: "<?php\n//--------------------------------------------------------------------------------------\n// Instructions:\n//--------------------------------------------------------------------------------------\n// <theme-name> is the theme assigned to cPanel account.\n// 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n// 2) mkdir api_examples\n// 3) cd api_examples\n// 4) create a file Ftp_ftp_exists.live.php and put this code into that file.\n// 5) In your browser login to a cPanel account.\n// 6) Manually change the url from: .../frontend/<theme-name>\n//    to .../frontend/<theme-name>/api_examples/Ftp_ftp_exists.live.php\n//--------------------------------------------------------------------------------------\n\n// Instantiate the CPANEL object.\nrequire_once \"/usr/local/cpanel/php/cpanel.php\";\n\n// Print the header\nheader('Content-Type: text/plain');\n\n// Connect to cPanel - only do this once.\n$cpanel = new CPANEL();\n\n// Call the API\n$response = $cpanel->uapi(\n    'Ftp',\n    'ftp_exists',\n    array (\n        'user' => 'us_chickens',\n    )\n);\n\n// Handle the response\nif ($response['cpanelresult']['result']['status']) {\n    $data = $response['cpanelresult']['result']['data'];\n    // Do something with the $data\n    // So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    // Report errors:\n    print to_json($response['cpanelresult']['result']['errors']);\n}\n\n// Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n//--------------------------------------------------------------------------------------\n// Helper function to convert a PHP value to html printable json\n//--------------------------------------------------------------------------------------\nfunction to_json($data) {\n    return json_encode($data, JSON_PRETTY_PRINT);\n}"
+      x-cpanel-api-version: UAPI
+      x-cpanel-available-version: cPanel 11.42
+  /Ftp/get_ftp_daemon_info:
+    get:
+      x-readonly: true
+      description: This function retrieves the extended information about the server's FTP daemon.
+      operationId: Ftp-get_ftp_daemon_info
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  apiversion:
+                    description: The version of the API.
+                    example: 3
+                    type: integer
+                  func:
+                    description: The name of the method called.
+                    example: get_ftp_daemon_info
+                    type: string
+                  module:
+                    description: The name of the module called.
+                    example: Ftp
+                    type: string
+                  result:
+                    properties:
+                      data:
+                        properties:
+                          enabled:
+                            description: 'Whether the server''s FTP daemon is enabled.
+
+
+                              * `1` – Enabled.
+
+                              * `0` – Disabled.'
+                            enum:
+                            - 0
+                            - 1
+                            example: 1
+                            type: integer
+                          name:
+                            description: 'The FTP server''s name.
+
+
+                              * `pure-ftpd`
+
+                              * `proftpd`
+
+                              * An empty string.'
+                            enum:
+                            - pure-ftpd
+                            - proftpd
+                            - ''
+                            example: pure-ftpd
+                            type: string
+                          supports:
+                            description: This object contains the features that the FTP daemon supports.
+                            properties:
+                              login_without_domain:
+                                description: 'Whether the FTP daemon supports username authentication without the user''s domain.
+
+
+                                  * `1` – Supported.
+
+                                  * `0` – **Not** supported.'
+                                enum:
+                                - 0
+                                - 1
+                                example: 0
+                                type: integer
+                              quota:
+                                description: 'Whether the FTP daemon supports disk quotas.
+
+
+                                  * `1` – Supported.
+
+                                  * `0` – **Not** supported.'
+                                enum:
+                                - 0
+                                - 1
+                                example: 1
+                                type: integer
+                            type: object
+                        type: object
+                      errors:
+                        description: List of errors if the API failed.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      messages:
+                        description: List of messages generated by the API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      metadata:
+                        properties: {}
+                      status:
+                        description: '- 1 - Success
+
+                          - 0 - Failed: Check the errors field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      warnings:
+                        description: List of warnings generated by the API. Warnings describe non-critical failures or other problematic conditions noted while running a API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                    type: object
+                type: object
+          description: HTTP Request was successful.
+      summary: Return FTP server's information
+      tags:
+      - Ftp
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "uapi --output=jsonpretty \\\n  --user=username \\\n  Ftp \\\n  get_ftp_daemon_info\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2083/cpsess##########/execute/Ftp/get_ftp_daemon_info
+      - label: LiveAPI Perl
+        lang: Perl
+        source: "#--------------------------------------------------------------------------------------\n# Instructions:\n#--------------------------------------------------------------------------------------\n# <theme-name> is the theme assigned to cPanel account.\n# 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n# 2) mkdir api_examples\n# 3) cd api_examples\n# 4) create a file Ftp_get_ftp_daemon_info.live.pl and put this code into that file.\n# 5) In your browser login to a cPanel account.\n# 6) Manually change the url from: .../frontend/<theme-name>\n#    to .../frontend/<theme-name>/api_examples/Ftp_get_ftp_daemon_info.live.pl\n#--------------------------------------------------------------------------------------\n\nuse strict;\n\nuse Cpanel::LiveAPI ();\n\nmy $cpanel = Cpanel::LiveAPI->new(); # Connect to cPanel - only do this once.\n\n# Print the header\nprint \"Content-type: text/plain\\r\\n\\r\\n\";\n\n# Call the API\nmy $response = $cpanel->uapi(\n    q/Ftp/,\n    q/get_ftp_daemon_info/\n);\n\n# Handle the response\nif ($response->{cpanelresult}{result}{status}) {\n    my $data = $response->{cpanelresult}{result}{data};\n    # Do something with the $data\n    # So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    # Report errors:\n    print to_json($response->{cpanelresult}{result}{errors});\n}\n\n# Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n#--------------------------------------------------------------------------------------\n# Helper function to convert a perl object to html printable json\n#--------------------------------------------------------------------------------------\nsub to_json {\n    require JSON;\n    my $str = JSON->new->pretty->encode($_[0]);\n    return $str;\n}\n"
+      - label: LiveAPI PHP
+        lang: PHP
+        source: "<?php\n//--------------------------------------------------------------------------------------\n// Instructions:\n//--------------------------------------------------------------------------------------\n// <theme-name> is the theme assigned to cPanel account.\n// 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n// 2) mkdir api_examples\n// 3) cd api_examples\n// 4) create a file Ftp_get_ftp_daemon_info.live.php and put this code into that file.\n// 5) In your browser login to a cPanel account.\n// 6) Manually change the url from: .../frontend/<theme-name>\n//    to .../frontend/<theme-name>/api_examples/Ftp_get_ftp_daemon_info.live.php\n//--------------------------------------------------------------------------------------\n\n// Instantiate the CPANEL object.\nrequire_once \"/usr/local/cpanel/php/cpanel.php\";\n\n// Print the header\nheader('Content-Type: text/plain');\n\n// Connect to cPanel - only do this once.\n$cpanel = new CPANEL();\n\n// Call the API\n$response = $cpanel->uapi(\n    'Ftp',\n    'get_ftp_daemon_info'\n);\n\n// Handle the response\nif ($response['cpanelresult']['result']['status']) {\n    $data = $response['cpanelresult']['result']['data'];\n    // Do something with the $data\n    // So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    // Report errors:\n    print to_json($response['cpanelresult']['result']['errors']);\n}\n\n// Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n//--------------------------------------------------------------------------------------\n// Helper function to convert a PHP value to html printable json\n//--------------------------------------------------------------------------------------\nfunction to_json($data) {\n    return json_encode($data, JSON_PRETTY_PRINT);\n}"
+      x-cpanel-api-version: UAPI
+      x-cpanel-available-version: cPanel 54
+  /Ftp/get_port:
+    get:
+      x-readonly: true
+      description: 'This function returns the FTP port.
+
+
+        **Important:**
+
+
+        When you disable the *FTP* role, the system **disables** this function.'
+      operationId: Ftp-get_port
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  apiversion:
+                    description: The version of the API.
+                    example: 3
+                    type: integer
+                  func:
+                    description: The name of the method called.
+                    example: get_port
+                    type: string
+                  module:
+                    description: The name of the module called.
+                    example: Ftp
+                    type: string
+                  result:
+                    properties:
+                      data:
+                        properties:
+                          port:
+                            description: The FTP port.
+                            example: 21
+                            maximum: 65335
+                            minimum: 1
+                            type: integer
+                        type: object
+                      errors:
+                        description: List of errors if the API failed.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      messages:
+                        description: List of messages generated by the API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      metadata:
+                        properties: {}
+                      status:
+                        description: '* `1` - Success
+
+                          * `0` - Failed. Check the errors field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      warnings:
+                        description: List of warnings generated by the API. Warnings describe non-critical failures or other problematic conditions noted while running a API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                    type: object
+                type: object
+          description: HTTP Request was successful.
+      summary: Return FTP server's port
+      tags:
+      - Ftp
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "uapi --output=jsonpretty \\\n  --user=username \\\n  Ftp \\\n  get_port\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2083/cpsess##########/execute/Ftp/get_port
+      - label: LiveAPI Perl
+        lang: Perl
+        source: "#--------------------------------------------------------------------------------------\n# Instructions:\n#--------------------------------------------------------------------------------------\n# <theme-name> is the theme assigned to cPanel account.\n# 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n# 2) mkdir api_examples\n# 3) cd api_examples\n# 4) create a file Ftp_get_port.live.pl and put this code into that file.\n# 5) In your browser login to a cPanel account.\n# 6) Manually change the url from: .../frontend/<theme-name>\n#    to .../frontend/<theme-name>/api_examples/Ftp_get_port.live.pl\n#--------------------------------------------------------------------------------------\n\nuse strict;\n\nuse Cpanel::LiveAPI ();\n\nmy $cpanel = Cpanel::LiveAPI->new(); # Connect to cPanel - only do this once.\n\n# Print the header\nprint \"Content-type: text/plain\\r\\n\\r\\n\";\n\n# Call the API\nmy $response = $cpanel->uapi(\n    q/Ftp/,\n    q/get_port/\n);\n\n# Handle the response\nif ($response->{cpanelresult}{result}{status}) {\n    my $data = $response->{cpanelresult}{result}{data};\n    # Do something with the $data\n    # So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    # Report errors:\n    print to_json($response->{cpanelresult}{result}{errors});\n}\n\n# Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n#--------------------------------------------------------------------------------------\n# Helper function to convert a perl object to html printable json\n#--------------------------------------------------------------------------------------\nsub to_json {\n    require JSON;\n    my $str = JSON->new->pretty->encode($_[0]);\n    return $str;\n}\n"
+      - label: LiveAPI PHP
+        lang: PHP
+        source: "<?php\n//--------------------------------------------------------------------------------------\n// Instructions:\n//--------------------------------------------------------------------------------------\n// <theme-name> is the theme assigned to cPanel account.\n// 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n// 2) mkdir api_examples\n// 3) cd api_examples\n// 4) create a file Ftp_get_port.live.php and put this code into that file.\n// 5) In your browser login to a cPanel account.\n// 6) Manually change the url from: .../frontend/<theme-name>\n//    to .../frontend/<theme-name>/api_examples/Ftp_get_port.live.php\n//--------------------------------------------------------------------------------------\n\n// Instantiate the CPANEL object.\nrequire_once \"/usr/local/cpanel/php/cpanel.php\";\n\n// Print the header\nheader('Content-Type: text/plain');\n\n// Connect to cPanel - only do this once.\n$cpanel = new CPANEL();\n\n// Call the API\n$response = $cpanel->uapi(\n    'Ftp',\n    'get_port'\n);\n\n// Handle the response\nif ($response['cpanelresult']['result']['status']) {\n    $data = $response['cpanelresult']['result']['data'];\n    // Do something with the $data\n    // So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    // Report errors:\n    print to_json($response['cpanelresult']['result']['errors']);\n}\n\n// Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n//--------------------------------------------------------------------------------------\n// Helper function to convert a PHP value to html printable json\n//--------------------------------------------------------------------------------------\nfunction to_json($data) {\n    return json_encode($data, JSON_PRETTY_PRINT);\n}"
+      x-cpanel-api-version: UAPI
+      x-cpanel-available-version: cPanel 11.42
+  /Ftp/get_quota:
+    get:
+      x-readonly: true
+      description: 'This function checks an FTP account''s quota.
+
+
+        **Important:**
+
+
+        When you disable the _FTP role_, the system **disables** this function.'
+      operationId: Ftp-get_quota
+      parameters:
+      - description: The FTP account's username.
+        in: query
+        name: account
+        required: true
+        schema:
+          example: user1
+          type: string
+      - description: 'The user''s associated domain.
+
+
+          **Note:**
+
+
+          This parameter defaults to the cPanel account''s primary domain.'
+        in: query
+        name: domain
+        required: false
+        schema:
+          example: example.com
+          format: domain
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  apiversion:
+                    description: The version of the API.
+                    example: 3
+                    type: integer
+                  func:
+                    description: The name of the method called.
+                    example: get_quota
+                    type: string
+                  module:
+                    description: The name of the module called.
+                    example: Ftp
+                    type: string
+                  result:
+                    properties:
+                      data:
+                        description: 'The FTP account''s quota.
+
+                          * `unlimited`
+
+                          * A positive integer that represents the maximum amount of disk space that the FTP account can use, in megabytes (MB).'
+                        example: unlimited
+                        type: string
+                      errors:
+                        description: List of errors if the API failed.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      messages:
+                        description: List of messages generated by the API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      metadata:
+                        properties: {}
+                      status:
+                        description: '* `1` - Success.
+
+                          * `0` - Failed. Check the `errors` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      warnings:
+                        description: List of warnings generated by the API. Warnings describe non-critical failures or other problematic conditions noted while running a API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                    type: object
+                type: object
+          description: HTTP Request was successful.
+      summary: Return FTP account's quota
+      tags:
+      - Ftp
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "uapi --output=jsonpretty \\\n  --user=username \\\n  Ftp \\\n  get_quota \\\n  account='user1'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2083/cpsess##########/execute/Ftp/get_quota?account=user1
+      - label: LiveAPI Perl
+        lang: Perl
+        source: "#--------------------------------------------------------------------------------------\n# Instructions:\n#--------------------------------------------------------------------------------------\n# <theme-name> is the theme assigned to cPanel account.\n# 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n# 2) mkdir api_examples\n# 3) cd api_examples\n# 4) create a file Ftp_get_quota.live.pl and put this code into that file.\n# 5) In your browser login to a cPanel account.\n# 6) Manually change the url from: .../frontend/<theme-name>\n#    to .../frontend/<theme-name>/api_examples/Ftp_get_quota.live.pl\n#--------------------------------------------------------------------------------------\n\nuse strict;\n\nuse Cpanel::LiveAPI ();\n\nmy $cpanel = Cpanel::LiveAPI->new(); # Connect to cPanel - only do this once.\n\n# Print the header\nprint \"Content-type: text/plain\\r\\n\\r\\n\";\n\n# Call the API\nmy $response = $cpanel->uapi(\n    q/Ftp/,\n    q/get_quota/,\n    {\n        'account' => 'user1',\n    }\n);\n\n# Handle the response\nif ($response->{cpanelresult}{result}{status}) {\n    my $data = $response->{cpanelresult}{result}{data};\n    # Do something with the $data\n    # So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    # Report errors:\n    print to_json($response->{cpanelresult}{result}{errors});\n}\n\n# Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n#--------------------------------------------------------------------------------------\n# Helper function to convert a perl object to html printable json\n#--------------------------------------------------------------------------------------\nsub to_json {\n    require JSON;\n    my $str = JSON->new->pretty->encode($_[0]);\n    return $str;\n}\n"
+      - label: LiveAPI PHP
+        lang: PHP
+        source: "<?php\n//--------------------------------------------------------------------------------------\n// Instructions:\n//--------------------------------------------------------------------------------------\n// <theme-name> is the theme assigned to cPanel account.\n// 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n// 2) mkdir api_examples\n// 3) cd api_examples\n// 4) create a file Ftp_get_quota.live.php and put this code into that file.\n// 5) In your browser login to a cPanel account.\n// 6) Manually change the url from: .../frontend/<theme-name>\n//    to .../frontend/<theme-name>/api_examples/Ftp_get_quota.live.php\n//--------------------------------------------------------------------------------------\n\n// Instantiate the CPANEL object.\nrequire_once \"/usr/local/cpanel/php/cpanel.php\";\n\n// Print the header\nheader('Content-Type: text/plain');\n\n// Connect to cPanel - only do this once.\n$cpanel = new CPANEL();\n\n// Call the API\n$response = $cpanel->uapi(\n    'Ftp',\n    'get_quota',\n    array (\n        'account' => 'user1',\n    )\n);\n\n// Handle the response\nif ($response['cpanelresult']['result']['status']) {\n    $data = $response['cpanelresult']['result']['data'];\n    // Do something with the $data\n    // So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    // Report errors:\n    print to_json($response['cpanelresult']['result']['errors']);\n}\n\n// Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n//--------------------------------------------------------------------------------------\n// Helper function to convert a PHP value to html printable json\n//--------------------------------------------------------------------------------------\nfunction to_json($data) {\n    return json_encode($data, JSON_PRETTY_PRINT);\n}"
+      x-cpanel-api-version: UAPI
+      x-cpanel-available-version: cPanel 11.42
+  /Ftp/get_welcome_message:
+    get:
+      x-readonly: true
+      description: 'This function retrieves the cPanel account''s FTP welcome message.
+
+
+        **Important:**
+
+
+        When you disable the *FTP* role, the system **disables** this function.'
+      operationId: Ftp-get_welcome_message
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  apiversion:
+                    description: The version of the API.
+                    example: 3
+                    type: integer
+                  func:
+                    description: The name of the method called.
+                    example: get_welcome_message
+                    type: string
+                  module:
+                    description: The name of the module called.
+                    example: Ftp
+                    type: string
+                  result:
+                    properties:
+                      data:
+                        description: The cPanel account's FTP welcome message.
+                        example: Greetings, Professor Falken.
+                        type: string
+                      errors:
+                        description: List of errors if the API failed.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      messages:
+                        description: List of messages generated by the API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      metadata:
+                        properties: {}
+                      status:
+                        description: '- `1` — Success.
+
+                          - `0` — Failed. Check the errors field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      warnings:
+                        description: List of warnings generated by the API. Warnings describe non-critical failures or other problematic conditions noted while running a API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                    type: object
+                type: object
+          description: HTTP Request was successful.
+      summary: Return FTP account's welcome message
+      tags:
+      - Ftp
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "uapi --output=jsonpretty \\\n  --user=username \\\n  Ftp \\\n  get_welcome_message\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2083/cpsess##########/execute/Ftp/get_welcome_message
+      - label: LiveAPI Perl
+        lang: Perl
+        source: "#--------------------------------------------------------------------------------------\n# Instructions:\n#--------------------------------------------------------------------------------------\n# <theme-name> is the theme assigned to cPanel account.\n# 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n# 2) mkdir api_examples\n# 3) cd api_examples\n# 4) create a file Ftp_get_welcome_message.live.pl and put this code into that file.\n# 5) In your browser login to a cPanel account.\n# 6) Manually change the url from: .../frontend/<theme-name>\n#    to .../frontend/<theme-name>/api_examples/Ftp_get_welcome_message.live.pl\n#--------------------------------------------------------------------------------------\n\nuse strict;\n\nuse Cpanel::LiveAPI ();\n\nmy $cpanel = Cpanel::LiveAPI->new(); # Connect to cPanel - only do this once.\n\n# Print the header\nprint \"Content-type: text/plain\\r\\n\\r\\n\";\n\n# Call the API\nmy $response = $cpanel->uapi(\n    q/Ftp/,\n    q/get_welcome_message/\n);\n\n# Handle the response\nif ($response->{cpanelresult}{result}{status}) {\n    my $data = $response->{cpanelresult}{result}{data};\n    # Do something with the $data\n    # So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    # Report errors:\n    print to_json($response->{cpanelresult}{result}{errors});\n}\n\n# Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n#--------------------------------------------------------------------------------------\n# Helper function to convert a perl object to html printable json\n#--------------------------------------------------------------------------------------\nsub to_json {\n    require JSON;\n    my $str = JSON->new->pretty->encode($_[0]);\n    return $str;\n}\n"
+      - label: LiveAPI PHP
+        lang: PHP
+        source: "<?php\n//--------------------------------------------------------------------------------------\n// Instructions:\n//--------------------------------------------------------------------------------------\n// <theme-name> is the theme assigned to cPanel account.\n// 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n// 2) mkdir api_examples\n// 3) cd api_examples\n// 4) create a file Ftp_get_welcome_message.live.php and put this code into that file.\n// 5) In your browser login to a cPanel account.\n// 6) Manually change the url from: .../frontend/<theme-name>\n//    to .../frontend/<theme-name>/api_examples/Ftp_get_welcome_message.live.php\n//--------------------------------------------------------------------------------------\n\n// Instantiate the CPANEL object.\nrequire_once \"/usr/local/cpanel/php/cpanel.php\";\n\n// Print the header\nheader('Content-Type: text/plain');\n\n// Connect to cPanel - only do this once.\n$cpanel = new CPANEL();\n\n// Call the API\n$response = $cpanel->uapi(\n    'Ftp',\n    'get_welcome_message'\n);\n\n// Handle the response\nif ($response['cpanelresult']['result']['status']) {\n    $data = $response['cpanelresult']['result']['data'];\n    // Do something with the $data\n    // So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    // Report errors:\n    print to_json($response['cpanelresult']['result']['errors']);\n}\n\n// Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n//--------------------------------------------------------------------------------------\n// Helper function to convert a PHP value to html printable json\n//--------------------------------------------------------------------------------------\nfunction to_json($data) {\n    return json_encode($data, JSON_PRETTY_PRINT);\n}"
+      x-cpanel-api-version: UAPI
+      x-cpanel-available-version: cPanel 11.42
+  /Ftp/kill_session:
+    get:
+      x-readonly: false
+      x-rollback: none
+      description: 'This function kills FTP sessions.
+
+
+        **Important:**
+
+
+        When you disable the *FTP* Role, the system **disables** this function.'
+      operationId: Ftp-kill_session
+      parameters:
+      - description: "The username for the session's FTP account.\n\n**Note:**\n\n  To stop all FTP sessions for the cPanel account, set this parameter to the `all` value."
+        in: query
+        name: login
+        required: false
+        schema:
+          default: all
+          example: weeones
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  apiversion:
+                    description: The version of the API.
+                    example: 3
+                    type: integer
+                  func:
+                    description: The name of the method called.
+                    example: kill_session
+                    type: string
+                  module:
+                    description: The name of the module called.
+                    example: Ftp
+                    type: string
+                  result:
+                    properties:
+                      data:
+                        default: null
+                        type:
+                        - object
+                        - 'null'
+                      errors:
+                        description: List of errors if the API failed.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      messages:
+                        description: List of messages generated by the API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      metadata:
+                        properties: {}
+                      status:
+                        description: '* `1` - Success.
+
+                          * `0` - Failed. Check the errors field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      warnings:
+                        description: List of warnings generated by the API. Warnings describe non-critical failures or other problematic conditions noted while running a API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                type: object
+          description: HTTP Request was successful.
+      summary: Stop FTP session
+      tags:
+      - Ftp
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "uapi --output=jsonpretty \\\n  --user=username \\\n  Ftp \\\n  kill_session\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2083/cpsess##########/execute/Ftp/kill_session
+      - label: LiveAPI Perl
+        lang: Perl
+        source: "#--------------------------------------------------------------------------------------\n# Instructions:\n#--------------------------------------------------------------------------------------\n# <theme-name> is the theme assigned to cPanel account.\n# 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n# 2) mkdir api_examples\n# 3) cd api_examples\n# 4) create a file Ftp_kill_session.live.pl and put this code into that file.\n# 5) In your browser login to a cPanel account.\n# 6) Manually change the url from: .../frontend/<theme-name>\n#    to .../frontend/<theme-name>/api_examples/Ftp_kill_session.live.pl\n#--------------------------------------------------------------------------------------\n\nuse strict;\n\nuse Cpanel::LiveAPI ();\n\nmy $cpanel = Cpanel::LiveAPI->new(); # Connect to cPanel - only do this once.\n\n# Print the header\nprint \"Content-type: text/plain\\r\\n\\r\\n\";\n\n# Call the API\nmy $response = $cpanel->uapi(\n    q/Ftp/,\n    q/kill_session/\n);\n\n# Handle the response\nif ($response->{cpanelresult}{result}{status}) {\n    my $data = $response->{cpanelresult}{result}{data};\n    # Do something with the $data\n    # So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    # Report errors:\n    print to_json($response->{cpanelresult}{result}{errors});\n}\n\n# Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n#--------------------------------------------------------------------------------------\n# Helper function to convert a perl object to html printable json\n#--------------------------------------------------------------------------------------\nsub to_json {\n    require JSON;\n    my $str = JSON->new->pretty->encode($_[0]);\n    return $str;\n}\n"
+      - label: LiveAPI PHP
+        lang: PHP
+        source: "<?php\n//--------------------------------------------------------------------------------------\n// Instructions:\n//--------------------------------------------------------------------------------------\n// <theme-name> is the theme assigned to cPanel account.\n// 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n// 2) mkdir api_examples\n// 3) cd api_examples\n// 4) create a file Ftp_kill_session.live.php and put this code into that file.\n// 5) In your browser login to a cPanel account.\n// 6) Manually change the url from: .../frontend/<theme-name>\n//    to .../frontend/<theme-name>/api_examples/Ftp_kill_session.live.php\n//--------------------------------------------------------------------------------------\n\n// Instantiate the CPANEL object.\nrequire_once \"/usr/local/cpanel/php/cpanel.php\";\n\n// Print the header\nheader('Content-Type: text/plain');\n\n// Connect to cPanel - only do this once.\n$cpanel = new CPANEL();\n\n// Call the API\n$response = $cpanel->uapi(\n    'Ftp',\n    'kill_session'\n);\n\n// Handle the response\nif ($response['cpanelresult']['result']['status']) {\n    $data = $response['cpanelresult']['result']['data'];\n    // Do something with the $data\n    // So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    // Report errors:\n    print to_json($response['cpanelresult']['result']['errors']);\n}\n\n// Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n//--------------------------------------------------------------------------------------\n// Helper function to convert a PHP value to html printable json\n//--------------------------------------------------------------------------------------\nfunction to_json($data) {\n    return json_encode($data, JSON_PRETTY_PRINT);\n}"
+      x-cpanel-api-version: UAPI
+      x-cpanel-available-version: cPanel 11.42
+  /Ftp/list_ftp:
+    get:
+      x-readonly: true
+      description: 'This function lists FTP account information.
+
+
+        **Important:**
+
+
+        When you disable the *FTP* role, the system **disables** this function. For more information, read our How to Use Server Profiles documentation.'
+      operationId: Ftp-list_ftp
+      parameters:
+      - description: 'A list of the FTP account types to include in the function''s results.
+
+
+          * `anonymous`
+
+          * `logaccess`
+
+          * `main`
+
+          * `sub`
+
+
+          If you do not specify this parameter, this function returns all FTP account
+
+          types.
+
+
+          **Note:**
+
+
+          * Separate multiple types with the pipe character (`|`).
+
+          * In browser-based calls, use `%7C`.'
+        in: query
+        name: include_acct_types
+        required: false
+        schema:
+          example: main|anonymous
+          type: string
+      - description: 'A list of the FTP account types to exclude from the function''s
+
+          results.
+
+
+          * `anonymous`
+
+          * `logaccess`
+
+          * `main`
+
+          * `sub`
+
+
+          If you do not specify this parameter, this function does **not** exclude
+
+          any account types.
+
+
+          **Note:**
+
+
+          * Separate multiple types with the pipe character (`|`).
+
+          * In browser-based calls, use `%7C`.'
+        in: query
+        name: skip_acct_types
+        required: false
+        schema:
+          example: main|anonymous
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  apiversion:
+                    description: The version of the API.
+                    example: 3
+                    type: integer
+                  func:
+                    description: The name of the method called.
+                    example: list_ftp
+                    type: string
+                  module:
+                    description: The name of the module called.
+                    example: Ftp
+                    type: string
+                  result:
+                    properties:
+                      data:
+                        items:
+                          properties:
+                            homedir:
+                              description: The absolute path to the FTP account's document root.
+                              example: /home/user/public_html/ftp/
+                              format: path
+                              type: string
+                            type:
+                              description: 'The type of FTP account.
+
+
+                                * `anonymous`
+
+                                * `logaccess`
+
+                                * `main`
+
+                                * `sub`'
+                              enum:
+                              - anonymous
+                              - logaccess
+                              - main
+                              - sub
+                              example: main
+                              type: string
+                            user:
+                              description: The username for an FTP account on the cPanel account.
+                              example: ftpaccount
+                              type: string
+                          type: object
+                        type: array
+                      errors:
+                        description: List of errors if the API failed.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      messages:
+                        description: List of messages generated by the API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      metadata:
+                        properties:
+                          transformed:
+                            description: Post-processing may have transformed the data.
+                            enum:
+                            - 1
+                            example: 1
+                            type: integer
+                      status:
+                        description: '- 1 - Success
+
+                          - 0 - Failed: Check the errors field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      warnings:
+                        description: List of warnings generated by the API. Warnings describe non-critical failures or other problematic conditions noted while running a API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                    type: object
+                type: object
+          description: HTTP Request was successful.
+      summary: Return FTP accounts
+      tags:
+      - Ftp
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "uapi --output=jsonpretty \\\n  --user=username \\\n  Ftp \\\n  list_ftp\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2083/cpsess##########/execute/Ftp/list_ftp
+      - label: LiveAPI Perl
+        lang: Perl
+        source: "#--------------------------------------------------------------------------------------\n# Instructions:\n#--------------------------------------------------------------------------------------\n# <theme-name> is the theme assigned to cPanel account.\n# 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n# 2) mkdir api_examples\n# 3) cd api_examples\n# 4) create a file Ftp_list_ftp.live.pl and put this code into that file.\n# 5) In your browser login to a cPanel account.\n# 6) Manually change the url from: .../frontend/<theme-name>\n#    to .../frontend/<theme-name>/api_examples/Ftp_list_ftp.live.pl\n#--------------------------------------------------------------------------------------\n\nuse strict;\n\nuse Cpanel::LiveAPI ();\n\nmy $cpanel = Cpanel::LiveAPI->new(); # Connect to cPanel - only do this once.\n\n# Print the header\nprint \"Content-type: text/plain\\r\\n\\r\\n\";\n\n# Call the API\nmy $response = $cpanel->uapi(\n    q/Ftp/,\n    q/list_ftp/\n);\n\n# Handle the response\nif ($response->{cpanelresult}{result}{status}) {\n    my $data = $response->{cpanelresult}{result}{data};\n    foreach my $item (@{$data}) {\n        # Do something with the $item\n    }\n\n    # So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    # Report errors:\n    print to_json($response->{cpanelresult}{result}{errors});\n}\n\n# Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n#--------------------------------------------------------------------------------------\n# Helper function to convert a perl object to html printable json\n#--------------------------------------------------------------------------------------\nsub to_json {\n    require JSON;\n    my $str = JSON->new->pretty->encode($_[0]);\n    return $str;\n}\n"
+      - label: LiveAPI PHP
+        lang: PHP
+        source: "<?php\n//--------------------------------------------------------------------------------------\n// Instructions:\n//--------------------------------------------------------------------------------------\n// <theme-name> is the theme assigned to cPanel account.\n// 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n// 2) mkdir api_examples\n// 3) cd api_examples\n// 4) create a file Ftp_list_ftp.live.php and put this code into that file.\n// 5) In your browser login to a cPanel account.\n// 6) Manually change the url from: .../frontend/<theme-name>\n//    to .../frontend/<theme-name>/api_examples/Ftp_list_ftp.live.php\n//--------------------------------------------------------------------------------------\n\n// Instantiate the CPANEL object.\nrequire_once \"/usr/local/cpanel/php/cpanel.php\";\n\n// Print the header\nheader('Content-Type: text/plain');\n\n// Connect to cPanel - only do this once.\n$cpanel = new CPANEL();\n\n// Call the API\n$response = $cpanel->uapi(\n    'Ftp',\n    'list_ftp'\n);\n\n// Handle the response\nif ($response['cpanelresult']['result']['status']) {\n    $data = $response['cpanelresult']['result']['data'];\n    foreach ($data as $item) {\n        // Do something with the $item\n    }\n\n    // So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    // Report errors:\n    print to_json($response['cpanelresult']['result']['errors']);\n}\n\n// Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n//--------------------------------------------------------------------------------------\n// Helper function to convert a PHP value to html printable json\n//--------------------------------------------------------------------------------------\nfunction to_json($data) {\n    return json_encode($data, JSON_PRETTY_PRINT);\n}"
+      x-cpanel-api-version: UAPI
+      x-cpanel-available-version: cPanel 11.42
+  /Ftp/list_ftp_with_disk:
+    get:
+      x-readonly: true
+      description: 'This function lists FTP account and disk usage information.
+
+
+        **Important:**
+
+
+        When you disable the FTP role, the system **disables** this function.'
+      operationId: Ftp-list_ftp_with_disk
+      parameters:
+      - description: 'A pipe-delimited list of the FTP account types to include in the function''s results.
+
+          If you do not specify this parameter, the function returns all FTP account types.
+
+
+          Valid types for this list are:
+
+
+          * `anonymous`
+
+          * `logaccess`
+
+          * `main`
+
+          * `sub`'
+        in: query
+        name: include_acct_types
+        required: false
+        schema:
+          example: main|anonymous
+          type: string
+      - description: 'A pipe-delimited list of the FTP account types to exclude from the function''s
+
+          results. If you do not specify this parameter, the function does **not** exclude
+
+          any account types.
+
+
+          Valid types for this list are:
+
+
+          * `anonymous`
+
+          * `logaccess`
+
+          * `main`
+
+          * `sub`'
+        in: query
+        name: skip_acct_types
+        required: false
+        schema:
+          example: main|anonymous
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  apiversion:
+                    description: The version of the API.
+                    example: 3
+                    type: integer
+                  func:
+                    description: The name of the method called.
+                    example: list_ftp_with_disk
+                    type: string
+                  module:
+                    description: The name of the module called.
+                    example: Ftp
+                    type: string
+                  result:
+                    properties:
+                      data:
+                        items:
+                          properties:
+                            _diskquota:
+                              description: 'The FTP account''s quota in megabytes, with two digits of fractional precision,
+
+                                encoded as a string. `0.00` means that the quota is unlimited.
+
+
+                                **Note:**
+
+
+                                This value is different from the value for `diskquota`.'
+                              example: '476.84'
+                              format: ^\d+\.\d+$
+                              type: string
+                            _diskused:
+                              description: 'The amount of disk space in megabytes that the account currently uses,
+
+                                with two digits of fractional precision, encoded as a string.
+
+
+                                **Note:**
+
+
+                                This value is the same as the value for `diskused`.'
+                              example: '2.34'
+                              format: ^\d+\.\d+$
+                              type: string
+                            accttype:
+                              description: 'The type of FTP account.
+
+
+                                * `anonymous`
+
+                                * `logaccess`
+
+                                * `main`
+
+                                * `sub`'
+                              enum:
+                              - anonymous
+                              - logaccess
+                              - main
+                              - sub
+                              example: sub
+                              type: string
+                            deleteable:
+                              description: 'Whether the function''s caller can delete the account.
+
+
+                                * `1` – The caller can delete the account.
+
+                                * `0` – The caller **cannot** delete the account.'
+                              enum:
+                              - 0
+                              - 1
+                              example: 1
+                              type: integer
+                            dir:
+                              description: The absolute path to the FTP account's document root.
+                              example: /home/user/public_ftp
+                              type: string
+                            diskquota:
+                              description: 'The FTP account''s quota.
+
+
+                                * `unlimited`
+
+                                * The disk quota in megabytes, with two digits of fractional precision, encoded as a string.
+
+
+                                **Note:**
+
+
+                                This value is different from the value for `_diskquota`.'
+                              example: '476.84'
+                              oneOf:
+                              - enum:
+                                - unlimited
+                                type: string
+                              - format: ^\d+\.\d+$
+                                type: string
+                            diskused:
+                              description: 'The amount of disk space in megabytes that the account currently uses,
+
+                                with two digits of fractional precision, encoded as a string.
+
+
+                                **Note:**
+
+
+                                This value is the same as the value for `_diskused`.'
+                              example: '2.34'
+                              format: ^\d+\.\d+$
+                              type: string
+                            diskusedpercent:
+                              description: The percentage of the disk space quota that the account currently uses.
+                              example: 21
+                              type: integer
+                            diskusedpercent20:
+                              description: The percentage of disk space that the account currently uses, rounded in 20 percent increments.
+                              example: 20
+                              maximum: 100
+                              minimum: 0
+                              multipleOf: 20
+                              type: integer
+                            htmldir:
+                              description: The path to the FTP account's HTML directory.
+                              example: null
+                              type:
+                              - string
+                              - 'null'
+                            humandiskquota:
+                              description: 'The FTP account''s quota, in human-readable format.
+
+
+                                * `None` — The function returns this value if the account has an unlimited quota.
+
+                                * The quota in megabytes (MB), a space, and the characters `MB`.'
+                              example: 477 MB
+                              type: string
+                            humandiskused:
+                              description: 'The amount of disk space that the account currently uses, in
+
+                                human-readable format. The function formats this value as the
+
+                                quota''s size, a space, and the characters `MB`.'
+                              example: 2 MB
+                              type: string
+                            login:
+                              description: The FTP account username.
+                              example: ftpaccount
+                              type: string
+                            reldir:
+                              description: 'The path to the FTP account''s document root,
+
+                                relative to the cPanel account''s home directory.'
+                              example: public_ftp
+                              type: string
+                            serverlogin:
+                              description: The full FTP login username.
+                              example: ftpaccount@example.com
+                              type: string
+                          type: object
+                        type: array
+                      errors:
+                        description: List of errors if the API failed.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      messages:
+                        description: List of messages generated by the API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      metadata:
+                        properties:
+                          transformed:
+                            description: Post-processing may have transformed the data.
+                            enum:
+                            - 1
+                            example: 1
+                            type: integer
+                      status:
+                        description: '- 1 - Success
+
+                          - 0 - Failed: Check the errors field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      warnings:
+                        description: List of warnings generated by the API. Warnings describe non-critical failures or other problematic conditions noted while running a API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                    type: object
+                type: object
+          description: HTTP Request was successful.
+      summary: Return FTP accounts and disk usage
+      tags:
+      - Ftp
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "uapi --output=jsonpretty \\\n  --user=username \\\n  Ftp \\\n  list_ftp_with_disk\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2083/cpsess##########/execute/Ftp/list_ftp_with_disk
+      - label: LiveAPI Perl
+        lang: Perl
+        source: "#--------------------------------------------------------------------------------------\n# Instructions:\n#--------------------------------------------------------------------------------------\n# <theme-name> is the theme assigned to cPanel account.\n# 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n# 2) mkdir api_examples\n# 3) cd api_examples\n# 4) create a file Ftp_list_ftp_with_disk.live.pl and put this code into that file.\n# 5) In your browser login to a cPanel account.\n# 6) Manually change the url from: .../frontend/<theme-name>\n#    to .../frontend/<theme-name>/api_examples/Ftp_list_ftp_with_disk.live.pl\n#--------------------------------------------------------------------------------------\n\nuse strict;\n\nuse Cpanel::LiveAPI ();\n\nmy $cpanel = Cpanel::LiveAPI->new(); # Connect to cPanel - only do this once.\n\n# Print the header\nprint \"Content-type: text/plain\\r\\n\\r\\n\";\n\n# Call the API\nmy $response = $cpanel->uapi(\n    q/Ftp/,\n    q/list_ftp_with_disk/\n);\n\n# Handle the response\nif ($response->{cpanelresult}{result}{status}) {\n    my $data = $response->{cpanelresult}{result}{data};\n    foreach my $item (@{$data}) {\n        # Do something with the $item\n    }\n\n    # So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    # Report errors:\n    print to_json($response->{cpanelresult}{result}{errors});\n}\n\n# Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n#--------------------------------------------------------------------------------------\n# Helper function to convert a perl object to html printable json\n#--------------------------------------------------------------------------------------\nsub to_json {\n    require JSON;\n    my $str = JSON->new->pretty->encode($_[0]);\n    return $str;\n}\n"
+      - label: LiveAPI PHP
+        lang: PHP
+        source: "<?php\n//--------------------------------------------------------------------------------------\n// Instructions:\n//--------------------------------------------------------------------------------------\n// <theme-name> is the theme assigned to cPanel account.\n// 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n// 2) mkdir api_examples\n// 3) cd api_examples\n// 4) create a file Ftp_list_ftp_with_disk.live.php and put this code into that file.\n// 5) In your browser login to a cPanel account.\n// 6) Manually change the url from: .../frontend/<theme-name>\n//    to .../frontend/<theme-name>/api_examples/Ftp_list_ftp_with_disk.live.php\n//--------------------------------------------------------------------------------------\n\n// Instantiate the CPANEL object.\nrequire_once \"/usr/local/cpanel/php/cpanel.php\";\n\n// Print the header\nheader('Content-Type: text/plain');\n\n// Connect to cPanel - only do this once.\n$cpanel = new CPANEL();\n\n// Call the API\n$response = $cpanel->uapi(\n    'Ftp',\n    'list_ftp_with_disk'\n);\n\n// Handle the response\nif ($response['cpanelresult']['result']['status']) {\n    $data = $response['cpanelresult']['result']['data'];\n    foreach ($data as $item) {\n        // Do something with the $item\n    }\n\n    // So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    // Report errors:\n    print to_json($response['cpanelresult']['result']['errors']);\n}\n\n// Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n//--------------------------------------------------------------------------------------\n// Helper function to convert a PHP value to html printable json\n//--------------------------------------------------------------------------------------\nfunction to_json($data) {\n    return json_encode($data, JSON_PRETTY_PRINT);\n}"
+      x-cpanel-api-version: UAPI
+      x-cpanel-available-version: cPanel 11.42
+  /Ftp/list_sessions:
+    get:
+      x-readonly: true
+      description: 'This function lists the FTP server''s active sessions.
+
+
+        **Important:**
+
+
+        When you disable the FTP role, the system **disables** this function.'
+      operationId: Ftp-list_sessions
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  apiversion:
+                    description: The version of the API.
+                    example: 3
+                    type: integer
+                  func:
+                    description: The name of the method called.
+                    example: list_sessions
+                    type: string
+                  module:
+                    description: The name of the module called.
+                    example: Ftp
+                    type: string
+                  result:
+                    properties:
+                      data:
+                        items:
+                          properties:
+                            cmdline:
+                              description: Information about the FTP process, from the `ps` ([process status](http://www.linfo.org/ps.html)) command.
+                              example: pure-ftpd (IDLE)
+                              type: string
+                            file:
+                              description: 'The file that the session is processing.
+
+
+                                **Note:**
+
+
+                                The function returns a blank value if the session is idle.'
+                              example: ''
+                              type: string
+                            host:
+                              description: The IP address or hostname that connected to the FTP server.
+                              example: localhost
+                              oneOf:
+                              - format: ipv4
+                                type: string
+                              - format: domain
+                                type: string
+                            login:
+                              description: The FTP session login time.
+                              example: Tue Apr 23 16:23:23 2020
+                              type: string
+                            pid:
+                              description: The session's PID.
+                              example: 6735
+                              minimum: 1
+                              type: integer
+                            status:
+                              description: 'The session''s status.
+
+                                - `IDLE` - The session is connected, but idle.
+
+                                - `DL` - A download is in progress.
+
+                                - `UL` - An upload is in progress.'
+                              enum:
+                              - IDLE
+                              - DL
+                              - UL
+                              example: IDLE
+                              type: string
+                            user:
+                              description: The FTP account username.
+                              example: ftpaccount
+                              type: string
+                          type: object
+                        type: array
+                      errors:
+                        description: List of errors if the API failed.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      messages:
+                        description: List of messages generated by the API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      metadata:
+                        properties:
+                          transformed:
+                            description: Post-processing may have transformed the data.
+                            enum:
+                            - 1
+                            example: 1
+                            type: integer
+                      status:
+                        description: '- `1` - Success.
+
+                          - `0` - Failed. Check the `errors` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      warnings:
+                        description: List of warnings generated by the API. Warnings describe non-critical failures or other problematic conditions noted while running an API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                    type: object
+                type: object
+          description: HTTP Request was successful.
+      summary: Return FTP server's active sessions
+      tags:
+      - Ftp
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "uapi --output=jsonpretty \\\n  --user=username \\\n  Ftp \\\n  list_sessions\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2083/cpsess##########/execute/Ftp/list_sessions
+      - label: LiveAPI Perl
+        lang: Perl
+        source: "#--------------------------------------------------------------------------------------\n# Instructions:\n#--------------------------------------------------------------------------------------\n# <theme-name> is the theme assigned to cPanel account.\n# 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n# 2) mkdir api_examples\n# 3) cd api_examples\n# 4) create a file Ftp_list_sessions.live.pl and put this code into that file.\n# 5) In your browser login to a cPanel account.\n# 6) Manually change the url from: .../frontend/<theme-name>\n#    to .../frontend/<theme-name>/api_examples/Ftp_list_sessions.live.pl\n#--------------------------------------------------------------------------------------\n\nuse strict;\n\nuse Cpanel::LiveAPI ();\n\nmy $cpanel = Cpanel::LiveAPI->new(); # Connect to cPanel - only do this once.\n\n# Print the header\nprint \"Content-type: text/plain\\r\\n\\r\\n\";\n\n# Call the API\nmy $response = $cpanel->uapi(\n    q/Ftp/,\n    q/list_sessions/\n);\n\n# Handle the response\nif ($response->{cpanelresult}{result}{status}) {\n    my $data = $response->{cpanelresult}{result}{data};\n    foreach my $item (@{$data}) {\n        # Do something with the $item\n    }\n\n    # So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    # Report errors:\n    print to_json($response->{cpanelresult}{result}{errors});\n}\n\n# Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n#--------------------------------------------------------------------------------------\n# Helper function to convert a perl object to html printable json\n#--------------------------------------------------------------------------------------\nsub to_json {\n    require JSON;\n    my $str = JSON->new->pretty->encode($_[0]);\n    return $str;\n}\n"
+      - label: LiveAPI PHP
+        lang: PHP
+        source: "<?php\n//--------------------------------------------------------------------------------------\n// Instructions:\n//--------------------------------------------------------------------------------------\n// <theme-name> is the theme assigned to cPanel account.\n// 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n// 2) mkdir api_examples\n// 3) cd api_examples\n// 4) create a file Ftp_list_sessions.live.php and put this code into that file.\n// 5) In your browser login to a cPanel account.\n// 6) Manually change the url from: .../frontend/<theme-name>\n//    to .../frontend/<theme-name>/api_examples/Ftp_list_sessions.live.php\n//--------------------------------------------------------------------------------------\n\n// Instantiate the CPANEL object.\nrequire_once \"/usr/local/cpanel/php/cpanel.php\";\n\n// Print the header\nheader('Content-Type: text/plain');\n\n// Connect to cPanel - only do this once.\n$cpanel = new CPANEL();\n\n// Call the API\n$response = $cpanel->uapi(\n    'Ftp',\n    'list_sessions'\n);\n\n// Handle the response\nif ($response['cpanelresult']['result']['status']) {\n    $data = $response['cpanelresult']['result']['data'];\n    foreach ($data as $item) {\n        // Do something with the $item\n    }\n\n    // So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    // Report errors:\n    print to_json($response['cpanelresult']['result']['errors']);\n}\n\n// Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n//--------------------------------------------------------------------------------------\n// Helper function to convert a PHP value to html printable json\n//--------------------------------------------------------------------------------------\nfunction to_json($data) {\n    return json_encode($data, JSON_PRETTY_PRINT);\n}"
+      x-cpanel-api-version: UAPI
+      x-cpanel-available-version: cPanel 11.42
+  /Ftp/passwd:
+    get:
+      x-readonly: false
+      x-rollback: none
+      description: 'This function changes an FTP account''s password.
+
+
+        **Important:**
+
+
+        When you disable the FTP role, the system **disables** this function.'
+      operationId: Ftp-passwd
+      parameters:
+      - description: The FTP account's new password.
+        in: query
+        name: pass
+        required: true
+        schema:
+          example: 12345luggage
+          type: string
+      - description: The FTP account username.
+        in: query
+        name: user
+        required: true
+        schema:
+          example: ftpaccount
+          type: string
+      - description: 'The user''s associated domain.
+
+
+          **Note:**
+
+
+          This parameter defaults to the cPanel account''s primary domain'
+        in: query
+        name: domain
+        required: false
+        schema:
+          example: example.com
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  apiversion:
+                    description: The version of the API.
+                    example: 3
+                    type: integer
+                  func:
+                    description: The name of the method called.
+                    example: passwd
+                    type: string
+                  module:
+                    description: The name of the module called.
+                    example: Ftp
+                    type: string
+                  result:
+                    properties:
+                      data:
+                        default: null
+                        type:
+                        - object
+                        - 'null'
+                      errors:
+                        description: List of errors if the API failed.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      messages:
+                        description: List of messages generated by the API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      metadata:
+                        properties: {}
+                      status:
+                        description: '- 1 - Success
+
+                          - 0 - Failed: Check the errors field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      warnings:
+                        description: List of warnings generated by the API. Warnings describe non-critical failures or other problematic conditions noted while running a API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                type: object
+          description: HTTP Request was successful.
+      summary: Update FTP account's password
+      tags:
+      - Ftp
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "uapi --output=jsonpretty \\\n  --user=username \\\n  Ftp \\\n  passwd \\\n  user='ftpaccount' \\\n  pass='123456luggage'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2083/cpsess##########/execute/Ftp/passwd?user=ftpaccount&pass=12345luggage
+      - label: LiveAPI Perl
+        lang: Perl
+        source: "#--------------------------------------------------------------------------------------\n# Instructions:\n#--------------------------------------------------------------------------------------\n# <theme-name> is the theme assigned to cPanel account.\n# 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n# 2) mkdir api_examples\n# 3) cd api_examples\n# 4) create a file Ftp_passwd.live.pl and put this code into that file.\n# 5) In your browser login to a cPanel account.\n# 6) Manually change the url from: .../frontend/<theme-name>\n#    to .../frontend/<theme-name>/api_examples/Ftp_passwd.live.pl\n#--------------------------------------------------------------------------------------\n\nuse strict;\n\nuse Cpanel::LiveAPI ();\n\nmy $cpanel = Cpanel::LiveAPI->new(); # Connect to cPanel - only do this once.\n\n# Print the header\nprint \"Content-type: text/plain\\r\\n\\r\\n\";\n\n# Call the API\nmy $response = $cpanel->uapi(\n    q/Ftp/,\n    q/passwd/,\n    {\n        'user' => 'ftpaccount',\n        'pass' => '12345luggage',\n    }\n);\n\n# Handle the response\nif ($response->{cpanelresult}{result}{status}) {\n    my $data = $response->{cpanelresult}{result}{data};\n    # Do something with the $data\n    # So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    # Report errors:\n    print to_json($response->{cpanelresult}{result}{errors});\n}\n\n# Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n#--------------------------------------------------------------------------------------\n# Helper function to convert a perl object to html printable json\n#--------------------------------------------------------------------------------------\nsub to_json {\n    require JSON;\n    my $str = JSON->new->pretty->encode($_[0]);\n    return $str;\n}\n"
+      - label: LiveAPI PHP
+        lang: PHP
+        source: "<?php\n//--------------------------------------------------------------------------------------\n// Instructions:\n//--------------------------------------------------------------------------------------\n// <theme-name> is the theme assigned to cPanel account.\n// 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n// 2) mkdir api_examples\n// 3) cd api_examples\n// 4) create a file Ftp_passwd.live.php and put this code into that file.\n// 5) In your browser login to a cPanel account.\n// 6) Manually change the url from: .../frontend/<theme-name>\n//    to .../frontend/<theme-name>/api_examples/Ftp_passwd.live.php\n//--------------------------------------------------------------------------------------\n\n// Instantiate the CPANEL object.\nrequire_once \"/usr/local/cpanel/php/cpanel.php\";\n\n// Print the header\nheader('Content-Type: text/plain');\n\n// Connect to cPanel - only do this once.\n$cpanel = new CPANEL();\n\n// Call the API\n$response = $cpanel->uapi(\n    'Ftp',\n    'passwd',\n    array (\n        'user' => 'ftpaccount',\n        'pass' => '12345luggage',\n    )\n);\n\n// Handle the response\nif ($response['cpanelresult']['result']['status']) {\n    $data = $response['cpanelresult']['result']['data'];\n    // Do something with the $data\n    // So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    // Report errors:\n    print to_json($response['cpanelresult']['result']['errors']);\n}\n\n// Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n//--------------------------------------------------------------------------------------\n// Helper function to convert a PHP value to html printable json\n//--------------------------------------------------------------------------------------\nfunction to_json($data) {\n    return json_encode($data, JSON_PRETTY_PRINT);\n}"
+      x-cpanel-api-version: UAPI
+      x-cpanel-available-version: cPanel 11.42
+  /Ftp/server_name:
+    get:
+      x-readonly: true
+      description: 'This function checks whether the server uses ProFTPD or Pure-FTPd.
+
+
+        **Important:**
+
+
+        When you disable the FTP role, the system **disables** this function.'
+      operationId: Ftp-server_name
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  apiversion:
+                    description: The version of the API.
+                    example: 3
+                    type: integer
+                  func:
+                    description: The name of the method called.
+                    example: server_name
+                    type: string
+                  module:
+                    description: The name of the module called.
+                    example: Ftp
+                    type: string
+                  result:
+                    properties:
+                      data:
+                        description: 'The FTP server.
+
+                          * `pure-ftpd` - The Pure-FTPD server.
+
+                          * `proftpd` - The ProFTPD FTP server.
+
+                          * `disabled` - FTP has been disabled on this server.'
+                        enum:
+                        - pure-ftpd
+                        - proftpd
+                        - disabled
+                        example: pure-ftpd
+                        type: string
+                      errors:
+                        description: List of errors if the API failed.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      messages:
+                        description: List of messages generated by the API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      metadata:
+                        properties: {}
+                      status:
+                        description: '- 1 - Success
+
+                          - 0 - Failed: Check the errors field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      warnings:
+                        description: List of warnings generated by the API. Warnings describe non-critical failures or other problematic conditions noted while running a API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                    type: object
+                type: object
+          description: HTTP Request was successful.
+      summary: Return whether server uses ProFTPD or Pure-FTPd
+      tags:
+      - Ftp
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "uapi --output=jsonpretty \\\n  --user=username \\\n  Ftp \\\n  server_name\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2083/cpsess##########/execute/Ftp/server_name
+      - label: LiveAPI Perl
+        lang: Perl
+        source: "#--------------------------------------------------------------------------------------\n# Instructions:\n#--------------------------------------------------------------------------------------\n# <theme-name> is the theme assigned to cPanel account.\n# 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n# 2) mkdir api_examples\n# 3) cd api_examples\n# 4) create a file Ftp_server_name.live.pl and put this code into that file.\n# 5) In your browser login to a cPanel account.\n# 6) Manually change the url from: .../frontend/<theme-name>\n#    to .../frontend/<theme-name>/api_examples/Ftp_server_name.live.pl\n#--------------------------------------------------------------------------------------\n\nuse strict;\n\nuse Cpanel::LiveAPI ();\n\nmy $cpanel = Cpanel::LiveAPI->new(); # Connect to cPanel - only do this once.\n\n# Print the header\nprint \"Content-type: text/plain\\r\\n\\r\\n\";\n\n# Call the API\nmy $response = $cpanel->uapi(\n    q/Ftp/,\n    q/server_name/\n);\n\n# Handle the response\nif ($response->{cpanelresult}{result}{status}) {\n    my $data = $response->{cpanelresult}{result}{data};\n    # Do something with the $data\n    # So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    # Report errors:\n    print to_json($response->{cpanelresult}{result}{errors});\n}\n\n# Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n#--------------------------------------------------------------------------------------\n# Helper function to convert a perl object to html printable json\n#--------------------------------------------------------------------------------------\nsub to_json {\n    require JSON;\n    my $str = JSON->new->pretty->encode($_[0]);\n    return $str;\n}\n"
+      - label: LiveAPI PHP
+        lang: PHP
+        source: "<?php\n//--------------------------------------------------------------------------------------\n// Instructions:\n//--------------------------------------------------------------------------------------\n// <theme-name> is the theme assigned to cPanel account.\n// 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n// 2) mkdir api_examples\n// 3) cd api_examples\n// 4) create a file Ftp_server_name.live.php and put this code into that file.\n// 5) In your browser login to a cPanel account.\n// 6) Manually change the url from: .../frontend/<theme-name>\n//    to .../frontend/<theme-name>/api_examples/Ftp_server_name.live.php\n//--------------------------------------------------------------------------------------\n\n// Instantiate the CPANEL object.\nrequire_once \"/usr/local/cpanel/php/cpanel.php\";\n\n// Print the header\nheader('Content-Type: text/plain');\n\n// Connect to cPanel - only do this once.\n$cpanel = new CPANEL();\n\n// Call the API\n$response = $cpanel->uapi(\n    'Ftp',\n    'server_name'\n);\n\n// Handle the response\nif ($response['cpanelresult']['result']['status']) {\n    $data = $response['cpanelresult']['result']['data'];\n    // Do something with the $data\n    // So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    // Report errors:\n    print to_json($response['cpanelresult']['result']['errors']);\n}\n\n// Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n//--------------------------------------------------------------------------------------\n// Helper function to convert a PHP value to html printable json\n//--------------------------------------------------------------------------------------\nfunction to_json($data) {\n    return json_encode($data, JSON_PRETTY_PRINT);\n}"
+      x-cpanel-api-version: UAPI
+      x-cpanel-available-version: cPanel 11.42
+  /Ftp/set_anonymous_ftp:
+    get:
+      x-readonly: false
+      x-rollback: none
+      description: 'This function enables or disables anonymous FTP logins.
+
+
+        **Important:**
+
+
+        When you disable the FTP role, the system **disables** this function.'
+      operationId: Ftp-set_anonymous_ftp
+      parameters:
+      - description: 'Whether to enable or disable anonymous FTP logins.
+
+
+          * `1` - Enable.
+
+          * `0` - Disable.'
+        in: query
+        name: set
+        required: false
+        schema:
+          default: 0
+          enum:
+          - 0
+          - 1
+          example: 0
+          type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  apiversion:
+                    description: The version of the API.
+                    example: 3
+                    type: integer
+                  func:
+                    description: The name of the method called.
+                    example: set_anonymous_ftp
+                    type: string
+                  module:
+                    description: The name of the module called.
+                    example: Ftp
+                    type: string
+                  result:
+                    properties:
+                      data:
+                        default: null
+                        type:
+                        - object
+                        - 'null'
+                      errors:
+                        description: List of errors if the API failed.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      messages:
+                        description: List of messages generated by the API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      metadata:
+                        properties: {}
+                      status:
+                        description: '- 1 - Success
+
+                          - 0 - Failed: Check the errors field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      warnings:
+                        description: List of warnings generated by the API. Warnings describe non-critical failures or other problematic conditions noted while running a API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                type: object
+          description: HTTP Request was successful.
+      summary: Enable or disable anonymous FTP logins
+      tags:
+      - Ftp
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "uapi --output=jsonpretty \\\n  --user=username \\\n  Ftp \\\n  set_anonymous_ftp\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2083/cpsess##########/execute/Ftp/set_anonymous_ftp
+      - label: LiveAPI Perl
+        lang: Perl
+        source: "#--------------------------------------------------------------------------------------\n# Instructions:\n#--------------------------------------------------------------------------------------\n# <theme-name> is the theme assigned to cPanel account.\n# 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n# 2) mkdir api_examples\n# 3) cd api_examples\n# 4) create a file Ftp_set_anonymous_ftp.live.pl and put this code into that file.\n# 5) In your browser login to a cPanel account.\n# 6) Manually change the url from: .../frontend/<theme-name>\n#    to .../frontend/<theme-name>/api_examples/Ftp_set_anonymous_ftp.live.pl\n#--------------------------------------------------------------------------------------\n\nuse strict;\n\nuse Cpanel::LiveAPI ();\n\nmy $cpanel = Cpanel::LiveAPI->new(); # Connect to cPanel - only do this once.\n\n# Print the header\nprint \"Content-type: text/plain\\r\\n\\r\\n\";\n\n# Call the API\nmy $response = $cpanel->uapi(\n    q/Ftp/,\n    q/set_anonymous_ftp/\n);\n\n# Handle the response\nif ($response->{cpanelresult}{result}{status}) {\n    my $data = $response->{cpanelresult}{result}{data};\n    # Do something with the $data\n    # So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    # Report errors:\n    print to_json($response->{cpanelresult}{result}{errors});\n}\n\n# Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n#--------------------------------------------------------------------------------------\n# Helper function to convert a perl object to html printable json\n#--------------------------------------------------------------------------------------\nsub to_json {\n    require JSON;\n    my $str = JSON->new->pretty->encode($_[0]);\n    return $str;\n}\n"
+      - label: LiveAPI PHP
+        lang: PHP
+        source: "<?php\n//--------------------------------------------------------------------------------------\n// Instructions:\n//--------------------------------------------------------------------------------------\n// <theme-name> is the theme assigned to cPanel account.\n// 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n// 2) mkdir api_examples\n// 3) cd api_examples\n// 4) create a file Ftp_set_anonymous_ftp.live.php and put this code into that file.\n// 5) In your browser login to a cPanel account.\n// 6) Manually change the url from: .../frontend/<theme-name>\n//    to .../frontend/<theme-name>/api_examples/Ftp_set_anonymous_ftp.live.php\n//--------------------------------------------------------------------------------------\n\n// Instantiate the CPANEL object.\nrequire_once \"/usr/local/cpanel/php/cpanel.php\";\n\n// Print the header\nheader('Content-Type: text/plain');\n\n// Connect to cPanel - only do this once.\n$cpanel = new CPANEL();\n\n// Call the API\n$response = $cpanel->uapi(\n    'Ftp',\n    'set_anonymous_ftp'\n);\n\n// Handle the response\nif ($response['cpanelresult']['result']['status']) {\n    $data = $response['cpanelresult']['result']['data'];\n    // Do something with the $data\n    // So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    // Report errors:\n    print to_json($response['cpanelresult']['result']['errors']);\n}\n\n// Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n//--------------------------------------------------------------------------------------\n// Helper function to convert a PHP value to html printable json\n//--------------------------------------------------------------------------------------\nfunction to_json($data) {\n    return json_encode($data, JSON_PRETTY_PRINT);\n}"
+      x-cpanel-api-version: UAPI
+      x-cpanel-available-version: cPanel 11.42
+  /Ftp/set_anonymous_ftp_incoming:
+    get:
+      x-readonly: false
+      x-rollback: none
+      description: 'This function enables or disables inbound anonymous FTP transfers.
+
+
+        **Important:**
+
+
+        When you disable the FTP role, the system **disables** this function.'
+      operationId: Ftp-set_anonymous_ftp_incoming
+      parameters:
+      - description: 'Whether to enable or disable inbound anonymous FTP transfers.
+
+
+          * `1` - Enable.
+
+          * `0` - Disable.'
+        in: query
+        name: set
+        required: false
+        schema:
+          default: 0
+          enum:
+          - 0
+          - 1
+          example: 0
+          type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  apiversion:
+                    description: The version of the API.
+                    example: 3
+                    type: integer
+                  func:
+                    description: The name of the method called.
+                    example: set_anonymous_ftp_incoming
+                    type: string
+                  module:
+                    description: The name of the module called.
+                    example: Ftp
+                    type: string
+                  result:
+                    properties:
+                      data:
+                        default: null
+                        type:
+                        - object
+                        - 'null'
+                      errors:
+                        description: List of errors if the API failed.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      messages:
+                        description: List of messages generated by the API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      metadata:
+                        properties: {}
+                      status:
+                        description: '- 1 - Success
+
+                          - 0 - Failed: Check the errors field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      warnings:
+                        description: List of warnings generated by the API. Warnings describe non-critical failures or other problematic conditions noted while running a API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                type: object
+          description: HTTP Request was successful.
+      summary: Enable or disable anonymous incoming FTP transfers
+      tags:
+      - Ftp
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "uapi --output=jsonpretty \\\n  --user=username \\\n  Ftp \\\n  set_anonymous_ftp_incoming\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2083/cpsess##########/execute/Ftp/set_anonymous_ftp_incoming
+      - label: LiveAPI Perl
+        lang: Perl
+        source: "#--------------------------------------------------------------------------------------\n# Instructions:\n#--------------------------------------------------------------------------------------\n# <theme-name> is the theme assigned to cPanel account.\n# 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n# 2) mkdir api_examples\n# 3) cd api_examples\n# 4) create a file Ftp_set_anonymous_ftp_incoming.live.pl and put this code into that file.\n# 5) In your browser login to a cPanel account.\n# 6) Manually change the url from: .../frontend/<theme-name>\n#    to .../frontend/<theme-name>/api_examples/Ftp_set_anonymous_ftp_incoming.live.pl\n#--------------------------------------------------------------------------------------\n\nuse strict;\n\nuse Cpanel::LiveAPI ();\n\nmy $cpanel = Cpanel::LiveAPI->new(); # Connect to cPanel - only do this once.\n\n# Print the header\nprint \"Content-type: text/plain\\r\\n\\r\\n\";\n\n# Call the API\nmy $response = $cpanel->uapi(\n    q/Ftp/,\n    q/set_anonymous_ftp_incoming/\n);\n\n# Handle the response\nif ($response->{cpanelresult}{result}{status}) {\n    my $data = $response->{cpanelresult}{result}{data};\n    # Do something with the $data\n    # So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    # Report errors:\n    print to_json($response->{cpanelresult}{result}{errors});\n}\n\n# Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n#--------------------------------------------------------------------------------------\n# Helper function to convert a perl object to html printable json\n#--------------------------------------------------------------------------------------\nsub to_json {\n    require JSON;\n    my $str = JSON->new->pretty->encode($_[0]);\n    return $str;\n}\n"
+      - label: LiveAPI PHP
+        lang: PHP
+        source: "<?php\n//--------------------------------------------------------------------------------------\n// Instructions:\n//--------------------------------------------------------------------------------------\n// <theme-name> is the theme assigned to cPanel account.\n// 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n// 2) mkdir api_examples\n// 3) cd api_examples\n// 4) create a file Ftp_set_anonymous_ftp_incoming.live.php and put this code into that file.\n// 5) In your browser login to a cPanel account.\n// 6) Manually change the url from: .../frontend/<theme-name>\n//    to .../frontend/<theme-name>/api_examples/Ftp_set_anonymous_ftp_incoming.live.php\n//--------------------------------------------------------------------------------------\n\n// Instantiate the CPANEL object.\nrequire_once \"/usr/local/cpanel/php/cpanel.php\";\n\n// Print the header\nheader('Content-Type: text/plain');\n\n// Connect to cPanel - only do this once.\n$cpanel = new CPANEL();\n\n// Call the API\n$response = $cpanel->uapi(\n    'Ftp',\n    'set_anonymous_ftp_incoming'\n);\n\n// Handle the response\nif ($response['cpanelresult']['result']['status']) {\n    $data = $response['cpanelresult']['result']['data'];\n    // Do something with the $data\n    // So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    // Report errors:\n    print to_json($response['cpanelresult']['result']['errors']);\n}\n\n// Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n//--------------------------------------------------------------------------------------\n// Helper function to convert a PHP value to html printable json\n//--------------------------------------------------------------------------------------\nfunction to_json($data) {\n    return json_encode($data, JSON_PRETTY_PRINT);\n}"
+      x-cpanel-api-version: UAPI
+      x-cpanel-available-version: cPanel 11.42
+  /Ftp/set_homedir:
+    get:
+      x-readonly: false
+      x-rollback: none
+      description: 'This function changes the home directory for FTP accounts.
+
+
+        **Important:**
+
+
+        When you disable the FTP role, the system **disables** this function.'
+      operationId: Ftp-set_homedir
+      parameters:
+      - description: The FTP account username.
+        in: query
+        name: user
+        required: true
+        schema:
+          example: example1
+          type: string
+      - description: 'The user''s associated domain.
+
+
+          **Note:**
+
+
+          The default value is the cPanel account''s primary domain.'
+        in: query
+        name: domain
+        required: false
+        schema:
+          example: example.com
+          format: domain
+          type: string
+      - description: 'The FTP account''s home directory
+
+
+          **Note:**
+
+
+          This parameter defaults to the `user@domain` subdirectory in the cPanel account''s home directory with the name, where user and domain represent the `user` and `domain` parameters.'
+        in: query
+        name: homedir
+        required: false
+        schema:
+          default: user@domain/
+          example: example1/
+          format: path
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  apiversion:
+                    description: The version of the API.
+                    example: 3
+                    type: integer
+                  func:
+                    description: The name of the method called.
+                    example: set_homedir
+                    type: string
+                  module:
+                    description: The name of the module called.
+                    example: Ftp
+                    type: string
+                  result:
+                    properties:
+                      data:
+                        default: null
+                        type:
+                        - object
+                        - 'null'
+                      errors:
+                        description: List of errors if the API failed.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      messages:
+                        description: List of messages generated by the API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      metadata:
+                        properties: {}
+                      status:
+                        description: '- 1 - Success
+
+                          - 0 - Failed: Check the errors field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      warnings:
+                        description: List of warnings generated by the API. Warnings describe non-critical failures or other problematic conditions noted while running a API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                type: object
+          description: HTTP Request was successful.
+      summary: Update FTP account's home directory
+      tags:
+      - Ftp
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "uapi --output=jsonpretty \\\n  --user=username \\\n  Ftp \\\n  set_homedir \\\n  user='example1'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2083/cpsess##########/execute/Ftp/set_homedir?user=example1
+      - label: LiveAPI Perl
+        lang: Perl
+        source: "#--------------------------------------------------------------------------------------\n# Instructions:\n#--------------------------------------------------------------------------------------\n# <theme-name> is the theme assigned to cPanel account.\n# 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n# 2) mkdir api_examples\n# 3) cd api_examples\n# 4) create a file Ftp_set_homedir.live.pl and put this code into that file.\n# 5) In your browser login to a cPanel account.\n# 6) Manually change the url from: .../frontend/<theme-name>\n#    to .../frontend/<theme-name>/api_examples/Ftp_set_homedir.live.pl\n#--------------------------------------------------------------------------------------\n\nuse strict;\n\nuse Cpanel::LiveAPI ();\n\nmy $cpanel = Cpanel::LiveAPI->new(); # Connect to cPanel - only do this once.\n\n# Print the header\nprint \"Content-type: text/plain\\r\\n\\r\\n\";\n\n# Call the API\nmy $response = $cpanel->uapi(\n    q/Ftp/,\n    q/set_homedir/,\n    {\n        'user' => 'example1',\n    }\n);\n\n# Handle the response\nif ($response->{cpanelresult}{result}{status}) {\n    my $data = $response->{cpanelresult}{result}{data};\n    # Do something with the $data\n    # So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    # Report errors:\n    print to_json($response->{cpanelresult}{result}{errors});\n}\n\n# Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n#--------------------------------------------------------------------------------------\n# Helper function to convert a perl object to html printable json\n#--------------------------------------------------------------------------------------\nsub to_json {\n    require JSON;\n    my $str = JSON->new->pretty->encode($_[0]);\n    return $str;\n}\n"
+      - label: LiveAPI PHP
+        lang: PHP
+        source: "<?php\n//--------------------------------------------------------------------------------------\n// Instructions:\n//--------------------------------------------------------------------------------------\n// <theme-name> is the theme assigned to cPanel account.\n// 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n// 2) mkdir api_examples\n// 3) cd api_examples\n// 4) create a file Ftp_set_homedir.live.php and put this code into that file.\n// 5) In your browser login to a cPanel account.\n// 6) Manually change the url from: .../frontend/<theme-name>\n//    to .../frontend/<theme-name>/api_examples/Ftp_set_homedir.live.php\n//--------------------------------------------------------------------------------------\n\n// Instantiate the CPANEL object.\nrequire_once \"/usr/local/cpanel/php/cpanel.php\";\n\n// Print the header\nheader('Content-Type: text/plain');\n\n// Connect to cPanel - only do this once.\n$cpanel = new CPANEL();\n\n// Call the API\n$response = $cpanel->uapi(\n    'Ftp',\n    'set_homedir',\n    array (\n        'user' => 'example1',\n    )\n);\n\n// Handle the response\nif ($response['cpanelresult']['result']['status']) {\n    $data = $response['cpanelresult']['result']['data'];\n    // Do something with the $data\n    // So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    // Report errors:\n    print to_json($response['cpanelresult']['result']['errors']);\n}\n\n// Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n//--------------------------------------------------------------------------------------\n// Helper function to convert a PHP value to html printable json\n//--------------------------------------------------------------------------------------\nfunction to_json($data) {\n    return json_encode($data, JSON_PRETTY_PRINT);\n}"
+      x-cpanel-api-version: UAPI
+      x-cpanel-available-version: cPanel 54
+  /Ftp/set_quota:
+    get:
+      x-readonly: false
+      x-rollback: none
+      description: 'This function changes an FTP account''s quota.
+
+
+        **Important:**
+
+
+        When you disable the FTP role, the system **disables** this function.'
+      operationId: Ftp-set_quota
+      parameters:
+      - description: The FTP account username.
+        in: query
+        name: user
+        required: true
+        schema:
+          example: ftpaccount
+          type: string
+      - description: 'The user''s associated domain.
+
+
+          **Note:**
+
+
+          The default value is the cPanel account''s primary domain.'
+        in: query
+        name: domain
+        required: false
+        schema:
+          example: example.com
+          format: domain
+          type: string
+      - description: "Whether to disable quotas for the FTP account.\n* `1` - Disable quotas.\n* `0` - Enable quotas.\n\n**Note:**\n\n If you disable quotas for an FTP account, you grant that account unlimited disk space."
+        in: query
+        name: kill
+        required: false
+        schema:
+          default: 0
+          enum:
+          - 0
+          - 1
+          example: 0
+          type: integer
+      - description: 'The new quota, in megabytes.
+
+
+          **Note:**
+
+
+          Setting this parameter to `0` grants the account unlimited disk space.'
+        in: query
+        name: quota
+        required: false
+        schema:
+          default: 0
+          example: 500
+          minimum: 0
+          type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  apiversion:
+                    description: The version of the API.
+                    example: 3
+                    type: integer
+                  func:
+                    description: The name of the method called.
+                    example: set_quota
+                    type: string
+                  module:
+                    description: The name of the module called.
+                    example: Ftp
+                    type: string
+                  result:
+                    properties:
+                      data:
+                        default: null
+                        type:
+                        - object
+                        - 'null'
+                      errors:
+                        description: List of errors if the API failed.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      messages:
+                        description: List of messages generated by the API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      metadata:
+                        properties: {}
+                      status:
+                        description: '- 1 - Success
+
+                          - 0 - Failed: Check the errors field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      warnings:
+                        description: List of warnings generated by the API. Warnings describe non-critical failures or other problematic conditions noted while running a API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                type: object
+          description: HTTP Request was successful.
+      summary: Update FTP account's quota
+      tags:
+      - Ftp
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "uapi --output=jsonpretty \\\n  --user=username \\\n  Ftp \\\n  set_quota \\\n  user='ftpaccount'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2083/cpsess##########/execute/Ftp/set_quota?user=ftpaccount
+      - label: LiveAPI Perl
+        lang: Perl
+        source: "#--------------------------------------------------------------------------------------\n# Instructions:\n#--------------------------------------------------------------------------------------\n# <theme-name> is the theme assigned to cPanel account.\n# 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n# 2) mkdir api_examples\n# 3) cd api_examples\n# 4) create a file Ftp_set_quota.live.pl and put this code into that file.\n# 5) In your browser login to a cPanel account.\n# 6) Manually change the url from: .../frontend/<theme-name>\n#    to .../frontend/<theme-name>/api_examples/Ftp_set_quota.live.pl\n#--------------------------------------------------------------------------------------\n\nuse strict;\n\nuse Cpanel::LiveAPI ();\n\nmy $cpanel = Cpanel::LiveAPI->new(); # Connect to cPanel - only do this once.\n\n# Print the header\nprint \"Content-type: text/plain\\r\\n\\r\\n\";\n\n# Call the API\nmy $response = $cpanel->uapi(\n    q/Ftp/,\n    q/set_quota/,\n    {\n        'user' => 'ftpaccount',\n    }\n);\n\n# Handle the response\nif ($response->{cpanelresult}{result}{status}) {\n    my $data = $response->{cpanelresult}{result}{data};\n    # Do something with the $data\n    # So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    # Report errors:\n    print to_json($response->{cpanelresult}{result}{errors});\n}\n\n# Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n#--------------------------------------------------------------------------------------\n# Helper function to convert a perl object to html printable json\n#--------------------------------------------------------------------------------------\nsub to_json {\n    require JSON;\n    my $str = JSON->new->pretty->encode($_[0]);\n    return $str;\n}\n"
+      - label: LiveAPI PHP
+        lang: PHP
+        source: "<?php\n//--------------------------------------------------------------------------------------\n// Instructions:\n//--------------------------------------------------------------------------------------\n// <theme-name> is the theme assigned to cPanel account.\n// 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n// 2) mkdir api_examples\n// 3) cd api_examples\n// 4) create a file Ftp_set_quota.live.php and put this code into that file.\n// 5) In your browser login to a cPanel account.\n// 6) Manually change the url from: .../frontend/<theme-name>\n//    to .../frontend/<theme-name>/api_examples/Ftp_set_quota.live.php\n//--------------------------------------------------------------------------------------\n\n// Instantiate the CPANEL object.\nrequire_once \"/usr/local/cpanel/php/cpanel.php\";\n\n// Print the header\nheader('Content-Type: text/plain');\n\n// Connect to cPanel - only do this once.\n$cpanel = new CPANEL();\n\n// Call the API\n$response = $cpanel->uapi(\n    'Ftp',\n    'set_quota',\n    array (\n        'user' => 'ftpaccount',\n    )\n);\n\n// Handle the response\nif ($response['cpanelresult']['result']['status']) {\n    $data = $response['cpanelresult']['result']['data'];\n    // Do something with the $data\n    // So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    // Report errors:\n    print to_json($response['cpanelresult']['result']['errors']);\n}\n\n// Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n//--------------------------------------------------------------------------------------\n// Helper function to convert a PHP value to html printable json\n//--------------------------------------------------------------------------------------\nfunction to_json($data) {\n    return json_encode($data, JSON_PRETTY_PRINT);\n}"
+      x-cpanel-api-version: UAPI
+      x-cpanel-available-version: cPanel 11.42
+  /Ftp/set_welcome_message:
+    get:
+      x-readonly: false
+      x-rollback: none
+      description: 'This function sets the FTP welcome message.
+
+
+        **Important:**
+
+
+        When you disable the FTP role, the system **disables** this function.'
+      operationId: Ftp-set_welcome_message
+      parameters:
+      - description: The cPanel account's new FTP welcome message.
+        in: query
+        name: message
+        required: true
+        schema:
+          example: Greetings, Professor Falken.
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  apiversion:
+                    description: The version of the API.
+                    example: 3
+                    type: integer
+                  func:
+                    description: The name of the method called.
+                    example: set_welcome_message
+                    type: string
+                  module:
+                    description: The name of the module called.
+                    example: Ftp
+                    type: string
+                  result:
+                    properties:
+                      data:
+                        default: null
+                        type:
+                        - object
+                        - 'null'
+                      errors:
+                        description: List of errors if the API failed.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      messages:
+                        description: List of messages generated by the API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      metadata:
+                        properties: {}
+                      status:
+                        description: '- 1 - Success
+
+                          - 0 - Failed: Check the errors field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      warnings:
+                        description: List of warnings generated by the API. Warnings describe non-critical failures or other problematic conditions noted while running a API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                type: object
+          description: HTTP Request was successful.
+      summary: Update FTP welcome message
+      tags:
+      - Ftp
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "uapi --output=jsonpretty \\\n  --user=username \\\n  Ftp \\\n  set_welcome_message \\\n  message='Greetings, Professor Falken.'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2083/cpsess##########/execute/Ftp/set_welcome_message?message=Greetings%2c%20Professor%20Falken.
+      - label: LiveAPI Perl
+        lang: Perl
+        source: "#--------------------------------------------------------------------------------------\n# Instructions:\n#--------------------------------------------------------------------------------------\n# <theme-name> is the theme assigned to cPanel account.\n# 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n# 2) mkdir api_examples\n# 3) cd api_examples\n# 4) create a file Ftp_set_welcome_message.live.pl and put this code into that file.\n# 5) In your browser login to a cPanel account.\n# 6) Manually change the url from: .../frontend/<theme-name>\n#    to .../frontend/<theme-name>/api_examples/Ftp_set_welcome_message.live.pl\n#--------------------------------------------------------------------------------------\n\nuse strict;\n\nuse Cpanel::LiveAPI ();\n\nmy $cpanel = Cpanel::LiveAPI->new(); # Connect to cPanel - only do this once.\n\n# Print the header\nprint \"Content-type: text/plain\\r\\n\\r\\n\";\n\n# Call the API\nmy $response = $cpanel->uapi(\n    q/Ftp/,\n    q/set_welcome_message/,\n    {\n        'message' => 'Greetings, Professor Falken.',\n    }\n);\n\n# Handle the response\nif ($response->{cpanelresult}{result}{status}) {\n    my $data = $response->{cpanelresult}{result}{data};\n    # Do something with the $data\n    # So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    # Report errors:\n    print to_json($response->{cpanelresult}{result}{errors});\n}\n\n# Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n#--------------------------------------------------------------------------------------\n# Helper function to convert a perl object to html printable json\n#--------------------------------------------------------------------------------------\nsub to_json {\n    require JSON;\n    my $str = JSON->new->pretty->encode($_[0]);\n    return $str;\n}\n"
+      - label: LiveAPI PHP
+        lang: PHP
+        source: "<?php\n//--------------------------------------------------------------------------------------\n// Instructions:\n//--------------------------------------------------------------------------------------\n// <theme-name> is the theme assigned to cPanel account.\n// 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n// 2) mkdir api_examples\n// 3) cd api_examples\n// 4) create a file Ftp_set_welcome_message.live.php and put this code into that file.\n// 5) In your browser login to a cPanel account.\n// 6) Manually change the url from: .../frontend/<theme-name>\n//    to .../frontend/<theme-name>/api_examples/Ftp_set_welcome_message.live.php\n//--------------------------------------------------------------------------------------\n\n// Instantiate the CPANEL object.\nrequire_once \"/usr/local/cpanel/php/cpanel.php\";\n\n// Print the header\nheader('Content-Type: text/plain');\n\n// Connect to cPanel - only do this once.\n$cpanel = new CPANEL();\n\n// Call the API\n$response = $cpanel->uapi(\n    'Ftp',\n    'set_welcome_message',\n    array (\n        'message' => 'Greetings, Professor Falken.',\n    )\n);\n\n// Handle the response\nif ($response['cpanelresult']['result']['status']) {\n    $data = $response['cpanelresult']['result']['data'];\n    // Do something with the $data\n    // So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    // Report errors:\n    print to_json($response['cpanelresult']['result']['errors']);\n}\n\n// Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n//--------------------------------------------------------------------------------------\n// Helper function to convert a PHP value to html printable json\n//--------------------------------------------------------------------------------------\nfunction to_json($data) {\n    return json_encode($data, JSON_PRETTY_PRINT);\n}"
+      x-cpanel-api-version: UAPI
+      x-cpanel-available-version: cPanel 11.42
+components:
+  securitySchemes:
+    BasicAuth:
+      scheme: basic
+      type: http
+externalDocs:
+  url: https://cpanel.net/developers/
+x-tagGroups:
+- name: API Development Tools
+  tags:
+  - API Token Management
+  - Batch
+  - SSE Task Management
+  - URL Parsing
+- name: Authentication
+  tags:
+  - External Authentication
+  - Two-Factor Settings
+- name: Backup Information
+  tags:
+  - BackupInfo
+  - BackupInfo Status
+- name: Block Ip Addresses
+  tags:
+  - Block IP
+- name: Commerce Integration
+  tags:
+  - Market Integration
+  - SSL Certificates
+- name: Contact Information
+  tags:
+  - Contact Information
+- name: cPanel Account
+  tags:
+  - Account Enhancements
+  - Account Information
+  - Account Management
+  - AuditLog
+  - Contact Information
+  - cPanel Features
+  - Disk Quotas
+  - DomainRecommendations
+  - Personalization
+  - Resource Usage and Statistics
+  - Subaccount Management
+  - Team Roles
+  - Team Users
+- name: cPanel Account Backups
+  tags:
+  - Backup
+  - File Restoration
+- name: cPanel Plugin Framework
+  tags:
+  - Formbricks
+  - Plugins
+- name: cPanel Theme Management
+  tags:
+  - Application Information
+  - Brand Management
+  - Branding Files
+  - Browser Cache Management
+  - Language
+  - Theme Settings
+- name: Directory Management
+  tags:
+  - Directory Indexes
+  - Directory Privacy
+  - Directory Protection
+- name: DNS
+  tags:
+  - DNS
+  - DNS Information
+  - DNS Security
+  - Dynamic DNS
+  - Email DNS Settings
+  - ZoneEdit
+- name: Domain
+  tags:
+  - Domain
+- name: Domain Management
+  tags:
+  - AddonDomain
+  - Direct Link Protection (Hotlink)
+  - Domain
+  - Domain Information
+  - Domain Redirection
+  - DomainLookup
+  - Park
+  - SubDomain
+  - Virtual Host Information
+- name: Domains
+  tags:
+  - Subdomains
+- name: Email
+  tags:
+  - Email Accounts
+  - Email Filtering
+  - Email Forwarding
+  - Email Server Information
+  - Email Suspensions
+  - Mail Server Information
+  - Mailbox Management
+  - Mailing Lists
+  - Signing and Encryption (GnuPG Keys)
+  - Spam Filtering (Greylisting)
+  - Spam Management
+  - Spam Prevention (BoxTrapper)
+  - Webmail Applications
+  - Webmail Sessions
+- name: Extract Information
+  tags:
+  - ExtractInfo
+  - ExtractInfo Status
+- name: File Manager
+  tags:
+  - Trash
+- name: Files
+  tags:
+  - FTP Accounts
+  - FTP Server Settings
+  - Image Tools
+  - Jodit
+  - Manage Files
+  - Manage Files
+  - WebDisk Settings
+- name: GIT Management
+  tags:
+  - Deployment Settings
+  - Repository Management
+- name: InProductSurvey
+  tags:
+  - InProductSurvey
+- name: MySQL and MariaDB
+  tags:
+  - Database Information
+  - Database Management
+  - Remote Databases
+  - User Management
+- name: Notifications
+  tags:
+  - Pushbullet
+- name: Optional Applications
+  tags:
+  - Antivirus Protection (ClamAV)
+  - Calendar and Contacts (DAV)
+  - Calendar and Contacts Server
+  - WordPress Manager Backups
+- name: PostgreSQL
+  tags:
+  - PostgreSQL Database Management
+  - PostgreSQL User Management
+- name: Retrieve bandwidth information
+  tags:
+  - Bandwidth
+- name: Security
+  tags:
+  - Known SSH Hosts Management
+  - Login Information
+- name: Server Information
+  tags:
+  - cPanel Server Information
+  - Notifications
+  - Password Strength
+  - SSH
+  - WebPros MCP
+  - WebProsMCP
+- name: ServiceProxy
+  tags:
+  - ServiceProxy
+- name: Site Quality Monitoring
+  tags:
+  - SiteQuality
+- name: SSL Certificates
+  tags:
+  - Auto-generated SSL Certificates
+  - cPanel Account SSL Management
+  - SNI Email Settings
+  - SSL Certificate Management
+  - Verify Domain Ownership
+- name: Statistics
+  tags:
+  - Domain Statistics
+  - Weblog Settings
+- name: UserData
+  tags:
+  - UserData
+- name: Web Server Configuration
+  tags:
+  - EA4
+  - EasyApache Settings
+  - PHP
+- name: Web Server Management
+  tags:
+  - Application Manager
+  - ModSecurity
+  - NginxCaching
+  - PHP Settings
+  - Web Apps
+- name: Website Configuration
+  tags:
+  - Handler Management
+  - Logs
+  - Mime Type Management
+  - Nova
+  - Site Information
+  - Site Installation
+  - Sitejet
+  - WPX

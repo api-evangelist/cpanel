@@ -1,0 +1,1594 @@
+openapi: 3.2.0
+info:
+  contact:
+    email: cs@cpanel.net
+    name: WebPros International, LLC
+    url: https://cpanel.net/support/
+  description: WHM API.
+  license:
+    name: cPanel License
+    url: https://cpanel.net/legal-notices/
+  termsOfService: https://cpanel.net/legal-notices/
+  title: WHM Updates API
+  version: 11.137.9999.106
+  x-api-evangelist-provenance: 'Harvested verbatim from cPanel''s developer portal on 2026-09-05 via the MCP tool get-full-api-description at https://api.docs.cpanel.net/mcp. ONE mechanical change was made before storage: example values containing PEM private-key or certificate blocks, and AWS-access-key-shaped example strings, were replaced with REDACTED_* placeholders so the file can be stored in a public git repository without tripping secret scanning. No path, operation, parameter, schema or description was altered, added or removed.'
+servers:
+- description: A server running WHM.
+  url: https://{host}:{port}/json-api
+  variables:
+    host:
+      default: whm-server.tld
+      description: The hostname of a server running WHM.
+    port:
+      default: '2087'
+      description: The WHM port.
+security:
+- BasicAuth: []
+tags:
+- description: Server Administration / Updates
+  name: Updates
+paths:
+  /accept_eula:
+    get:
+      description: 'This function records acceptance of cPanel & WHM''s legal terms. To do this, the function creates a touchfile in the `/var/cpanel/activate/` directory and writes an acceptance audit record to `/var/cpanel/activate/eula_acceptance.json`. The audit record captures the accepting user, timestamp, remote IP address, agreement version, and agreement URLs.
+
+
+        **Important:**
+
+
+        Server owners *must* accept these agreements before they use cPanel & WHM.'
+      operationId: EULA-accept_eula
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: accept_eula
+                        type: string
+                      reason:
+                        description: 'The reason the API function failed when the `metadata.result`
+
+                          field is `0`. This field may display a success message when
+
+                          a function succeeds.'
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` - Success
+
+                          * `0` - Failed. Check the reason field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Save EULA acceptance
+      tags:
+      - Updates
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  accept_eula\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/accept_eula?api.version=1
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '76'
+  /get_available_tiers:
+    get:
+      description: 'This function lists of each available version of cPanel & WHM, and each
+
+        version''s latest maintenance release. This function also lists the cPanel & WHM
+
+        version for each
+
+        release tier.'
+      operationId: Sys-get_available_tiers
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    additionalProperties:
+                      description: The latest maintenance release for a cPanel & WHM version number.
+                      type: string
+                    description: A list of the latest available version of cPanel & WHM.
+                    example:
+                      '11.30': 11.30.8.0
+                      '11.32': 11.32.7.3
+                      '11.34': 11.34.2.8
+                      '11.36': 11.36.2.12
+                      '11.38': 11.38.2.23
+                      '11.40': 11.40.1.22
+                      '11.42': 11.42.1.31
+                      '11.44': 11.44.3.5
+                      '11.46': 11.46.4.0
+                      '11.48': 11.48.5.3
+                      '11.50': 11.50.6.2
+                      '11.52': 11.52.6.6
+                      '11.54': 11.54.0.36
+                      '11.56': 11.56.0.52
+                      '11.58': 11.58.0.52
+                      '11.60': 11.60.0.48
+                      '11.62': 11.62.0.48
+                      '11.64': 11.64.0.42
+                      '11.66': 11.66.0.35
+                      '11.68': 11.68.0.39
+                      '11.70': 11.70.0.69
+                      '11.72': 11.72.0.12
+                      '11.74': 11.74.0.12
+                      '11.76': 11.76.0.22
+                      '11.78': 11.78.0.49
+                      '11.80': 11.80.0.24
+                      '11.82': 11.82.0.19
+                      '11.84': 11.84.0.22
+                      '11.86': 11.86.0.24
+                      '11.88': 11.88.0.13
+                      '11.90': 11.90.0.3
+                      current: 11.90.0.3
+                      edge: 11.90.0.3
+                      lts: 11.86.0.24
+                      release: 11.88.0.13
+                      stable: 11.88.0.13
+                    properties:
+                      current:
+                        description: The version of cPanel & WHM that is currently on the CURRENT tier.
+                        type: string
+                      edge:
+                        description: The version of cPanel & WHM that is currently on the EDGE tier.
+                        type: string
+                      lts:
+                        description: The version of cPanel & WHM that is currently on the LTS tier.
+                        type: string
+                      release:
+                        description: The version of cPanel & WHM that is currently on the RELEASE tier.
+                        type: string
+                      stable:
+                        description: The version of cPanel & WHM that is currently on the STABLE tier.
+                        type: string
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: get_available_tiers
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: Got tiers list
+                        type: string
+                      result:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 1
+                        - 0
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Return cPanel & WHM available versions
+      tags:
+      - Updates
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  get_available_tiers\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/get_available_tiers?api.version=1
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11.38'
+  /get_current_lts_expiration_status:
+    get:
+      description: This function determines whether a branch's Long-Term Support (LTS) version expires within three months. For more information about LTS, read our cPanel Long-Term Support documentation.
+      operationId: Update-get_current_lts_expiration_status
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      expiration:
+                        description: When support for the build version expires.
+                        example: 1585612801
+                        format: unix_timestamp
+                        type: integer
+                      expires_in_next_three_months:
+                        description: 'Whether the LTS version expires within the next three months.
+
+                          - `1` — LTS expires within the next three months.
+
+                          - `0` — LTS does **not** expire within the next three months.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 0
+                        type: integer
+                      full_version:
+                        description: The full version number.
+                        example: 11.88.1.11
+                        type: string
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: get_current_lts_expiration_status
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Return Long Term Support expiration status
+      tags:
+      - Updates
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  get_current_lts_expiration_status\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/get_current_lts_expiration_status?api.version=1
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '62'
+  /get_lts_wexpire:
+    get:
+      description: This function parses the `/etc/cpanel/TIERS.json` file and returns whether a branch qualifies for Long-Term Support (LTS). For more information about LTS, read our cPanel Long-Term Support documentation.
+      operationId: Update-get_lts_wexpire
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      branch:
+                        additionalProperties:
+                          description: The branch.
+                          items:
+                            properties:
+                              build:
+                                description: The build version number.
+                                example: 11.90.0.5
+                                type: string
+                              is_main:
+                                description: 'Whether the build represents the main build of the branch.
+
+                                  * `1` - The build is the main build of the branch.
+
+                                  * `0` - The build is **not** the main build of the branch.
+
+
+                                  **Note:**
+
+
+                                  This will be `1` for exactly one of the entries in this array.'
+                                enum:
+                                - 0
+                                - 1
+                                example: 0
+                                type: integer
+                            type: object
+                          type: array
+                        description: An object that lists information about available branch builds.
+                        example:
+                          11.78.0:
+                          - build: 11.78.0.49
+                            is_main: 1
+                          11.80.0:
+                          - build: 11.80.0.24
+                            is_main: 1
+                          11.82.0:
+                          - build: 11.82.0.19
+                            is_main: 1
+                          11.84.0:
+                          - build: 11.84.0.22
+                            is_main: 1
+                          11.86.0:
+                          - build: 11.86.0.25
+                            is_main: 1
+                          11.88.0:
+                          - build: 11.88.0.14
+                            is_main: 1
+                          11.90.0:
+                          - build: 11.90.0.5
+                            is_main: 1
+                        type: object
+                      flags:
+                        additionalProperties:
+                          description: 'Feature or flag in the output format.
+
+
+                            * `1` - Feature is present in the returned data.
+
+                            * `0` - Feature is **not** present in the returned data.'
+                          enum:
+                          - 0
+                          - 1
+                          type: integer
+                        description: An object containing Features or flags supported by this output.
+                        example:
+                          is_main: 1
+                        type: object
+                      tiers:
+                        additionalProperties:
+                          description: The release tier.
+                          items:
+                            properties:
+                              build:
+                                description: The build version number.
+                                type: string
+                              expires:
+                                description: 'When WebPros International, LLC support for the build version expires.
+
+                                  Encoded as a Unix Timestamp.
+
+
+                                  **Note:**
+
+
+                                  This item is only present when the version is LTS.'
+                                example: '1617148801'
+                                type: string
+                              is_lts:
+                                description: 'Whether cPanel offers this version as LTS.
+
+                                  * `1` — Long-term support.
+
+                                  * `0` — No Long-term support.
+
+
+                                  **Note:**
+
+
+                                  This item is only present when the version is LTS.'
+                                enum:
+                                - 1
+                                example: 1
+                                type: integer
+                              is_main:
+                                description: 'Whether the build represents the main build of the tier.
+
+                                  * `1` - The build is the main build of the tier.
+
+                                  * `0` - The build is **not** the main build of the tier.
+
+
+                                  **Note:**
+
+
+                                  This will be `1` for exactly one of the entries in this array.'
+                                enum:
+                                - 0
+                                - 1
+                                example: 1
+                                type: integer
+                              named:
+                                description: 'The release tier or tiers which currently offer this branch, if applicable.
+
+
+                                  **Note:**
+
+
+                                  This item is only present when the version is part of a named tier.'
+                                example:
+                                - edge
+                                - current
+                                - release
+                                items:
+                                  enum:
+                                  - edge
+                                  - current
+                                  - release
+                                  - stable
+                                  - lts
+                                  type: string
+                                type: array
+                            type: object
+                          type: array
+                        description: An object that lists information about build versions in release tiers.
+                        example:
+                          '11.78':
+                          - build: 11.78.0.49
+                            expires: '1588636799'
+                            is_lts: 1
+                            is_main: 1
+                          '11.80':
+                          - build: 11.80.0.24
+                            is_main: 1
+                          '11.82':
+                          - build: 11.82.0.19
+                            is_main: 1
+                          '11.84':
+                          - build: 11.84.0.22
+                            is_main: 1
+                          '11.86':
+                          - build: 11.86.0.25
+                            expires: '1617148801'
+                            is_lts: 1
+                            is_main: 1
+                            named:
+                            - lts
+                          '11.88':
+                          - build: 11.88.0.13
+                            is_main: 0
+                            named:
+                            - stable
+                          - build: 11.88.0.14
+                            is_main: 1
+                          '11.90':
+                          - build: 11.90.0.5
+                            is_main: 1
+                            named:
+                            - current
+                            - edge
+                            - release
+                        type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: get_lts_wexpire
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is 0. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` - Success
+
+                          * `0` - Failed: Check the reason field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Return Long Term Support status for all versions
+      tags:
+      - Updates
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  get_lts_wexpire\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/get_lts_wexpire?api.version=1
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '62'
+  /installed_versions:
+    get:
+      description: This function lists the versions of third-party software that ship with cPanel & WHM.
+      operationId: ApplicationVersions-installed_versions
+      parameters:
+      - description: 'Whether to list the server''s installed RPMs in the function''s
+
+          `cpanel_packages`, `ea_4_packages`, and `os_packages` arrays.
+
+
+          * `1` - List.
+
+          * `0` - Do **not** list.'
+        in: query
+        name: packages
+        required: false
+        schema:
+          default: 0
+          enum:
+          - 0
+          - 1
+          example: 1
+          type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    example:
+                      apache: 2.4.12
+                      apache_php_default_version: 0
+                      apache_php_versions:
+                      - 0
+                      bind: 9.9.4-29
+                      clamav: 0.99.2-1
+                      cpanel_and_whm: 11.64.0.9999
+                      cpanel_packages:
+                      - cpanel-ace-editor-1.2.6-1.cp1166.noarch
+                      - cpanel-yui-2.9.0-5.cp1136.noarch
+                      cpanel_php: 7.2.7-4
+                      cron: 0
+                      cronie: 1.4.11-23
+                      dovecot: 2.2.31 (65cde28)
+                      ea_4_packages: []
+                      easyapache: '4'
+                      exim: 4.89-2
+                      linux_kernel: 3.10.0-327.18.2.el7.x86_64
+                      mailman: 2.1.23-9
+                      mariadb: 0
+                      mariadb_build: 0
+                      munin: 0
+                      mysql: 5.7.61
+                      mysql_build: 5.7.61-1
+                      nscd: 2.17-222
+                      openssh-server: 7.4p1-21
+                      operating_system_name: centos
+                      operating_system_version: '7.2'
+                      os_packages:
+                      - ImageMagick-6.7.8.9-15.el7_2.x86_64
+                      - zsh-5.0.2-14.el7.x86_64
+                      p0f: 3.09b-1
+                      postgresql: 0
+                      postgresql_build: 0
+                      powerdns: 0
+                      proftpd: 0
+                      pureftpd: 1.0.45
+                      roundcube: 1.2.4-1
+                      rsyslog: 8.24.0-16
+                      spamd: 3.4.2
+                      squirrelmail: 0
+                    properties:
+                      apache:
+                        description: 'The Apache® version.
+
+
+                          * `0` - Apache is **not** installed on the server.'
+                        example: 2.4.12
+                        oneOf:
+                        - description: A version of Apache.
+                          type: string
+                        - description: Apache is **not** installed.
+                          enum:
+                          - 0
+                          type: integer
+                      apache_php_default_version:
+                        description: 'The default PHP version for Apache.
+
+
+                          * `0` - PHP for Apache is **not** installed on the server.'
+                        example: 7.3.21-1.1.1
+                        oneOf:
+                        - description: A version for Apache of default PHP.
+                          type: string
+                        - description: default PHP is **not** installed.
+                          enum:
+                          - 0
+                          type: integer
+                      apache_php_versions:
+                        description: 'An array of PHP versions that the system installs for Apache.
+
+
+                          If PHP for Apache is **not** installed, this will return an array containing `0`.
+
+
+                          **Note:**
+
+
+                          Unlike other keys in this object, this returns a `[0]` value when PHP for Apache is **not** installed.'
+                        example:
+                        - 7.1.33-3.4.2
+                        - 7.2.33-1.1.1
+                        - 7.3.21-1.1.1
+                        items:
+                          oneOf:
+                          - description: A version of PHP for Apache.
+                            type: string
+                          - description: PHP for Apache is **not** installed on the server.
+                            enum:
+                            - 0
+                            type: integer
+                        type: array
+                      bind:
+                        description: 'The BIND version.
+
+
+                          * `0` - BIND is **not** installed on the server.'
+                        example: 9.9.4-29
+                        oneOf:
+                        - description: A version of BIND.
+                          type: string
+                        - description: BIND is **not** installed.
+                          enum:
+                          - 0
+                          type: integer
+                      clamav:
+                        description: 'The ClamAV version.
+
+
+                          * `0` - ClamAV is **not** installed on the server.'
+                        example: 0.99.2-1
+                        oneOf:
+                        - description: A version of ClamAV.
+                          type: string
+                        - description: ClamAV is **not** installed.
+                          enum:
+                          - 0
+                          type: integer
+                      cpanel_and_whm:
+                        description: The cPanel & WHM version.
+                        example: 11.64.0.9999
+                        type: string
+                      cpanel_packages:
+                        description: 'An array of cPanel-provided RPMs.
+
+
+                          **Note:**
+
+
+                          The function **only** returns this array if you set the `packages` parameter to `1`.'
+                        example:
+                        - cpanel-ace-editor-1.1.9-1.cp1152.noarch
+                        - cpanel-analog-6.0-2.cp1136.x86_64
+                        - cpanel-angular-chosen-1.4.0-1.cp1158.noarch
+                        items:
+                          type: string
+                        type: array
+                      cpanel_php:
+                        description: 'The system PHP version.
+
+
+                          * `0` - System PHP is **not** installed on the server.'
+                        example: 7.2.7-4
+                        oneOf:
+                        - description: A version of cPanel & WHM.
+                          type: string
+                        - description: cPanel & WHM is **not** installed.
+                          enum:
+                          - 0
+                          type: integer
+                      cron:
+                        description: 'The version of the ISC / Vixie cron daemon. This is the default cron service installed on Ubuntu.
+
+
+                          * `0` - ISC / Vixie cron is **not** installed on the server.'
+                        example: 3.0pl1-136ubuntu1
+                        oneOf:
+                        - description: A version of the cron daemon.
+                          type: string
+                        - description: ISC / Vixie cron is **not** installed.
+                          enum:
+                          - 0
+                          type: integer
+                      cronie:
+                        description: 'The version of the cronie cron daemon. This is the default cron service installed on CentOS, CloudLinux, AlmaLinux, and other systems running derivatives of Red Hat Enterprise Linux.
+
+
+                          * `0` - cronie is **not** installed on the server.'
+                        example: 1.4.11-23
+                        oneOf:
+                        - description: A version of the cron daemon.
+                          type: string
+                        - description: cronie is **not** installed.
+                          enum:
+                          - 0
+                          type: integer
+                      dovecot:
+                        description: 'The Dovecot version.
+
+
+                          * `0` - Dovecot is **not** installed on the server.'
+                        example: 2.2.31 (65cde28)
+                        oneOf:
+                        - description: A version of Dovecot.
+                          type: string
+                        - description: Dovecot is **not** installed.
+                          enum:
+                          - 0
+                          type: integer
+                      ea_4_packages:
+                        description: 'An array of EasyApache 4 (EA4)-provided RPMs.
+
+
+                          **Note:**
+
+
+                          The function **only** returns this array if you set the `packages` parameter to `1`.'
+                        example: []
+                        items:
+                          type: string
+                        type: array
+                      easyapache:
+                        description: 'The EasyApache version.
+
+
+                          * `0` - EasyApache is **not** installed on the server.'
+                        example: '4'
+                        oneOf:
+                        - description: A version of EasyApache.
+                          type: string
+                        - description: EasyApache is **not** installed.
+                          enum:
+                          - 0
+                          type: integer
+                      exim:
+                        description: 'The Exim version.
+
+
+                          * `0` - Exim is **not** installed on the server.'
+                        example: 4.89-2
+                        oneOf:
+                        - description: A version of Exim.
+                          type: string
+                        - description: Exim is **not** installed.
+                          enum:
+                          - 0
+                          type: integer
+                      linux_kernel:
+                        description: The Linux® kernel version.
+                        example: 3.10.0-327.18.2.e17.x86_64
+                        type: string
+                      mailman:
+                        description: 'The Mailman version.
+
+
+                          * `0` - Mailman is **not** installed on the server.'
+                        example: 2.1.23-9
+                        oneOf:
+                        - description: A version of Mailman.
+                          type: string
+                        - description: Mailman is **not** installed.
+                          enum:
+                          - 0
+                          type: integer
+                      mariadb:
+                        description: 'The MariaDB® version number.
+
+
+                          * `0` - MariaDB is **not** installed on the server.'
+                        example: 5.5.65
+                        oneOf:
+                        - description: A version number of MariaDB.
+                          type: string
+                        - description: MariaDB is **not** installed.
+                          enum:
+                          - 0
+                          type: integer
+                      mariadb_build:
+                        description: 'The MariaDB RPM''s version number.
+
+
+                          * `0` - MariaDB RPM''s is **not** installed on the server.'
+                        example: 5.5.65-1
+                        oneOf:
+                        - description: A version number of MariaDB RPM's.
+                          type: string
+                        - description: MariaDB RPM's is **not** installed.
+                          enum:
+                          - 0
+                          type: integer
+                      munin:
+                        description: 'The Munin version.
+
+
+                          * `0` - Munin is **not** installed on the server.'
+                        example: 2.0.30
+                        oneOf:
+                        - description: A version of Munin.
+                          type: string
+                        - description: Munin is **not** installed.
+                          enum:
+                          - 0
+                          type: integer
+                      mysql:
+                        description: 'The MySQL® version number.
+
+
+                          * `0` - MySQL is **not** installed on the server.'
+                        example: 5.7.61
+                        oneOf:
+                        - description: A version number of MySQL.
+                          type: string
+                        - description: MySQL is **not** installed.
+                          enum:
+                          - 0
+                          type: integer
+                      mysql_build:
+                        description: 'The MySQL RPM''s version number.
+
+
+                          * `0` - MySQL RPM''s is **not** installed on the server.'
+                        example: 5.7.61-1
+                        oneOf:
+                        - description: A version number of MySQL RPM's.
+                          type: string
+                        - description: MySQL RPM's is **not** installed.
+                          enum:
+                          - 0
+                          type: integer
+                      nscd:
+                        description: 'The Name Service Cache Daemon version number.
+
+
+                          * `0` - Name Service Cache Daemon is **not** installed on the server.'
+                        example: 2.17-222
+                        oneOf:
+                        - description: A version number of Name Service Cache Daemon.
+                          type: string
+                        - description: Name Service Cache Daemon is **not** installed.
+                          enum:
+                          - 0
+                          type: integer
+                      openssh-server:
+                        description: 'The OpenSSH version.
+
+
+                          * `0` - OpenSSH is **not** installed on the server.'
+                        example: clients-6.6.1p1-25
+                        oneOf:
+                        - description: A version of OpenSSH.
+                          type: string
+                        - description: OpenSSH is **not** installed.
+                          enum:
+                          - 0
+                          type: integer
+                      operating_system_name:
+                        description: The server's operating system (OS).
+                        example: centos
+                        type: string
+                      operating_system_version:
+                        description: The version of the server's OS.
+                        example: '7.2'
+                        type: string
+                      os_packages:
+                        description: "An array of OS-provided RPMs.\n\n**Note:**\n\n The function **only** returns this array if you set the `packages` parameter to `1`."
+                        example:
+                        - GeoIP-1.5.0-11.el7.x86_64
+                        - ImageMagick-6.7.8.9-15.el7_2.x86_64
+                        - ModemManager-glib-1.6.0-2.el7.x86_64
+                        items:
+                          type: string
+                        type: array
+                      p0f:
+                        description: 'The Passive OS Fingerprinting version number.
+
+
+                          * `0` - Passive OS Fingerprinting is **not** installed on the server.'
+                        example: 3.09b-1
+                        oneOf:
+                        - description: A version number of Passive OS Fingerprinting.
+                          type: string
+                        - description: Passive OS Fingerprinting is **not** installed.
+                          enum:
+                          - 0
+                          type: integer
+                      postgresql:
+                        description: 'The PostgreSQL® version.
+
+
+                          * `0` - PostgreSQL is **not** installed on the server.'
+                        example: '9.2'
+                        oneOf:
+                        - description: A version of PostgreSQL.
+                          type: string
+                        - description: PostgreSQL is **not** installed.
+                          enum:
+                          - 0
+                          type: integer
+                      postgresql_build:
+                        description: 'The PostgreSQL RPM''s version number.
+
+
+                          * `0` - PostgreSQL RPM''s is **not** installed on the server.'
+                        example: '0'
+                        oneOf:
+                        - description: A version number of PostgreSQL RPM's.
+                          type: string
+                        - description: PostgreSQL RPM's is **not** installed.
+                          enum:
+                          - 0
+                          type: integer
+                      powerdns:
+                        description: 'The PowerDNS version.
+
+
+                          * `0` - PowerDNS is **not** installed on the server.'
+                        example: 4.1.10-15
+                        oneOf:
+                        - description: A version of PowerDNS.
+                          type: string
+                        - description: PowerDNS is **not** installed.
+                          enum:
+                          - 0
+                          type: integer
+                      proftpd:
+                        description: 'The ProFTP version.
+
+
+                          * `0` - ProFTP is **not** installed on the server.'
+                        example: 1.3.7d
+                        oneOf:
+                        - description: A version of ProFTP.
+                          type: string
+                        - description: ProFTP is **not** installed.
+                          enum:
+                          - 0
+                          type: integer
+                      pureftpd:
+                        description: 'The Pure-FTPd version.
+
+
+                          * `0` - Pure-FTPd is **not** installed on the server.'
+                        example: 1.0.45
+                        oneOf:
+                        - description: A version of Pure-FTPd.
+                          type: string
+                        - description: Pure-FTPd is **not** installed.
+                          enum:
+                          - 0
+                          type: integer
+                      roundcube:
+                        description: 'The Roundcube version.
+
+
+                          * `0` - Roundcube is **not** installed on the server.'
+                        example: 1.2.4-1
+                        oneOf:
+                        - description: A version of Roundcube.
+                          type: string
+                        - description: Roundcube is **not** installed.
+                          enum:
+                          - 0
+                          type: integer
+                      rsyslog:
+                        description: 'The Rsyslog version number.
+
+
+                          * `0` - Rsyslog is **not** installed on the server.'
+                        example: 8.24.0-16
+                        oneOf:
+                        - description: A version number of Rsyslog.
+                          type: string
+                        - description: Rsyslog is **not** installed.
+                          enum:
+                          - 0
+                          type: integer
+                      spamd:
+                        description: 'The Apache SpamAssassin™ version number.
+
+
+                          * `0` - Apache SpamAssassin is **not** installed on the server.'
+                        example: 3.4.2
+                        oneOf:
+                        - description: A version number of Apache SpamAssassin.
+                          type: string
+                        - description: Apache SpamAssassin is **not** installed.
+                          enum:
+                          - 0
+                          type: integer
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: installed_versions
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is 0. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` - Success
+
+                          * `0` - Failed: Check the reason field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Return third-party software versions
+      tags:
+      - Updates
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  installed_versions\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/installed_versions?api.version=1
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '64'
+  /set_cpanel_updates:
+    get:
+      description: This function sets the frequency of cPanel & WHM updates.
+      operationId: Sys-set_cpanel_updates
+      parameters:
+      - description: 'The frequency with which to run cPanel & WHM updates on a server.
+
+          - `daily` — Run updates daily.
+
+          - `manual` — Run updates manually.
+
+          - `never` — Never run updates.'
+        in: query
+        name: updates
+        required: true
+        schema:
+          enum:
+          - daily
+          - manual
+          - never
+          example: daily
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      updates:
+                        description: 'The new frequency of server updates.
+
+                          - `daily` — Run updates daily.
+
+                          - `manual` — Run updates manually.
+
+                          - `never` — Never run updates.'
+                        enum:
+                        - daily
+                        - manual
+                        - never
+                        example: daily
+                        type: string
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: set_cpanel_updates
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: Cpanel update frequency set to daily
+                        type: string
+                      result:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Update cPanel & WHM update frequency
+      tags:
+      - Updates
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  set_cpanel_updates \\\n  updates='daily'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/set_cpanel_updates?api.version=1&updates=daily
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11.38'
+  /set_tier:
+    get:
+      description: This function sets a cPanel & WHM server to a specified support tier.
+      operationId: Sys-set_tier
+      parameters:
+      - description: The support tier to use.
+        in: query
+        name: tier
+        required: true
+        schema:
+          enum:
+          - edge
+          - current
+          - release
+          - stable
+          - lts
+          example: current
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      tier:
+                        description: The server's new support tier.
+                        enum:
+                        - edge
+                        - current
+                        - release
+                        - stable
+                        - lts
+                        example: current
+                        type: string
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: set_tier
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: Update tier successfully changed to current
+                        type: string
+                      result:
+                        description: '* `1` — Success
+
+                          * `0` — Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Update cPanel & WHM release tier
+      tags:
+      - Updates
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  set_tier \\\n  tier='current'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/set_tier?api.version=1&tier=current
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11.38'
+  /update_updateconf:
+    post:
+      description: 'This function modifies a server''s `/etc/cpupdate.conf` file. This file controls how the server handles software updates and upgrades.
+
+
+        **Important:**
+
+
+        You **must** have the `root` level Access Control List (ACL) privilege to execute this function.'
+      operationId: CpUpdate-update_updateconf
+      parameters:
+      - description: "The cPanel & WHM installation's release tier, or a [valid version number](https://go.cpanel.net/longtermsupport).\n\nIf you do not use this parameter, the system retains the current setting.\n\n* A valid cPanel & WHM version number.\n* `STABLE` - This version has received considerable public exposure, testing, and verification.\n* `RELEASE` - This version is feature-complete and well-tested. It contains all intended features and functionality.\n* `CURRENT` - This version is tested and verified, but it may not contain all of the proposed functionality of a release. This tier is similar to the \"release candidate\" tier that other publication schemes use.\n* `EDGE` - This version only has rudimentary testing. The features are subject to further modification. This version usually lacks official public documentation.\n* `LTS` - Some hosting providers do not wish to upgrade cPanel & WHM to newer major versions. This is a single cPanel & WHM version for the year-long period in which WebPros International, LLC supports it.\n\n  If you do not set this parameter, the system retains the current setting.\n\n New installations default to RELEASE."
+        in: query
+        name: CPANEL
+        required: false
+        schema:
+          anyOf:
+          - enum:
+            - STABLE
+            - RELEASE
+            - CURRENT
+            - EDGE
+            - LTS
+            type: string
+          - format: cPanel version
+            type: string
+          - type: string
+          example: RELEASE
+      - description: 'The frequency with which the server updates the operating system distribution''s packages each time that the `/usr/local/cpanel/scripts/upcp` script runs.
+
+
+          If you do not set this parameter, the system retains the current setting.
+
+
+          * `daily` - Update the system packages daily.
+
+          * `manual` - Update the system packages manually.
+
+          * `never` - If you specify `never`, the server administrator **must** run the `/usr/local/cpanel/scripts/update-packages` script when they update the server''s packages.'
+        in: query
+        name: RPMUP
+        required: false
+        schema:
+          anyOf:
+          - enum:
+            - daily
+            - manual
+            - never
+            type: string
+          - type: string
+          example: daily
+      - description: 'The frequency with which the server updates Apache SpamAssassin''s™ rules when the `/usr/local/cpanel/scripts/upcp` script runs.
+
+
+          If you do not set this parameter, the system retains the current setting.
+
+
+          * `daily` - Update Apache SpamAssassin rules daily.
+
+          * `manual` - Update Apache SpamAssassin rules manually.
+
+          * `never` - If you specify `never`, the server administrator **must** run the `/usr/local/cpanel/scripts/update-packages` script when they update Apache SpamAssassin''s rules.'
+        in: query
+        name: SARULESUP
+        required: false
+        schema:
+          anyOf:
+          - enum:
+            - daily
+            - manual
+            - never
+            type: string
+          - type: string
+          example: daily
+      - description: 'Whether the system applies expedited security updates for the current major version.
+
+
+          This setting is **independent** of the `UPDATES` setting. It drives the hourly `/usr/local/cpanel/scripts/upcp --security` check, which applies a security release within the current major version as soon as it is available, even when `UPDATES` is set to `manual` or `never`.
+
+
+          If you do not set this parameter, the system retains the current setting.
+
+
+          * `hourly` - Check for and apply current-major security updates every hour. This is the default.
+
+          * `never` - Do **not** apply expedited security updates.'
+        in: query
+        name: SECURITY_UPDATES
+        required: false
+        schema:
+          anyOf:
+          - enum:
+            - hourly
+            - never
+            type: string
+          - type: string
+          example: hourly
+      - description: 'The absolute directory path to the staging directory for updates.
+
+
+          If you do not set this parameter, the system retains the current setting.'
+        in: query
+        name: STAGING_DIR
+        required: false
+        schema:
+          example: /usr/local/cpanel
+          type: string
+      - description: 'When the system will check for updates.
+
+
+          If you do not set this parameter, the system retains the current setting.
+
+
+          * `daily` - Update cPanel & WHM automatically through a cron job once every 24 hours.
+
+          * `manual` - Update cPanel & WHM manually.
+
+          * `never` - Do **not** update cPanel & WHM.'
+        in: query
+        name: UPDATES
+        required: false
+        schema:
+          anyOf:
+          - enum:
+            - daily
+            - manual
+            - never
+            type: string
+          - type: string
+          example: daily
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: update_updateconf
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is 0. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` - Success
+
+                          * `0` - Failed: Check the reason field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Update software update behavior
+      tags:
+      - Updates
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  update_updateconf\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/update_updateconf?api.version=1
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11.38'
+  /version:
+    get:
+      description: This function returns the cPanel & WHM version that a server runs.
+      operationId: Cpanel-version
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      version:
+                        description: The server's cPanel & WHM version.
+                        example: 11.88.0.9999
+                        type: string
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: version
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` - Success
+
+                          * `0` - Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Return cPanel & WHM version
+      tags:
+      - Updates
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  version\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/version?api.version=1
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11.38'
+components:
+  securitySchemes:
+    BasicAuth:
+      scheme: basic
+      type: http
+externalDocs:
+  url: https://cpanel.net/developers/
+x-tagGroups:
+- name: Account Restoration
+  tags:
+  - Restore Account
+  - Restore Queue Management
+  - Restore Queue Reporting
+- name: Accounts
+  tags:
+  - Account Creation
+  - Account Enhancements
+  - Account Management
+  - Bandwidth and Disk Quotas
+  - Domain Information
+  - Passwords
+  - Styles
+  - Suspensions
+- name: API Development Tools
+  tags:
+  - API Execution
+  - API Statistics
+  - API Token Management
+  - Applications
+  - Session
+- name: Authentication
+  tags:
+  - Authentication Providers
+  - External Authentication
+  - Login URL
+  - SSH Keys and Connections
+  - Two-Factor Authentication
+- name: Backups
+  tags:
+  - Backup Destination
+  - Backup or Restore
+  - Backup Settings
+  - Legacy Migration
+- name: Commerce Integration
+  tags:
+  - Market Integration
+  - Sitejet
+- name: cPanel Market
+  tags:
+  - Product Management
+  - Provider Management
+- name: cPanel Support Tickets
+  tags:
+  - Support Access
+  - Ticket Management
+- name: Customizations
+  tags:
+  - Brand
+  - Customizations
+- name: Databases
+  tags:
+  - Manage MySQL Server
+  - MySQL Databases
+  - PostgreSQL Databases
+  - Remote MySQL Databases
+- name: DNS
+  tags:
+  - DNS Cluster Settings
+  - DNS Security
+  - DNS Zones
+  - Domain Management
+  - Domain Management
+  - Resolvers
+  - Service Records
+- name: Hosting Plans
+  tags:
+  - Feature Access
+  - Feature Lists
+  - Hosting Plan Extensions
+  - Hosting Plans
+- name: InProductSurvey
+  tags:
+  - InProductSurvey
+- name: Integrations
+  tags:
+  - API Authentication
+  - Links
+  - Scripts Hooks
+- name: IP Address Management
+  tags:
+  - IPv4 Address Settings
+  - IPv6 Address Settings
+  - Network Address Translation
+- name: Login Security (cPHulk)
+  tags:
+  - Management
+  - Reporting
+  - Settings
+- name: Logs
+  tags:
+  - Web Log Retention
+- name: Mail
+  tags:
+  - cPanel Account Mail Management
+  - Mail DNS Settings
+  - Mail Server Settings
+  - Spam Management
+  - Spam Protection (Greylisting)
+- name: Monitoring
+  tags:
+  - 360 Monitoring
+- name: NGINX Manager
+  tags:
+  - NGINX Manager
+- name: Resellers
+  tags:
+  - Account Enhancement Limit
+  - Account Limits
+  - Account Permissions
+  - Account Settings
+  - Reseller Account Management
+- name: Security
+  tags:
+  - WHM Access
+- name: Server Administration
+  tags:
+  - Configuration Clusters
+  - Configurations
+  - Connected Applications
+  - Connections
+  - cPanel Analytics
+  - License Management
+  - Notifications
+  - Plugin-Based Features
+  - Security
+  - Server Nodes
+  - Server Profiles
+  - Services
+  - System Information
+  - Updates
+- name: SSL Certificates
+  tags:
+  - Auto-Generated Certificates
+  - cPanel Account Settings
+  - SSL Server Settings
+- name: System Package Management
+  tags:
+  - Install or Uninstall Package
+  - List Package Information
+  - Package Manager Settings
+- name: Transfers
+  tags:
+  - cPanel Account Transfer
+  - Transfer Configuration
+  - Transfer Monitoring
+- name: UserData
+  tags:
+  - UserData
+- name: Web Server Configuration
+  tags:
+  - EasyApache Settings
+  - PHP
+  - PHP-FPM
+- name: Web Server Security (ModSecurity)
+  tags:
+  - Rule Settings
+  - Rule Vendor Settings
+  - Server Settings

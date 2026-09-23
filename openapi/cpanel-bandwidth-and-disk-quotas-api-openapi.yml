@@ -1,0 +1,805 @@
+openapi: 3.2.0
+info:
+  contact:
+    email: cs@cpanel.net
+    name: WebPros International, LLC
+    url: https://cpanel.net/support/
+  description: WHM API.
+  license:
+    name: cPanel License
+    url: https://cpanel.net/legal-notices/
+  termsOfService: https://cpanel.net/legal-notices/
+  title: WHM Bandwidth and Disk Quotas API
+  version: 11.137.9999.106
+  x-api-evangelist-provenance: 'Harvested verbatim from cPanel''s developer portal on 2026-09-05 via the MCP tool get-full-api-description at https://api.docs.cpanel.net/mcp. ONE mechanical change was made before storage: example values containing PEM private-key or certificate blocks, and AWS-access-key-shaped example strings, were replaced with REDACTED_* placeholders so the file can be stored in a public git repository without tripping secret scanning. No path, operation, parameter, schema or description was altered, added or removed.'
+servers:
+- description: A server running WHM.
+  url: https://{host}:{port}/json-api
+  variables:
+    host:
+      default: whm-server.tld
+      description: The hostname of a server running WHM.
+    port:
+      default: '2087'
+      description: The WHM port.
+security:
+- BasicAuth: []
+tags:
+- description: Accounts / Bandwidth and Disk Quotas
+  name: Bandwidth and Disk Quotas
+paths:
+  /editquota:
+    get:
+      description: This function modifies a user's disk quota.
+      operationId: Accounts-editquota
+      parameters:
+      - description: 'The account''s new quota.
+
+          * A positive integer that represents the maximum amount of disk space, in megabytes (MB).
+
+          * 0 or unlimited grants the account unlimited disk space.'
+        in: query
+        name: quota
+        required: true
+        schema:
+          example: 500
+          oneOf:
+          - minimum: 0
+            type: integer
+          - enum:
+            - unlimited
+            type: string
+      - description: The cPanel account username.
+        in: query
+        name: user
+        required: true
+        schema:
+          example: user
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: editquota
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is 0. This field may display a success message when a function succeeds.
+                        example: Set quota for user.
+                        type: string
+                      result:
+                        description: '- 1 - Success
+
+                          - 0 - Failed: Check the reason field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Update cPanel account disk quota
+      tags:
+      - Bandwidth and Disk Quotas
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  editquota \\\n  user='user' \\\n  quota='500'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/editquota?api.version=1&user=user&quota=500
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11'
+  /get_disk_usage:
+    get:
+      description: This function lists the disk usage status of the system's user accounts. This also lists information about file system object (inode) usage.
+      operationId: DiskUsage-get_disk_usage
+      parameters:
+      - description: 'Each cPanel & WHM server maintains a cache of users’ disk quota
+
+          usage. This parameter controls the way this function will use
+
+          that cache.
+
+
+          * `on` - Use the quota cache. This is fast, but it may be inaccurate.
+
+          * `off` - Ignore the quota cache. This is slower, but it will be more accurate.'
+        in: query
+        name: cache_mode
+        required: false
+        schema:
+          default: 'on'
+          enum:
+          - 'on'
+          - 'off'
+          example: 'on'
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      accounts:
+                        description: A list of objects containing the disk usage data for all accounts on the server.
+                        items:
+                          properties:
+                            blocks_limit:
+                              description: 'The account''s disk space quota, in kibibytes (KiB).
+
+                                * `null` - The account has unlimited disk space.'
+                              example: null
+                              minimum: 0
+                              type:
+                              - integer
+                              - 'null'
+                            blocks_used:
+                              description: The account's current disk space usage, in kibibytes (KiB).
+                              example: 2632
+                              minimum: 0
+                              type: integer
+                            inodes_limit:
+                              description: 'The account''s inode quota.
+
+                                * `null` - The account has an unlimited number of inodes.'
+                              example: 9999
+                              minimum: 0
+                              type:
+                              - integer
+                              - 'null'
+                            inodes_used:
+                              description: The account's current inode usage.
+                              example: 340
+                              minimum: 0
+                              type: integer
+                            user:
+                              description: The cPanel or Reseller account username.
+                              example: username
+                              type: string
+                          type: object
+                        type: array
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: get_disk_usage
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` - Success.
+
+                          * `0` - Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Return all cPanel accounts disk usage
+      tags:
+      - Bandwidth and Disk Quotas
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  get_disk_usage\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/get_disk_usage?api.version=1
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '80'
+  /limitbw:
+    get:
+      description: This function modifies a cPanel account's bandwidth quota.
+      operationId: Bandwidth-limitbw
+      parameters:
+      - description: The username of a cPanel account on the server.
+        in: query
+        name: user
+        required: true
+        schema:
+          example: username
+          type: string
+      - description: 'The account''s new bandwidth quota, in megabytes (MB).
+
+          * `0` and `unlimited` - Grant the user unlimited bandwidth'
+        in: query
+        name: bwlimit
+        required: false
+        schema:
+          default: unlimited
+          example: 0
+          oneOf:
+          - enum:
+            - unlimited
+            type: string
+          - minimum: 0
+            type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      bwlimits:
+                        description: An array of objects containing account information.
+                        items:
+                          properties:
+                            bwlimit:
+                              description: 'The account''s new bandwidth quota, in megabytes (MB).
+
+                                * `0` - The user has unlimited bandwidth.'
+                              example: 0
+                              minimum: 0
+                              type: integer
+                            bwlimitenable:
+                              description: 'Whether bandwidth limiting is enabled for the account.
+
+                                * `1` - Enabled.
+
+                                * `0` - Disabled.'
+                              enum:
+                              - 0
+                              - 1
+                              example: 0
+                              type: integer
+                            domains:
+                              description: An array of all of the cPanel account's domains.
+                              example:
+                              - example.com
+                              - addondomain.com
+                              - subdomain.example.com
+                              items:
+                                type: string
+                              type: array
+                            human_bwlimit:
+                              description: 'The account''s bandwidth quota, in human-readable format.
+
+                                * `unlimited` - The user has unlimited bandwidth.
+
+                                * A positive integer that represents a maximum monthly bandwidth use, a space, and the string MB.'
+                              example: 500 MB
+                              pattern: ^(unlimited|\d+ MB)$
+                              type: string
+                            human_bwused:
+                              description: 'The account''s current bandwidth usage, in human-readable format.
+
+                                * `none`
+
+                                * A positive integer that represents the amount of bandwidth used, a space, and the string MB.'
+                              example: none
+                              pattern: ^(none|\d+ MB)$
+                              type: string
+                            unlimited:
+                              description: 'Whether the account''s bandwidth quota is unlimited.
+
+                                * `1` - Unlimited.
+
+                                * `0` - Not unlimited.'
+                              enum:
+                              - 0
+                              - 1
+                              example: 1
+                              type: integer
+                          type: object
+                        type: array
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: limitbw
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is 0. This field may display a success message when a function succeeds.
+                        example: Bandwidth Limit for username has been set to unlimited megabytes
+                        type: string
+                      result:
+                        description: '* `1` - Success
+
+                          * `0` - Failed: Check the reason field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Update cPanel account bandwidth quota
+      tags:
+      - Bandwidth and Disk Quotas
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  limitbw \\\n  user='username'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/limitbw?api.version=1&user=username
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11'
+  /quota_enabled:
+    get:
+      description: This function checks if quotas are enabled on at least one of a user's /home directory mounts.
+      operationId: Quota-quota_enabled
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      quota_enabled:
+                        description: 'Whether quotas are enabled.
+
+                          * 1 - Enabled.
+
+                          * 0 - Disabled.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 0
+                        type: integer
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: quota_enabled
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* 1 - Success
+
+                          * 0 - Failed. Check the reason field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Validate cPanel account quotas
+      tags:
+      - Bandwidth and Disk Quotas
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  quota_enabled\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/quota_enabled?api.version=1
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11'
+  /showbw:
+    get:
+      description: This function retrieves account bandwidth information.
+      operationId: Bandwidth-showbw
+      parameters:
+      - description: 'The month to query, in numeric format.
+
+
+          This value defaults to the current month.'
+        in: query
+        name: month
+        required: false
+        schema:
+          example: 12
+          maximum: 12
+          minimum: 1
+          type: integer
+      - description: 'A [Perl Compatible Regular Expression (PCRE)](https://en.wikipedia.org/wiki/Perl_Compatible_Regular_Expressions)
+
+          that filters the results. The system matches the PCRE against the `searchtype`
+
+          parameter''s specified type.
+
+
+          If you do **not** specify a value for **both** the `searchtype` and `search`
+
+          parameters, the function does **not** use the `search` criteria.'
+        in: query
+        name: search
+        required: false
+        schema:
+          example: ownername
+          type: string
+      - description: 'The account information to query.
+
+
+          * `domain` — Match domains against the `search` regular expression.
+
+          * `owner` — Match the WHM user who owns the account against the `search`
+
+          regular expression.
+
+          * `user` — Match usernames against the `search` regular expression.
+
+          * `ip` — Match IP addresses against the `search` regular expression.
+
+          * `package` — Match hosting plans (packages) against the `search` regular
+
+          expression.
+
+
+          If you do **not** specify a value for **both** the `searchtype` and `search`
+
+          parameters, the function does **not** use the `searchtype` value.'
+        in: query
+        name: searchtype
+        required: false
+        schema:
+          enum:
+          - domain
+          - owner
+          - user
+          - ip
+          - package
+          example: owner
+          type: string
+      - description: 'The reseller to query.
+
+
+          If you do **not** specify a value, the function queries **all** users.'
+        in: query
+        name: showres
+        required: false
+        schema:
+          example: reseller_user
+          type: string
+      - description: 'The year to query.
+
+
+          This value defaults to the current year.'
+        in: query
+        name: year
+        required: false
+        schema:
+          example: 2019
+          type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      acct:
+                        description: Bandwidth information for the reseller's accounts.
+                        items:
+                          properties:
+                            bwusage:
+                              description: The bandwidth information for domains on the account.
+                              items:
+                                properties:
+                                  deleted:
+                                    description: 'Whether the account was deleted.
+
+
+                                      * `1` — Deleted.
+
+                                      * `0` — **Not** deleted.'
+                                    enum:
+                                    - 1
+                                    - 0
+                                    example: 0
+                                    type: integer
+                                  domain:
+                                    description: The domain on the account.
+                                    example: example.com
+                                    type: string
+                                  usage:
+                                    description: The domain's bandwidth usage during the queried period, in bytes.
+                                    example: 0
+                                    minimum: 0
+                                    type: integer
+                                type: object
+                              type: array
+                            deleted:
+                              description: 'Whether the account was deleted.
+
+
+                                * `1` — Deleted.
+
+                                * `0` — **Not** deleted.'
+                              enum:
+                              - 1
+                              - 0
+                              example: 0
+                              type: integer
+                            limit:
+                              description: The account's bandwidth limit, in bytes.
+                              example: 0
+                              minimum: 0
+                              type: integer
+                            maindomain:
+                              description: The account's main domain.
+                              example: example.com
+                              type: string
+                            owner:
+                              description: The account's owner.
+                              example: root
+                              type: string
+                            reseller:
+                              description: 'Whether the user is a reseller.
+
+
+                                * `1` — Reseller account.
+
+                                * `0` — **Not** a reseller account.'
+                              enum:
+                              - 1
+                              - 0
+                              example: 0
+                              type: integer
+                            totalbytes:
+                              description: The account's total bandwidth usage during the queried period, in bytes.
+                              example: 352
+                              minimum: 0
+                              type: integer
+                            user:
+                              description: The account username.
+                              example: user
+                              type: string
+                          type: object
+                        type: array
+                      month:
+                        description: The queried month.
+                        example: 12
+                        maximum: 12
+                        minimum: 1
+                        type: integer
+                      reseller:
+                        description: The reseller username or the `root` user.
+                        example: root
+                        type: string
+                      totalused:
+                        description: The total bandwidth usage of the reseller's accounts during the queried period, in bytes.
+                        example: 352
+                        minimum: 0
+                        type: integer
+                      year:
+                        description: The queried year.
+                        example: 2019
+                        type: integer
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: showbw
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 1
+                        - 0
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Return cPanel account bandwidth information
+      tags:
+      - Bandwidth and Disk Quotas
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  showbw\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/showbw?api.version=1
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11'
+components:
+  securitySchemes:
+    BasicAuth:
+      scheme: basic
+      type: http
+externalDocs:
+  url: https://cpanel.net/developers/
+x-tagGroups:
+- name: Account Restoration
+  tags:
+  - Restore Account
+  - Restore Queue Management
+  - Restore Queue Reporting
+- name: Accounts
+  tags:
+  - Account Creation
+  - Account Enhancements
+  - Account Management
+  - Bandwidth and Disk Quotas
+  - Domain Information
+  - Passwords
+  - Styles
+  - Suspensions
+- name: API Development Tools
+  tags:
+  - API Execution
+  - API Statistics
+  - API Token Management
+  - Applications
+  - Session
+- name: Authentication
+  tags:
+  - Authentication Providers
+  - External Authentication
+  - Login URL
+  - SSH Keys and Connections
+  - Two-Factor Authentication
+- name: Backups
+  tags:
+  - Backup Destination
+  - Backup or Restore
+  - Backup Settings
+  - Legacy Migration
+- name: Commerce Integration
+  tags:
+  - Market Integration
+  - Sitejet
+- name: cPanel Market
+  tags:
+  - Product Management
+  - Provider Management
+- name: cPanel Support Tickets
+  tags:
+  - Support Access
+  - Ticket Management
+- name: Customizations
+  tags:
+  - Brand
+  - Customizations
+- name: Databases
+  tags:
+  - Manage MySQL Server
+  - MySQL Databases
+  - PostgreSQL Databases
+  - Remote MySQL Databases
+- name: DNS
+  tags:
+  - DNS Cluster Settings
+  - DNS Security
+  - DNS Zones
+  - Domain Management
+  - Domain Management
+  - Resolvers
+  - Service Records
+- name: Hosting Plans
+  tags:
+  - Feature Access
+  - Feature Lists
+  - Hosting Plan Extensions
+  - Hosting Plans
+- name: InProductSurvey
+  tags:
+  - InProductSurvey
+- name: Integrations
+  tags:
+  - API Authentication
+  - Links
+  - Scripts Hooks
+- name: IP Address Management
+  tags:
+  - IPv4 Address Settings
+  - IPv6 Address Settings
+  - Network Address Translation
+- name: Login Security (cPHulk)
+  tags:
+  - Management
+  - Reporting
+  - Settings
+- name: Logs
+  tags:
+  - Web Log Retention
+- name: Mail
+  tags:
+  - cPanel Account Mail Management
+  - Mail DNS Settings
+  - Mail Server Settings
+  - Spam Management
+  - Spam Protection (Greylisting)
+- name: Monitoring
+  tags:
+  - 360 Monitoring
+- name: NGINX Manager
+  tags:
+  - NGINX Manager
+- name: Resellers
+  tags:
+  - Account Enhancement Limit
+  - Account Limits
+  - Account Permissions
+  - Account Settings
+  - Reseller Account Management
+- name: Security
+  tags:
+  - WHM Access
+- name: Server Administration
+  tags:
+  - Configuration Clusters
+  - Configurations
+  - Connected Applications
+  - Connections
+  - cPanel Analytics
+  - License Management
+  - Notifications
+  - Plugin-Based Features
+  - Security
+  - Server Nodes
+  - Server Profiles
+  - Services
+  - System Information
+  - Updates
+- name: SSL Certificates
+  tags:
+  - Auto-Generated Certificates
+  - cPanel Account Settings
+  - SSL Server Settings
+- name: System Package Management
+  tags:
+  - Install or Uninstall Package
+  - List Package Information
+  - Package Manager Settings
+- name: Transfers
+  tags:
+  - cPanel Account Transfer
+  - Transfer Configuration
+  - Transfer Monitoring
+- name: UserData
+  tags:
+  - UserData
+- name: Web Server Configuration
+  tags:
+  - EasyApache Settings
+  - PHP
+  - PHP-FPM
+- name: Web Server Security (ModSecurity)
+  tags:
+  - Rule Settings
+  - Rule Vendor Settings
+  - Server Settings

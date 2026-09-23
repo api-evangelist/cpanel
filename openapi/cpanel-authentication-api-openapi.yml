@@ -1,0 +1,3296 @@
+openapi: 3.2.0
+info:
+  contact:
+    email: cs@cpanel.net
+    name: WebPros International, LLC
+    url: https://cpanel.net/support/
+  description: WHM API.
+  license:
+    name: cPanel License
+    url: https://cpanel.net/legal-notices/
+  termsOfService: https://cpanel.net/legal-notices/
+  title: WHM Authentication API
+  version: 11.137.9999.106
+  x-api-evangelist-provenance: 'Harvested verbatim from cPanel''s developer portal on 2026-09-05 via the MCP tool get-full-api-description at https://api.docs.cpanel.net/mcp. ONE mechanical change was made before storage: example values containing PEM private-key or certificate blocks, and AWS-access-key-shaped example strings, were replaced with REDACTED_* placeholders so the file can be stored in a public git repository without tripping secret scanning. No path, operation, parameter, schema or description was altered, added or removed.'
+servers:
+- description: A server running WHM.
+  url: https://{host}:{port}/json-api
+  variables:
+    host:
+      default: whm-server.tld
+      description: The hostname of a server running WHM.
+    port:
+      default: '2087'
+      description: The WHM port.
+security:
+- BasicAuth: []
+tags:
+- description: The Authentication module for WHM API 1.
+  name: Authentication
+paths:
+  /api_token_create:
+    get:
+      description: 'This function creates an API token. You can use API tokens instead of a password
+
+        or access hash key to execute WHM API 1 functions over HTTPS. For more information
+
+        about API tokens, read our
+
+        Manage API Tokens in WHM
+
+        documentation.
+
+
+        **Important:**
+
+
+        You **must** call this function over an SSL connection.'
+      operationId: Tokens-api_token_create
+      parameters:
+      - description: 'The API token''s name.
+
+
+          **Note:**
+
+
+          * An API token name''s maximum length is 50 characters, and the name may **only**
+
+          contain alphanumeric characters, dashes (`-`), and underscores (`_`).
+
+          * You **must** assign a name that does **not** already exist to the API token.'
+        in: query
+        name: token_name
+        required: true
+        schema:
+          example: example
+          type: string
+      - description: 'The privileges to assign to the token. If you do not use this parameter, the system
+
+          assigns **all** of your privileges to the token.
+
+
+          **Note:**
+
+
+          * You can **only** assign privileges that you possess to the API token.
+
+          * To assign multiple privileges to the token, increment the parameter name. For
+
+          example: `acl-0`, `acl-1`, `acl-2`.'
+        examples:
+          multiple:
+            summary: Assign multiple privileges.
+            value: acl-0=create-acct acl-1=list-accts acl-2=kill-acct
+          single:
+            summary: Assign a single privilege.
+            value: all
+        in: query
+        name: acl
+        required: false
+        schema:
+          type: string
+      - description: "The API token's expiration time. If you do not use this parameter, the\nAPI token will not expire.\n\n* A date, in [Unix Epoch format](http://en.wikipedia.org/wiki/Unix_time).\n* `0` — The API token will **not** expire.\n\n**Important:**\n\n When an API token expires, the system **does** not delete it. You **must**\n manually delete expired API tokens."
+        in: query
+        name: expires_at
+        required: false
+        schema:
+          default: 0
+          example: 1609372800
+          type: integer
+      - description: 'One or more optional remote IP or CIDR IP ranges this token may be used from. If you do not use this parameter, the system
+
+          does not limit which IPs can use this token.
+
+
+          **Note:**
+
+
+          * To assign multiple whitelisted IPs to the token, increment the parameter name. For
+
+          example: `whitelist_ip-0`, `whitelist_ip-1`, `whitelist_ip-2`.'
+        examples:
+          multiple:
+            summary: Assign multiple IP or CIDR ranges.
+            value: whitelist_ip-0=192.0.2.1 whitelist_ip-1=192.0.2.5 whitelist_ip-2=192.0.2.8/29 whitelist-ip-3=fc00:abcd::f whitelist-ip-4=2620:0:28a4::/48
+          single:
+            summary: Assign a single IP or CIDR range.
+            value: 192.0.2.8/29
+        in: query
+        name: whitelist_ip
+        required: false
+        schema:
+          anyOf:
+          - format: ipv4
+            type: string
+          - format: ipv6
+            type: string
+          - format: cidr
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      acls:
+                        description: An array of privileges that the token possesses.
+                        items:
+                          example: kill-acct
+                          type: string
+                        type: array
+                      create_time:
+                        description: The API token's creation time, in Unix time format.
+                        example: 1483625276
+                        format: unix_timestamp
+                        type: integer
+                      expires_at:
+                        description: 'The API token''s expiration time.
+
+
+                          * A valid timestamp, in Unix time format.
+
+                          * A `null` value.'
+                        example: 1609372800
+                        format: unix_timestamp
+                        type:
+                        - integer
+                        - 'null'
+                      name:
+                        description: 'The new API token''s name.
+
+
+                          **Note:**
+
+
+                          Use this value to revoke an API token with WHM API 1''s
+
+                          `api_token_revoke` function.'
+                        example: example
+                        type: string
+                      token:
+                        description: 'The new API token to use to authenticate to WHM.
+
+
+                          **Warning:**
+
+
+                          Make **certain** that you save your API token in a safe location.
+
+                          You **cannot** access the token again after you use this function.'
+                        example: UWU28DCA23NKY76CN17MDPKM3O7EFQY8
+                        type: string
+                      whitelist_ips:
+                        description: List of remote IP or CIDR IP ranges this token may be used from.
+                        example:
+                        - 1.1.1.1
+                        - 1.1.1.2
+                        - 1.1.1.8/29
+                        - fc00:abcd:0000:0000:0000:0000:0000:000f
+                        - 2620:0000:28a4:0000:0000:0000:0000:0000/48
+                        items:
+                          anyOf:
+                          - format: ipv4
+                            type: string
+                          - format: ipv6
+                            type: string
+                          - format: cidr
+                            type: string
+                        type:
+                        - array
+                        - 'null'
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: api_token_create
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Create WHM API token
+      tags:
+      - Authentication
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  api_token_create \\\n  token_name='example'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/api_token_create?api.version=1&token_name=example
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '64'
+  /api_token_get_details:
+    get:
+      description: This function looks up an API token’s details based on the token itself.
+      operationId: Tokens-api_token_get_details
+      parameters:
+      - description: The API token.
+        in: query
+        name: token
+        required: true
+        schema:
+          example: GVJWD78FF12NMBFKYKPS9BJ483C0XSQH
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                anyOf:
+                - properties:
+                    data:
+                      allOf:
+                      - description: The API token’s details. Only present if the system recognizes the given `token`.
+                      - $ref: '#/components/schemas/TokenDetails'
+                    metadata:
+                      $ref: '#/components/schemas/Metadata'
+                  title: Token Recognized
+                  type: object
+                - properties:
+                    metadata:
+                      $ref: '#/components/schemas/Metadata'
+                  title: Token Unrecognized
+                  type: object
+          description: HTTP Request was successful.
+      summary: Look up API token details
+      tags:
+      - Authentication
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  api_token_get_details \\\n  token=GVJWD78FF12NMBFKYKPS9BJ483C0XSQH\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/api_token_get_details?api.version=1&token=GVJWD78FF12NMBFKYKPS9BJ483C0XSQH
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: 98
+  /api_token_list:
+    get:
+      description: This function lists a WHM account's API tokens.
+      operationId: Tokens-api_token_list
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      tokens:
+                        additionalProperties:
+                          description: An object of API token details.
+                          properties:
+                            acls:
+                              additionalProperties:
+                                description: 'Whether the Access Control List (ACL) is enabled.
+
+                                  * `1` - The ACL is enabled.
+
+                                  * `0` - The ACL is disabled.
+
+
+                                  **Note**
+
+
+                                  The property name should be an [ACL](https://go.cpanel.net/ACLReferenceChart).'
+                                enum:
+                                - 0
+                                - 1
+                                example: 1
+                                type: integer
+                              description: An object of privileges available to the user.
+                            create_time:
+                              description: The API token's creation time.
+                              example: 1483625276
+                              format: unix_timestamp
+                              type: integer
+                            expires_at:
+                              description: The API token's expiration time. If the API token does not expire, the value is `null`.
+                              example: 1609372800
+                              format: unix_timestamp
+                              type:
+                              - integer
+                              - 'null'
+                            name:
+                              description: The API token's name.
+                              example: my-token-name
+                              type: string
+                            whitelist_ips:
+                              description: List of remote IP or CIDR IP ranges this token may be used from.
+                              example:
+                              - 192.0.2.1
+                              - 192.0.2.2
+                              - 192.0.2.8/29
+                              - fc00:abcd:0000:0000:0000:0000:0000:000f
+                              - 2620:0000:28a4:0000:0000:0000:0000:0000/48
+                              items:
+                                anyOf:
+                                - format: ipv4
+                                  type: string
+                                - format: ipv6
+                                  type: string
+                                - format: cidr
+                                  type: string
+                              type:
+                              - array
+                              - 'null'
+                        description: An object that contains WHM account's API token names.
+                        example:
+                          my-controller-token:
+                            acls:
+                              create-acct: 0
+                              edit-account: 0
+                              limit-bandwidth: 1
+                              list-accts: 1
+                              suspend-acct: 1
+                              upgrade-account: 0
+                            create_time: 1483625276
+                            expires_at: 1609372800
+                            name: my-controller-token
+                            whitelist_ips:
+                            - 192.0.2.1
+                            - 192.0.2.2
+                            - 192.0.2.8/29
+                            - fc00:abcd:0000:0000:0000:0000:0000:000f
+                            - 2620:0000:28a4:0000:0000:0000:0000:0000/48
+                          my-read-only-token:
+                            acls:
+                              create-acct: 0
+                              edit-account: 0
+                              limit-bandwidth: 0
+                              list-accts: 1
+                              suspend-acct: 0
+                              upgrade-account: 0
+                            create_time: 1490882281
+                            expires_at: null
+                            name: my-read-only-token
+                            whitelist_ips: null
+                        type: object
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: api_token_list
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is 0. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` - Success
+
+                          * `0` - Failed: Check the reason field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Return WHM API tokens
+      tags:
+      - Authentication
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  api_token_list\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/api_token_list?api.version=1
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '64'
+  /api_token_revoke:
+    get:
+      description: This function revokes an API token from the WHM account.
+      operationId: Tokens-api_token_revoke
+      parameters:
+      - description: 'The API token''s name.
+
+
+          **Note:**
+
+
+          To revoke multiple API tokens, increment this parameter''s name. For example: `token_name-1`, `token_name-2`, and `token_name-3`.'
+        examples:
+          multiple:
+            summary: Revoke multiple API tokens.
+            value: token_name-1=subway&token_name-2=job&token_name-3=jmkMRXBnhp20iz
+          single:
+            summary: Revoke a single API token.
+            value: subway
+        in: query
+        name: token_name
+        required: true
+        schema:
+          example: subway
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: api_token_revoke
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is 0. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '- 1 - Success
+
+                          - 0 - Failed: Check the reason field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Disable WHM API token
+      tags:
+      - Authentication
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  api_token_revoke \\\n  token_name='subway'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/api_token_revoke?api.version=1&token_name=subway
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '64'
+  /api_token_update:
+    get:
+      description: This function updates an API token's settings.
+      operationId: Tokens-api_token_update
+      parameters:
+      - description: The API token's name.
+        in: query
+        name: token_name
+        required: true
+        schema:
+          example: token
+          type: string
+      - description: 'The new privileges to assign to the token. If you do **not** use this parameter,
+
+          the system will assign all of your privileges to the token.
+
+
+          For a list of Access Control List (ACL) privileges, read our
+
+          [Edit Reseller Nameservers and Privileges](https://docs.cpanel.net/whm/resellers/edit-reseller-nameservers-and-privileges/#feature-limits-acl-lists)
+
+          documentation.
+
+
+          **Note:**
+
+
+          * You can **only** assign privileges that you possess to the API token.
+
+
+          * The function replaces **all** current privileges with the privileges that you pass
+
+          in this parameter.
+
+
+          * To assign multiple privileges to the token, increment the parameter name.
+
+          For example, `acl-1`, `acl-2`, `acl-3`.'
+        examples:
+          multiple:
+            summary: Assign multiple privilges.
+            value: acl-0=create-acct acl-1=list-accts acl-2=kill-acct
+          single:
+            summary: Assign a single privilege.
+            value: all
+        in: query
+        name: acl
+        required: false
+        schema:
+          type: string
+      - description: 'The API token''s expiration time. If you do not use this parameter,
+
+          the API token will **not** expire.
+
+
+          * A date, in [Unix Epoch format](http://en.wikipedia.org/wiki/Unix_time).
+
+          * `0` — The API token will **not** expire.
+
+
+          **Important:**
+
+
+          When an API token expires, the system does **not** delete it. You **must**
+
+          manually delete expired API tokens.'
+        in: query
+        name: expires_at
+        required: false
+        schema:
+          default: 0
+          example: 1609372800
+          format: unix_timestamp
+          type: integer
+      - description: 'The API token''s new name. If you do not use this parameter, the API token''s name
+
+          remains the same.
+
+
+          **Note:**
+
+
+          * An API token name''s maximum length is 50 characters, and the name may **only**
+
+          contain alphanumeric characters, dashes (`-`), and underscores (`_`).
+
+
+          * You **must** assign a name that does **not** already exist to the API token.'
+        in: query
+        name: new_name
+        required: false
+        schema:
+          example: example
+          maxLength: 50
+          type: string
+      - description: 'The new remote IP or CIDR IP ranges to assign to this token. If you do not use this parameter, the system
+
+          does not limit which IPs can use this token.
+
+
+          **Note:**
+
+
+          * The function replaces **all** current whitelisted IPs with the IPs you pass
+
+          in this parameter.
+
+
+          * To assign multiple whitelisted IPs to the token, increment the parameter name. For
+
+          example: `whitelist_ip-0`, `whitelist_ip-1`, `whitelist_ip-2`.
+
+
+          * If a token has whitelisted IPs set, they can be cleared by passing `whitelist_ip=any` as a parameter.
+
+          This will allow any IP to make API calls using that token.'
+        examples:
+          clear:
+            summary: Clear a token's whitelisted IPs list.
+            value: whitelist_ip=any
+          multiple:
+            summary: Assign multiple IPs or CIDR ranges.
+            value: whitelist_ip-0=192.0.2.1 whitelist_ip-1=192.0.2.5 whitelist_ip-2=192.0.2.8/29 whitelist-ip-3=fc00:abcd::f whitelist-ip-4=2620:0:28a4::/48
+          single:
+            summary: Assign a single IP or CIDR range.
+            value: whitelist_ip=192.0.2.8/29
+        in: query
+        name: whitelist_ip
+        required: false
+        schema:
+          anyOf:
+          - format: ipv4
+            type: string
+          - format: ipv6
+            type: string
+          - format: cidr
+            type: string
+          - enum:
+            - any
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      acls:
+                        description: A list of privileges assigned to the token.
+                        example:
+                        - create-acct
+                        - kill-acct
+                        - list-accts
+                        items:
+                          type: string
+                        type: array
+                      create_time:
+                        description: The API token's creation time.
+                        example: 1483625276
+                        format: unix_timestamp
+                        type: integer
+                      expires_at:
+                        description: 'The API token''s expiration time.
+
+
+                          **Note:**
+
+
+                          A `null` value means that the API token does **not** expire.'
+                        example: 1609372800
+                        format: unix_timestamp
+                        type:
+                        - integer
+                        - 'null'
+                      name:
+                        description: 'The API token''s name.
+
+
+                          **Note:**
+
+
+                          * This function returns the API token''s new name when you use
+
+                          the `new_name` parameter.
+
+
+                          * Use this value to revoke an API token with WHM API 1''s `api_token_revoke`
+
+                          function.'
+                        example: example
+                        type: string
+                      whitelist_ips:
+                        description: List of remote IP or CIDR IP ranges this token may be used from.
+                        example:
+                        - 192.0.2.1
+                        - 192.0.2.2
+                        - 192.0.2.8/29
+                        - fc00:abcd:0000:0000:0000:0000:0000:000f
+                        - 2620:0000:28a4:0000:0000:0000:0000:0000/48
+                        items:
+                          anyOf:
+                          - format: ipv4
+                            type: string
+                          - format: ipv6
+                            type: string
+                          - format: cidr
+                            type: string
+                        type:
+                        - array
+                        - 'null'
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: api_token_update
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` — Success.
+
+                          * `0` – Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 1
+                        - 0
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Update WHM API token's settings
+      tags:
+      - Authentication
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  api_token_update \\\n  token_name='token'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/api_token_update?api.version=1&token_name=token
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '68'
+  /disable_authentication_provider:
+    get:
+      description: This function disables a external authentication identity provider for a specified service.
+      operationId: Authentication-disable_authentication_provider
+      parameters:
+      - description: A valid identity provider's identification key.
+        in: query
+        name: provider_id
+        required: true
+        schema:
+          example: cpanelid
+          type: string
+      - description: 'The cPanel & WHM service''s name:
+
+
+          * `cpaneld`
+
+          * `webmaild`
+
+          * `whostmgrd`'
+        in: query
+        name: service_name
+        required: true
+        schema:
+          enum:
+          - cpaneld
+          - webmaild
+          - whostmgrd
+          example: cpaneld
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: disable_authentication_provider
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Disable identity provider
+      tags:
+      - Authentication
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  disable_authentication_provider \\\n  service_name='cpaneld' \\\n  provider_id='cpanelid'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/disable_authentication_provider?api.version=1&service_name=cpaneld&provider_id=cpanelid
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '54'
+  /disable_failing_authentication_providers:
+    get:
+      description: This function disables any enabled identity provider modules that fail to load.
+      operationId: Authentication-disable_failing_authentication_providers
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      payload:
+                        description: An array of objects containing information about the external authentication identity provider module failures.
+                        items:
+                          properties:
+                            disabled_services:
+                              description: An array of the cPanel services for which the external authentication identity provider was previously disabled.
+                              example:
+                              - cpaneld
+                              - webmaild
+                              items:
+                                type: string
+                              type: array
+                            failures_to_disable:
+                              description: An array of objects containing the cPanel services for which the system fails to disable the module.
+                              items:
+                                properties:
+                                  failure:
+                                    description: A description of the failure to disable the identity provider module for that module.
+                                    example: An informative failure message.
+                                    type: string
+                                  service_name:
+                                    description: A cPanel service for which the system failed to disable the external authentication identity provider.
+                                    example: whostmgrd
+                                    type: string
+                                type: object
+                              type: array
+                            provider_failure:
+                              description: A description of the failure.
+                              example: '(ERR mcddbv) The system failed to load the module “Cpanel::Security::Authn::Provider::Facebook“ because of an error: Can''t locate Cpanel/Security/Authn/Provider/Facebook.pm in @INC (@INC contains: /usr/local/cpanel /usr/local/cpanel/3rdparty/perl/514/lib/perl5/cpanel_lib/i386-linux-64int /usr/local/cpanel/3rdparty/perl/514/lib/perl5/cpanel_lib /usr/local/cpanel/3rdparty/perl/514/lib/perl5/5.14.4/i386-linux-64int /usr/local/cpanel/3rdparty/perl/514/lib/perl5/5.14.4 /opt/cpanel/perl5/514/site_lib/i386-linux-64int /opt/cpanel/perl5/514/site_lib /var/cpanel/perl) at (eval 143) line 1.
+
+                                BEGIN failed--compilation aborted at (eval 143) line 1.
+
+                                '
+                              type: string
+                            provider_name:
+                              description: The external authentication identity provider to disable.
+                              example: facebook
+                              type: string
+                            provider_namespace:
+                              description: The external authentication identity provider module's namespace.
+                              example: Cpanel::Security::Authn::Provider::Facebook
+                              type: string
+                          type: object
+                        type: array
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: disable_failing_authentication_providers
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 1
+                        - 0
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Disable identity provider modules that fail to load
+      tags:
+      - Authentication
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  disable_failing_authentication_providers\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/disable_failing_authentication_providers?api.version=1
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '54'
+  /enable_authentication_provider:
+    get:
+      description: This function enables an external authentication identity provider for a specified service.
+      operationId: Authentication-enable_authentication_provider
+      parameters:
+      - description: A valid identity provider's identification key.
+        in: query
+        name: provider_id
+        required: true
+        schema:
+          example: cpanelid
+          type: string
+      - description: 'The cPanel & WHM service''s name:
+
+
+          * `cpaneld`
+
+          * `webmaild`
+
+          * `whostmgrd`'
+        in: query
+        name: service_name
+        required: true
+        schema:
+          enum:
+          - cpaneld
+          - webmaild
+          - whostmgrd
+          example: cpaneld
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: enable_authentication_provider
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Enable identity provider
+      tags:
+      - Authentication
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  enable_authentication_provider \\\n  service_name='cpaneld' \\\n  provider_id='cpanelid'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/enable_authentication_provider?api.version=1&service_name=cpaneld&provider_id=cpanelid
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '54'
+  /get_available_authentication_providers:
+    get:
+      description: This function lists available external authentication identity providers for all services.
+      operationId: Authentication-get_available_authentication_providers
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      providers:
+                        description: An array of available identity provider names and settings. Each hash in the array includes the cpaneld_link , whostmgrd_link , webmaild_link , icon , icon_type , provider_name , display_name , documentation_url , color , configured , id , label , textcolor , whostmgr_enabled , cpaneld_enabled , and webmaild_enabled returns.
+                        items:
+                          properties:
+                            color:
+                              description: The background color of the button on the cPanel interface. A valid RGB hexadecimal color value.
+                              example: dd4b39
+                              type: string
+                            configured:
+                              description: 'Whether the identity provider is configured on the server.
+
+                                - 1  The provider is configured.
+
+                                - 0  The provider is not configured.'
+                              enum:
+                              - 0
+                              - 1
+                              example: 1
+                              type: integer
+                            cpaneld_enabled:
+                              description: 'Whether the identity provider is enabled for the cpaneld service.
+
+                                - 1  The provider is enabled for the cpaneld service..
+
+                                - 0  The provider is not enabled for the cpaneld service.'
+                              enum:
+                              - 0
+                              - 1
+                              example: 1
+                              type: integer
+                            cpaneld_link:
+                              description: link to the identity provider's configuration for the cpaneld service on the system. A valid URL .
+                              example: https://hostname.example.com:2083/openid_connect/cpanelid
+                              type: string
+                            display_name:
+                              description: The display name of the identity provider. A valid string.
+                              example: cPanel
+                              type: string
+                            documentation_url:
+                              description: The URL to the identity provider's documentation. A valid URL.
+                              example: https://go.cpanel.net/cpanelidmanage
+                              type: string
+                            icon:
+                              description: The icon file to display in the button on the cPanel login interface. A valid Base64-encoded, JPG or PNG-formatted image file.
+                              example: Click to view...iVBORw0KGgoAAAANSUhEUgAAACEAAAAhCAYAAABX5MJvAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAV1JREFUeNrsVtGNwjAMJegGYIRucBmhtwEjdAMyQjYoG2SEG6HcBGUDugFskHOQg1zTlFaN\/\/KkqMh2yYvt53S3KygomIZaE+y9P8BDJ9xXpdSDxT9jwX7dxDJsDMvCuvl33GF1sBwS5O8GX7eVgCabGyRkGJF25v0sJHrcyDH7iMhWEl9zWSD1\/xs1klJn8J\/gZ4WxNdgu8KyiDXGIfmJ7LO6R8CI5rJnwO+Kv0Wb9Z7xlZr+wMt8f\/ANmyCoCMF3CUmP8rOmHip1AM\/8tdbLcjfnL5NigYmIp+ilp5iYRJNkmajtLIBuJiUZ1S+aDKGDjI8tGk+N\/9yuy0ODcGIjL8UEmcXKLDelRDQ5tHcuIkSLQE1WYhIRfMRIEmiV1Z7NES5Rh9nIisRGVWGOyyyflC5fSkDsTmk1KnVBMbForqQw+IVtUCP3KEpdojffHnRGKcq3LZ3pBgST+BRgANXt+WPKE7tYAAAAASUVORK5CYII=
+                              type: string
+                            icon_type:
+                              description: The icon file's MIME type. A valid image format's MIME type.
+                              example: image/svg+xml
+                              type: string
+                            id:
+                              description: The ID of the identity provider. A valid string.
+                              example: cpanelid
+                              type: string
+                            label:
+                              description: The text label that will appear on the cPanel login interface. A valid string.
+                              example: Log in with a cPanelID Account
+                              type: string
+                            provider_name:
+                              description: The name of the identity provider. A valid string.
+                              example: cpanel
+                              type: string
+                            textcolor:
+                              description: The color of the text label on the cPanel login interface. A valid RGB hexadecimal color value.
+                              example: FFFFFF
+                              type: string
+                            webmaild_enabled:
+                              description: 'Whether the identity provider is enabled for the webmaild service.
+
+                                - 1  The provider is enabled for the webmaild service.
+
+                                - 0  The provider is not enabled for the webmaild service.'
+                              enum:
+                              - 0
+                              - 1
+                              example: 1
+                              type: integer
+                            webmaild_link:
+                              description: link to the identity provider's configuration for the webmaild service on the system. A valid URL .
+                              example: https://hostname.example.com:2096/openid_connect/cpanelid
+                              type: string
+                            whostmgr_enabled:
+                              description: 'Whether the identity provider is enabled for the whostmgr service.
+
+                                - 1  The provider is enabled for the whostmgr service.
+
+                                - 0  The provider is not enabled for the whostmgr service.'
+                              enum:
+                              - 0
+                              - 1
+                              example: 1
+                              type: integer
+                            whostmgrd_link:
+                              description: link to the identity provider's configuration for the whostmgrd service on the system. A valid URL.
+                              example: https://hostname.example.com:2087/openid_connect/cpanelid
+                              type: string
+                          type: object
+                        type: array
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: get_available_authentication_providers
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is 0. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` - Success
+
+                          * `0` - Failed: Check the reason field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Return available identity providers
+      tags:
+      - Authentication
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  get_available_authentication_providers\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/get_available_authentication_providers?api.version=1
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '54'
+  /get_login_url:
+    get:
+      description: 'This function retrieves the login URL for the cPanel Store or a
+
+        cPanel Market provider.'
+      operationId: Market-get_login_url
+      parameters:
+      - description: The cPanel Store or cPanel Market provider's name.
+        in: query
+        name: provider
+        required: true
+        schema:
+          example: cPStore
+          type: string
+      - description: 'The location to which the cPanel Store or cPanel Market provider
+
+          redirects the user''s browser after they log in.'
+        in: query
+        name: url_after_login
+        required: true
+        schema:
+          example: http://hostname.example.com/redirectionlocation.cgi?state
+          format: url
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      payload:
+                        description: The URL to which to redirect the browser after login.
+                        example: https://account.cpanel.net/oauth2/auth/login?client_id=d5eff4a09e29d5b20752674c0ab2c799c428eb23df4db2df10a5c9d96c37472c76013a41e9a0c714e852965ceaed2e8e05e2f738bc27ee562cfb683fbfc75a01&email=&redirect_uri=http%3A%2F%2Fhostname.example.com%2Fredirectionlocation.cgi%3Fstate&response_type=token
+                        format: url
+                        type: string
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: get_login_url
+                        type: string
+                      reason:
+                        description: 'The reason the API function failed when the `metadata.result`
+
+                          field is `0`. This field may display a success message when
+
+                          a function succeeds.'
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` - Success.
+
+                          * `0` - Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Return cPanel Store or cPanel Market login URL
+      tags:
+      - Authentication
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  get_login_url \\\n  provider='cPStore' \\\n  url_after_login='http://hostname.example.com/redirectionlocation.cgi?state'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/get_login_url?api.version=1&provider=cPStore&url_after_login=http%3a%2f%2fhostname.example.com%2fredirectionlocation.cgi%3fstate
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '62'
+  /get_provider_client_configurations:
+    get:
+      description: This function retrieves the configuration details for the client of an external authentication identity provider.
+      operationId: Authentication-get_provider_client_configurations
+      parameters:
+      - description: The identity provider's key.
+        in: query
+        name: provider_id
+        required: true
+        schema:
+          example: cpanelid
+          type: string
+      - description: 'The cPanel & WHM service''s name.
+
+          * `cpaneld` — The cPanel daemon.
+
+          * `whostmgrd` — The WHM daemon.
+
+          * `webmaild` — The Webmail daemon.'
+        in: query
+        name: service_name
+        required: true
+        schema:
+          enum:
+          - cpaneld
+          - whostmgrd
+          - webmaild
+          example: cpaneld
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      client_configurations:
+                        description: An object that contains the client configuration information.
+                        properties:
+                          client_id:
+                            description: The client ID for the identity provider.
+                            example: '1234567890'
+                            type: string
+                          client_secret:
+                            description: The secret for the client ID.
+                            example: victoria
+                            type: string
+                          redirect_uris:
+                            description: The redirection URIs for each interface that the identity provider uses.
+                            example:
+                            - https://hostname.example.com:2083/openid_connect_callback/cpanelid
+                            - https://hostname.example.com:2087/openid_connect_callback/cpanelid
+                            - https://hostname.example.com:2096/openid_connect_callback/cpanelid
+                            items:
+                              format: url
+                              type: string
+                            type: array
+                        type: object
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: get_provider_client_configurations
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` - Success.
+
+                          * `0` - Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Return identity provider client configuration
+      tags:
+      - Authentication
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  get_provider_client_configurations \\\n  service_name='cpaneld' \\\n  provider_id='cpanelid'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/get_provider_client_configurations?api.version=1&service_name=cpaneld&provider_id=cpanelid
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '54'
+  /get_provider_configuration_fields:
+    get:
+      description: This function retrieves the configuration fields for a external authentication identity provider.
+      operationId: Authentication-get_provider_configuration_fields
+      parameters:
+      - description: The identity provider's key.
+        in: query
+        name: provider_id
+        required: true
+        schema:
+          example: cpanelid
+          type: string
+      - description: 'The cPanel & WHM service''s name.
+
+
+          * `cpaneld`
+
+          * `whostmgrd`
+
+          * `webmaild`'
+        in: query
+        name: service_name
+        required: true
+        schema:
+          enum:
+          - cpaneld
+          - whostmgrd
+          - webmaild
+          example: cpaneld
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      configuration_fields:
+                        description: An array of objects containing the configuration information for each field.
+                        example:
+                        - description: The Secret of the Client
+                          display_order: 1
+                          field_id: client_secret
+                          label: Client Secret
+                          value: null
+                        - description: The ID of the Client.
+                          display_order: 0
+                          field_id: client_id
+                          label: Client ID
+                          value: null
+                        items:
+                          properties:
+                            description:
+                              description: The description of the configuration field.
+                              type: string
+                            display_order:
+                              description: The display order of the configuration field.
+                              minimum: 0
+                              type: integer
+                            field_id:
+                              description: The name of the configuration field.
+                              type: string
+                            label:
+                              description: The label of the configuration field.
+                              type: string
+                            value:
+                              description: The value of the configuration field, if available.
+                              type:
+                              - string
+                              - 'null'
+                          type: object
+                        type: array
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: get_provider_configuration_fields
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 1
+                        - 0
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Return identity provider configuration fields
+      tags:
+      - Authentication
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  get_provider_configuration_fields \\\n  service_name='cpaneld' \\\n  provider_id='cpanelid'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/get_provider_configuration_fields?api.version=1&service_name=cpaneld&provider_id=cpanelid
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '54'
+  /get_provider_display_configurations:
+    get:
+      description: This function retrieves the display configuration for the login button of an external authentication identity provider.
+      operationId: Authentication-get_provider_display_configurations
+      parameters:
+      - description: The identity provider's key.
+        in: query
+        name: provider_id
+        required: true
+        schema:
+          example: google
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      configurations:
+                        description: An array of objects containing information about each service's external authentication display information.
+                        example:
+                        - color: dd4b39
+                          display_name: Google
+                          documentation_url: https://developers.google.com/identity/protocols/OpenIDConnect
+                          icon: PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMiIgaGVpZ2h0PSIxNCIgdmlld0JveD0iMCAwIDIyIDE0Ij48ZyBmaWxsPSIjZmZmIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxwYXRoIGQ9Ik03IDZ2Mi40aDMuOTdjLS4xNiAxLjAzLTEuMiAzLjAyLTMuOTcgMy4wMi0yLjM5IDAtNC4zNC0xLjk4LTQuMzQtNC40MlM0LjYxIDIuNTggNyAyLjU4YzEuMzYgMCAyLjI3LjU4IDIuNzkgMS4wOGwxLjktMS44M0MxMC40Ny42OSA4Ljg5IDAgNyAwIDMuMTMgMCAwIDMuMTMgMCA3czMuMTMgNyA3IDdjNC4wNCAwIDYuNzItMi44NCA2LjcyLTYuODQgMC0uNDYtLjA1LS44MS0uMTEtMS4xNkg3ek0yMiA2aC0yVjRoLTJ2MmgtMnYyaDJ2MmgyVjhoMiIvPjwvZz48L3N2Zz4=
+                          icon_type: image/svg+xml
+                          label: Log in via Google
+                          link: /openid_connect/google
+                          provider_name: google
+                          service: cpaneld
+                          textcolor: FFFFFF
+                        - color: dd4b39
+                          display_name: Google
+                          documentation_url: https://developers.google.com/identity/protocols/OpenIDConnect
+                          icon: PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMiIgaGVpZ2h0PSIxNCIgdmlld0JveD0iMCAwIDIyIDE0Ij48ZyBmaWxsPSIjZmZmIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxwYXRoIGQ9Ik03IDZ2Mi40aDMuOTdjLS4xNiAxLjAzLTEuMiAzLjAyLTMuOTcgMy4wMi0yLjM5IDAtNC4zNC0xLjk4LTQuMzQtNC40MlM0LjYxIDIuNTggNyAyLjU4YzEuMzYgMCAyLjI3LjU4IDIuNzkgMS4wOGwxLjktMS44M0MxMC40Ny42OSA4Ljg5IDAgNyAwIDMuMTMgMCAwIDMuMTMgMCA3czMuMTMgNyA3IDdjNC4wNCAwIDYuNzItMi44NCA2LjcyLTYuODQgMC0uNDYtLjA1LS44MS0uMTEtMS4xNkg3ek0yMiA2aC0yVjRoLTJ2MmgtMnYyaDJ2MmgyVjhoMiIvPjwvZz48L3N2Zz4=
+                          icon_type: image/svg+xml
+                          label: Log in via Google
+                          link: /openid_connect/google
+                          provider_name: google
+                          service: webmaild
+                          textcolor: FFFFFF
+                        - color: dd4b39
+                          display_name: Google
+                          documentation_url: https://developers.google.com/identity/protocols/OpenIDConnect
+                          icon: PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMiIgaGVpZ2h0PSIxNCIgdmlld0JveD0iMCAwIDIyIDE0Ij48ZyBmaWxsPSIjZmZmIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxwYXRoIGQ9Ik03IDZ2Mi40aDMuOTdjLS4xNiAxLjAzLTEuMiAzLjAyLTMuOTcgMy4wMi0yLjM5IDAtNC4zNC0xLjk4LTQuMzQtNC40MlM0LjYxIDIuNTggNyAyLjU4YzEuMzYgMCAyLjI3LjU4IDIuNzkgMS4wOGwxLjktMS44M0MxMC40Ny42OSA4Ljg5IDAgNyAwIDMuMTMgMCAwIDMuMTMgMCA3czMuMTMgNyA3IDdjNC4wNCAwIDYuNzItMi44NCA2LjcyLTYuODQgMC0uNDYtLjA1LS44MS0uMTEtMS4xNkg3ek0yMiA2aC0yVjRoLTJ2MmgtMnYyaDJ2MmgyVjhoMiIvPjwvZz48L3N2Zz4=
+                          icon_type: image/svg+xml
+                          label: Log in via Google
+                          link: /openid_connect/google
+                          provider_name: google
+                          service: whostmgrd
+                          textcolor: FFFFFF
+                        items:
+                          properties:
+                            color:
+                              description: The background color of the button in the cPanel interface.
+                              format: RGB
+                              type: string
+                            display_name:
+                              description: The display name of the identity provider.
+                              type: string
+                            documentation_url:
+                              description: The URL to the identity provider's documentation.
+                              format: url
+                              type: string
+                            icon:
+                              description: The icon file in the button that the cPanel login interface displays.
+                              format: byte
+                              type: string
+                            icon_type:
+                              description: The icon file's MIME type.
+                              type: string
+                            label:
+                              description: The text label in the button that the cPanel login interface displays.
+                              type: string
+                            link:
+                              description: A reference URL to the identity provider's configuration for the system.
+                              type: string
+                            provider_name:
+                              description: The name of the identity provider.
+                              type: string
+                            service:
+                              description: 'The service''s name.
+
+
+                                * `cpaneld`
+
+                                * `whostmgrd`
+
+                                * `webmaild`'
+                              enum:
+                              - cpaneld
+                              - whostmgrd
+                              - webmaild
+                              type: string
+                            textcolor:
+                              description: The color of the text label in the button that the cPanel login interface displays.
+                              format: RGB
+                              type: string
+                          type: object
+                        type: array
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: get_provider_display_configurations
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 1
+                        - 0
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Return identity provider login interface appearance
+      tags:
+      - Authentication
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  get_provider_display_configurations \\\n  provider_id='google'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/get_provider_display_configurations?api.version=1&provider_id=google
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: 58.0.12
+  /get_users_authn_linked_accounts:
+    get:
+      description: This function lists all accounts that link to available external authentication identity providers.
+      operationId: Accounts-get_users_authn_linked_accounts
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      username_linked_accounts:
+                        description: An array of objects containing user accounts with their linked identity provider accounts.
+                        items:
+                          properties:
+                            link_time:
+                              description: When the user linked the account.
+                              example: 1443124003
+                              format: unix_timestamp
+                              type: integer
+                            preferred_username:
+                              description: The preferred username of the account on the identity provider that the interface will display.
+                              example: username@example.com
+                              type: string
+                            provider_id:
+                              description: The system's internal key for the identity provider.
+                              example: cpanelid
+                              type: string
+                            provider_protocol:
+                              description: The identity provider's protocol.
+                              example: openid_connect
+                              type: string
+                            subject_unique_identifier:
+                              description: The unique identifier for the user at the identity provider.
+                              example: '123456789012345678901'
+                              type: string
+                            username:
+                              description: The cPanel account's username.
+                              example: username
+                              format: username
+                              type: string
+                          type: object
+                        type: array
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: get_users_authn_linked_accounts
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 1
+                        - 0
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Return accounts linked to identity providers
+      tags:
+      - Authentication
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  get_users_authn_linked_accounts\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/get_users_authn_linked_accounts?api.version=1
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '54'
+  /link_user_authn_provider:
+    get:
+      description: This function adds an External Authentication authorization link to an account.
+      operationId: Accounts-link_user_authn_provider
+      parameters:
+      - description: The preferred username of the account on the identity provider.
+        in: query
+        name: preferred_username
+        required: true
+        schema:
+          example: Example
+          type: string
+      - description: The name of the identity provider.
+        in: query
+        name: provider_id
+        required: true
+        schema:
+          example: google
+          type: string
+      - description: The unique identifier for the user at the identity provider.
+        in: query
+        name: subject_unique_identifier
+        required: true
+        schema:
+          example: '123456789012345678901'
+          type: string
+      - description: The account's username.
+        in: query
+        name: username
+        required: true
+        schema:
+          example: example
+          format: username
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: link_user_authn_provider
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Add identity provider to cPanel account
+      tags:
+      - Authentication
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  link_user_authn_provider \\\n  username='example' \\\n  provider_id='google' \\\n  subject_unique_identifier='123456789012345678901' \\\n  preferred_username='Example'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/link_user_authn_provider?api.version=1&username=example&provider_id=google&subject_unique_identifier=123456789012345678901&preferred_username=Example
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '56'
+  /set_provider_client_configurations:
+    get:
+      description: This function sets the values of configuration fields for an external authentication identity provider.
+      operationId: Authentication-set_provider_client_configurations
+      parameters:
+      - description: "The configuration values to set for the identity provider.\n\n**Note**\n \nThe items in this parameter depend on the fields that the provider implements through OpenID."
+        in: query
+        name: configurations
+        required: true
+        schema:
+          example: '{"client_id":"victoria","client_secret":"secret"}'
+          format: json
+          type: string
+      - description: The identity provider's key.
+        in: query
+        name: provider_id
+        required: true
+        schema:
+          example: cpanelid
+          type: string
+      - description: 'The cPanel & WHM service''s name.
+
+          * `cpaneld` — The cPanel daemon.
+
+          * `whostmgrd` — The WHM daemon.
+
+          * `webmaild` — The Webmail daemon.'
+        in: query
+        name: service_name
+        required: true
+        schema:
+          enum:
+          - cpaneld
+          - whostmgrd
+          - webmaild
+          example: cpaneld
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: set_provider_client_configurations
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` — Success
+
+                          * `0` — Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Update identity provider client configuration
+      tags:
+      - Authentication
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  set_provider_client_configurations \\\n  service_name='cpaneld' \\\n  provider_id='cpanelid' \\\n  configurations='{\"client_id\":\"victoria\",\"client_secret\":\"secret\"}'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/set_provider_client_configurations?api.version=1&service_name=cpaneld&provider_id=cpanelid&configurations=%7b%22client_id%22%3a%22victoria%22%2c%22client_secret%22%3a%22secret%22%7d
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '54'
+  /set_provider_display_configurations:
+    get:
+      description: This function sets the display configuration for the login button of an external authentication identity provider.
+      operationId: Authentication-set_provider_display_configurations
+      parameters:
+      - content:
+          application/json:
+            example:
+              color: 6677aa
+              display_name: Hosting Center Login
+              textcolor: 44ffbb
+            schema:
+              properties:
+                color:
+                  description: The background color of the button on the cPanel interface.
+                  example: dd4b39
+                  format: RGB
+                  type: string
+                display_name:
+                  description: The display name of the identity provider.
+                  example: cPanel
+                  type: string
+                icon:
+                  description: The icon file to display in the button on the cPanel login interface.
+                  example: iVBORw0KGgoAAAANSUhEUgAAACEAAAAhCAYAAABX5MJvAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAV1JREFUeNrsVtGNwjAMJegGYIRucBmhtwEjdAMyQjYoG2SEG6HcBGUDugFskHOQg1zTlFaN\/\/KkqMh2yYvt53S3KygomIZaE+y9P8BDJ9xXpdSDxT9jwX7dxDJsDMvCuvl33GF1sBwS5O8GX7eVgCabGyRkGJF25v0sJHrcyDH7iMhWEl9zWSD1\/xs1klJn8J\/gZ4WxNdgu8KyiDXGIfmJ7LO6R8CI5rJnwO+Kv0Wb9Z7xlZr+wMt8f\/ANmyCoCMF3CUmP8rOmHip1AM\/8tdbLcjfnL5NigYmIp+ilp5iYRJNkmajtLIBuJiUZ1S+aDKGDjI8tGk+N\/9yuy0ODcGIjL8UEmcXKLDelRDQ5tHcuIkSLQE1WYhIRfMRIEmiV1Z7NES5Rh9nIisRGVWGOyyyflC5fSkDsTmk1KnVBMbForqQw+IVtUCP3KEpdojffHnRGKcq3LZ3pBgST+BRgANXt+WPKE7tYAAAAASUVORK5CYII=
+                  type: string
+                icon_type:
+                  default: image/svg+xml
+                  description: The icon file's MIME type.
+                  example: image/svg+xml
+                  format: mime
+                  type: string
+                label:
+                  description: The text label that will appear on the cPanel login interface.
+                  example: Log in with a cPanelID Account
+                  type: string
+                textcolor:
+                  description: The color of the text label on the cPanel login interface.
+                  example: FFFFFF
+                  format: RGB
+                  type: string
+              type: object
+        description: The display configuration in JSON-encoded key-value format.
+        in: query
+        name: configurations
+        required: true
+      - description: The identity provider's key.
+        in: query
+        name: provider_id
+        required: true
+        schema:
+          example: cpanelid
+          type: string
+      - description: 'The cPanel & WHM service''s name.
+
+          * `cpaneld` — The cPanel daemon.
+
+          * `whostmgrd` — The WHM daemon.
+
+          * `webmaild` — The Webmail daemon.'
+        in: query
+        name: service_name
+        required: true
+        schema:
+          enum:
+          - cpaneld
+          - whostmgrd
+          - webmaild
+          example: cpaneld
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: set_provider_display_configurations
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Update identity provider login interface appearance
+      tags:
+      - Authentication
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: whmapi1 --output=jsonpretty set_provider_display_configurations service_name='cpaneld' provider_id='cpanelid' configurations='{"color":"dd4b39","display_name":"cPanel","icon":"iVBORw0KGgoAAAANSUhEUgAAACEAAAAhCAYAAABX5MJvAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAV1JREFUeNrsVtGNwjAMJegGYIRucBmhtwEjdAMyQjYoG2SEG6HcBGUDugFskHOQg1zTlFaN\\/\\/KkqMh2yYvt53S3KygomIZaE+y9P8BDJ9xXpdSDxT9jwX7dxDJsDMvCuvl33GF1sBwS5O8GX7eVgCabGyRkGJF25v0sJHrcyDH7iMhWEl9zWSD1\\/xs1klJn8J\\/gZ4WxNdgu8KyiDXGIfmJ7LO6R8CI5rJnwO+Kv0Wb9Z7xlZr+wMt8f\\/ANmyCoCMF3CUmP8rOmHip1AM\\/8tdbLcjfnL5NigYmIp+ilp5iYRJNkmajtLIBuJiUZ1S+aDKGDjI8tGk+N\\/9yuy0ODcGIjL8UEmcXKLDelRDQ5tHcuIkSLQE1WYhIRfMRIEmiV1Z7NES5Rh9nIisRGVWGOyyyflC5fSkDsTmk1KnVBMbForqQw+IVtUCP3KEpdojffHnRGKcq3LZ3pBgST+BRgANXt+WPKE7tYAAAAASUVORK5CYII=","icon_type":"image/svg+xml","label":"Log in with a cPanelID Account","textcolor":"FFFFFF"}'
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/set_provider_display_configurations?api.version=1&service_name=cpaneld&provider_id=cpanelid&configurations=%7b%22color%22%3a%22dd4b39%22%2c%22display_name%22%3a%22cPanel%22%2c%22icon%22%3a%22iVBORw0KGgoAAAANSUhEUgAAACEAAAAhCAYAAABX5MJvAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAV1JREFUeNrsVtGNwjAMJegGYIRucBmhtwEjdAMyQjYoG2SEG6HcBGUDugFskHOQg1zTlFaN%5c%5c%2f%5c%5c%2fKkqMh2yYvt53S3KygomIZaE%2by9P8BDJ9xXpdSDxT9jwX7dxDJsDMvCuvl33GF1sBwS5O8GX7eVgCabGyRkGJF25v0sJHrcyDH7iMhWEl9zWSD1%5c%5c%2fxs1klJn8J%5c%5c%2fgZ4WxNdgu8KyiDXGIfmJ7LO6R8CI5rJnwO%2bKv0Wb9Z7xlZr%2bwMt8f%5c%5c%2fANmyCoCMF3CUmP8rOmHip1AM%5c%5c%2f8tdbLcjfnL5NigYmIp%2bilp5iYRJNkmajtLIBuJiUZ1S%2baDKGDjI8tGk%2bN%5c%5c%2f9yuy0ODcGIjL8UEmcXKLDelRDQ5tHcuIkSLQE1WYhIRfMRIEmiV1Z7NES5Rh9nIisRGVWGOyyyflC5fSkDsTmk1KnVBMbForqQw%2bIVtUCP3KEpdojffHnRGKcq3LZ3pBgST%2bBRgANXt%2bWPKE7tYAAAAASUVORK5CYII%3d%22%2c%22icon_type%22%3a%22image%2fsvg%2bxml%22%2c%22label%22%3a%22Log%20in%20with%20a%20cPanelID%20Account%22%2c%22textcolor%22%3a%22FFFFFF%22%7d
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '54'
+  /twofactorauth_disable_policy:
+    get:
+      description: This function disables the Two-Factor Authentication (2FA) security policy on the server.
+      operationId: TwoFactorAuth-twofactorauth_disable_policy
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: twofactorauth_disable_policy
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` — Success
+
+                          * `0` — Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Disable 2FA
+      tags:
+      - Authentication
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  twofactorauth_disable_policy\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/twofactorauth_disable_policy?api.version=1
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '54'
+  /twofactorauth_enable_policy:
+    get:
+      description: This function enables the Two-Factor Authentication (2FA) security policy on the server.
+      operationId: TwoFactorAuth-twofactorauth_enable_policy
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: twofactorauth_enable_policy
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` — Success
+
+                          * `0` — Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Enable 2FA
+      tags:
+      - Authentication
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  twofactorauth_enable_policy\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/twofactorauth_enable_policy?api.version=1
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '54'
+  /twofactorauth_generate_tfa_config:
+    get:
+      description: This function generates a random secret and a one-time password authentication (OTP auth) URL for the user. Use the secret that this function returns and a valid verification token with WHM API 1's `twofactorauth_set_tfa_config` function to configure Two-Factor Authentication (2FA) on an account.
+      operationId: TwoFactorAuth-twofactorauth_generate_tfa_config
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      otpauth_str:
+                        description: A one-time authentication URL to encode as the QR code.
+                        example: otpauth://totp/Example:root?secret=CAOXW75HKYJJ6E5Y&issuer=Example
+                        format: uri
+                        type: string
+                      secret:
+                        description: A generated security code for use with 2FA.
+                        example: WJ73QJSKZBXCFIPZ
+                        type: string
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: twofactorauth_generate_tfa_config
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Create a one-time authentication secret and code
+      tags:
+      - Authentication
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  twofactorauth_generate_tfa_config\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/twofactorauth_generate_tfa_config?api.version=1
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '54'
+  /twofactorauth_get_issuer:
+    get:
+      description: This function returns the currently configured issuer. The issuer appears within the authentication app.
+      operationId: TwoFactorAuth-twofactorauth_get_issuer
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      issuer:
+                        description: The issuer's name for the currently-authenticated user.
+                        example: example.cpanel.net
+                        type: string
+                      system_wide_issuer:
+                        description: 'The system''s default issuer''s name.
+
+
+                          **Note:**
+
+
+                          If the `root` user has **not** configured a system-wide issuer, this value defaults to the system hostname.'
+                        example: example.cpanel.net
+                        type: string
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: twofactorauth_get_issuer
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` - Success.
+
+                          * `0` - Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Return configured issuer for current user
+      tags:
+      - Authentication
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  twofactorauth_get_issuer\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/twofactorauth_get_issuer?api.version=1
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '54'
+  /twofactorauth_get_tfa_config_for_user:
+    get:
+      description: This function returns the Two-Factor Authentication (2FA) configuration for a cPanel account, its email accounts, and its team user accounts.
+      operationId: TwoFactorAuth-twofactorauth_get_tfa_config_for_user
+      parameters:
+      - description: The username for the account.
+        in: query
+        name: user
+        required: true
+        schema:
+          example: example
+          format: username
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    additionalProperties:
+                      properties:
+                        email:
+                          additionalProperties:
+                            description: An object that contains a hash of the email account's data.
+                            properties:
+                              secret:
+                                description: The 2FA secret for the account.
+                                example: QLLIU5WTY3UTJGNG
+                                type: string
+                            type: object
+                          description: The email data for the user.
+                          type: object
+                        primary_account:
+                          description: An object containing the secret for the cPanel user if 2FA is enabled for the user.
+                          properties:
+                            secret:
+                              description: The 2FA secret for the account.
+                              type: string
+                          type: object
+                        team:
+                          additionalProperties:
+                            description: An objection that contains a hash of the team user account's data.
+                            properties:
+                              secret:
+                                description: The 2FA secret for the account.
+                                example: QLLIU5WTY3UTJGNG
+                                type: string
+                            type: object
+                          description: The cPanel user's team user account data.
+                          type: object
+                      type: object
+                    description: The cPanel user account that the API was called for.
+                    example:
+                      example:
+                        email:
+                          user@example.com:
+                            secret: QLLIU5WTY3UTJGNG
+                        primary_account:
+                          secret: QLLIU5WTY3UTJGNG
+                        team:
+                          team_user@example:
+                            secret: QLLIU5WTY3UTJGNG
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: twofactorauth_get_tfa_config_for_user
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` - Success.
+
+                          * `0` - Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Return cPanel account 2FA data
+      tags:
+      - Authentication
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  twofactorauth_get_tfa_config_for_user \\\n  user='user'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/twofactorauth_get_tfa_config_for_user?api.version=1&user=user
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '118'
+  /twofactorauth_get_user_configs:
+    get:
+      description: This function returns a list of user-controlled accounts and whether the accounts have Two-Factor Authentication (2FA) enabled.
+      operationId: TwoFactorAuth-twofactorauth_get_user_configs
+      parameters:
+      - description: 'The username for a specified account.
+
+
+          **Note:**
+
+
+          If you do **not** specify a value, the function returns **all** user accounts.'
+        in: query
+        name: user
+        required: false
+        schema:
+          example: example
+          format: username
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    additionalProperties:
+                      description: An object that contains a hash of the account's data.
+                      properties:
+                        is_enabled:
+                          description: 'Whether the account has 2FA enabled.
+
+                            * `1` - Enabled.
+
+                            * `0` - **Not** enabled.'
+                          enum:
+                          - 0
+                          - 1
+                          example: 1
+                          type: integer
+                        primary_domain:
+                          description: The account's primary domain.
+                          example: example.com
+                          format: domain
+                          type: string
+                      type: object
+                    description: The data that the function returns.
+                    example:
+                      example:
+                        is_enabled: 0
+                        primary_domain: example.com
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: twofactorauth_get_user_configs
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` - Success.
+
+                          * `0` - Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Return cPanel accounts with 2FA enabled
+      tags:
+      - Authentication
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  twofactorauth_get_user_configs\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/twofactorauth_get_user_configs?api.version=1
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '54'
+  /twofactorauth_policy_status:
+    get:
+      description: This function displays the Two-Factor Authentication (2FA) policy status on the server.
+      operationId: TwoFactorAuth-twofactorauth_policy_status
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      is_enabled:
+                        description: 'Whether the 2FA security policy is enabled.
+
+                          - `1` — Enabled.
+
+                          - `0` — **Not** enabled.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: twofactorauth_policy_status
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` — Success
+
+                          * `0` — Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Return 2FA policy status
+      tags:
+      - Authentication
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  twofactorauth_policy_status\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/twofactorauth_policy_status?api.version=1
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '54'
+  /twofactorauth_remove_user_config:
+    get:
+      description: 'This function removes the Two-Factor Authentication (2FA) settings for one or more specified user accounts.
+
+
+        **Note:**
+
+
+        If you remove the 2FA settings for an account, the user **must** perform the setup procedure again to re-configure 2FA on the account.
+
+
+        This function reports an account in the `data.users_modified` array
+
+        even if that account had no 2FA settings configured to begin with.
+
+        Check whether 2FA was actually configured beforehand (for example,
+
+        with the `twofactorauth_get_tfa_config_for_user` function) if your
+
+        integration needs to distinguish an actual removal from a no-op.'
+      operationId: TwoFactorAuth-twofactorauth_remove_user_config
+      parameters:
+      - description: "The account's username.\n\n**Note:**\n\n To remove multiple users, increment the parameter name. For example, `user-1`, `user-2`, or `user-3`."
+        examples:
+          multiple:
+            description: Multiple users.
+            value: user-1=username1 user-2=username2 user-3=username3
+          single:
+            description: A single user.
+            value: example.com
+        in: query
+        name: user
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      failed:
+                        additionalProperties:
+                          description: 'The reason for the failure.
+
+
+                            **Note:**
+
+
+                            The user''s name is the return name.'
+                          example: You are not authorized to modify example
+                          type: string
+                          x-additionalPropertiesName: username
+                        description: An object that contains the user accounts for which removal failed.
+                        type: object
+                      users_modified:
+                        description: An array of the user accounts for which you successfully removed 2FA settings.
+                        items:
+                          example: example
+                          type: string
+                        type: array
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: twofactorauth_remove_user_config
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Remove 2FA settings
+      tags:
+      - Authentication
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  twofactorauth_remove_user_config \\\n  user='example.com'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/twofactorauth_remove_user_config?api.version=1&user=example.com
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '54'
+  /twofactorauth_set_issuer:
+    get:
+      description: This function sets the `issuer` value that the system uses to generate the `secret` and `otpurls` values for Two-Factor Authentication on your accounts.
+      operationId: TwoFactorAuth-twofactorauth_set_issuer
+      parameters:
+      - description: The issuer's name.
+        in: query
+        name: issuer
+        required: true
+        schema:
+          example: hostname.example.com
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: twofactorauth_set_issuer
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Update 2FA issuer value
+      tags:
+      - Authentication
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  twofactorauth_set_issuer \\\n  issuer='hostname.example.com'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/twofactorauth_set_issuer?api.version=1&issuer=hostname.example.com
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '54'
+  /twofactorauth_set_tfa_config:
+    get:
+      description: This function sets the secret and the authentication code for Two-Factor Authentication (2FA) for the `root` or reseller account. You can generate a random secret and an OTP authentication URL with WHM API 1's `twofactorauth_generate_tfa_configorauth_generate_tfa_config` function.
+      operationId: TwoFactorAuth-twofactorauth_set_tfa_config
+      parameters:
+      - description: A generated code for use with 2FA in Base32 format.
+        in: query
+        name: secret
+        required: true
+        schema:
+          example: WJ73QJSKZBXCFIPZ
+          type: string
+      - description: The time-based one-time password (TOTP) that the authentication app provides.
+        in: query
+        name: tfa_token
+        required: true
+        schema:
+          example: '227174'
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      success:
+                        description: 'Whether the account successfully enabled 2FA.
+
+                          * `1` — Enabled.
+
+                          * `0` — **Not** enabled.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: twofactorauth_set_tfa_config
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Update 2FA authentication secret and code
+      tags:
+      - Authentication
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  twofactorauth_set_tfa_config \\\n  secret='WJ73QJSKZBXCFIPZ' \\\n  tfa_token='227174'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/twofactorauth_set_tfa_config?api.version=1&secret=WJ73QJSKZBXCFIPZ&tfa_token=227174
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '54'
+  /twofactorauth_set_tfa_config_for_user:
+    post:
+      description: This function updates the Two-Factor Authentication (2FA) configuration for the given cPanel user.
+      operationId: TwoFactorAuth-twofactorauth_set_tfa_config_for_user
+      requestBody:
+        content:
+          application/json:
+            schema:
+              additionalProperties:
+                description: The cPanel user account for which to set the 2FA config.
+                properties:
+                  email:
+                    additionalProperties:
+                      description: An object that contains a hash of the email account's data.
+                      properties:
+                        secret:
+                          description: The 2FA secret for the account.
+                          example: QLLIU5WTY3UTJGNG
+                          type: string
+                      type: object
+                    description: The email data for the user.
+                    type: object
+                  primary_account:
+                    description: An object that contains the secret for the cPanel user.
+                    properties:
+                      secret:
+                        description: The 2FA secret for the account.
+                        example: QLLIU5WTY3UTJGNG
+                        type: string
+                    type: object
+                  team:
+                    additionalProperties:
+                      description: An object that contains a hash of the team user account's data.
+                      properties:
+                        secret:
+                          description: The 2FA secret for the account.
+                          example: QLLIU5WTY3UTJGNG
+                          type: string
+                      type: object
+                type: object
+              example:
+                example:
+                  email:
+                    user@example.com:
+                      secret: QLLIU5WTY3UTJGNG
+                  primary_account:
+                    secret: QLLIU5WTY3UTJGNG
+                  team:
+                    team_user@example:
+                      secret: QLLIU5WTY3UTJGNG
+              type: object
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: twofactorauth_set_tfa_config_for_user
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` - Success
+
+                          * `0` - Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Update cPanel account's 2FA data
+      tags:
+      - Authentication
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "echo '{\"example\" : { \"email\" : { \"user@example.com\" : { \"secret\" : \"QLLIU5WTY3UTJGNG\" } }, \"primary_account\" : { \"secret\" : \"QLLIU5WTY3UTJGNG\" }, \"team\" : { \"team_user@example\" : { \"secret\" : \"QLLIU5WTY3UTJGNG\" }}}}' | \\\nwhmapi1 --input=json --output=jsonpretty \\\n  twofactorauth_set_tfa_config_for_user\n"
+      - label: HTTP Request (Wire Format)
+        lang: HTTP
+        source: 'POST /cpsess##########/json-api/twofactorauth_set_tfa_config_for_user HTTP/1.1
+
+          Host: example.com:2087
+
+          Cookie: ###################################
+
+          Content-Type: application/json
+
+          Content-Length: 179
+
+
+          {"example":{"email":{"user@example.com":{"secret":"QLLIU5WTY3UTJGNG"}},"primary_account":{"secret":"QLLIU5WTY3UTJGNG"},"team":{"team_user@example":{"secret":"QLLIU5WTY3UTJGNG"}}}}'
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '118'
+  /unlink_user_authn_provider:
+    get:
+      description: This function unlinks a cPanel account from an external authentication identity provider.
+      operationId: Accounts-unlink_user_authn_provider
+      parameters:
+      - description: The system's internal key for the identity provider.
+        in: query
+        name: provider_id
+        required: true
+        schema:
+          example: cpanelid
+          type: string
+      - description: The unique identifier for the user at the identity provider.
+        in: query
+        name: subject_unique_identifier
+        required: true
+        schema:
+          example: '123456789012345678901'
+          type: string
+      - description: The account's username.
+        in: query
+        name: username
+        required: true
+        schema:
+          example: example
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: unlink_user_authn_provider
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` — Success
+
+                          * `0` — Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Unregister cPanel account from authentication provider
+      tags:
+      - Authentication
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  unlink_user_authn_provider \\\n  username='example' \\\n  provider_id='cpanelid' \\\n  subject_unique_identifier='123456789012345678901'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/unlink_user_authn_provider?api.version=1&username=example&provider_id=cpanelid&subject_unique_identifier=123456789012345678901
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '54'
+  /validate_login_token:
+    get:
+      description: This function validates a login token with the cPanel Store or a cPanel Market provider, and then returns access tokens.
+      operationId: Market-validate_login_token
+      parameters:
+      - description: The login token to validate.
+        in: query
+        name: login_token
+        required: true
+        schema:
+          example: 1a676e6f-99fc-11e6-9ab6-e60a769b73bc
+          type: string
+      - description: The cPanel Store or cPanel Market provider's name.
+        in: query
+        name: provider
+        required: true
+        schema:
+          example: cPStore
+          type: string
+      - description: The location to which the cPanel Store or cPanel Market provider redirects the user's browser after they log in.
+        in: query
+        name: url_after_login
+        required: true
+        schema:
+          example: http://hostname.example.com/redirectionlocation.cgi?state
+          format: url
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      payload:
+                        description: An array of objects that contain token information.
+                        items:
+                          properties:
+                            access_token:
+                              description: The access token that the cPanel Store or cPanel Market provider returns after you log in.
+                              example: b7a6f029-99fc-11e6-a0bd-87581cb027ac
+                              type: string
+                            refresh_token:
+                              description: The refresh token that the cPanel Store or cPanel Market provider returns after you log in .
+                              example: b7a7107f-99fc-11e6-a0bd-b46329164206
+                              type: string
+                          type: object
+                        type: array
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: validate_login_token
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the ''reason'' field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Validate login token and return access token
+      tags:
+      - Authentication
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  validate_login_token \\\n  provider='cPStore' \\\n  url_after_login='http://hostname.example.com/redirectionlocation.cgi?state' \\\n  login_token='1a676e6f-99fc-11e6-9ab6-e60a769b73bc'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/validate_login_token?api.version=1&provider=cPStore&url_after_login=http%3a%2f%2fhostname.example.com%2fredirectionlocation.cgi%3fstate&login_token=1a676e6f-99fc-11e6-9ab6-e60a769b73bc
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '62'
+  /wp_dashboard_create_api_token:
+    get:
+      description: This function creates a WHM API token for WebPros Dashboard.
+      operationId: WPDashboard-wp_dashboard_create_api_token
+      parameters:
+      - description: "The privileges to assign to the token.\n\n**Note:**\n\n* You can **only** assign privileges that you possess to the API token.\n* This function does **not** assign all of your privileges by default. The system\n will reject a request without an `acl` or `acl-N` value."
+        examples:
+          multiple:
+            summary: Assign multiple privileges.
+            value: acl-0=create-acct acl-1=list-accts acl-2=kill-acct
+          single:
+            summary: Assign a single privilege.
+            value: all
+        in: query
+        name: acl
+        required: true
+        schema:
+          type: string
+      - description: 'The API token''s name.
+
+
+          **Note:**
+
+
+          This parameter''s value cannot exceed 50 characters and may **only**
+
+          contain alphanumeric characters, dashes (`-`), and underscores (`_`).'
+        in: query
+        name: token_name
+        required: true
+        schema:
+          example: example
+          type: string
+      - description: 'The API token''s expiration time, in [Unix Epoch format](https://go.cpanel.net/unix_time).
+
+
+          **Note:**
+
+          *  If you do not use this parameter or use the `0` value, the
+
+          API token will not expire.
+
+          * You **must** manually delete expired API tokens.'
+        in: query
+        name: expires_at
+        required: false
+        schema:
+          default: 0
+          example: 1609372800
+          type: integer
+      - description: 'One or more optional remote IP address or CIDR IP address ranges that can use this token.
+
+
+          **Note:**
+
+
+          If you do not use this parameter, the system does not limit which IP addressess can use this token.'
+        examples:
+          multiple:
+            summary: Assign multiple IP or CIDR ranges.
+            value: whitelist_ip-0=192.0.2.1 whitelist_ip-1=192.0.2.5 whitelist_ip-2=192.0.2.8/29 whitelist_ip-3=2001:0db8:0:0:1:0:0:1 whitelist_ip-4=2001:0db8:0:0:0:0:0:0/48
+          single:
+            summary: Assign a single IP or CIDR range.
+            value: 192.0.2.8/29
+        in: query
+        name: whitelist_ip
+        required: false
+        schema:
+          anyOf:
+          - format: ipv4
+            type: string
+          - format: ipv6
+            type: string
+          - format: cidr
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      acls:
+                        description: An array of privileges that the token possesses.
+                        items:
+                          example: kill-acct
+                          type: string
+                        type: array
+                      create_time:
+                        description: The API token's creation time, in [Unix Epoch format](https://go.cpanel.net/unix_time).
+                        example: 1483625276
+                        format: unix_timestamp
+                        type: integer
+                      expires_at:
+                        description: The API token's expiration time, in [Unix Epoch format](https://go.cpanel.net/unix_time).
+                        example: 1609372800
+                        format: unix_timestamp
+                        type:
+                        - integer
+                        - 'null'
+                      name:
+                        description: The new API token's name.
+                        example: example
+                        type: string
+                      token:
+                        description: 'The new API token to use to authenticate to WHM.
+
+
+                          **Note:**
+
+
+                          You **cannot** access the token again after you use this function. Save the token in a safe location.'
+                        example: UWU28DCA23NKY76CN17MDPKM3O7EFQY8
+                        type: string
+                      whitelist_ips:
+                        description: The list of remote IP addresses or CIDR IP address ranges that can use this token.
+                        example:
+                        - 192.0.2.1
+                        - 192.0.2.2
+                        - 192.0.2.8/29
+                        - 2001:0db8:0000:0000:0000:0000:0000:0001
+                        - 2001:0db8:0000:0000:0000:0000:0000:0000/48
+                        items:
+                          anyOf:
+                          - format: ipv4
+                            type: string
+                          - format: ipv6
+                            type: string
+                          - format: cidr
+                            type: string
+                        type:
+                        - array
+                        - 'null'
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: wp_dashboard_create_api_token
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Create API token for Dashboard
+      tags:
+      - Authentication
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  wp_dashboard_create_api_token \\\n  token_name='example' \\\n  acl-0='all'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/wp_dashboard_create_api_token?api.version=1&token_name=example&acl-0=all
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '64'
+components:
+  schemas:
+    TokenDetails:
+      properties:
+        acls:
+          description: A list of privileges assigned to the token.
+          example:
+          - create-acct
+          - kill-acct
+          - list-accts
+          items:
+            type: string
+          type: array
+        create_time:
+          description: The API token's creation time.
+          example: 1483625276
+          format: unix_timestamp
+          type: integer
+        expires_at:
+          description: 'The API token''s expiration time.
+
+
+            **Note:**
+
+
+            A `null` value means that the API token does **not** expire.'
+          example: 1609372800
+          format: unix_timestamp
+          type:
+          - integer
+          - 'null'
+        name:
+          description: The API token's name.
+          example: example
+          type: string
+        whitelist_ips:
+          description: List of remote IP or CIDR IP ranges this token may be used from.
+          example:
+          - 192.0.2.1
+          - 192.0.2.2
+          - 192.0.2.8/29
+          - fc00:abcd:0000:0000:0000:0000:0000:000f
+          - 2620:0000:28a4:0000:0000:0000:0000:0000/48
+          items:
+            anyOf:
+            - format: ipv4
+              type: string
+            - format: ipv6
+              type: string
+            - format: cidr
+              type: string
+          type:
+          - array
+          - 'null'
+      type: object
+    Metadata:
+      properties:
+        command:
+          description: The method name called.
+          example: api_token_get_details
+          type: string
+        reason:
+          description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+          example: OK
+          type: string
+        result:
+          description: '* `1` — Success.
+
+            * `0` – Failed. Check the `reason` field for more details.'
+          enum:
+          - 1
+          - 0
+          example: 1
+          type: integer
+        version:
+          description: The version of the API function.
+          example: 1
+          type: integer
+      type: object
+  securitySchemes:
+    BasicAuth:
+      scheme: basic
+      type: http
+externalDocs:
+  url: https://cpanel.net/developers/
+x-tagGroups:
+- name: Account Restoration
+  tags:
+  - Restore Account
+  - Restore Queue Management
+  - Restore Queue Reporting
+- name: Accounts
+  tags:
+  - Account Creation
+  - Account Enhancements
+  - Account Management
+  - Bandwidth and Disk Quotas
+  - Domain Information
+  - Passwords
+  - Styles
+  - Suspensions
+- name: API Development Tools
+  tags:
+  - API Execution
+  - API Statistics
+  - API Token Management
+  - Applications
+  - Session
+- name: Authentication
+  tags:
+  - Authentication Providers
+  - External Authentication
+  - Login URL
+  - SSH Keys and Connections
+  - Two-Factor Authentication
+- name: Backups
+  tags:
+  - Backup Destination
+  - Backup or Restore
+  - Backup Settings
+  - Legacy Migration
+- name: Commerce Integration
+  tags:
+  - Market Integration
+  - Sitejet
+- name: cPanel Market
+  tags:
+  - Product Management
+  - Provider Management
+- name: cPanel Support Tickets
+  tags:
+  - Support Access
+  - Ticket Management
+- name: Customizations
+  tags:
+  - Brand
+  - Customizations
+- name: Databases
+  tags:
+  - Manage MySQL Server
+  - MySQL Databases
+  - PostgreSQL Databases
+  - Remote MySQL Databases
+- name: DNS
+  tags:
+  - DNS Cluster Settings
+  - DNS Security
+  - DNS Zones
+  - Domain Management
+  - Domain Management
+  - Resolvers
+  - Service Records
+- name: Hosting Plans
+  tags:
+  - Feature Access
+  - Feature Lists
+  - Hosting Plan Extensions
+  - Hosting Plans
+- name: InProductSurvey
+  tags:
+  - InProductSurvey
+- name: Integrations
+  tags:
+  - API Authentication
+  - Links
+  - Scripts Hooks
+- name: IP Address Management
+  tags:
+  - IPv4 Address Settings
+  - IPv6 Address Settings
+  - Network Address Translation
+- name: Login Security (cPHulk)
+  tags:
+  - Management
+  - Reporting
+  - Settings
+- name: Logs
+  tags:
+  - Web Log Retention
+- name: Mail
+  tags:
+  - cPanel Account Mail Management
+  - Mail DNS Settings
+  - Mail Server Settings
+  - Spam Management
+  - Spam Protection (Greylisting)
+- name: Monitoring
+  tags:
+  - 360 Monitoring
+- name: NGINX Manager
+  tags:
+  - NGINX Manager
+- name: Resellers
+  tags:
+  - Account Enhancement Limit
+  - Account Limits
+  - Account Permissions
+  - Account Settings
+  - Reseller Account Management
+- name: Security
+  tags:
+  - WHM Access
+- name: Server Administration
+  tags:
+  - Configuration Clusters
+  - Configurations
+  - Connected Applications
+  - Connections
+  - cPanel Analytics
+  - License Management
+  - Notifications
+  - Plugin-Based Features
+  - Security
+  - Server Nodes
+  - Server Profiles
+  - Services
+  - System Information
+  - Updates
+- name: SSL Certificates
+  tags:
+  - Auto-Generated Certificates
+  - cPanel Account Settings
+  - SSL Server Settings
+- name: System Package Management
+  tags:
+  - Install or Uninstall Package
+  - List Package Information
+  - Package Manager Settings
+- name: Transfers
+  tags:
+  - cPanel Account Transfer
+  - Transfer Configuration
+  - Transfer Monitoring
+- name: UserData
+  tags:
+  - UserData
+- name: Web Server Configuration
+  tags:
+  - EasyApache Settings
+  - PHP
+  - PHP-FPM
+- name: Web Server Security (ModSecurity)
+  tags:
+  - Rule Settings
+  - Rule Vendor Settings
+  - Server Settings

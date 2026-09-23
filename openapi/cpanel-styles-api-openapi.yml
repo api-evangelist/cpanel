@@ -1,0 +1,323 @@
+openapi: 3.2.0
+info:
+  contact:
+    email: cs@cpanel.net
+    name: WebPros International, LLC
+    url: https://cpanel.net/support/
+  description: WHM API.
+  license:
+    name: cPanel License
+    url: https://cpanel.net/legal-notices/
+  termsOfService: https://cpanel.net/legal-notices/
+  title: WHM Styles API
+  version: 11.137.9999.106
+  x-api-evangelist-provenance: 'Harvested verbatim from cPanel''s developer portal on 2026-09-05 via the MCP tool get-full-api-description at https://api.docs.cpanel.net/mcp. ONE mechanical change was made before storage: example values containing PEM private-key or certificate blocks, and AWS-access-key-shaped example strings, were replaced with REDACTED_* placeholders so the file can be stored in a public git repository without tripping secret scanning. No path, operation, parameter, schema or description was altered, added or removed.'
+servers:
+- description: A server running WHM.
+  url: https://{host}:{port}/json-api
+  variables:
+    host:
+      default: whm-server.tld
+      description: The hostname of a server running WHM.
+    port:
+      default: '2087'
+      description: The WHM port.
+security:
+- BasicAuth: []
+tags:
+- description: Server Administration / Account Management
+  name: Styles
+paths:
+  /get_users_links:
+    get:
+      description: 'This function returns a list of
+
+        application keys
+
+        (appkeys) and the URLs that correspond to applications for the cPanel user''s theme.
+
+        Use the appkey values for the `app` parameter''s value in the WHM API 1 `create_user_session`
+
+        function.'
+      operationId: Plugins-get_users_links
+      parameters:
+      - description: The requested user's username.
+        in: query
+        name: user
+        required: true
+        schema:
+          example: user
+          type: string
+      - description: 'The interface for which to filter results:
+
+
+          * `cpanel` — cPanel
+
+          * `webmail` — Webmail'
+        in: query
+        name: service
+        required: false
+        schema:
+          default: cpaneld
+          enum:
+          - cpaneld
+          - webmail
+          example: cpaneld
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    additionalProperties:
+                      description: 'The name of the appkey and its corresponding URL to the specific
+
+                        application.
+
+
+                        **Note:**
+
+
+                        This function returns this value as the appkey name and the appkey''s
+
+                        application URL.'
+                      type: string
+                    description: A list of appkeys and their corresponding file locations.
+                    example:
+                      Backups_Home: frontend/jupiter/backup/index.html
+                      Calendar_Configure: frontend/jupiter/mail/calendars_and_contacts/index.html
+                      ContactInfo_Change: frontend/jupiter/contact/index.html
+                      Cron_Home: frontend/jupiter/cron/index.html
+                      Database_MySQL: frontend/jupiter/sql/index.html
+                      Database_phpMyAdmin: frontend/jupiter/sql/PhpMyAdmin.html
+                      Email_AccountLevelFiltering: frontend/jupiter/mail/filters/userfilters.html
+                      Email_Accounts: frontend/jupiter/mail/pops/index.html
+                      Email_Archive: frontend/jupiter/mail/archive.html
+                      Email_Authentication: frontend/jupiter/mail/auth.html
+                      Email_AutoResponders: frontend/jupiter/mail/autores.html
+                      Email_BoxTrapper: frontend/jupiter/mail/boxtrapper.html
+                      Email_DefaultAddress: frontend/jupiter/mail/def.html
+                      Email_DeliveryReport: frontend/jupiter/mail/def.html
+                      Email_Disk_Usage: frontend/jupiter/mail/manage_disk_usage/
+                      Email_Forwarders: frontend/jupiter/mail/fwds.html
+                      Email_GreyListing: frontend/jupiter/mail/greylisting/index.html
+                      Email_MailingLists: frontend/jupiter/mail/lists.html
+                      Email_Routing: frontend/jupiter/mail/email_routing.html
+                      Email_SpamFilter: frontend/jupiter/mail/spam/spam.html
+                      Email_UserLevelFiltering: frontend/jupiter/mail/filters/managefilters.html
+                      FileManager_Home: frontend/jupiter/filemanager/index.html
+                      Locale_Change: frontend/jupiter/setlang/index.html
+                      Password_Change: frontend/jupiter/passwd/index.html
+                      SSL_TLS_Manager: frontend/jupiter/ssl/index.html
+                      SSL_TLS_Status: frontend/jupiter/security/tls_status/
+                      SSL_TLS_Wizard: frontend/jupiter/security/tls_wizard/
+                      Solr_Disk_Usage: frontend/jupiter/mail/search_index/
+                      Stats_AWStats: frontend/jupiter/stats/awstats_landing.html
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: get_users_links
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 1
+                        - 0
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Return cPanel account theme's app keys and URLs
+      tags:
+      - Styles
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  get_users_links \\\n  user='user'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/get_users_links?api.version=1&user=user
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11.50'
+components:
+  securitySchemes:
+    BasicAuth:
+      scheme: basic
+      type: http
+externalDocs:
+  url: https://cpanel.net/developers/
+x-tagGroups:
+- name: Account Restoration
+  tags:
+  - Restore Account
+  - Restore Queue Management
+  - Restore Queue Reporting
+- name: Accounts
+  tags:
+  - Account Creation
+  - Account Enhancements
+  - Account Management
+  - Bandwidth and Disk Quotas
+  - Domain Information
+  - Passwords
+  - Styles
+  - Suspensions
+- name: API Development Tools
+  tags:
+  - API Execution
+  - API Statistics
+  - API Token Management
+  - Applications
+  - Session
+- name: Authentication
+  tags:
+  - Authentication Providers
+  - External Authentication
+  - Login URL
+  - SSH Keys and Connections
+  - Two-Factor Authentication
+- name: Backups
+  tags:
+  - Backup Destination
+  - Backup or Restore
+  - Backup Settings
+  - Legacy Migration
+- name: Commerce Integration
+  tags:
+  - Market Integration
+  - Sitejet
+- name: cPanel Market
+  tags:
+  - Product Management
+  - Provider Management
+- name: cPanel Support Tickets
+  tags:
+  - Support Access
+  - Ticket Management
+- name: Customizations
+  tags:
+  - Brand
+  - Customizations
+- name: Databases
+  tags:
+  - Manage MySQL Server
+  - MySQL Databases
+  - PostgreSQL Databases
+  - Remote MySQL Databases
+- name: DNS
+  tags:
+  - DNS Cluster Settings
+  - DNS Security
+  - DNS Zones
+  - Domain Management
+  - Domain Management
+  - Resolvers
+  - Service Records
+- name: Hosting Plans
+  tags:
+  - Feature Access
+  - Feature Lists
+  - Hosting Plan Extensions
+  - Hosting Plans
+- name: InProductSurvey
+  tags:
+  - InProductSurvey
+- name: Integrations
+  tags:
+  - API Authentication
+  - Links
+  - Scripts Hooks
+- name: IP Address Management
+  tags:
+  - IPv4 Address Settings
+  - IPv6 Address Settings
+  - Network Address Translation
+- name: Login Security (cPHulk)
+  tags:
+  - Management
+  - Reporting
+  - Settings
+- name: Logs
+  tags:
+  - Web Log Retention
+- name: Mail
+  tags:
+  - cPanel Account Mail Management
+  - Mail DNS Settings
+  - Mail Server Settings
+  - Spam Management
+  - Spam Protection (Greylisting)
+- name: Monitoring
+  tags:
+  - 360 Monitoring
+- name: NGINX Manager
+  tags:
+  - NGINX Manager
+- name: Resellers
+  tags:
+  - Account Enhancement Limit
+  - Account Limits
+  - Account Permissions
+  - Account Settings
+  - Reseller Account Management
+- name: Security
+  tags:
+  - WHM Access
+- name: Server Administration
+  tags:
+  - Configuration Clusters
+  - Configurations
+  - Connected Applications
+  - Connections
+  - cPanel Analytics
+  - License Management
+  - Notifications
+  - Plugin-Based Features
+  - Security
+  - Server Nodes
+  - Server Profiles
+  - Services
+  - System Information
+  - Updates
+- name: SSL Certificates
+  tags:
+  - Auto-Generated Certificates
+  - cPanel Account Settings
+  - SSL Server Settings
+- name: System Package Management
+  tags:
+  - Install or Uninstall Package
+  - List Package Information
+  - Package Manager Settings
+- name: Transfers
+  tags:
+  - cPanel Account Transfer
+  - Transfer Configuration
+  - Transfer Monitoring
+- name: UserData
+  tags:
+  - UserData
+- name: Web Server Configuration
+  tags:
+  - EasyApache Settings
+  - PHP
+  - PHP-FPM
+- name: Web Server Security (ModSecurity)
+  tags:
+  - Rule Settings
+  - Rule Vendor Settings
+  - Server Settings

@@ -1,0 +1,1717 @@
+openapi: 3.2.0
+info:
+  contact:
+    email: cs@cpanel.net
+    name: WebPros International, LLC
+    url: https://cpanel.net/support/
+  description: UAPI accesses the cPanel interface's features. Use this API to access and modify cPanel account data and settings.
+  license:
+    name: cPanel License
+    url: https://cpanel.net/legal-notices/
+  termsOfService: https://cpanel.net/legal-notices/
+  title: cPanel U File Restoration API
+  version: 11.137.9999.106
+  x-api-evangelist-provenance: 'Harvested verbatim from cPanel''s developer portal on 2026-09-05 via the MCP tool get-full-api-description at https://api.docs.cpanel.net/mcp. ONE mechanical change was made before storage: example values containing PEM private-key or certificate blocks, and AWS-access-key-shaped example strings, were replaced with REDACTED_* placeholders so the file can be stored in a public git repository without tripping secret scanning. No path, operation, parameter, schema or description was altered, added or removed.'
+servers:
+- description: A server running cPanel.
+  url: https://{host}:{port}/execute
+  variables:
+    host:
+      default: cpanel-server.tld
+      description: The hostname of a server running cPanel.
+    port:
+      default: '2083'
+      description: The cPanel port.
+security:
+- BasicAuth: []
+tags:
+- description: cPanel Account Backups / File Restoration
+  name: File Restoration
+paths:
+  /Backup/restore_databases:
+    post:
+      x-readonly: false
+      x-rollback: none
+      description: 'This function restores a database''s backup files.
+
+
+        **Important:**
+
+
+        When the MySQL Client role is disabled, the system also **disables** this function.
+
+
+        **Note:**
+
+
+        You **must** pass either the `file` **or** `backup` parameter.'
+      operationId: Backup-restore_databases
+      parameters:
+      - description: 'The database backup file to restore.
+
+
+          **Important:**
+
+
+          **Only** pass this parameter to restore files already on the server.
+
+
+          **Note:**
+
+
+          To restore multiple database backup files, increment the parameter name. For example: `backup-1`, `backup-2`, and `backup-3`.'
+        examples:
+          multiple:
+            summary: Restore multiple database backup files.
+            value: backup-1=home/user/user_db1.sql.gz backup-2=home/user/user_db2.sql.gz backup-3=home/user/user_db3.sql.gz
+          single:
+            summary: Restore a single database backup file.
+            value: home/user/user_db1.sql.gz
+        in: query
+        name: backup
+        required: false
+        schema:
+          type: string
+      - description: 'The maximum number of seconds to try to restore the file.
+
+          * `0` - The system will not time out the file restoration.'
+        in: query
+        name: timeout
+        required: false
+        schema:
+          default: 7200
+          example: 3600
+          minimum: 0
+          type: integer
+      - description: 'Whether to return additional information from the `/usr/local/cpanel/logs/cpbackup` log file.
+
+          * `1` - Return additional information.
+
+          * `0` - Do **not** return additional information.'
+        in: query
+        name: verbose
+        required: false
+        schema:
+          default: 0
+          enum:
+          - 0
+          - 1
+          example: 1
+          type: integer
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              properties:
+                file:
+                  format: binary
+                  type: string
+              type: object
+        description: 'The database backup file to upload and restore.
+
+
+          **Important:**
+
+
+          * **Only** pass this parameter to upload files that don''t already exist on the server.
+
+          * You can **not** pass this parameter on the command line.
+
+
+          **Note:**
+
+
+          * To upload multiple database backup files, increment the parameter name. For example: `file-1`, `file-2`, and `file-3`.
+
+          * Pass this file in a multipart/form-data structure.
+
+          * For more information about this structure, read Mozilla''s [POST Method](https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/POST) documentation.'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  apiversion:
+                    description: The version of the API.
+                    example: 3
+                    type: integer
+                  func:
+                    description: The name of the method called.
+                    example: restore_databases
+                    type: string
+                  module:
+                    description: The name of the module called.
+                    example: Backup
+                    type: string
+                  result:
+                    properties:
+                      data:
+                        properties:
+                          log_id:
+                            description: The log file's restoration identification (ID). The system uses the backup restoration's date to create this ID. The ID is in [ISO-8601 Date Time](https://en.wikipedia.org/wiki/ISO_8601) format with the log's revision number appended.
+                            example: 2019-08-13T15:10:07Z.1
+                            type: string
+                          log_path:
+                            description: The filepath to the backup restoration's log file.
+                            example: /home/cptest/logs/restoredb/2019-08-13T15:10:07Z.1.log
+                            format: path
+                            type: string
+                          messages:
+                            description: An array of statements about the database's restoration.
+                            items:
+                              example: The system successfully restored the database 'user_db1' from the backup file 'user_db1.sql.gz'
+                              type: string
+                            type: array
+                        type: object
+                      errors:
+                        description: List of errors if the API failed.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      messages:
+                        description: List of messages generated by the API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      metadata:
+                        properties: {}
+                      status:
+                        description: '* `1` - Success
+
+                          * `0` - Failed: Check the errors field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      warnings:
+                        description: List of warnings generated by the API. Warnings describe non-critical failures or other problematic conditions noted while running a API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                    type: object
+                type: object
+          description: HTTP Request was successful.
+      summary: Restore databases
+      tags:
+      - File Restoration
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "uapi --input=json --output=jsonpretty \\\n  --user=username \\\n  Backup \\\n  restore_databases\n"
+      - label: HTTP Request (Wire Format)
+        lang: HTTP
+        source: 'POST /cpsess##########/execute/Backup/restore_databases HTTP/1.1
+
+          Host: example.com:2083
+
+          Cookie: ###################################
+
+          Content-Type: application/json
+
+          Content-Length: 0
+
+
+          '
+      x-cpanel-api-version: UAPI
+      x-cpanel-available-version: cPanel 84
+  /Backup/restore_email_filters:
+    post:
+      x-readonly: false
+      x-rollback: none
+      description: 'This function restores an account''s email filters.
+
+
+        **Important:**
+
+
+        When the Receive Mail role is disabled, the system also **disables** this function.
+
+
+        **Note:**
+
+
+        You **must** use the `backup` parameter when you call this function in one of the following formats:
+
+        * As part of a `multipart/form-data` request body to upload and restore a backup file to the server.
+
+        * As a query parameter to restore an existing file on the server.'
+      operationId: Backup-restore_email_filters
+      parameters:
+      - description: 'The email filter file to restore.
+
+
+          **Important:**
+
+
+          **Only** pass this parameter to restore email filter files that already exist on the server.
+
+
+          **Note:**
+
+
+          To restore multiple email filter files, increment the parameter name. For example: `backup-1`, `backup-2`, and `backup-3`.'
+        examples:
+          multiple:
+            summary: Restore multiple email filter files.
+            value: backup-1=/home/user/filter_info1.username.yaml.gz backup-2=/home/user/filter_info2.username.yaml.gz backup-3=/home/user/filter_info3.username.yaml.gz
+          single:
+            summary: Restore a single email filter file.
+            value: /home/user/filter_info.username.yaml.gz
+        in: query
+        name: backup
+        required: false
+        schema:
+          type: string
+      - description: 'The maximum number of seconds to try to restore the file.
+
+          * `0` - The system will not time out the file restoration.'
+        in: query
+        name: timeout
+        required: false
+        schema:
+          default: 7200
+          example: 3600
+          minimum: 0
+          type: integer
+      - description: 'Whether to return additional information from the `/home/cpuser/.cpanel/logs/restore-email-filters` log files.
+
+          * `1` - Return additional information.
+
+          * `0` - Do not return additional information.'
+        in: query
+        name: verbose
+        required: false
+        schema:
+          default: 0
+          enum:
+          - 0
+          - 1
+          example: 1
+          type: integer
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              properties:
+                backup:
+                  format: binary
+                  type: string
+              type: object
+        description: 'The email filter file to upload and restore.
+
+
+          **Important:**
+
+
+          * **Only** pass this parameter to upload files that don''t already exist on the server.
+
+          * You can''t pass this parameter on the command line.
+
+
+          **Note:**
+
+
+          * To upload multiple email filter files, increment the parameter name. For example: `backup-1`, `backup-2`, and `backup-3`.
+
+          * Pass this file in a multipart/form-data structure.
+
+          * For more information about this structure, read Mozilla''s [POST Method](https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/POST) documentation.'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  apiversion:
+                    description: The version of the API.
+                    example: 3
+                    type: integer
+                  func:
+                    description: The name of the method called.
+                    example: restore_email_filters
+                    type: string
+                  module:
+                    description: The name of the module called.
+                    example: Backup
+                    type: string
+                  result:
+                    properties:
+                      data:
+                        properties:
+                          log_id:
+                            description: The log file's restoration identification (ID). The system uses the backup restoration's date to create this ID. The ID is in [ISO-8601 Date Time](https://en.wikipedia.org/wiki/ISO_8601) format with the log's revision number appended.
+                            example: 2019-08-13T15:10:07Z.1
+                            type: string
+                          log_path:
+                            description: The filepath to the backup restoration's log file.
+                            example: /home/cpuser/.cpanel/logs/restore-email-filters/2019-09-11T18:30:49Z.1.log
+                            format: path
+                            type: string
+                          messages:
+                            description: An array of statements about the database's restoration.
+                            items:
+                              example: The system successfully restored the email filters from the 'filter-info.user.yaml.gz' backup.
+                              type: string
+                            type: array
+                        type: object
+                      errors:
+                        description: List of errors if the API failed.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      messages:
+                        description: List of messages generated by the API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      metadata:
+                        properties: {}
+                      status:
+                        description: '* `1` - Success
+
+                          * `0` - Failed: Check the errors field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      warnings:
+                        description: List of warnings generated by the API. Warnings describe non-critical failures or other problematic conditions noted while running a API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                    type: object
+                type: object
+          description: HTTP Request was successful.
+      summary: Restore email filters
+      tags:
+      - File Restoration
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "uapi --input=json --output=jsonpretty \\\n  --user=username \\\n  Backup \\\n  restore_email_filters\n"
+      - label: HTTP Request (Wire Format)
+        lang: HTTP
+        source: 'POST /cpsess##########/execute/Backup/restore_email_filters HTTP/1.1
+
+          Host: example.com:2083
+
+          Cookie: ###################################
+
+          Content-Type: application/json
+
+          Content-Length: 0
+
+
+          '
+      x-cpanel-api-version: UAPI
+      x-cpanel-available-version: cPanel 86
+  /Backup/restore_email_forwarders:
+    post:
+      x-readonly: false
+      x-rollback: none
+      description: 'This function restores an account''s email forwarders.
+
+
+        **Important:**
+
+
+        When the Receive Mail role is disabled, the system also **disables** this function.
+
+
+        **Note:**
+
+
+        You **must** use the `backup` parameter when you call this function in one of the following formats:
+
+        * As part of a `multipart/form-data` request body to upload and restore a backup file to the server. For more information about this structure, read Mozilla''s POST Method documentation.
+
+        * As a query parameter to restore an existing file on the server.'
+      operationId: Backup-restore_email_forwarders
+      parameters:
+      - description: 'The email forwarder file to restore.
+
+
+          **Important:**
+
+
+          **Only** pass this parameter to restore email forwarder files that already exist on the server.
+
+
+          **Note:**
+
+
+          To restore multiple email filter files, increment the parameter name. For example: `backup-1`, `backup-2`, and `backup-3`.'
+        examples:
+          multiple:
+            summary: Restore multiple email forwarder files.
+            value: backup-1=/home/user/aliases-example1.com.gz backup-2=/home/user/aliases-example2.com.gz backup-3=/home/user/aliases-example3.com.gz
+          single:
+            summary: Restore a single email forwarder file.
+            value: /home/user/aliases-example.com.gz
+        in: query
+        name: backup
+        required: false
+        schema:
+          type: string
+      - description: 'The maximum number of seconds to try to restore the file.
+
+          * `0` - The system will not time out the file restoration.'
+        in: query
+        name: timeout
+        required: false
+        schema:
+          default: 7200
+          example: 3600
+          minimum: 0
+          type: integer
+      - description: 'Whether to return additional information from the `/home/cpuser/.cpanel/logs/restore-email-forwarders` log files.
+
+          * `1` - Return additional information.
+
+          * `0` - Do not return additional information.'
+        in: query
+        name: verbose
+        required: false
+        schema:
+          default: 0
+          enum:
+          - 0
+          - 1
+          example: 1
+          type: integer
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              properties:
+                backup:
+                  format: binary
+                  type: string
+              type: object
+        description: 'The email forwarder file to upload and restore.
+
+
+          **Important:**
+
+
+          * **Only** pass this parameter to upload files that don''t already exist on the server.
+
+          * You can''t pass this parameter on the command line.
+
+
+          **Note:**
+
+
+          To upload multiple email filter files, increment the parameter name. For example: `backup-1`, `backup-2`, and `backup-3`.'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  apiversion:
+                    description: The version of the API.
+                    example: 3
+                    type: integer
+                  func:
+                    description: The name of the method called.
+                    example: restore_email_forwarders
+                    type: string
+                  module:
+                    description: The name of the module called.
+                    example: Backup
+                    type: string
+                  result:
+                    properties:
+                      data:
+                        properties:
+                          log_id:
+                            description: The log file's restoration identification (ID). The system uses the backup restoration's date to create this ID. The ID is in [ISO-8601 Date Time](https://en.wikipedia.org/wiki/ISO_8601) format with the log's revision number appended.
+                            example: 2019-08-13T15:10:07Z.1
+                            type: string
+                          log_path:
+                            description: The filepath to the backup restoration's log file.
+                            example: /home/cpuser/.cpanel/logs/restore-email-forwarders/2019-09-11T18:30:49Z.1.log
+                            format: path
+                            type: string
+                          messages:
+                            description: An array of statements about the database's restoration.
+                            items:
+                              example: The system successfully restored the email forwarders from the 'aliases-example.com.gz' backup.
+                              type: string
+                            type: array
+                        type: object
+                      errors:
+                        description: List of errors if the API failed.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      messages:
+                        description: List of messages generated by the API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      metadata:
+                        properties: {}
+                      status:
+                        description: '* `1` - Success
+
+                          * `0` - Failed: Check the errors field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      warnings:
+                        description: List of warnings generated by the API. Warnings describe non-critical failures or other problematic conditions noted while running a API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                    type: object
+                type: object
+          description: HTTP Request was successful.
+      summary: Restore email forwarders
+      tags:
+      - File Restoration
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "uapi --input=json --output=jsonpretty \\\n  --user=username \\\n  Backup \\\n  restore_email_forwarders\n"
+      - label: HTTP Request (Wire Format)
+        lang: HTTP
+        source: 'POST /cpsess##########/execute/Backup/restore_email_forwarders HTTP/1.1
+
+          Host: example.com:2083
+
+          Cookie: ###################################
+
+          Content-Type: application/json
+
+          Content-Length: 0
+
+
+          '
+      x-cpanel-api-version: UAPI
+      x-cpanel-available-version: cPanel 86
+  /Backup/restore_files:
+    post:
+      x-readonly: false
+      x-rollback: none
+      description: 'This function restores an account''s files.
+
+
+        **Important:**
+
+
+        When the File Storage role is disabled, the system also **disables** this function.
+
+
+        **Note:**
+
+
+        You **must** use the `backup` parameter when you call this function in one of the following formats:
+
+        * As part of a `multipart/form-data` request body to upload and restore a backup file to the server. For more information about this structure, read Mozilla''s POST Method documentation.
+
+        * As a query parameter to restore an existing file on the server.'
+      operationId: Backup-restore_files
+      parameters:
+      - description: 'The backup file to restore.
+
+
+          **Important:**
+
+
+          **Only** pass this parameter to restore backup files that already exist on the server.
+
+
+          **Note:**
+
+
+          To restore multiple backup files, increment the parameter name. For example: `backup-1`, `backup-2`, and `backup-3`.'
+        examples:
+          multiple:
+            summary: Restore multiple backup files.
+            value: backup-1=/home/cpuser/backup-cpuser.tld-9-10-2019_1.tar.gz backup-2=/home/cpuser/backup-cpuser.tld-9-10-2019_2.tar.gz
+          single:
+            summary: Restore a single backup file.
+            value: /home/cpuser/backup-cpuser.tld-9-10-2019_1.tar.gz
+        in: query
+        name: backup
+        required: false
+        schema:
+          type: string
+      - description: The directory to which to restore the file. The default is the user's `home` directory.
+        in: query
+        name: directory
+        required: false
+        schema:
+          example: /home/user/example
+          format: path
+          type: string
+      - description: 'The maximum number of seconds to try to restore the file.
+
+          * `0` - The system will not time out the file restoration.'
+        in: query
+        name: timeout
+        required: false
+        schema:
+          default: 172800
+          example: 7200
+          minimum: 0
+          type: integer
+      - description: 'Whether to return additional information from the `/home/cptest/.cpanel/logs/restorefiles` log files.
+
+          * `1` - Return additional information.
+
+          * `0` - Do not return additional information.'
+        in: query
+        name: verbose
+        required: false
+        schema:
+          default: 0
+          enum:
+          - 0
+          - 1
+          example: 1
+          type: integer
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              properties:
+                backup:
+                  format: binary
+                  type: string
+              type: object
+        description: 'The backup file to upload and restore.
+
+
+          **Important:**
+
+
+          * **Only** pass this parameter to upload files that don''t already exist on the server.
+
+          * You can''t pass this parameter on the command line.
+
+
+          **Note:**
+
+
+          To upload and restore multiple backup files, increment the parameter name. For example: `backup-1`, `backup-2`, and `backup-3`.'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  apiversion:
+                    description: The version of the API.
+                    example: 3
+                    type: integer
+                  func:
+                    description: The name of the method called.
+                    example: restore_files
+                    type: string
+                  module:
+                    description: The name of the module called.
+                    example: Backup
+                    type: string
+                  result:
+                    properties:
+                      data:
+                        properties:
+                          log_id:
+                            description: The log file's restoration identification (ID). The system uses the backup restoration's date to create this ID. The ID is in [ISO-8601 Date Time](https://en.wikipedia.org/wiki/ISO_8601) format with the log's revision number appended.
+                            example: 2019-08-13T15:10:07Z.1
+                            type: string
+                          log_path:
+                            description: The filepath to the backup restoration's log file.
+                            example: /home/cptest/.cpanel/logs/restorefiles/2019-08-13T15:10:07Z.1.log
+                            format: path
+                            type: string
+                          messages:
+                            description: An array of statements about the database's restoration.
+                            items:
+                              example: The system successfully restored the directory /home/cpuser/point2 from the backup file backup-cpuser.tld-9-10-2019_1.tar.gz
+                              type: string
+                            type: array
+                        type: object
+                      errors:
+                        description: List of errors if the API failed.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      messages:
+                        description: List of messages generated by the API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      metadata:
+                        properties: {}
+                      status:
+                        description: '* `1` - Success
+
+                          * `0` - Failed: Check the errors field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      warnings:
+                        description: List of warnings generated by the API. Warnings describe non-critical failures or other problematic conditions noted while running a API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                    type: object
+                type: object
+          description: HTTP Request was successful.
+      summary: Restore files
+      tags:
+      - File Restoration
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "uapi --input=json --output=jsonpretty \\\n  --user=username \\\n  Backup \\\n  restore_files\n"
+      - label: HTTP Request (Wire Format)
+        lang: HTTP
+        source: 'POST /cpsess##########/execute/Backup/restore_files HTTP/1.1
+
+          Host: example.com:2083
+
+          Cookie: ###################################
+
+          Content-Type: application/json
+
+          Content-Length: 0
+
+
+          '
+      x-cpanel-api-version: UAPI
+      x-cpanel-available-version: cPanel 86
+  /Restore/directory_listing:
+    get:
+      x-readonly: true
+      description: 'This function lists all of the backup files and directories in the user''s home directory.
+
+
+        **Important:**
+
+
+        When you disable the File Storage role, the system **disables** this function.'
+      operationId: Restore-directory_listing
+      parameters:
+      - description: 'A path to a subdirectory within the user''s home directory, or any level below it.
+
+
+          **Note:**
+
+
+          The value of this parameter **must** begin and end with a forward slash (`/`) for security purposes.'
+        in: query
+        name: path
+        required: true
+        schema:
+          example: /public_html/
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  apiversion:
+                    description: The version of the API.
+                    example: 3
+                    type: integer
+                  func:
+                    description: The name of the method called.
+                    example: directory_listing
+                    type: string
+                  module:
+                    description: The name of the module called.
+                    example: Restore
+                    type: string
+                  result:
+                    properties:
+                      data:
+                        description: An object that contains information about a specific item stored in the backup.
+                        items:
+                          properties:
+                            conflict:
+                              description: 'Whether a difference exists between the `type` and `onDiskType` returns.
+
+                                * `1` - Conflict exists.
+
+                                * `0` - **No** conflict exists.'
+                              enum:
+                              - 0
+                              - 1
+                              example: 0
+                              type: integer
+                            exists:
+                              description: 'Whether the file exists in the user''s directory or **only** in the backup.
+
+                                * `1` - File exists in the user''s directory.
+
+                                * `0` - File exists **only** in the backup.'
+                              enum:
+                              - 0
+                              - 1
+                              example: 1
+                              type: integer
+                            name:
+                              description: The name of the file or directory.
+                              example: public_html
+                              type: string
+                            onDiskType:
+                              description: 'The item type stored on the disk.
+
+                                * `dir` - A directory.
+
+                                * `file` - A file.
+
+                                * `symlink` - A symlink.
+
+                                * `unknown` - An unknown file type.'
+                              enum:
+                              - dir
+                              - file
+                              - symlink
+                              - unknown
+                              example: file
+                              type: string
+                            type:
+                              description: 'The item type stored in the backup.
+
+                                * `dir` - A directory.
+
+                                * `file` - A file.
+
+                                * `symlink` - A symlink.
+
+                                * `unknown` - An unknown file type.'
+                              enum:
+                              - dir
+                              - file
+                              - symlink
+                              - unknown
+                              example: file
+                              type: string
+                          type: object
+                        type: array
+                      errors:
+                        description: List of errors if the API failed.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      messages:
+                        description: List of messages generated by the API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      metadata:
+                        properties:
+                          transformed:
+                            description: Post-processing may have transformed the data.
+                            enum:
+                            - 1
+                            example: 1
+                            type: integer
+                      status:
+                        description: '* `1` - Success.
+
+                          * `0` - Failed. Check the `errors` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      warnings:
+                        description: List of warnings generated by the API. Warnings describe non-critical failures or other problematic conditions noted while running a API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+          description: HTTP Request was successful.
+      summary: Return backups in home directory
+      tags:
+      - File Restoration
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "uapi --output=jsonpretty \\\n  --user=username \\\n  Restore \\\n  directory_listing \\\n  path='/public_html/'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2083/cpsess##########/execute/Restore/directory_listing?path=%2fpublic_html%2f
+      - label: LiveAPI Perl
+        lang: Perl
+        source: "#--------------------------------------------------------------------------------------\n# Instructions:\n#--------------------------------------------------------------------------------------\n# <theme-name> is the theme assigned to cPanel account.\n# 1) cd /usr/local/cpanel/base/frontend/<theme_name>\n# 2) mkdir api_examples\n# 3) cd api_examples\n# 4) create a file Restore_directory_listing.live.pl and put this code into that file.\n# 5) In your browser login to a cPanel account.\n# 6) Manually change the url from: .../frontend/<theme_name>/\n#    to .../frontend/<theme_name>/api_examples/Restore_directory_listing.live.pl\n#--------------------------------------------------------------------------------------\n\nuse strict;\n\nuse Cpanel::LiveAPI ();\n\nmy $cpanel = Cpanel::LiveAPI->new(); # Connect to cPanel - only do this once.\n\n# Print the header\nprint \"Content-type: text/plain\\r\\n\\r\\n\";\n\n# Call the API\nmy $response = $cpanel->uapi(\n    q/Restore/,\n    q/directory_listing/,\n    {\n        'path' => '/public_html/',\n    }\n);\n\n# Handle the response\nif ($response->{cpanelresult}{result}{status}) {\n    my $data = $response->{cpanelresult}{result}{data};\n    foreach my $item (@{$data}) {\n        # Do something with the $item\n    }\n\n    # So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    # Report errors:\n    print to_json($response->{cpanelresult}{result}{errors});\n}\n\n# Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n#--------------------------------------------------------------------------------------\n# Helper function to convert a perl object to html printable json\n#--------------------------------------------------------------------------------------\nsub to_json {\n    require JSON;\n    my $str = JSON->new->pretty->encode($_[0]);\n    return $str;\n}\n"
+      - label: LiveAPI PHP
+        lang: PHP
+        source: "<?php\n//--------------------------------------------------------------------------------------\n// Instructions:\n//--------------------------------------------------------------------------------------\n// <theme-name> is the theme assigned to cPanel account.\n// 1) cd /usr/local/cpanel/base/frontend/<theme_name>\n// 2) mkdir api_examples\n// 3) cd api_examples\n// 4) create a file Restore_directory_listing.live.php and put this code into that file.\n// 5) In your browser login to a cPanel account.\n// 6) Manually change the url from: .../frontend/<theme_name>/\n//    to .../frontend/<theme_name>/api_examples/Restore_directory_listing.live.php\n//--------------------------------------------------------------------------------------\n\n// Instantiate the CPANEL object.\nrequire_once \"/usr/local/cpanel/php/cpanel.php\";\n\n// Print the header\nheader('Content-Type: text/plain');\n\n// Connect to cPanel - only do this once.\n$cpanel = new CPANEL();\n\n// Call the API\n$response = $cpanel->uapi(\n    'Restore',\n    'directory_listing',\n    array (\n        'path' => '/public_html/',\n    )\n);\n\n// Handle the response\nif ($response['cpanelresult']['result']['status']) {\n    $data = $response['cpanelresult']['result']['data'];\n    foreach ($data as $item) {\n        // Do something with the $item\n    }\n\n    // So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    // Report errors:\n    print to_json($response['cpanelresult']['result']['errors']);\n}\n\n// Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n//--------------------------------------------------------------------------------------\n// Helper function to convert a PHP value to html printable json\n//--------------------------------------------------------------------------------------\nfunction to_json($data) {\n    return json_encode($data, JSON_PRETTY_PRINT);\n}"
+      x-cpanel-api-version: UAPI
+      x-cpanel-available-version: cPanel 68
+  /Restore/get_users:
+    get:
+      x-readonly: true
+      description: 'This function lists a reseller''s users that have existing backup metadata.
+
+
+        **Note:**
+
+
+        When you disable the File Storage role, the system **disables** this function.'
+      operationId: Restore-get_users
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  apiversion:
+                    description: The version of the API.
+                    example: 3
+                    type: integer
+                  func:
+                    description: The name of the method called.
+                    example: get_users
+                    type: string
+                  module:
+                    description: The name of the module called.
+                    example: Restore
+                    type: string
+                  result:
+                    properties:
+                      data:
+                        description: An array of reseller account names.
+                        items:
+                          example: username
+                          format: username
+                          type: string
+                        type: array
+                      errors:
+                        description: List of errors if the API failed.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      messages:
+                        description: List of messages generated by the API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      metadata:
+                        properties:
+                          transformed:
+                            description: Post-processing may have transformed the data.
+                            enum:
+                            - 1
+                            example: 1
+                            type: integer
+                      status:
+                        description: '* `1` - Success.
+
+                          * `0` - Failed. Check the `errors` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      warnings:
+                        description: List of warnings generated by the API. Warnings describe non-critical failures or other problematic conditions noted while running a API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                    type: object
+                type: object
+          description: HTTP Request was successful.
+      summary: Return cPanel accounts with backup metadata
+      tags:
+      - File Restoration
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "uapi --output=jsonpretty \\\n  --user=username \\\n  Restore \\\n  get_users\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2083/cpsess##########/execute/Restore/get_users
+      - label: LiveAPI Perl
+        lang: Perl
+        source: "#--------------------------------------------------------------------------------------\n# Instructions:\n#--------------------------------------------------------------------------------------\n# <theme-name> is the theme assigned to cPanel account.\n# 1) cd /usr/local/cpanel/base/frontend/<theme_name>\n# 2) mkdir api_examples\n# 3) cd api_examples\n# 4) create a file Restore_get_users.live.pl and put this code into that file.\n# 5) In your browser login to a cPanel account.\n# 6) Manually change the url from: .../frontend/<theme_name>/\n#    to .../frontend/<theme_name>/api_examples/Restore_get_users.live.pl\n#--------------------------------------------------------------------------------------\n\nuse strict;\n\nuse Cpanel::LiveAPI ();\n\nmy $cpanel = Cpanel::LiveAPI->new(); # Connect to cPanel - only do this once.\n\n# Print the header\nprint \"Content-type: text/plain\\r\\n\\r\\n\";\n\n# Call the API\nmy $response = $cpanel->uapi(\n    q/Restore/,\n    q/get_users/\n);\n\n# Handle the response\nif ($response->{cpanelresult}{result}{status}) {\n    my $data = $response->{cpanelresult}{result}{data};\n    foreach my $item (@{$data}) {\n        # Do something with the $item\n    }\n\n    # So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    # Report errors:\n    print to_json($response->{cpanelresult}{result}{errors});\n}\n\n# Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n#--------------------------------------------------------------------------------------\n# Helper function to convert a perl object to html printable json\n#--------------------------------------------------------------------------------------\nsub to_json {\n    require JSON;\n    my $str = JSON->new->pretty->encode($_[0]);\n    return $str;\n}\n"
+      - label: LiveAPI PHP
+        lang: PHP
+        source: "<?php\n//--------------------------------------------------------------------------------------\n// Instructions:\n//--------------------------------------------------------------------------------------\n// <theme-name> is the theme assigned to cPanel account.\n// 1) cd /usr/local/cpanel/base/frontend/<theme_name>\n// 2) mkdir api_examples\n// 3) cd api_examples\n// 4) create a file Restore_get_users.live.php and put this code into that file.\n// 5) In your browser login to a cPanel account.\n// 6) Manually change the url from: .../frontend/<theme_name>/\n//    to .../frontend/<theme_name>/api_examples/Restore_get_users.live.php\n//--------------------------------------------------------------------------------------\n\n// Instantiate the CPANEL object.\nrequire_once \"/usr/local/cpanel/php/cpanel.php\";\n\n// Print the header\nheader('Content-Type: text/plain');\n\n// Connect to cPanel - only do this once.\n$cpanel = new CPANEL();\n\n// Call the API\n$response = $cpanel->uapi(\n    'Restore',\n    'get_users'\n);\n\n// Handle the response\nif ($response['cpanelresult']['result']['status']) {\n    $data = $response['cpanelresult']['result']['data'];\n    foreach ($data as $item) {\n        // Do something with the $item\n    }\n\n    // So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    // Report errors:\n    print to_json($response['cpanelresult']['result']['errors']);\n}\n\n// Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n//--------------------------------------------------------------------------------------\n// Helper function to convert a PHP value to html printable json\n//--------------------------------------------------------------------------------------\nfunction to_json($data) {\n    return json_encode($data, JSON_PRETTY_PRINT);\n}"
+      x-cpanel-api-version: UAPI
+      x-cpanel-available-version: cPanel 72
+  /Restore/query_file_info:
+    get:
+      x-readonly: true
+      description: 'This function lists all of an item''s backup locations. An item can be a file, a directory, or a symlink.
+
+
+        **Important:**
+
+
+        When you disable the File Storage role, the system **disables** this function.'
+      operationId: Restore-query_file_info
+      parameters:
+      - description: 'A file, directory, or symlink in the user''s directory tree.
+
+
+          **Note:**
+
+
+          The value of this parameter **must** begin with a forward slash (`/`).'
+        in: query
+        name: path
+        required: true
+        schema:
+          example: /public_html/index.php
+          format: path
+          type: string
+      - description: 'Whether to show the `exist` return, which indicates whether the item exists in the
+
+          local disk or only in the backup.
+
+
+          * `1` — Show the `exist` return''s value.
+
+          * `0` — Do **not** show the `exists` return''s value.'
+        in: query
+        name: exists
+        required: false
+        schema:
+          default: 0
+          enum:
+          - 1
+          - 0
+          example: 0
+          type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  apiversion:
+                    description: The version of the API.
+                    example: 3
+                    type: integer
+                  func:
+                    description: The name of the method called.
+                    example: query_file_info
+                    type: string
+                  module:
+                    description: The name of the module called.
+                    example: Restore
+                    type: string
+                  result:
+                    properties:
+                      data:
+                        description: An array of objects containing the item's details.
+                        items:
+                          properties:
+                            backupDate:
+                              description: The date when the system created the backup.
+                              example: '2020-07-01T00:00:00.000Z'
+                              format: ISO-8601 Date
+                              type: string
+                            backupID:
+                              anyOf:
+                              - description: A daily backup file from a specified backup date.
+                                format: ISO-8601 Date
+                                type: string
+                              - description: An incremental daily backup.
+                                enum:
+                                - incremental
+                                type: string
+                              - description: A weekly or monthly incremental backup.
+                                enum:
+                                - weekly/incremental
+                                - monthly/incremental
+                                type: string
+                              - description: A weekly or monthly backup from a specified backup date.
+                                type: string
+                              description: 'The backup''s identification.
+
+
+                                * A date, in `YYYY-MM-DD` format.
+
+                                * `incremental` — An incremental daily backup.
+
+                                * The backup frequency (`weekly` or `monthly`) , a slash character (`/`), and the value `incremental`.
+
+                                * The backup frequency (`weekly` or `monthly`), a slash character (`/`), and the backup date, in `YYYY-MM-DD` format.'
+                              example: weekly/2017-07-01
+                              type: string
+                            backupType:
+                              description: 'The backup type.
+
+
+                                * `compressed` —  A compressed tar file.
+
+                                * `incremental` — A full tree of files and directories.
+
+                                * `uncompressed` — An uncompressed tar file.'
+                              enum:
+                              - compressed
+                              - incremental
+                              - uncompressed
+                              example: compressed
+                              type: string
+                            exists:
+                              description: 'Whether the item (a file, a directory, or a symlink) exists in the local disk or only in the backup.
+
+
+                                * `1` — The item exists in the local disk.
+
+                                * `0` — The item exists only in the backup.
+
+
+                                **Note:**
+
+
+                                This return appears **only** if you set the `exists` parameter to `1`.'
+                              enum:
+                              - 1
+                              - 0
+                              example: 1
+                              type: integer
+                            fileSize:
+                              description: 'The size, in bytes, of the file in the backup.
+
+
+                                **Note:**
+
+
+                                The function returns this value **only** if the item is a file.'
+                              example: 199
+                              minimum: 0
+                              type: integer
+                            mtime:
+                              description: The file's last modification time.
+                              example: 1520043240
+                              format: unix_timestamp
+                              type: integer
+                            path:
+                              description: The identical file path value that the system passed in the function.
+                              example: /public_html/index.php
+                              format: path
+                              type: string
+                            type:
+                              description: 'The item type stored in the backup.
+
+
+                                * `dir` — A directory.
+
+                                * `file` — A file.
+
+                                * `symlink` — A symlink.
+
+                                * `unknown` — An unknown file type.'
+                              enum:
+                              - dir
+                              - file
+                              - symlink
+                              - unknown
+                              example: file
+                              type: string
+                          type: object
+                        type: array
+                      errors:
+                        description: List of errors if the API failed.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      messages:
+                        description: List of messages generated by the API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      metadata:
+                        properties:
+                          transformed:
+                            description: Post-processing may have transformed the data.
+                            enum:
+                            - 1
+                            example: 1
+                            type: integer
+                      status:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the `errors` field for more details.'
+                        enum:
+                        - 1
+                        - 0
+                        example: 1
+                        type: integer
+                      warnings:
+                        description: List of warnings generated by the API. Warnings describe non-critical failures or other problematic conditions noted while running a API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                    type: object
+                type: object
+          description: HTTP Request was successful.
+      summary: Return backup storage locations
+      tags:
+      - File Restoration
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "uapi --output=jsonpretty \\\n  --user=username \\\n  Restore \\\n  query_file_info \\\n  path='/public_html/index.php'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2083/cpsess##########/execute/Restore/query_file_info?path=%2fpublic_html%2findex.php
+      - label: LiveAPI Perl
+        lang: Perl
+        source: "#--------------------------------------------------------------------------------------\n# Instructions:\n#--------------------------------------------------------------------------------------\n# <theme-name> is the theme assigned to cPanel account.\n# 1) cd /usr/local/cpanel/base/frontend/<theme_name>\n# 2) mkdir api_examples\n# 3) cd api_examples\n# 4) create a file Restore_query_file_info.live.pl and put this code into that file.\n# 5) In your browser login to a cPanel account.\n# 6) Manually change the url from: .../frontend/<theme_name>/\n#    to .../frontend/<theme_name>/api_examples/Restore_query_file_info.live.pl\n#--------------------------------------------------------------------------------------\n\nuse strict;\n\nuse Cpanel::LiveAPI ();\n\nmy $cpanel = Cpanel::LiveAPI->new(); # Connect to cPanel - only do this once.\n\n# Print the header\nprint \"Content-type: text/plain\\r\\n\\r\\n\";\n\n# Call the API\nmy $response = $cpanel->uapi(\n    q/Restore/,\n    q/query_file_info/,\n    {\n        'path' => '/public_html/index.php',\n    }\n);\n\n# Handle the response\nif ($response->{cpanelresult}{result}{status}) {\n    my $data = $response->{cpanelresult}{result}{data};\n    foreach my $item (@{$data}) {\n        # Do something with the $item\n    }\n\n    # So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    # Report errors:\n    print to_json($response->{cpanelresult}{result}{errors});\n}\n\n# Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n#--------------------------------------------------------------------------------------\n# Helper function to convert a perl object to html printable json\n#--------------------------------------------------------------------------------------\nsub to_json {\n    require JSON;\n    my $str = JSON->new->pretty->encode($_[0]);\n    return $str;\n}\n"
+      - label: LiveAPI PHP
+        lang: PHP
+        source: "<?php\n//--------------------------------------------------------------------------------------\n// Instructions:\n//--------------------------------------------------------------------------------------\n// <theme-name> is the theme assigned to cPanel account.\n// 1) cd /usr/local/cpanel/base/frontend/<theme_name>\n// 2) mkdir api_examples\n// 3) cd api_examples\n// 4) create a file Restore_query_file_info.live.php and put this code into that file.\n// 5) In your browser login to a cPanel account.\n// 6) Manually change the url from: .../frontend/<theme_name>/\n//    to .../frontend/<theme_name>/api_examples/Restore_query_file_info.live.php\n//--------------------------------------------------------------------------------------\n\n// Instantiate the CPANEL object.\nrequire_once \"/usr/local/cpanel/php/cpanel.php\";\n\n// Print the header\nheader('Content-Type: text/plain');\n\n// Connect to cPanel - only do this once.\n$cpanel = new CPANEL();\n\n// Call the API\n$response = $cpanel->uapi(\n    'Restore',\n    'query_file_info',\n    array (\n        'path' => '/public_html/index.php',\n    )\n);\n\n// Handle the response\nif ($response['cpanelresult']['result']['status']) {\n    $data = $response['cpanelresult']['result']['data'];\n    foreach ($data as $item) {\n        // Do something with the $item\n    }\n\n    // So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    // Report errors:\n    print to_json($response['cpanelresult']['result']['errors']);\n}\n\n// Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n//--------------------------------------------------------------------------------------\n// Helper function to convert a PHP value to html printable json\n//--------------------------------------------------------------------------------------\nfunction to_json($data) {\n    return json_encode($data, JSON_PRETTY_PRINT);\n}"
+      x-cpanel-api-version: UAPI
+      x-cpanel-available-version: cPanel 68
+  /Restore/restore_file:
+    get:
+      x-readonly: false
+      x-rollback: none
+      description: 'This function restores a file or directory from a backup to the file or directory''s original location.
+
+
+        **Important:**
+
+
+        When you disable the File Storage role, the system **disables** this function.'
+      operationId: Restore-restore_file
+      parameters:
+      - description: 'The backup''s identification.
+
+
+          * `YYYY-MM-DD` — Restore a daily backup from the specified backup date.
+
+          * `incremental` — Restore a daily incremental backup.
+
+          * `weekly/YYYY-MM-DD` — Restore a weekly backup from the specified backup date.
+
+          * `monthly/YYYY-MM-DD` — Restore a monthly backup from the specified backup date.
+
+          * `weekly/incremental` — Restore a weekly incremental backup.
+
+          * `monthly/incremental` — Restore a monthly incremental backup.'
+        in: query
+        name: backupID
+        required: true
+        schema:
+          anyOf:
+          - description: A daily backup file from a specified backup date.
+            format: ISO-8601 Date
+            type: string
+          - description: An incremental daily backup.
+            enum:
+            - incremental
+            type: string
+          - description: A weekly or monthly incremental backup.
+            enum:
+            - weekly/incremental
+            - monthly/incremental
+            type: string
+          - description: A weekly or monthly backup from a specified backup date.
+            type: string
+          example: weekly/2017-07-03
+      - description: 'Whether to overwrite the file or directory on the disc with its backup replacement.
+
+
+          * `1` — Overwrite the file or directory.
+
+          * `0` — Do **not** overwrite the file or directory.'
+        in: query
+        name: overwrite
+        required: true
+        schema:
+          enum:
+          - 1
+          - 0
+          example: 1
+          type: integer
+      - description: 'The absolute file or directory''s path, within a backup, that you wish to restore.
+
+
+          **Important:**
+
+
+          * The value of this parameter **must** begin with a forward slash (/).
+
+          * You **must** parse filenames properly to prevent a cross-site scripting (XSS) attack.'
+        in: query
+        name: path
+        required: true
+        schema:
+          example: /public_html/index.php
+          format: path
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  apiversion:
+                    description: The version of the API.
+                    example: 3
+                    type: integer
+                  func:
+                    description: The name of the method called.
+                    example: restore_file
+                    type: string
+                  module:
+                    description: The name of the module called.
+                    example: Restore
+                    type: string
+                  result:
+                    properties:
+                      data:
+                        description: An object containing the status of the operation.
+                        properties:
+                          success:
+                            description: 'Whether the `overwrite` parameter succeeded.
+
+
+                              * `1` — Success.
+
+                              * `0` — Failure.'
+                            enum:
+                            - 1
+                            - 0
+                            example: 1
+                            type: integer
+                        type: object
+                      errors:
+                        description: List of errors if the API failed.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      messages:
+                        description: List of messages generated by the API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      metadata:
+                        properties: {}
+                      status:
+                        description: '- 1 - Success
+
+                          - 0 - Failed: Check the errors field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      warnings:
+                        description: List of warnings generated by the API. Warnings describe non-critical failures or other problematic conditions noted while running a API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                    type: object
+                type: object
+          description: HTTP Request was successful.
+      summary: Restore file or directory
+      tags:
+      - File Restoration
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "uapi --output=jsonpretty \\\n  --user=username \\\n  Restore \\\n  restore_file \\\n  backupID='weekly/2017-07-03' \\\n  path='/public_html/index.php' \\\n  overwrite='1'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2083/cpsess##########/execute/Restore/restore_file?backupID=weekly%2f2017-07-03&path=%2fpublic_html%2findex.php&overwrite=1
+      - label: LiveAPI Perl
+        lang: Perl
+        source: "#--------------------------------------------------------------------------------------\n# Instructions:\n#--------------------------------------------------------------------------------------\n# <theme-name> is the theme assigned to cPanel account.\n# 1) cd /usr/local/cpanel/base/frontend/<theme_name>\n# 2) mkdir api_examples\n# 3) cd api_examples\n# 4) create a file Restore_restore_file.live.pl and put this code into that file.\n# 5) In your browser login to a cPanel account.\n# 6) Manually change the url from: .../frontend/<theme_name>/\n#    to .../frontend/<theme_name>/api_examples/Restore_restore_file.live.pl\n#--------------------------------------------------------------------------------------\n\nuse strict;\n\nuse Cpanel::LiveAPI ();\n\nmy $cpanel = Cpanel::LiveAPI->new(); # Connect to cPanel - only do this once.\n\n# Print the header\nprint \"Content-type: text/plain\\r\\n\\r\\n\";\n\n# Call the API\nmy $response = $cpanel->uapi(\n    q/Restore/,\n    q/restore_file/,\n    {\n        'backupID' => 'weekly/2017-07-03',\n        'path' => '/public_html/index.php',\n        'overwrite' => '1',\n    }\n);\n\n# Handle the response\nif ($response->{cpanelresult}{result}{status}) {\n    my $data = $response->{cpanelresult}{result}{data};\n    # Do something with the $data\n    # So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    # Report errors:\n    print to_json($response->{cpanelresult}{result}{errors});\n}\n\n# Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n#--------------------------------------------------------------------------------------\n# Helper function to convert a perl object to html printable json\n#--------------------------------------------------------------------------------------\nsub to_json {\n    require JSON;\n    my $str = JSON->new->pretty->encode($_[0]);\n    return $str;\n}\n"
+      - label: LiveAPI PHP
+        lang: PHP
+        source: "<?php\n//--------------------------------------------------------------------------------------\n// Instructions:\n//--------------------------------------------------------------------------------------\n// <theme-name> is the theme assigned to cPanel account.\n// 1) cd /usr/local/cpanel/base/frontend/<theme_name>\n// 2) mkdir api_examples\n// 3) cd api_examples\n// 4) create a file Restore_restore_file.live.php and put this code into that file.\n// 5) In your browser login to a cPanel account.\n// 6) Manually change the url from: .../frontend/<theme_name>/\n//    to .../frontend/<theme_name>/api_examples/Restore_restore_file.live.php\n//--------------------------------------------------------------------------------------\n\n// Instantiate the CPANEL object.\nrequire_once \"/usr/local/cpanel/php/cpanel.php\";\n\n// Print the header\nheader('Content-Type: text/plain');\n\n// Connect to cPanel - only do this once.\n$cpanel = new CPANEL();\n\n// Call the API\n$response = $cpanel->uapi(\n    'Restore',\n    'restore_file',\n    array (\n        'backupID' => 'weekly/2017-07-03',\n        'path' => '/public_html/index.php',\n        'overwrite' => '1',\n    )\n);\n\n// Handle the response\nif ($response['cpanelresult']['result']['status']) {\n    $data = $response['cpanelresult']['result']['data'];\n    // Do something with the $data\n    // So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    // Report errors:\n    print to_json($response['cpanelresult']['result']['errors']);\n}\n\n// Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n//--------------------------------------------------------------------------------------\n// Helper function to convert a PHP value to html printable json\n//--------------------------------------------------------------------------------------\nfunction to_json($data) {\n    return json_encode($data, JSON_PRETTY_PRINT);\n}"
+      x-cpanel-api-version: UAPI
+      x-cpanel-available-version: cPanel 68
+components:
+  securitySchemes:
+    BasicAuth:
+      scheme: basic
+      type: http
+externalDocs:
+  url: https://cpanel.net/developers/
+x-tagGroups:
+- name: API Development Tools
+  tags:
+  - API Token Management
+  - Batch
+  - SSE Task Management
+  - URL Parsing
+- name: Authentication
+  tags:
+  - External Authentication
+  - Two-Factor Settings
+- name: Backup Information
+  tags:
+  - BackupInfo
+  - BackupInfo Status
+- name: Block Ip Addresses
+  tags:
+  - Block IP
+- name: Commerce Integration
+  tags:
+  - Market Integration
+  - SSL Certificates
+- name: Contact Information
+  tags:
+  - Contact Information
+- name: cPanel Account
+  tags:
+  - Account Enhancements
+  - Account Information
+  - Account Management
+  - AuditLog
+  - Contact Information
+  - cPanel Features
+  - Disk Quotas
+  - DomainRecommendations
+  - Personalization
+  - Resource Usage and Statistics
+  - Subaccount Management
+  - Team Roles
+  - Team Users
+- name: cPanel Account Backups
+  tags:
+  - Backup
+  - File Restoration
+- name: cPanel Plugin Framework
+  tags:
+  - Formbricks
+  - Plugins
+- name: cPanel Theme Management
+  tags:
+  - Application Information
+  - Brand Management
+  - Branding Files
+  - Browser Cache Management
+  - Language
+  - Theme Settings
+- name: Directory Management
+  tags:
+  - Directory Indexes
+  - Directory Privacy
+  - Directory Protection
+- name: DNS
+  tags:
+  - DNS
+  - DNS Information
+  - DNS Security
+  - Dynamic DNS
+  - Email DNS Settings
+  - ZoneEdit
+- name: Domain
+  tags:
+  - Domain
+- name: Domain Management
+  tags:
+  - AddonDomain
+  - Direct Link Protection (Hotlink)
+  - Domain
+  - Domain Information
+  - Domain Redirection
+  - DomainLookup
+  - Park
+  - SubDomain
+  - Virtual Host Information
+- name: Domains
+  tags:
+  - Subdomains
+- name: Email
+  tags:
+  - Email Accounts
+  - Email Filtering
+  - Email Forwarding
+  - Email Server Information
+  - Email Suspensions
+  - Mail Server Information
+  - Mailbox Management
+  - Mailing Lists
+  - Signing and Encryption (GnuPG Keys)
+  - Spam Filtering (Greylisting)
+  - Spam Management
+  - Spam Prevention (BoxTrapper)
+  - Webmail Applications
+  - Webmail Sessions
+- name: Extract Information
+  tags:
+  - ExtractInfo
+  - ExtractInfo Status
+- name: File Manager
+  tags:
+  - Trash
+- name: Files
+  tags:
+  - FTP Accounts
+  - FTP Server Settings
+  - Image Tools
+  - Jodit
+  - Manage Files
+  - Manage Files
+  - WebDisk Settings
+- name: GIT Management
+  tags:
+  - Deployment Settings
+  - Repository Management
+- name: InProductSurvey
+  tags:
+  - InProductSurvey
+- name: MySQL and MariaDB
+  tags:
+  - Database Information
+  - Database Management
+  - Remote Databases
+  - User Management
+- name: Notifications
+  tags:
+  - Pushbullet
+- name: Optional Applications
+  tags:
+  - Antivirus Protection (ClamAV)
+  - Calendar and Contacts (DAV)
+  - Calendar and Contacts Server
+  - WordPress Manager Backups
+- name: PostgreSQL
+  tags:
+  - PostgreSQL Database Management
+  - PostgreSQL User Management
+- name: Retrieve bandwidth information
+  tags:
+  - Bandwidth
+- name: Security
+  tags:
+  - Known SSH Hosts Management
+  - Login Information
+- name: Server Information
+  tags:
+  - cPanel Server Information
+  - Notifications
+  - Password Strength
+  - SSH
+  - WebPros MCP
+  - WebProsMCP
+- name: ServiceProxy
+  tags:
+  - ServiceProxy
+- name: Site Quality Monitoring
+  tags:
+  - SiteQuality
+- name: SSL Certificates
+  tags:
+  - Auto-generated SSL Certificates
+  - cPanel Account SSL Management
+  - SNI Email Settings
+  - SSL Certificate Management
+  - Verify Domain Ownership
+- name: Statistics
+  tags:
+  - Domain Statistics
+  - Weblog Settings
+- name: UserData
+  tags:
+  - UserData
+- name: Web Server Configuration
+  tags:
+  - EA4
+  - EasyApache Settings
+  - PHP
+- name: Web Server Management
+  tags:
+  - Application Manager
+  - ModSecurity
+  - NginxCaching
+  - PHP Settings
+  - Web Apps
+- name: Website Configuration
+  tags:
+  - Handler Management
+  - Logs
+  - Mime Type Management
+  - Nova
+  - Site Information
+  - Site Installation
+  - Sitejet
+  - WPX

@@ -1,0 +1,531 @@
+openapi: 3.2.0
+info:
+  contact:
+    email: cs@cpanel.net
+    name: WebPros International, LLC
+    url: https://cpanel.net/support/
+  description: WHM API.
+  license:
+    name: cPanel License
+    url: https://cpanel.net/legal-notices/
+  termsOfService: https://cpanel.net/legal-notices/
+  title: WHM Account Management API
+  version: 11.137.9999.106
+  x-api-evangelist-provenance: 'Harvested verbatim from cPanel''s developer portal on 2026-09-05 via the MCP tool get-full-api-description at https://api.docs.cpanel.net/mcp. ONE mechanical change was made before storage: example values containing PEM private-key or certificate blocks, and AWS-access-key-shaped example strings, were replaced with REDACTED_* placeholders so the file can be stored in a public git repository without tripping secret scanning. No path, operation, parameter, schema or description was altered, added or removed.'
+servers:
+- description: A server running WHM.
+  url: https://{host}:{port}/json-api
+  variables:
+    host:
+      default: whm-server.tld
+      description: The hostname of a server running WHM.
+    port:
+      default: '2087'
+      description: The WHM port.
+security:
+- BasicAuth: []
+tags:
+- description: Accounts / Account Management
+  name: Account Management
+paths:
+  /get_homedir_roots:
+    get:
+      description: 'This function returns all the directories where the system stores
+
+        users'' home directories. It returns them in descending order, based on the
+
+        current amount of available free disk space for each directory. For example,
+
+        the first directory the function lists has the most available free disk space.
+
+
+        **Note:**
+
+
+        Use WHM''s Basic WebHost Manager Setup (WHM >> Home >> Server Configuration >> Basic WebHost Manager Setup) to configure where the system will create a new user''s home directory.'
+      operationId: Accounts-get_homedir_roots
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      payload:
+                        description: An array containing data for each home parent directory. This array contains the path return.
+                        items:
+                          properties:
+                            path:
+                              description: directory where the system can store users' home directories. A valid directory path.
+                              example: /home
+                              format: local_path
+                              type: string
+                          type: object
+                        type: array
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: get_homedir_roots
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` - Success
+
+                          * `0` - Failed: Check the reason field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Return home directories list
+      tags:
+      - Account Management
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  get_homedir_roots\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/get_homedir_roots?api.version=1
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '88'
+  /list_users:
+    get:
+      description: This function lists the cPanel user accounts and the `root` user on the server.
+      operationId: Accounts-list_users
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      users:
+                        description: 'A list of cPanel user accounts. The list may consist of the following types of accounts:
+
+
+                          * A valid cPanel username.
+
+                          * `root`'
+                        example:
+                        - example
+                        - root
+                        items:
+                          type: string
+                        type: array
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: list_users
+                        type: string
+                      reason:
+                        description: 'The reason the API function failed when the `metadata.result` field is `0`.
+
+
+                          **Note:**
+
+
+                          This field may display a success message when a function succeeds.'
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` - Success.
+
+                          * `0` - Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Return root and cPanel accounts
+      tags:
+      - Account Management
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  list_users\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/list_users?api.version=1
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11'
+  /removeacct:
+    get:
+      description: This function deletes a cPanel or WHM account.
+      operationId: Accounts-removeacct
+      parameters:
+      - description: The account's username.
+        in: query
+        name: username
+        required: true
+        schema:
+          example: username
+          type: string
+      - description: 'Whether to retain the account''s DNS entries.
+
+          - `1` — Retain DNS entries.
+
+          - `0` — Delete DNS entries.'
+        in: query
+        name: keepdns
+        required: false
+        schema:
+          default: 0
+          enum:
+          - 0
+          - 1
+          example: 0
+          type: integer
+      - deprecated: true
+        description: The account's username.
+        in: query
+        name: user
+        schema:
+          example: username
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: removeacct
+                        type: string
+                      output:
+                        properties:
+                          raw:
+                            description: The function's raw output.
+                            example: '"raw":"Running pre removal script (/usr/local/cpanel/scripts/prekillacct)......Done\nCollecting Domain Name and IP...User: example\nDomain: example.com\n...Done\nLocking account and setting shell to nologin...Locking password for user example.\npasswd: Success\n...Done\nKilling all processes owned by user......Done\nRemoving Sessions.........Done\nRemoving Suspended Info.........Done\nCleaning Virtfs.........Done\nRemoving Web Logs......Done\nRemoving Bandwidth Files......Done\nRemoving Email Sending Limits Cache......Done\nRemoving DKIM keys......Done\nRemoving Crontab......Done\nRemoving HTTP Virtual Hosts...Removed the following non-SSL virtual hosts: example.com\nRemoved the following SSL virtual hosts:\n...Done\nRemoving ftp Virtual Hosts......Done\nRemoving user''s web content directory symlinks......Done\nRemoving MySQL databases and users......Done\nRemoving PostgreSQL databases and users......Done\nRemoving User & Group.......Success...Done\nRemoving DNS Entries...example.com => deleted from hostname. \n...Done\nRemoving Email Setup...Removing /etc/valiases/example.com\n...Done\nRemoving mailman lists......Done\nUpdating Databases......Done\nRemoving bandwidth limits......Done\nRemoving Counter Data......Done\nAdding IP back to the IP address pool...System has 2 free ips.\n...Done\nRemoving user''s cPanel Databases & Updating......Done\nReloading Services......Done\nRemoving mail and service configs...\n...Done\nSending Contacts......Done\nUpdating internal databases...Updating ftp passwords for example\nPurging ftp user example\nFtp password files updated.\nFtp vhost passwords synced\n...Done\nRunning post removal scripts (/usr/local/cpanel/scripts/legacypostkillacct, /usr/local/cpanel/scripts/postkillacct)......Done\nAccount Removal Complete!!!...example account removed...Done\n"'
+                            type: string
+                        type: object
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: example account removed
+                        type: string
+                      result:
+                        description: '- `1` — Success
+
+                          - `0` — Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Delete cPanel account
+      tags:
+      - Account Management
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  removeacct \\\n  username='username'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/removeacct?api.version=1&username=username
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11'
+  /set_primary_domain_docroot:
+    get:
+      description: 'This function changes the document root for a cPanel account''s primary domain.
+
+
+        To change the document root for an addon domain or subdomain, use the cPanel
+
+        UAPI `SubDomain::changedocroot` function instead.
+
+
+        **Important:**
+
+
+        - The target directory must already exist before you call this function.
+
+        The API function does not create it.
+
+        - This function does **not** move any files. You must ensure that the files
+
+        exist in the new path when you call this function.
+
+        - Any parked domains (`ServerAlias` entries) on the affected domain will
+
+        inherit the new document root.
+
+        - AutoSSL HTTP-01 renewals will fail if the new document root is empty
+
+        or missing at renewal time.
+
+        - To revert a document root change, call this function again with the
+
+        original path.'
+      operationId: Accounts-set_primary_domain_docroot
+      parameters:
+      - description: 'The new document root as a path relative to the account''s home
+
+          directory. The path **must** begin with `public_html/`, and the target
+
+          directory **must** already exist.'
+        in: query
+        name: docroot
+        required: true
+        schema:
+          example: public_html/myapp/public
+          format: path
+          type: string
+      - description: The cPanel account username whose primary domain's document root you want to change.
+        in: query
+        name: username
+        required: true
+        schema:
+          example: username
+          format: username
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      documentroot:
+                        description: The absolute path of the new document root.
+                        example: /home/username/public_html/myapp/public
+                        type: string
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: set_primary_domain_docroot
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                    type: object
+                type: object
+          description: HTTP Request was successful.
+      summary: Change document root for cPanel account primary domain
+      tags:
+      - Account Management
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  set_primary_domain_docroot \\\n  username='username' \\\n  docroot='public_html/myapp/public'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/set_primary_domain_docroot?api.version=1&username=username&docroot=public_html%2Fmyapp%2Fpublic
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11'
+components:
+  securitySchemes:
+    BasicAuth:
+      scheme: basic
+      type: http
+externalDocs:
+  url: https://cpanel.net/developers/
+x-tagGroups:
+- name: Account Restoration
+  tags:
+  - Restore Account
+  - Restore Queue Management
+  - Restore Queue Reporting
+- name: Accounts
+  tags:
+  - Account Creation
+  - Account Enhancements
+  - Account Management
+  - Bandwidth and Disk Quotas
+  - Domain Information
+  - Passwords
+  - Styles
+  - Suspensions
+- name: API Development Tools
+  tags:
+  - API Execution
+  - API Statistics
+  - API Token Management
+  - Applications
+  - Session
+- name: Authentication
+  tags:
+  - Authentication Providers
+  - External Authentication
+  - Login URL
+  - SSH Keys and Connections
+  - Two-Factor Authentication
+- name: Backups
+  tags:
+  - Backup Destination
+  - Backup or Restore
+  - Backup Settings
+  - Legacy Migration
+- name: Commerce Integration
+  tags:
+  - Market Integration
+  - Sitejet
+- name: cPanel Market
+  tags:
+  - Product Management
+  - Provider Management
+- name: cPanel Support Tickets
+  tags:
+  - Support Access
+  - Ticket Management
+- name: Customizations
+  tags:
+  - Brand
+  - Customizations
+- name: Databases
+  tags:
+  - Manage MySQL Server
+  - MySQL Databases
+  - PostgreSQL Databases
+  - Remote MySQL Databases
+- name: DNS
+  tags:
+  - DNS Cluster Settings
+  - DNS Security
+  - DNS Zones
+  - Domain Management
+  - Domain Management
+  - Resolvers
+  - Service Records
+- name: Hosting Plans
+  tags:
+  - Feature Access
+  - Feature Lists
+  - Hosting Plan Extensions
+  - Hosting Plans
+- name: InProductSurvey
+  tags:
+  - InProductSurvey
+- name: Integrations
+  tags:
+  - API Authentication
+  - Links
+  - Scripts Hooks
+- name: IP Address Management
+  tags:
+  - IPv4 Address Settings
+  - IPv6 Address Settings
+  - Network Address Translation
+- name: Login Security (cPHulk)
+  tags:
+  - Management
+  - Reporting
+  - Settings
+- name: Logs
+  tags:
+  - Web Log Retention
+- name: Mail
+  tags:
+  - cPanel Account Mail Management
+  - Mail DNS Settings
+  - Mail Server Settings
+  - Spam Management
+  - Spam Protection (Greylisting)
+- name: Monitoring
+  tags:
+  - 360 Monitoring
+- name: NGINX Manager
+  tags:
+  - NGINX Manager
+- name: Resellers
+  tags:
+  - Account Enhancement Limit
+  - Account Limits
+  - Account Permissions
+  - Account Settings
+  - Reseller Account Management
+- name: Security
+  tags:
+  - WHM Access
+- name: Server Administration
+  tags:
+  - Configuration Clusters
+  - Configurations
+  - Connected Applications
+  - Connections
+  - cPanel Analytics
+  - License Management
+  - Notifications
+  - Plugin-Based Features
+  - Security
+  - Server Nodes
+  - Server Profiles
+  - Services
+  - System Information
+  - Updates
+- name: SSL Certificates
+  tags:
+  - Auto-Generated Certificates
+  - cPanel Account Settings
+  - SSL Server Settings
+- name: System Package Management
+  tags:
+  - Install or Uninstall Package
+  - List Package Information
+  - Package Manager Settings
+- name: Transfers
+  tags:
+  - cPanel Account Transfer
+  - Transfer Configuration
+  - Transfer Monitoring
+- name: UserData
+  tags:
+  - UserData
+- name: Web Server Configuration
+  tags:
+  - EasyApache Settings
+  - PHP
+  - PHP-FPM
+- name: Web Server Security (ModSecurity)
+  tags:
+  - Rule Settings
+  - Rule Vendor Settings
+  - Server Settings

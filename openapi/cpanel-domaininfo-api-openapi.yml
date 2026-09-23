@@ -1,0 +1,1774 @@
+openapi: 3.2.0
+info:
+  contact:
+    email: cs@cpanel.net
+    name: WebPros International, LLC
+    url: https://cpanel.net/support/
+  description: UAPI accesses the cPanel interface's features. Use this API to access and modify cPanel account data and settings.
+  license:
+    name: cPanel License
+    url: https://cpanel.net/legal-notices/
+  termsOfService: https://cpanel.net/legal-notices/
+  title: cPanel U Domain Info API
+  version: 11.137.9999.106
+  x-api-evangelist-provenance: 'Harvested verbatim from cPanel''s developer portal on 2026-09-05 via the MCP tool get-full-api-description at https://api.docs.cpanel.net/mcp. ONE mechanical change was made before storage: example values containing PEM private-key or certificate blocks, and AWS-access-key-shaped example strings, were replaced with REDACTED_* placeholders so the file can be stored in a public git repository without tripping secret scanning. No path, operation, parameter, schema or description was altered, added or removed.'
+servers:
+- description: A server running cPanel.
+  url: https://{host}:{port}/execute
+  variables:
+    host:
+      default: cpanel-server.tld
+      description: The hostname of a server running cPanel.
+    port:
+      default: '2083'
+      description: The cPanel port.
+security:
+- BasicAuth: []
+tags:
+- description: The DomainInfo module for UAPI.
+  name: DomainInfo
+paths:
+  /DomainInfo/domains_data:
+    get:
+      x-readonly: true
+      description: 'This function lists user data for the cPanel account''s domains.
+
+
+        **Note:**
+
+
+        This function retrieves data from the `/var/cpanel/userdata/user/domain` file, where `user`
+
+        represents the cPanel account username and `domain` represents the domain. For this reason,
+
+        actual output may not contain all of the returns that this document lists.'
+      operationId: DomainInfo-domains_data
+      parameters:
+      - description: 'The function''s return format.
+
+
+          * `hash` — Use a hash format. The function will return objects based on the domain type.
+
+          * `list` — Use a list format. The function will return an array of objects, where each object is a domain.'
+        in: query
+        name: format
+        required: false
+        schema:
+          default: hash
+          enum:
+          - hash
+          - list
+          example: hash
+          type: string
+      - description: 'Whether to hide temporary domains from the response arrays.
+
+
+          * `1` — Hide temporary domains from `addon_domains`, `sub_domains`, and `parked_domains` arrays.
+
+          * `0` — Return all domains, including the temporary domains.'
+        in: query
+        name: hide_temporary_domains
+        required: false
+        schema:
+          default: 0
+          enum:
+          - 1
+          - 0
+          example: 1
+          type: integer
+      - description: 'Whether to return the secure redirect status of the addon domains.
+
+
+          * `1` — Return the status.
+
+          * `0` — Do **not** return the status.'
+        in: query
+        name: return_https_redirects_status
+        required: false
+        schema:
+          default: 0
+          enum:
+          - 1
+          - 0
+          example: 1
+          type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                hash:
+                  summary: Output in hash return format.
+                  value:
+                    data:
+                      addon_domains:
+                      - all_aliases_valid: '0'
+                        can_https_redirect: '0'
+                        documentroot: /home/user/public_html/seconddomain.com
+                        domain: seconddomain.com
+                        group: user
+                        hascgi: '1'
+                        homedir: /home/user
+                        ip: 192.168.0.128
+                        ipv6: null
+                        is_https_redirecting: '0'
+                        is_temporary: '0'
+                        no_cache_update: '0'
+                        owner: root
+                        serveradmin: webmaster@seconddomain.example.com
+                        serveralias: seconddomain.com www.seconddomain.com www.seconddomain.example.com
+                        servername: seconddomain.example.com
+                        type: addon_domain
+                        usecanonicalname: 'Off'
+                        user: user
+                        userdirprotect: ''
+                      - all_aliases_valid: '0'
+                        can_https_redirect: '0'
+                        documentroot: /home/user/public_html/subdomain
+                        domain: exampledomain.com
+                        group: user
+                        hascgi: '1'
+                        homedir: /home/user
+                        ip: 192.168.0.128
+                        ipv6: null
+                        is_https_redirecting: '0'
+                        is_temporary: '0'
+                        no_cache_update: '0'
+                        owner: root
+                        serveradmin: webmaster@subdomain.example.com
+                        serveralias: exampledomain.com www.exampledomain.com www.subdomain.example.com
+                        servername: subdomain.example.com
+                        type: addon_domain
+                        usecanonicalname: 'Off'
+                        user: user
+                        userdirprotect: ''
+                      - all_aliases_valid: '0'
+                        can_https_redirect: '0'
+                        documentroot: /home/user/addondomain/home/dir
+                        domain: addondomain.com
+                        group: user
+                        hascgi: '1'
+                        homedir: /home/user
+                        ip: 192.168.0.128
+                        ipv6: null
+                        is_https_redirecting: '0'
+                        is_temporary: '0'
+                        main_domain:
+                          all_aliases_valid: '0'
+                          can_https_redirect: '0'
+                          customlog:
+                          - format: combined
+                            target: /usr/local/apache/domlogs/example.com
+                          - format: '"%{%s}t %I .\n%{%s}t %O ."'
+                            target: /usr/local/apache/domlogs/example.com-bytes_log
+                          documentroot: /home/user/public_html
+                          domain: example.com
+                          group: user
+                          hascgi: '1'
+                          homedir: /home/user
+                          ifmodulemodsuphpc:
+                            group: user
+                          ip: 192.168.0.128
+                          is_https_redirecting: '0'
+                          options: ExecCGI Includes
+                          owner: root
+                          port: '80'
+                          scriptalias:
+                          - path: /home/user/public_html/cgi-bin
+                            url: /cgi-bin/
+                          - path: /home/user/public_html/cgi-bin/
+                            url: /cgi-bin/
+                          serveradmin: webmaster@example.com
+                          serveralias: parkeddomain.com www.parkeddomain.com www.example.com
+                          servername: example.com
+                          type: main_domain
+                          usecanonicalname: 'Off'
+                          user: user
+                          userdirprotect: ''
+                        no_cache_update: '0'
+                        owner: root
+                        parked_capable_of_https_redirects:
+                        - parkeddomain.com
+                        parked_domains:
+                        - parkeddomain.com
+                        parked_with_https_redirects:
+                        - parkeddomain.com
+                        serveradmin: webmaster@subdomain.example.com
+                        serveralias: addondomain.com www.addondomain.com www.subdomain.example.com
+                        servername: subdomain.example.com
+                        sub_domains:
+                        - all_aliases_valid: '0'
+                          can_https_redirect: '0'
+                          documentroot: /home/user/public_html/sub
+                          domain: sub.example.com
+                          group: user
+                          hascgi: '1'
+                          homedir: /home/user
+                          ip: 192.168.0.128
+                          ipv6: null
+                          is_https_redirecting: '0'
+                          is_temporary: '0'
+                          no_cache_update: '0'
+                          owner: root
+                          serveradmin: webmaster@sub.example.com
+                          serveralias: www.sub.example.com
+                          servername: sub.example.com
+                          type: sub_domain
+                          usecanonicalname: 'Off'
+                          user: user
+                          userdirprotect: ''
+                        type: addon_domain
+                        usecanonicalname: 'Off'
+                        user: user
+                        userdirprotect: ''
+                    errors: null
+                    messages: null
+                    metadata: null
+                    status: 1
+                list:
+                  summary: Output in list return format.
+                  value:
+                    data:
+                    - all_aliases_valid: '0'
+                      can_https_redirect: '0'
+                      customlog:
+                      - format: combined
+                        target: /usr/local/apache/domlogs/example.com
+                      - format: '"%{%s}t %I .\n%{%s}t %O ."'
+                        target: /usr/local/apache/domlogs/example.com-bytes_log
+                      documentroot: /home/user/public_html
+                      domain: example.com
+                      group: user
+                      hascgi: '1'
+                      homedir: /home/user
+                      ifmodulemodsuphpc:
+                        group: user
+                      ip: 192.168.0.128
+                      is_https_redirecting: '0'
+                      is_temporary: '0'
+                      options: ExecCGI Includes
+                      owner: root
+                      port: '80'
+                      scriptalias:
+                      - path: /home/user/public_html/cgi-bin
+                        url: /cgi-bin/
+                      - path: /home/user/public_html/cgi-bin/
+                        url: /cgi-bin/
+                      serveradmin: webmaster@example.com
+                      serveralias: parkeddomain.com www.parkeddomain.com www.example.com
+                      servername: example.com
+                      type: main_domain
+                      usecanonicalname: 'Off'
+                      user: user
+                      userdirprotect: '1'
+                    - parked_with_https_redirects:
+                      - parkeddomain.com
+                    - parked_capable_of_https_redirects:
+                      - zippy.nugs.test
+                    - all_aliases_valid: '0'
+                      can_https_redirect: '0'
+                      documentroot: /home/user/public_html/seconddomain.com
+                      domain: seconddomain.com
+                      group: user
+                      hascgi: '1'
+                      homedir: /home/user
+                      ip: 192.168.0.128
+                      ipv6: null
+                      is_https_redirecting: '0'
+                      is_temporary: '0'
+                      no_cache_update: '0'
+                      owner: root
+                      serveradmin: webmaster@seconddomain.example.com
+                      serveralias: seconddomain.com www.seconddomain.com www.seconddomain.example.com
+                      servername: seconddomain.example.com
+                      type: addon_domain
+                      usecanonicalname: 'Off'
+                      user: user
+                      userdirprotect: ''
+                    - all_aliases_valid: '0'
+                      can_https_redirect: '0'
+                      documentroot: /home/user/public_html/subdomain
+                      domain: exampledomain.com
+                      group: user
+                      hascgi: '1'
+                      homedir: /home/user
+                      ip: 192.168.0.128
+                      ipv6: null
+                      is_https_redirecting: '0'
+                      is_temporary: '0'
+                      no_cache_update: '0'
+                      owner: root
+                      serveradmin: webmaster@subdomain.example.com
+                      serveralias: exampledomain.com www.exampledomain.com www.subdomain.example.com
+                      servername: subdomain.example.com
+                      type: addon_domain
+                      usecanonicalname: 'Off'
+                      user: user
+                      userdirprotect: ''
+                    - all_aliases_valid: '0'
+                      can_https_redirect: '0'
+                      documentroot: /home/user/addondomain/home/dir
+                      domain: addondomain.com
+                      group: user
+                      hascgi: '1'
+                      homedir: /home/user
+                      ip: 192.168.0.128
+                      ipv6: null
+                      is_https_redirecting: '0'
+                      is_temporary: '0'
+                      no_cache_update: '0'
+                      owner: root
+                      serveradmin: webmaster@subdomain.example.com
+                      serveralias: addondomain.com www.addondomain.com www.subdomain.example.com
+                      servername: subdomain.example.com
+                      type: addon_domain
+                      usecanonicalname: 'Off'
+                      user: user
+                      userdirprotect: ''
+                    - all_aliases_valid: '0'
+                      can_https_redirect: '0'
+                      documentroot: /home/user/public_html/sub
+                      domain: sub.example.com
+                      group: user
+                      hascgi: '1'
+                      homedir: /home/user
+                      ip: 192.168.0.128
+                      ipv6: null
+                      is_https_redirecting: '0'
+                      is_temporary: '0'
+                      no_cache_update: '0'
+                      owner: root
+                      serveradmin: webmaster@sub.example.com
+                      serveralias: www.sub.example.com
+                      servername: sub.example.com
+                      type: sub_domain
+                      usecanonicalname: 'Off'
+                      user: user
+                      userdirprotect: ''
+                    errors: null
+                    messages: null
+                    metadata:
+                      transformed: 1
+                    status: 1
+              schema:
+                properties:
+                  apiversion:
+                    description: The version of the API.
+                    example: 3
+                    type: integer
+                  func:
+                    description: The name of the method called.
+                    example: domains_data
+                    type: string
+                  module:
+                    description: The name of the module called.
+                    example: DomainInfo
+                    type: string
+                  result:
+                    properties:
+                      data:
+                        description: An object containing information about a cPanel account's domains. The output of this function changes, based on the `format` parameter value.
+                        oneOf:
+                        - $ref: '#/components/schemas/HashOutput'
+                        - $ref: '#/components/schemas/ListOutput'
+                      errors:
+                        description: List of errors if the API failed.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      messages:
+                        description: List of messages generated by the API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      metadata:
+                        properties: {}
+                      status:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the `errors` field for more details.'
+                        enum:
+                        - 1
+                        - 0
+                        example: 1
+                        type: integer
+                      warnings:
+                        description: List of warnings generated by the API. Warnings describe non-critical failures or other problematic conditions noted while running a API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                    type: object
+                type: object
+          description: HTTP Request was successful.
+      summary: Return all domains' hosting configuration
+      tags:
+      - DomainInfo
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "uapi --output=jsonpretty \\\n  --user=username \\\n  DomainInfo \\\n  domains_data\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2083/cpsess##########/execute/DomainInfo/domains_data
+      - label: LiveAPI Perl
+        lang: Perl
+        source: "#--------------------------------------------------------------------------------------\n# Instructions:\n#--------------------------------------------------------------------------------------\n# <theme-name> is the theme assigned to cPanel account.\n# 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n# 2) mkdir api_examples\n# 3) cd api_examples\n# 4) create a file DomainInfo_domains_data.live.pl and put this code into that file.\n# 5) In your browser login to a cPanel account.\n# 6) Manually change the url from: .../frontend/<theme-name>/\n#    to .../frontend/<theme-name>/api_examples/DomainInfo_domains_data.live.pl\n#--------------------------------------------------------------------------------------\n\nuse strict;\n\nuse Cpanel::LiveAPI ();\n\nmy $cpanel = Cpanel::LiveAPI->new(); # Connect to cPanel - only do this once.\n\n# Print the header\nprint \"Content-type: text/plain\\r\\n\\r\\n\";\n\n# Call the API\nmy $response = $cpanel->uapi(\n    q/DomainInfo/,\n    q/domains_data/\n);\n\n# Handle the response\nif ($response->{cpanelresult}{result}{status}) {\n    my $data = $response->{cpanelresult}{result}{data};\n    # Do something with the $data\n    # So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    # Report errors:\n    print to_json($response->{cpanelresult}{result}{errors});\n}\n\n# Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n#--------------------------------------------------------------------------------------\n# Helper function to convert a perl object to html printable json\n#--------------------------------------------------------------------------------------\nsub to_json {\n    require JSON;\n    my $str = JSON->new->pretty->encode($_[0]);\n    return $str;\n}\n"
+      - label: LiveAPI PHP
+        lang: PHP
+        source: "<?php\n//--------------------------------------------------------------------------------------\n// Instructions:\n//--------------------------------------------------------------------------------------\n// <theme-name> is the theme assigned to cPanel account.\n// 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n// 2) mkdir api_examples\n// 3) cd api_examples\n// 4) create a file DomainInfo_domains_data.live.php and put this code into that file.\n// 5) In your browser login to a cPanel account.\n// 6) Manually change the url from: .../frontend/<theme-name>/\n//    to .../frontend/<theme-name>/api_examples/DomainInfo_domains_data.live.php\n//--------------------------------------------------------------------------------------\n\n// Instantiate the CPANEL object.\nrequire_once \"/usr/local/cpanel/php/cpanel.php\";\n\n// Print the header\nheader('Content-Type: text/plain');\n\n// Connect to cPanel - only do this once.\n$cpanel = new CPANEL();\n\n// Call the API\n$response = $cpanel->uapi(\n    'DomainInfo',\n    'domains_data'\n);\n\n// Handle the response\nif ($response['cpanelresult']['result']['status']) {\n    $data = $response['cpanelresult']['result']['data'];\n    // Do something with the $data\n    // So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    // Report errors:\n    print to_json($response['cpanelresult']['result']['errors']);\n}\n\n// Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n//--------------------------------------------------------------------------------------\n// Helper function to convert a PHP value to html printable json\n//--------------------------------------------------------------------------------------\nfunction to_json($data) {\n    return json_encode($data, JSON_PRETTY_PRINT);\n}"
+      x-cpanel-api-version: UAPI
+      x-cpanel-available-version: cPanel 11.42
+  /DomainInfo/list_domains:
+    get:
+      x-readonly: true
+      description: 'This function lists the cPanel account''s domains.
+
+
+        **Note:**
+
+
+        For this function to succeed, the `/var/cpanel/userdata/username/main` file (where `username` represents the authenticated user) **must** possess the correct permissions. If a permissions error occurs, this function returns blank values for **all** of its returns and does **not** return an error message.'
+      operationId: DomainInfo-list_domains
+      parameters:
+      - description: 'Whether to hide temporary domains from the response arrays.
+
+
+          * `1` — Hide temporary domains from the `addon_domains`, `sub_domains`, and `parked_domains` arrays, and from the `main_domain` field.
+
+          * `0` — Return all domains, including the temporary domains.'
+        in: query
+        name: hide_temporary_domains
+        required: false
+        schema:
+          default: 0
+          enum:
+          - 1
+          - 0
+          example: 1
+          type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  apiversion:
+                    description: The version of the API.
+                    example: 3
+                    type: integer
+                  func:
+                    description: The name of the method called.
+                    example: list_domains
+                    type: string
+                  module:
+                    description: The name of the module called.
+                    example: DomainInfo
+                    type: string
+                  result:
+                    properties:
+                      data:
+                        properties:
+                          addon_domains:
+                            description: An array of string values that lists the addon domains on the cPanel account.
+                            items:
+                              example: addondomain.com
+                              format: domain
+                              type: string
+                            type: array
+                          main_domain:
+                            description: The cPanel account's main domain.
+                            example: example.com
+                            format: domain
+                            type:
+                            - string
+                            - 'null'
+                          parked_domains:
+                            description: An array of string values that lists the parked domains on the cPanel account.
+                            items:
+                              example: parkeddomain.com
+                              format: domain
+                              type: string
+                            type: array
+                          sub_domains:
+                            description: An array of string values that lists the subdomains on the cPanel account.
+                            items:
+                              example: subdomain.example.com
+                              format: domain
+                              type: string
+                            type: array
+                          is_temporary:
+                            description: Whether the domain is a temporary domain.
+                            type: object
+                            additionalProperties:
+                              type: integer
+                              enum:
+                              - 0
+                              - 1
+                              description: '* `1` — The domain is temporary.
+
+                                * `0` — The domain is not temporary.'
+                        type: object
+                      errors:
+                        description: List of errors if the API failed.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      messages:
+                        description: List of messages generated by the API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      metadata:
+                        properties: {}
+                      status:
+                        description: '* `1` - Success.
+
+                          * `0` - Failed. Check the `errors` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      warnings:
+                        description: List of warnings generated by the API. Warnings describe non-critical failures or other problematic conditions noted while running a API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                    type: object
+                type: object
+          description: HTTP Request was successful.
+      summary: Return cPanel account's domains
+      tags:
+      - DomainInfo
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "uapi --output=jsonpretty \\\n  --user=username \\\n  DomainInfo \\\n  list_domains\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2083/cpsess##########/execute/DomainInfo/list_domains
+      - label: LiveAPI Perl
+        lang: Perl
+        source: "#--------------------------------------------------------------------------------------\n# Instructions:\n#--------------------------------------------------------------------------------------\n# <theme-name> is the theme assigned to cPanel account.\n# 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n# 2) mkdir api_examples\n# 3) cd api_examples\n# 4) create a file DomainInfo_list_domains.live.pl and put this code into that file.\n# 5) In your browser login to a cPanel account.\n# 6) Manually change the url from: .../frontend/<theme-name>/\n#    to .../frontend/<theme-name>/api_examples/DomainInfo_list_domains.live.pl\n#--------------------------------------------------------------------------------------\n\nuse strict;\n\nuse Cpanel::LiveAPI ();\n\nmy $cpanel = Cpanel::LiveAPI->new(); # Connect to cPanel - only do this once.\n\n# Print the header\nprint \"Content-type: text/plain\\r\\n\\r\\n\";\n\n# Call the API\nmy $response = $cpanel->uapi(\n    q/DomainInfo/,\n    q/list_domains/\n);\n\n# Handle the response\nif ($response->{cpanelresult}{result}{status}) {\n    my $data = $response->{cpanelresult}{result}{data};\n    # Do something with the $data\n    # So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    # Report errors:\n    print to_json($response->{cpanelresult}{result}{errors});\n}\n\n# Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n#--------------------------------------------------------------------------------------\n# Helper function to convert a perl object to html printable json\n#--------------------------------------------------------------------------------------\nsub to_json {\n    require JSON;\n    my $str = JSON->new->pretty->encode($_[0]);\n    return $str;\n}\n"
+      - label: LiveAPI PHP
+        lang: PHP
+        source: "<?php\n//--------------------------------------------------------------------------------------\n// Instructions:\n//--------------------------------------------------------------------------------------\n// <theme-name> is the theme assigned to cPanel account.\n// 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n// 2) mkdir api_examples\n// 3) cd api_examples\n// 4) create a file DomainInfo_list_domains.live.php and put this code into that file.\n// 5) In your browser login to a cPanel account.\n// 6) Manually change the url from: .../frontend/<theme-name>/\n//    to .../frontend/<theme-name>/api_examples/DomainInfo_list_domains.live.php\n//--------------------------------------------------------------------------------------\n\n// Instantiate the CPANEL object.\nrequire_once \"/usr/local/cpanel/php/cpanel.php\";\n\n// Print the header\nheader('Content-Type: text/plain');\n\n// Connect to cPanel - only do this once.\n$cpanel = new CPANEL();\n\n// Call the API\n$response = $cpanel->uapi(\n    'DomainInfo',\n    'list_domains'\n);\n\n// Handle the response\nif ($response['cpanelresult']['result']['status']) {\n    $data = $response['cpanelresult']['result']['data'];\n    // Do something with the $data\n    // So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    // Report errors:\n    print to_json($response['cpanelresult']['result']['errors']);\n}\n\n// Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n//--------------------------------------------------------------------------------------\n// Helper function to convert a PHP value to html printable json\n//--------------------------------------------------------------------------------------\nfunction to_json($data) {\n    return json_encode($data, JSON_PRETTY_PRINT);\n}"
+      x-cpanel-api-version: UAPI
+      x-cpanel-available-version: cPanel 11.42
+  /DomainInfo/main_domain_builtin_subdomain_aliases:
+    get:
+      x-readonly: true
+      description: 'This function returns the built-in subdomain aliases for an account''s main domain.
+
+
+        **Note:**
+
+
+        This function retrieves data from the `/var/cpanel/userdata/user/domain` file, where `user` represents the cPanel account username and `domain` represents the domain. For this reason, actual output may not contain all of the returns that this document lists.'
+      operationId: DomainInfo-main_domain_builtin_subdomain_aliases
+      parameters:
+      - description: 'Whether to hide domain aliases if the main domain is a temporary domain.
+
+
+          * `1` — Return empty array if the main domain is a temporary domain.
+
+          * `0` — Show aliases regardless of domain type.'
+        in: query
+        name: hide_temporary_domains
+        required: false
+        schema:
+          default: 0
+          enum:
+          - 1
+          - 0
+          example: 1
+          type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  apiversion:
+                    description: The version of the API.
+                    example: 3
+                    type: integer
+                  func:
+                    description: The name of the method called.
+                    example: main_domain_builtin_subdomain_aliases
+                    type: string
+                  module:
+                    description: The name of the module called.
+                    example: DomainInfo
+                    type: string
+                  result:
+                    properties:
+                      data:
+                        description: A list of the built-in subdomain aliases for the account's main domain.
+                        example:
+                        - mail
+                        - www
+                        items:
+                          type: string
+                        type: array
+                      errors:
+                        description: List of errors if the API failed.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      messages:
+                        description: List of messages generated by the API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      metadata:
+                        properties:
+                          transformed:
+                            description: Post-processing may have transformed the data.
+                            enum:
+                            - 1
+                            example: 1
+                            type: integer
+                      status:
+                        description: '* `1` - Success.
+
+                          * `0` - Failed. Check the `errors` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      warnings:
+                        description: List of warnings generated by the API. Warnings describe non-critical failures or other problematic conditions noted while running a API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                    type: object
+                type: object
+          description: HTTP Request was successful.
+      summary: Return built-in subdomain aliases
+      tags:
+      - DomainInfo
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "uapi --output=jsonpretty \\\n  --user=username \\\n  DomainInfo \\\n  main_domain_builtin_subdomain_aliases\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2083/cpsess##########/execute/DomainInfo/main_domain_builtin_subdomain_aliases
+      - label: LiveAPI Perl
+        lang: Perl
+        source: "#--------------------------------------------------------------------------------------\n# Instructions:\n#--------------------------------------------------------------------------------------\n# <theme-name> is the theme assigned to cPanel account.\n# 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n# 2) mkdir api_examples\n# 3) cd api_examples\n# 4) create a file DomainInfo_main_domain_builtin_subdomain_aliases.live.pl and put this code into that file.\n# 5) In your browser login to a cPanel account.\n# 6) Manually change the url from: .../frontend/<theme-name>/\n#    to .../frontend/<theme-name>/api_examples/DomainInfo_main_domain_builtin_subdomain_aliases.live.pl\n#--------------------------------------------------------------------------------------\n\nuse strict;\n\nuse Cpanel::LiveAPI ();\n\nmy $cpanel = Cpanel::LiveAPI->new(); # Connect to cPanel - only do this once.\n\n# Print the header\nprint \"Content-type: text/plain\\r\\n\\r\\n\";\n\n# Call the API\nmy $response = $cpanel->uapi(\n    q/DomainInfo/,\n    q/main_domain_builtin_subdomain_aliases/\n);\n\n# Handle the response\nif ($response->{cpanelresult}{result}{status}) {\n    my $data = $response->{cpanelresult}{result}{data};\n    foreach my $item (@{$data}) {\n        # Do something with the $item\n    }\n\n    # So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    # Report errors:\n    print to_json($response->{cpanelresult}{result}{errors});\n}\n\n# Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n#--------------------------------------------------------------------------------------\n# Helper function to convert a perl object to html printable json\n#--------------------------------------------------------------------------------------\nsub to_json {\n    require JSON;\n    my $str = JSON->new->pretty->encode($_[0]);\n    return $str;\n}\n"
+      - label: LiveAPI PHP
+        lang: PHP
+        source: "<?php\n//--------------------------------------------------------------------------------------\n// Instructions:\n//--------------------------------------------------------------------------------------\n// <theme-name> is the theme assigned to cPanel account.\n// 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n// 2) mkdir api_examples\n// 3) cd api_examples\n// 4) create a file DomainInfo_main_domain_builtin_subdomain_aliases.live.php and put this code into that file.\n// 5) In your browser login to a cPanel account.\n// 6) Manually change the url from: .../frontend/<theme-name>/\n//    to .../frontend/<theme-name>/api_examples/DomainInfo_main_domain_builtin_subdomain_aliases.live.php\n//--------------------------------------------------------------------------------------\n\n// Instantiate the CPANEL object.\nrequire_once \"/usr/local/cpanel/php/cpanel.php\";\n\n// Print the header\nheader('Content-Type: text/plain');\n\n// Connect to cPanel - only do this once.\n$cpanel = new CPANEL();\n\n// Call the API\n$response = $cpanel->uapi(\n    'DomainInfo',\n    'main_domain_builtin_subdomain_aliases'\n);\n\n// Handle the response\nif ($response['cpanelresult']['result']['status']) {\n    $data = $response['cpanelresult']['result']['data'];\n    foreach ($data as $item) {\n        // Do something with the $item\n    }\n\n    // So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    // Report errors:\n    print to_json($response['cpanelresult']['result']['errors']);\n}\n\n// Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n//--------------------------------------------------------------------------------------\n// Helper function to convert a PHP value to html printable json\n//--------------------------------------------------------------------------------------\nfunction to_json($data) {\n    return json_encode($data, JSON_PRETTY_PRINT);\n}"
+      x-cpanel-api-version: UAPI
+      x-cpanel-available-version: cPanel 11.42
+  /DomainInfo/primary_domain:
+    get:
+      x-readonly: true
+      description: This function returns the cPanel account's main domain.
+      operationId: DomainInfo-primary_domain
+      parameters:
+      - description: 'Whether to hide temporary domains from the response.
+
+
+          * `1` — Return `null` if the main domain is a temporary domain.
+
+          * `0` — Return the main domain if it''s a temporary domain.'
+        in: query
+        name: hide_temporary_domains
+        required: false
+        schema:
+          default: 0
+          enum:
+          - 1
+          - 0
+          example: 1
+          type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  apiversion:
+                    description: The version of the API.
+                    example: 3
+                    type: integer
+                  func:
+                    description: The name of the method called.
+                    example: primary_domain
+                    type: string
+                  module:
+                    description: The name of the module called.
+                    example: DomainInfo
+                    type: string
+                  result:
+                    properties:
+                      data:
+                        properties:
+                          primary_domain:
+                            description: 'The cPanel account''s main domain.
+
+                              ** Note: **
+
+                              This return''s value will be `null` if the `hide_temporary_domains` parameter is set to `1` and the main domain is a temporary domain.'
+                            example: example.com
+                            type:
+                            - string
+                            - 'null'
+                        type: object
+                      errors:
+                        description: List of errors if the API failed.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      messages:
+                        description: List of messages generated by the API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      metadata:
+                        properties:
+                          transformed:
+                            description: Post-processing may have transformed the data.
+                            enum:
+                            - 1
+                            example: 1
+                            type: integer
+                      status:
+                        description: '* `1` - Success.
+
+                          * `0` - Failed. Check the `errors` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      warnings:
+                        description: List of warnings generated by the API. Warnings describe non-critical failures or other problematic conditions noted while running an API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                    type: object
+                type: object
+          description: HTTP Request was successful.
+      summary: Return the cPanel account's primary domain
+      tags:
+      - DomainInfo
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "uapi --output=jsonpretty \\\n  --user=username \\\n  DomainInfo \\\n  primary_domain\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2083/cpsess##########/execute/DomainInfo/primary_domain
+      - label: LiveAPI Perl
+        lang: Perl
+        source: "#--------------------------------------------------------------------------------------\n# Instructions:\n#--------------------------------------------------------------------------------------\n# <theme-name> is the theme assigned to cPanel account.\n# 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n# 2) mkdir api_examples\n# 3) cd api_examples\n# 4) create a file DomainInfo_primary_domain.live.pl and put this code into that file.\n# 5) In your browser login to a cPanel account.\n# 6) Manually change the url from: .../frontend/<theme-name>/\n#    to .../frontend/<theme-name>/api_examples/DomainInfo_primary_domain.live.pl\n#--------------------------------------------------------------------------------------\n\nuse strict;\n\nuse Cpanel::LiveAPI ();\n\nmy $cpanel = Cpanel::LiveAPI->new(); # Connect to cPanel - only do this once.\n\n# Print the header\nprint \"Content-type: text/plain\\r\\n\\r\\n\";\n\n# Call the API\nmy $response = $cpanel->uapi(\n    q/DomainInfo/,\n    q/primary_domain/\n);\n\n# Handle the response\nif ($response->{cpanelresult}{result}{status}) {\n    my $data = $response->{cpanelresult}{result}{data};\n    foreach my $item (@{$data}) {\n        # Do something with the $item\n    }\n\n    # So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    # Report errors:\n    print to_json($response->{cpanelresult}{result}{errors});\n}\n\n# Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n#--------------------------------------------------------------------------------------\n# Helper function to convert a perl object to html printable json\n#--------------------------------------------------------------------------------------\nsub to_json {\n    require JSON;\n    my $str = JSON->new->pretty->encode($_[0]);\n    return $str;\n}\n"
+      - label: LiveAPI PHP
+        lang: PHP
+        source: "<?php\n//--------------------------------------------------------------------------------------\n// Instructions:\n//--------------------------------------------------------------------------------------\n// <theme-name> is the theme assigned to cPanel account.\n// 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n// 2) mkdir api_examples\n// 3) cd api_examples\n// 4) create a file DomainInfo_primary_domain.live.php and put this code into that file.\n// 5) In your browser login to a cPanel account.\n// 6) Manually change the url from: .../frontend/<theme-name>/\n//    to .../frontend/<theme-name>/api_examples/DomainInfo_primary_domain.live.php\n//--------------------------------------------------------------------------------------\n\n// Instantiate the CPANEL object.\nrequire_once \"/usr/local/cpanel/php/cpanel.php\";\n\n// Print the header\nheader('Content-Type: text/plain');\n\n// Connect to cPanel - only do this once.\n$cpanel = new CPANEL();\n\n// Call the API\n$response = $cpanel->uapi(\n    'DomainInfo',\n    'primary_domain'\n);\n\n// Handle the response\nif ($response['cpanelresult']['result']['status']) {\n    $data = $response['cpanelresult']['result']['data'];\n    foreach ($data as $item) {\n        // Do something with the $item\n    }\n\n    // So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    // Report errors:\n    print to_json($response['cpanelresult']['result']['errors']);\n}\n\n// Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n//--------------------------------------------------------------------------------------\n// Helper function to convert a PHP value to html printable json\n//--------------------------------------------------------------------------------------\nfunction to_json($data) {\n    return json_encode($data, JSON_PRETTY_PRINT);\n}"
+      x-cpanel-api-version: UAPI
+      x-cpanel-available-version: cPanel 11.42
+  /DomainInfo/single_domain_data:
+    get:
+      x-readonly: true
+      description: 'This function lists user data for a domain.
+
+
+        **Important:**
+
+
+        This function retrieves data from the `/var/cpanel/userdata/user/domain` file, where `user` represents the cPanel account username and `domain` represents the domain.
+
+        * Because aliases (parked domains) do **not** use a user data file, this function **cannot** query information for aliases. To retrieve information for an alias, specify the associated main or addon domain.
+
+        * Due to differences in user data files, the function''s actual output may not contain all of the returns that this document lists.'
+      operationId: DomainInfo-single_domain_data
+      parameters:
+      - description: 'The domain on the cPanel account.
+
+
+          **Important:**
+
+
+          Do **not** specify an alias (parked domain).'
+        in: query
+        name: domain
+        required: true
+        schema:
+          example: example.com
+          format: domain
+          type: string
+      - description: 'Whether to hide temporary domains from the returned values.
+
+
+          * `1` — Return an error if the requested domain is a temporary domain.
+
+          * `0` — Return all domains, including the temporary domains.
+
+
+          **Note:**
+
+
+          If you set this parameter''s value to `1` and the requested domain is temporary,
+
+          the function will return an error similar to the following example: `Domain [example.com] is a temporary
+
+          domain and `hide_temporary_domains` is enabled.`'
+        in: query
+        name: hide_temporary_domains
+        required: false
+        schema:
+          default: 0
+          enum:
+          - 1
+          - 0
+          example: 1
+          type: integer
+      - description: 'Whether to return the secure redirect status of the addon domains.
+
+          * `1` - Return status.
+
+          * `0` - Do **not** return status.'
+        in: query
+        name: return_https_redirect_status
+        required: false
+        schema:
+          default: 0
+          enum:
+          - 0
+          - 1
+          example: 1
+          type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  apiversion:
+                    description: The version of the API.
+                    example: 3
+                    type: integer
+                  func:
+                    description: The name of the method called.
+                    example: single_domain_data
+                    type: string
+                  module:
+                    description: The name of the module called.
+                    example: DomainInfo
+                    type: string
+                  result:
+                    properties:
+                      data:
+                        properties:
+                          all_aliases_valid:
+                            description: 'Whether a valid SSL certificate exists on the domain''s aliases.
+
+                              * `1` - A valid SSL certificate exists on the aliases.
+
+                              * `0` - A valid SSL certificate does **not** exist on the aliases.
+
+
+                              **Important:**
+
+
+                              This return only appears if you set the `return_https_redirects_status` parameter to `1`.'
+                            enum:
+                            - 0
+                            - 1
+                            example: 0
+                            type: integer
+                          can_https_redirect:
+                            description: 'Whether a valid SSL certificate exists or AutoSSL runs on the domain.
+
+                              * `1` - A valid SSL certificate exists or AutoSSL runs.
+
+                              * `0` - A valid SSL certificate does **not** exist, and AutoSSL does not run.
+
+
+                              **Important:**
+
+
+                              This return only appears if you set the `return_https_redirects_status` parameter to `1`.'
+                            enum:
+                            - 0
+                            - 1
+                            example: 0
+                            type: integer
+                          customlog:
+                            description: An object containing Apache log information.
+                            properties:
+                              domain:
+                                description: The `target` log file's domain. An [Apache log](http://httpd.apache.org/docs/2.2/mod/mod_log_config.html) domain. Generally, this value is `combined`.
+                                example: combined
+                                type: string
+                              target:
+                                description: The absolute path to the domain's log file.
+                                example: /usr/local/apache/domlogs/example.com
+                                format: path
+                                type: string
+                            type: object
+                          documentroot:
+                            description: The absolute path to the domain's document root.
+                            example: /home/user/public_html/
+                            format: path
+                            type: string
+                          domain:
+                            description: The domain name on the cPanel account.
+                            example: example.com
+                            format: domain
+                            type: string
+                          group:
+                            description: The domain's group name.
+                            example: user
+                            type: string
+                          hascgi:
+                            description: 'Whether CGI is enabled for the domain.
+
+                              * `1` - Enabled.
+
+                              * `0` - Disabled.'
+                            enum:
+                            - 0
+                            - 1
+                            example: 1
+                            type: integer
+                          homedir:
+                            description: The absolute path to the account's home directory.
+                            example: /home/user
+                            format: path
+                            type: string
+                          ifmodulemodsuphpc:
+                            description: An object containing information about PHP scripts and suPHP.
+                            properties:
+                              group:
+                                description: If suPHP is enabled, the group that PHP scripts run as.
+                                example: user
+                                type: string
+                            type: object
+                          ip:
+                            description: The domain's IP address.
+                            example: 192.168.0.128
+                            format: ipv4
+                            type: string
+                          is_https_redirecting:
+                            description: 'Whether the domain redirects to https.
+
+                              * `1` - Redirects.
+
+                              * `0` - Does **not** redirect.
+
+
+                              **Important:**
+
+
+                              This return only appears if you set the `return_https_redirects_status` parameter to `1`.'
+                            enum:
+                            - 0
+                            - 1
+                            example: 0
+                            type: integer
+                          is_temporary:
+                            description: 'Whether the domain is a temporary domain.
+
+                              * `1` — The domain is temporary.
+
+                              * `0` — The domain is not temporary.'
+                            type: integer
+                            enum:
+                            - 0
+                            - 1
+                          options:
+                            description: The Apache `Options` directive for the domain.
+                            example: ExecCGI Includes
+                            type: string
+                          owner:
+                            description: The WHM account (root or a reseller) that owns the cPanel account.
+                            example: root
+                            format: username
+                            type: string
+                          phpopenbasedirprotect:
+                            description: 'The domain''s `open_basedir` setting.
+
+                              * `1` - Enabled.
+
+                              * `0` - Disabled.
+
+
+                              **Note:**
+
+
+                              In EasyApache 4, change this directive in the *Editor Mode* section of WHM''s
+
+                              [*MultiPHP INI Editor*](https://go.cpanel.net/whmdocsMultiPHPINIEditor) interface
+
+                              (*WHM >> Home >> Software >> MultiPHP INI Editor*).'
+                            enum:
+                            - 0
+                            - 1
+                            example: 1
+                            type: integer
+                          port:
+                            description: Apache's port to access the domain.
+                            example: 80
+                            maximum: 65335
+                            minimum: 1
+                            type: integer
+                          scriptalias:
+                            description: An object containing CGI information.
+                            properties:
+                              path:
+                                description: The absolute path to the domain's CGI directory.
+                                example: /home/user/public_html/cgi-bin
+                                format: path
+                                type: string
+                              url:
+                                description: The domain's CGI directory.
+                                example: /cgi-bin/
+                                format: url-path
+                                type: string
+                            type: object
+                          serveradmin:
+                            description: The domain's administrator's contact email address.
+                            example: webmaster@example.com
+                            format: email
+                            type: string
+                          serveralias:
+                            description: A space-separated list of the domain's aliases.
+                            example: parkeddomain.com www.parkeddomain.com www.example.com
+                            type: string
+                          servername:
+                            description: The domain's identifier on the server.
+                            example: example.com
+                            format: domain
+                            type: string
+                          type:
+                            description: 'The domain type.
+
+                              * `addon_domain` - The domain is an addon domain.
+
+                              * `sub_domain` - The domain is a subdomain.
+
+                              * `main_domain` - The domain is the account''s main domain.
+
+                              * `parked_domain` - The domain is a parked domain (domain alias).'
+                            enum:
+                            - addon_domain
+                            - sub_domain
+                            - main_domain
+                            - parked_domain
+                            example: main_domain
+                            type: string
+                          usecanonicalname:
+                            description: 'The domain''s Canonical Name (CNAME) setting.
+
+                              * `On` - Use the CNAME.
+
+                              * `Off` - Do **not** use the CNAME.'
+                            enum:
+                            - 'On'
+                            - 'Off'
+                            example: 'Off'
+                            type: string
+                          user:
+                            description: The cPanel account's username.
+                            example: user
+                            format: username
+                            type: string
+                          userdirprotect:
+                            description: 'The domain''s [Apache `mod_userdir` Tweak](https://go.cpanel.net/whmdocsApachemod_userdirTweak) setting.
+
+                              * `1` - Enabled.
+
+                              * `0` - Disabled.'
+                            enum:
+                            - 0
+                            - 1
+                            example: 1
+                            type: integer
+                        type: object
+                      errors:
+                        description: List of errors if the API failed.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      messages:
+                        description: List of messages generated by the API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      metadata:
+                        properties: {}
+                      status:
+                        description: '- 1 - Success.
+
+                          - 0 - Failed. Check the `errors` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      warnings:
+                        description: List of warnings generated by the API. Warnings describe non-critical failures or other problematic conditions noted while running an API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                    type: object
+                type: object
+          description: HTTP Request was successful.
+      summary: Return domain's hosting configuration
+      tags:
+      - DomainInfo
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "uapi --output=jsonpretty \\\n  --user=username \\\n  DomainInfo \\\n  single_domain_data \\\n  domain='example.com'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2083/cpsess##########/execute/DomainInfo/single_domain_data?domain=example.com
+      - label: LiveAPI Perl
+        lang: Perl
+        source: "#--------------------------------------------------------------------------------------\n# Instructions:\n#--------------------------------------------------------------------------------------\n# <theme-name> is the theme assigned to cPanel account.\n# 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n# 2) mkdir api_examples\n# 3) cd api_examples\n# 4) create a file DomainInfo_single_domain_data.live.pl and put this code into that file.\n# 5) In your browser login to a cPanel account.\n# 6) Manually change the url from: .../frontend/<theme-name>/\n#    to .../frontend/<theme-name>/api_examples/DomainInfo_single_domain_data.live.pl\n#--------------------------------------------------------------------------------------\n\nuse strict;\n\nuse Cpanel::LiveAPI ();\n\nmy $cpanel = Cpanel::LiveAPI->new(); # Connect to cPanel - only do this once.\n\n# Print the header\nprint \"Content-type: text/plain\\r\\n\\r\\n\";\n\n# Call the API\nmy $response = $cpanel->uapi(\n    q/DomainInfo/,\n    q/single_domain_data/,\n    {\n        'domain' => 'example.com',\n    }\n);\n\n# Handle the response\nif ($response->{cpanelresult}{result}{status}) {\n    my $data = $response->{cpanelresult}{result}{data};\n    # Do something with the $data\n    # So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    # Report errors:\n    print to_json($response->{cpanelresult}{result}{errors});\n}\n\n# Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n#--------------------------------------------------------------------------------------\n# Helper function to convert a perl object to html printable json\n#--------------------------------------------------------------------------------------\nsub to_json {\n    require JSON;\n    my $str = JSON->new->pretty->encode($_[0]);\n    return $str;\n}\n"
+      - label: LiveAPI PHP
+        lang: PHP
+        source: "<?php\n//--------------------------------------------------------------------------------------\n// Instructions:\n//--------------------------------------------------------------------------------------\n// <theme-name> is the theme assigned to cPanel account.\n// 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n// 2) mkdir api_examples\n// 3) cd api_examples\n// 4) create a file DomainInfo_single_domain_data.live.php and put this code into that file.\n// 5) In your browser login to a cPanel account.\n// 6) Manually change the url from: .../frontend/<theme-name>/\n//    to .../frontend/<theme-name>/api_examples/DomainInfo_single_domain_data.live.php\n//--------------------------------------------------------------------------------------\n\n// Instantiate the CPANEL object.\nrequire_once \"/usr/local/cpanel/php/cpanel.php\";\n\n// Print the header\nheader('Content-Type: text/plain');\n\n// Connect to cPanel - only do this once.\n$cpanel = new CPANEL();\n\n// Call the API\n$response = $cpanel->uapi(\n    'DomainInfo',\n    'single_domain_data',\n    array (\n        'domain' => 'example.com',\n    )\n);\n\n// Handle the response\nif ($response['cpanelresult']['result']['status']) {\n    $data = $response['cpanelresult']['result']['data'];\n    // Do something with the $data\n    // So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    // Report errors:\n    print to_json($response['cpanelresult']['result']['errors']);\n}\n\n// Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n//--------------------------------------------------------------------------------------\n// Helper function to convert a PHP value to html printable json\n//--------------------------------------------------------------------------------------\nfunction to_json($data) {\n    return json_encode($data, JSON_PRETTY_PRINT);\n}"
+      x-cpanel-api-version: UAPI
+      x-cpanel-available-version: cPanel 11.42
+components:
+  schemas:
+    Contents:
+      properties:
+        all_aliases_valid:
+          description: 'Whether a valid SSL certificate exists on the domain''s aliases.
+
+
+            * `1` — A valid SSL certificate exists.
+
+            * `0` — A valid SSL certificate does **not** exist.
+
+
+            **Note:**
+
+
+            This return **only** appears if you set the `return_https_redirects_status` parameter to `1`.'
+          enum:
+          - 1
+          - 0
+          type: integer
+        can_https_redirect:
+          description: 'Whether a valid SSL certificate exists or AutoSSL runs on the domain.
+
+
+            * `1` — A valid SSL certificate exists or AutoSSL runs.
+
+            * `0` — A valid SSL certificate does **not** exist and AutoSSL does **not** run.
+
+
+            **Note:**
+
+
+            This return **only** appears if you set the `return_https_redirects_status` parameter to `1`.'
+          enum:
+          - 1
+          - 0
+          type: integer
+        documentroot:
+          description: The absolute path to the domain's document root.
+          format: path
+          type: string
+        domain:
+          description: The domain's name.
+          format: domain
+          type: string
+        group:
+          description: The domain's group.
+          type: string
+        hascgi:
+          description: 'Whether CGI is enabled for the domain.
+
+
+            * `1` — Enabled.
+
+            * `0` — Disabled.'
+          enum:
+          - 1
+          - 0
+          type: integer
+        homedir:
+          description: The absolute path to the cPanel account's home directory.
+          format: path
+          type: string
+        ip:
+          description: The domain's IPv4 address.
+          format: ipv4
+          type: string
+        ipv6:
+          description: 'The domain''s IPv6 address.
+
+
+            * null — The account does **not** use IPv6.'
+          format: ipv6
+          type:
+          - string
+          - 'null'
+        is_https_redirecting:
+          description: 'Whether the domain redirects to `https`.
+
+
+            * `1` — The domain redirects to `https`.
+
+            * `0` — The domain does **not** redirect to `https`.
+
+
+            **Note:**
+
+
+            This return **only** appears if you set the `return_https_redirects_status` parameter to `1`.'
+          enum:
+          - 1
+          - 0
+          type: integer
+        is_temporary:
+          description: 'Whether the domain is a temporary domain.
+
+            * `1` — The domain is temporary.
+
+            * `0` — The domain is not temporary.'
+          enum:
+          - 1
+          - 0
+          type: integer
+        no_cache_update:
+          description: 'Whether the domain is subject to cache updates.
+
+
+            * `1` — The domain updates caches.
+
+            * `0` — The domain does **not** update caches.'
+          enum:
+          - 1
+          - 0
+          type: integer
+        owner:
+          description: The WHM account (`root` or a reseller) that owns the cPanel account.
+          type: string
+        serveradmin:
+          description: The domain's administrator's contact email address.
+          format: email
+          type: string
+        serveralias:
+          description: A space-separated list of the domain's aliases.
+          format: domain
+          type: string
+        servername:
+          description: The domain's identifier on the server.
+          format: domain
+          type: string
+        type:
+          description: 'The type of domain:
+
+
+            * `addon_domain` — The domain is an addon domain.
+
+            * `sub_domain` — The domain is a subdomain.
+
+            * `parked_domain` — The domain is a parked domain (domain alias).'
+          enum:
+          - addon_domain
+          - sub_domain
+          - parked_domains
+          type: string
+        usecanonicalname:
+          description: 'The domain''s Canonical Name (CNAME) setting.
+
+
+            * `On` — Use the domain''s CNAME.
+
+            * `Off` — Do **not** use the domain''s CNAME.'
+          enum:
+          - 'On'
+          - 'Off'
+          type: string
+        user:
+          description: The cPanel account's username.
+          format: username
+          type: string
+        userdirprotect:
+          description: 'The domain''s [Apache `mod_userdir` Tweak](https://go.cpanel.net/whmdocsApachemod_userdirTweak)
+
+            setting.
+
+
+            * `1` — Enabled.
+
+            * `0` — Disabled.'
+          enum:
+          - 1
+          - 0
+          type: integer
+    MainDomainContents:
+      properties:
+        all_aliases_valid:
+          description: 'Whether a valid SSL certificate exists on the domain''s aliases.
+
+
+            * `1` — A valid SSL certificate exists.
+
+            * `0` — A valid SSL certificate does **not** exist.
+
+
+            **Note:**
+
+
+            This return **only** appears if you set the `return_https_redirects_status` parameter to `1`.'
+          enum:
+          - 1
+          - 0
+          type: integer
+        can_https_redirect:
+          description: 'Whether a valid SSL certificate exists or AutoSSL runs on the domain.
+
+
+            * `1` — A valid SSL certificate exists or AutoSSL runs.
+
+            * `0` — A valid SSL certificate does **not** exist and AutoSSL does **not** run.
+
+
+            **Note:**
+
+
+            This return **only** appears if you set the `return_https_redirects_status` parameter to `1`.'
+          enum:
+          - 1
+          - 0
+          type: integer
+        customlog:
+          description: 'The domain''s [Apache log](http://httpd.apache.org/docs/2.2/mod/mod_log_config.html)
+
+            information.'
+          properties:
+            format:
+              description: 'The [log file](https://httpd.apache.org/docs/2.2/mod/mod_log_config.html#logformat)''s
+
+                format.'
+              type: string
+            target:
+              description: The absolute path to the domain's log file in the `domlogs` directory.
+              type: string
+          type: object
+        documentroot:
+          description: The absolute path to the domain's document root.
+          format: path
+          type: string
+        domain:
+          description: The domain's name.
+          format: domain
+          type: string
+        group:
+          description: The domain's group.
+          type: string
+        hascgi:
+          description: 'Whether CGI is enabled for the domain.
+
+
+            * `1` — Enabled.
+
+            * `0` — Disabled.'
+          enum:
+          - 1
+          - 0
+          type: integer
+        homedir:
+          description: The absolute path to the cPanel account's home directory.
+          format: path
+          type: string
+        ifmodulemodsuphpc:
+          description: Information about PHP scripts and suPHP.
+          properties:
+            group:
+              description: If suPHP is enabled, PHP scripts run as this group.
+              type: string
+          type: object
+        ip:
+          description: The domain's IPv4 address.
+          format: ipv4
+          type: string
+        ipv6:
+          description: 'The domain''s IPv6 address.
+
+
+            * null — The account does **not** use IPv6.'
+          format: ipv6
+          type:
+          - string
+          - 'null'
+        is_https_redirecting:
+          description: 'Whether the domain redirects to `https`.
+
+
+            * `1` — The domain redirects to `https`.
+
+            * `0` — The domain does **not** redirect to `https`.
+
+
+            **Note:**
+
+
+            This return **only** appears if you set the `return_https_redirects_status` parameter to `1`.'
+          enum:
+          - 1
+          - 0
+          type: integer
+        no_cache_update:
+          description: 'Whether the domain is subject to cache updates.
+
+
+            * `1` — The domain updates caches.
+
+            * `0` — The domain does **not** update caches.'
+          enum:
+          - 1
+          - 0
+          type: integer
+        owner:
+          description: The WHM account (`root` or a reseller) that owns the cPanel account.
+          type: string
+        scriptalias:
+          description: The domain's CGI information.
+          properties:
+            path:
+              description: The absolute path to the domain's CGI directory.
+              format: path
+              type: string
+            url:
+              description: The domain's CGI directory.
+              format: path
+              type: string
+          type: object
+        serveradmin:
+          description: The domain's administrator's contact email address.
+          format: email
+          type: string
+        serveralias:
+          description: A space-separated list of the domain's aliases.
+          format: domain
+          type: string
+        servername:
+          description: The domain's identifier on the server.
+          format: domain
+          type: string
+        type:
+          description: 'The domain is the cPanel account''s main domain.
+
+
+            * `main_domain` is the only possible value.'
+          enum:
+          - main_domain
+          type: string
+        usecanonicalname:
+          description: 'The domain''s Canonical Name (CNAME) setting.
+
+
+            * `On` — Use the domain''s CNAME.
+
+            * `Off` — Do **not** use the domain''s CNAME.'
+          enum:
+          - 'On'
+          - 'Off'
+          type: string
+        user:
+          description: The cPanel account's username.
+          format: username
+          type: string
+        userdirprotect:
+          description: 'The domain''s [Apache `mod_userdir` Tweak](https://go.cpanel.net/whmdocsApachemod_userdirTweak)
+
+            setting.
+
+
+            * `1` — Enabled.
+
+            * `0` — Disabled.'
+          enum:
+          - 1
+          - 0
+          type: integer
+    HashOutput:
+      properties:
+        addon_domains:
+          description: An array of objects containing information about each addon domain.
+          items:
+            $ref: '#/components/schemas/Contents'
+        main_domain:
+          description: An array of objects containing information about the main domain.
+          items:
+            $ref: '#/components/schemas/MainDomainContents'
+        parked_domains:
+          description: An array of objects containing information about each parked domain.
+          items:
+            $ref: '#/components/schemas/Contents'
+        sub_domains:
+          description: An array of objects containing information about each subdomain.
+          items:
+            $ref: '#/components/schemas/Contents'
+      type: object
+    ListOutput:
+      anyOf:
+      - $ref: '#/components/schemas/Contents'
+      - $ref: '#/components/schemas/MainDomainContents'
+  securitySchemes:
+    BasicAuth:
+      scheme: basic
+      type: http
+externalDocs:
+  url: https://cpanel.net/developers/
+x-tagGroups:
+- name: API Development Tools
+  tags:
+  - API Token Management
+  - Batch
+  - SSE Task Management
+  - URL Parsing
+- name: Authentication
+  tags:
+  - External Authentication
+  - Two-Factor Settings
+- name: Backup Information
+  tags:
+  - BackupInfo
+  - BackupInfo Status
+- name: Block Ip Addresses
+  tags:
+  - Block IP
+- name: Commerce Integration
+  tags:
+  - Market Integration
+  - SSL Certificates
+- name: Contact Information
+  tags:
+  - Contact Information
+- name: cPanel Account
+  tags:
+  - Account Enhancements
+  - Account Information
+  - Account Management
+  - AuditLog
+  - Contact Information
+  - cPanel Features
+  - Disk Quotas
+  - DomainRecommendations
+  - Personalization
+  - Resource Usage and Statistics
+  - Subaccount Management
+  - Team Roles
+  - Team Users
+- name: cPanel Account Backups
+  tags:
+  - Backup
+  - File Restoration
+- name: cPanel Plugin Framework
+  tags:
+  - Formbricks
+  - Plugins
+- name: cPanel Theme Management
+  tags:
+  - Application Information
+  - Brand Management
+  - Branding Files
+  - Browser Cache Management
+  - Language
+  - Theme Settings
+- name: Directory Management
+  tags:
+  - Directory Indexes
+  - Directory Privacy
+  - Directory Protection
+- name: DNS
+  tags:
+  - DNS
+  - DNS Information
+  - DNS Security
+  - Dynamic DNS
+  - Email DNS Settings
+  - ZoneEdit
+- name: Domain
+  tags:
+  - Domain
+- name: Domain Management
+  tags:
+  - AddonDomain
+  - Direct Link Protection (Hotlink)
+  - Domain
+  - Domain Information
+  - Domain Redirection
+  - DomainLookup
+  - Park
+  - SubDomain
+  - Virtual Host Information
+- name: Domains
+  tags:
+  - Subdomains
+- name: Email
+  tags:
+  - Email Accounts
+  - Email Filtering
+  - Email Forwarding
+  - Email Server Information
+  - Email Suspensions
+  - Mail Server Information
+  - Mailbox Management
+  - Mailing Lists
+  - Signing and Encryption (GnuPG Keys)
+  - Spam Filtering (Greylisting)
+  - Spam Management
+  - Spam Prevention (BoxTrapper)
+  - Webmail Applications
+  - Webmail Sessions
+- name: Extract Information
+  tags:
+  - ExtractInfo
+  - ExtractInfo Status
+- name: File Manager
+  tags:
+  - Trash
+- name: Files
+  tags:
+  - FTP Accounts
+  - FTP Server Settings
+  - Image Tools
+  - Jodit
+  - Manage Files
+  - Manage Files
+  - WebDisk Settings
+- name: GIT Management
+  tags:
+  - Deployment Settings
+  - Repository Management
+- name: InProductSurvey
+  tags:
+  - InProductSurvey
+- name: MySQL and MariaDB
+  tags:
+  - Database Information
+  - Database Management
+  - Remote Databases
+  - User Management
+- name: Notifications
+  tags:
+  - Pushbullet
+- name: Optional Applications
+  tags:
+  - Antivirus Protection (ClamAV)
+  - Calendar and Contacts (DAV)
+  - Calendar and Contacts Server
+  - WordPress Manager Backups
+- name: PostgreSQL
+  tags:
+  - PostgreSQL Database Management
+  - PostgreSQL User Management
+- name: Retrieve bandwidth information
+  tags:
+  - Bandwidth
+- name: Security
+  tags:
+  - Known SSH Hosts Management
+  - Login Information
+- name: Server Information
+  tags:
+  - cPanel Server Information
+  - Notifications
+  - Password Strength
+  - SSH
+  - WebPros MCP
+  - WebProsMCP
+- name: ServiceProxy
+  tags:
+  - ServiceProxy
+- name: Site Quality Monitoring
+  tags:
+  - SiteQuality
+- name: SSL Certificates
+  tags:
+  - Auto-generated SSL Certificates
+  - cPanel Account SSL Management
+  - SNI Email Settings
+  - SSL Certificate Management
+  - Verify Domain Ownership
+- name: Statistics
+  tags:
+  - Domain Statistics
+  - Weblog Settings
+- name: UserData
+  tags:
+  - UserData
+- name: Web Server Configuration
+  tags:
+  - EA4
+  - EasyApache Settings
+  - PHP
+- name: Web Server Management
+  tags:
+  - Application Manager
+  - ModSecurity
+  - NginxCaching
+  - PHP Settings
+  - Web Apps
+- name: Website Configuration
+  tags:
+  - Handler Management
+  - Logs
+  - Mime Type Management
+  - Nova
+  - Site Information
+  - Site Installation
+  - Sitejet
+  - WPX

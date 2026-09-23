@@ -1,0 +1,517 @@
+openapi: 3.2.0
+info:
+  contact:
+    email: cs@cpanel.net
+    name: WebPros International, LLC
+    url: https://cpanel.net/support/
+  description: WHM API.
+  license:
+    name: cPanel License
+    url: https://cpanel.net/legal-notices/
+  termsOfService: https://cpanel.net/legal-notices/
+  title: WHM Customizations API
+  version: 11.137.9999.106
+  x-api-evangelist-provenance: 'Harvested verbatim from cPanel''s developer portal on 2026-09-05 via the MCP tool get-full-api-description at https://api.docs.cpanel.net/mcp. ONE mechanical change was made before storage: example values containing PEM private-key or certificate blocks, and AWS-access-key-shaped example strings, were replaced with REDACTED_* placeholders so the file can be stored in a public git repository without tripping secret scanning. No path, operation, parameter, schema or description was altered, added or removed.'
+servers:
+- description: A server running WHM.
+  url: https://{host}:{port}/json-api
+  variables:
+    host:
+      default: whm-server.tld
+      description: The hostname of a server running WHM.
+    port:
+      default: '2087'
+      description: The WHM port.
+security:
+- BasicAuth: []
+tags:
+- description: The Customizations module for WHM API 1.
+  name: Customizations
+paths:
+  /delete_customizations:
+    get:
+      description: 'This function deletes customization data.
+
+
+        Customization data includes brand logos and colors.
+
+
+        Server owners and resellers can supply customization data to whitelabel portions
+
+        of the product or customize the cPanel experience for their users.
+
+
+        This function is used to delete customization data for the Jupiter theme **only**.
+
+
+        If you provide the optional `path` parameter, the API will removed only the specific element specified in the `.` separated path.
+
+        See the parameter for more details.'
+      operationId: Customizations-delete_customizations
+      parameters:
+      - description: The application name for the customization.
+        in: query
+        name: application
+        required: true
+        schema:
+          enum:
+          - cpanel
+          - webmail
+          example: cpanel
+          type: string
+      - description: The theme name for the customization.
+        in: query
+        name: theme
+        required: true
+        schema:
+          example: jupiter
+          type: string
+      - description: 'The JSONPath expression to reach to property you want to delete. We support only the
+
+          subset of JSONPath using the `.` style notation. There is presently no other JSONPath
+
+          features supported.'
+        in: query
+        name: path
+        required: false
+        schema:
+          example: brand.icon.description
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: delete_customizations
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Delete customization data
+      tags:
+      - Customizations
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  delete_customizations \\\n  application='cpanel' \\\n  theme='jupiter'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/delete_customizations?api.version=1&application=cpanel&theme=jupiter
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '100'
+      x-cpanel-cli-support: true
+  /retrieve_customizations:
+    get:
+      description: 'This function retrieves customization data.
+
+
+        Customization data includes brand logos and colors.
+
+
+        This function is used to retrieve customization data for the Jupiter theme **only**.'
+      operationId: Customizations-retrieve_customizations
+      parameters:
+      - description: The application name for the customization.
+        in: query
+        name: application
+        required: true
+        schema:
+          enum:
+          - cpanel
+          - webmail
+          example: cpanel
+          type: string
+      - description: The theme for the customization.
+        in: query
+        name: theme
+        required: true
+        schema:
+          example: jupiter
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: retrieve_customizations
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Retrieve customization data
+      tags:
+      - Customizations
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  retrieve_customizations \\\n  application='cpanel' \\\n  theme='jupiter'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/retrieve_customizations?api.version=1&application=cpanel&theme=jupiter
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '100'
+      x-cpanel-cli-support: true
+  /update_customizations:
+    post:
+      description: 'This function supplies branding data for a specific application and theme.
+
+
+        Customization data includes brand logos and colors.
+
+
+        This function is used to save customization data for the Jupiter theme **only**.'
+      operationId: Customizations-update_customizations
+      parameters:
+      - description: The application name for the customization.
+        in: query
+        name: application
+        required: true
+        schema:
+          enum:
+          - cpanel
+          - webmail
+          example: cpanel
+          type: string
+      - content:
+          application/json:
+            schema:
+              example:
+                brand:
+                  colors:
+                    accent: '#00FF00'
+                    primary: '#961218'
+                  favicon: AAABAAEAICACAAEAAQAwAQAAFgAAACgAAAAgAAAAQAAAAAEAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACanZoAAAAAAP///////////////////////////AD//+Ag///AEH//gDB//4AQf/+AuCq/AfAgBwP4IA8H+BABA/gQAwH8EAGArA/AgAQPwMACD+DAAAfA+AIPwP1UBQH//gAB//8AAf//gAP//wAH//+iP//////////////////////////////////////////////////////8AP//4CD//8AQf/+AMH//gBB//4C4Kr8B8CAHA/ggDwf4EAED+BADAfwQAYCsD8CABA/AwAIP4MAAB8D4Ag/A/VQFAf/+AAH//wAB//+AA///AAf//6I///////////////////////////8=
+                  logo:
+                    description: The orange logo for cPanel.
+                    forDarkBackground: PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4KPCEtLSBHZW5lcmF0b3I6IEFkb2JlIElsbHVzdHJhdG9yIDIwLjAuMCwgU1ZHIEV4cG9ydCBQbHVnLUluIC4gU1ZHIFZlcnNpb246IDYuMDAgQnVpbGQgMCkgIC0tPgo8c3ZnIHZlcnNpb249IjEuMSIgaWQ9IkxheWVyXzEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHg9IjBweCIgeT0iMHB4IgoJIHZpZXdCb3g9IjAgMCA5NCAyMCIgc3R5bGU9ImVuYWJsZS1iYWNrZ3JvdW5kOm5ldyAwIDAgOTQgMjA7IiB4bWw6c3BhY2U9InByZXNlcnZlIj4KPHN0eWxlIHR5cGU9InRleHQvY3NzIj4KCS5zdDB7ZmlsbDojRkZGRkZGO30KPC9zdHlsZT4KPHRpdGxlPmNQYW5lbCBMb2dvIC0gV2hpdGU8L3RpdGxlPgo8ZyBpZD0iTGF5ZXJfMiI+Cgk8ZyBpZD0iTGF5ZXJfMS0yIj4KCQk8cGF0aCBjbGFzcz0ic3QwIiBkPSJNNy44LDQuOWg1LjlsLTAuOSwzLjNjLTAuMSwwLjQtMC40LDAuOC0wLjgsMS4xYy0wLjQsMC4zLTAuOCwwLjQtMS4zLDAuNEg3LjljLTAuNiwwLTEuMiwwLjItMS43LDAuNQoJCQljLTAuNSwwLjQtMC44LDAuOS0xLDEuNGMtMC4xLDAuNC0wLjEsMC45LDAsMS4zYzAuMSwwLjQsMC4zLDAuNywwLjUsMS4xYzAuMiwwLjMsMC42LDAuNiwwLjksMC43QzcsMTUsNy41LDE1LjEsNy45LDE1LjFoMS43CgkJCWMwLjMsMCwwLjYsMC4xLDAuOCwwLjRjMC4yLDAuMiwwLjMsMC41LDAuMiwwLjhsLTEsMy43SDcuNmMtMS4yLDAtMi40LTAuMy0zLjQtMC44Yy0xLTAuNS0xLjktMS4yLTIuNi0yLjEKCQkJYy0xLjQtMS44LTEuOS00LjItMS4zLTYuNGwwLjEtMC40YzAuNC0xLjYsMS40LTIuOSwyLjctMy45QzMuOCw2LDQuNSw1LjYsNS4zLDUuM0M2LjEsNS4xLDYuOSw0LjksNy44LDQuOXoiLz4KCQk8cGF0aCBjbGFzcz0ic3QwIiBkPSJNMTAuNywyMGw1LjEtMTguNGMwLjEtMC40LDAuNC0wLjgsMC44LTEuMUMxNywwLjEsMTcuNSwwLDE4LDBoNS40YzEuMiwwLDIuNCwwLjMsMy40LDAuOGMyLjEsMSwzLjUsMi45LDQsNQoJCQljMC4zLDEuMSwwLjIsMi4zLTAuMSwzLjRsLTAuMSwwLjRjLTAuMiwwLjgtMC42LDEuNS0xLDIuMmMtMS40LDItMy44LDMuMy02LjMsMy4zaC00LjdsMC45LTMuNGMwLjEtMC40LDAuNC0wLjgsMC44LTEuMQoJCQljMC40LTAuMywwLjgtMC40LDEuMy0wLjRoMS41YzEuMiwwLDIuMy0wLjgsMi43LTJjMC4xLTAuNCwwLjEtMC44LDAtMS4yYy0wLjEtMC40LTAuMy0wLjctMC41LTEuMWMtMC4yLTAuMy0wLjYtMC42LTAuOS0wLjcKCQkJQzI0LDUsMjMuNiw0LjksMjMuMSw0LjloLTIuOWwtMy44LDEzLjZjLTAuMSwwLjQtMC40LDAuOC0wLjgsMS4xYy0wLjQsMC4zLTAuOCwwLjQtMS4zLDAuNEgxMC43eiIvPgoJCTxwYXRoIGNsYXNzPSJzdDAiIGQ9Ik00My4xLDEwLjJsMC4xLTAuM2MwLTAuMSwwLTAuMi0wLjEtMC4zYy0wLjEtMC4xLTAuMi0wLjEtMC4zLTAuMWgtOC40Yy0wLjMsMC0wLjctMC4xLTEtMC4yCgkJCWMtMC4zLTAuMS0wLjUtMC4zLTAuNy0wLjZjLTAuMi0wLjItMC4zLTAuNS0wLjQtMC44Yy0wLjEtMC4zLTAuMS0wLjcsMC0xbDAuNS0xLjloMTEuNGMwLjcsMCwxLjMsMC4xLDEuOSwwLjQKCQkJYzAuNiwwLjMsMS4xLDAuNywxLjUsMS4yYzAuNCwwLjUsMC43LDEuMSwwLjgsMS43YzAuMSwwLjYsMC4xLDEuMywwLDEuOWwtMi4xLDcuM0M0NiwxOSw0NC42LDIwLDQzLDIwbC04LjQsMAoJCQljLTEuNCwwLTIuNy0wLjYtMy42LTEuN2MtMC40LTAuNS0wLjctMS4xLTAuOC0xLjdjLTAuMi0wLjctMC4xLTEuNCwwLjEtMmwwLjEtMC40YzAuMS0wLjUsMC4zLTAuOSwwLjYtMS4zYzAuMy0wLjQsMC42LTAuNywxLTEKCQkJYzAuNC0wLjMsMC44LTAuNSwxLjMtMC43YzAuNS0wLjIsMS0wLjIsMS41LTAuMmg3LjFsLTAuNSwxLjljLTAuMSwwLjQtMC40LDAuOC0wLjgsMS4xYy0wLjQsMC4zLTAuOCwwLjQtMS4zLDAuNGgtMy4yCgkJCWMtMC4zLDAtMC41LDAuMS0wLjYsMC40Yy0wLjEsMC4yLDAsMC40LDAuMSwwLjVjMC4xLDAuMSwwLjMsMC4yLDAuNSwwLjJoNS4xYzAuMiwwLDAuNCwwLDAuNS0wLjFjMC4xLTAuMSwwLjItMC4yLDAuMy0wLjQKCQkJbDAuMS0wLjJMNDMuMSwxMC4yeiIvPgoJCTxwYXRoIGNsYXNzPSJzdDAiIGQ9Ik01OC4zLDQuOWMxLjIsMCwyLjQsMC4zLDMuNSwwLjhjMSwwLjUsMS45LDEuMiwyLjYsMi4xYzAuNywwLjksMS4yLDEuOSwxLjQsM2MwLjMsMS4xLDAuMiwyLjMtMC4xLDMuNAoJCQlsLTEuMyw0LjdjLTAuMSwwLjMtMC4zLDAuNi0wLjYsMC44Yy0wLjMsMC4yLTAuNiwwLjMtMSwwLjNINjBjLTAuNSwwLTEtMC40LTEtMC45YzAtMC4xLDAtMC4yLDAtMC4zbDEuNi01LjcKCQkJYzAuMS0wLjQsMC4xLTAuOCwwLTEuMmMtMC4xLTAuNC0wLjMtMC43LTAuNS0xLjFjLTAuMi0wLjMtMC42LTAuNi0wLjktMC43Yy0wLjQtMC4yLTAuOC0wLjMtMS4yLTAuM2gtMi45bC0yLjUsOS4xCgkJCWMtMC4xLDAuMy0wLjMsMC42LTAuNiwwLjhjLTAuMywwLjItMC42LDAuMy0xLDAuM2gtMi44Yy0wLjMsMC0wLjYtMC4xLTAuOC0wLjRjLTAuMi0wLjItMC4zLTAuNS0wLjItMC44bDMuOC0xMy45TDU4LjMsNC45eiIvPgoJCTxwYXRoIGNsYXNzPSJzdDAiIGQ9Ik03My42LDkuN2MtMC4yLDAuMi0wLjQsMC40LTAuNCwwLjZMNzIsMTQuNWMtMC4xLDAuNCwwLjEsMC44LDAuNSwwLjljMC4xLDAsMC4xLDAsMC4yLDBoMTAuOGwtMC44LDMKCQkJYy0wLjEsMC40LTAuNCwwLjgtMC44LDEuMUM4MS41LDE5LjksODEsMjAsODAuNiwyMGgtOS44Yy0wLjcsMC0xLjMtMC4xLTEuOS0wLjRjLTAuNi0wLjMtMS4xLTAuNy0xLjUtMS4yCgkJCWMtMC40LTAuNS0wLjctMS4xLTAuOC0xLjdjLTAuMS0wLjYtMC4xLTEuMywwLjEtMS45bDEuNi01LjdjMC4yLTAuNiwwLjQtMS4yLDAuOC0xLjdjMC43LTEsMS43LTEuOCwyLjktMi4yCgkJCWMwLjYtMC4yLDEuMy0wLjMsMS45LTAuM2g2LjljMC43LDAsMS4zLDAuMSwxLjksMC40YzAuNiwwLjMsMS4xLDAuNywxLjUsMS4yQzg0LjYsNyw4NC45LDcuNiw4NSw4LjJjMC4xLDAuNiwwLjEsMS4zLTAuMSwxLjkKCQkJbC0wLjUsMS43Yy0wLjIsMC43LTAuNiwxLjQtMS4zLDEuOGMtMC42LDAuNS0xLjQsMC43LTIuMSwwLjdoLTcuOGwwLjUtMS44YzAuMS0wLjQsMC40LTAuOCwwLjgtMS4xYzAuNC0wLjMsMC44LTAuNCwxLjMtMC40SDc5CgkJCWMwLjMsMCwwLjUtMC4xLDAuNi0wLjRsMC4xLTAuNGMwLjEtMC4zLTAuMS0wLjYtMC40LTAuN2MwLDAtMC4xLDAtMC4xLDBoLTQuOEM3NCw5LjQsNzMuOCw5LjUsNzMuNiw5Ljd6Ii8+CgkJPHBhdGggY2xhc3M9InN0MCIgZD0iTTgzLjUsMjBsNS4yLTE4LjljMC4xLTAuMywwLjMtMC42LDAuNi0wLjhjMC4zLTAuMiwwLjYtMC4zLDEtMC4zSDkzYzAuMywwLDAuNiwwLjEsMC44LDAuNAoJCQlDOTQsMC42LDk0LjEsMC45LDk0LDEuMmwtMy45LDEzLjljLTAuMiwwLjctMC41LDEuNC0wLjksMmMtMC40LDAuNi0wLjksMS4xLTEuNSwxLjVjLTAuNiwwLjQtMS4yLDAuOC0xLjksMQoJCQlDODUsMTkuOSw4NC4yLDIwLDgzLjUsMjB6Ii8+Cgk8L2c+CjwvZz4KPC9zdmc+
+                    forLightBackground: PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4KPCEtLSBHZW5lcmF0b3I6IEFkb2JlIElsbHVzdHJhdG9yIDIwLjAuMCwgU1ZHIEV4cG9ydCBQbHVnLUluIC4gU1ZHIFZlcnNpb246IDYuMDAgQnVpbGQgMCkgIC0tPgo8c3ZnIHZlcnNpb249IjEuMSIgaWQ9InhMYXllcl8xIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiB4PSIwcHgiIHk9IjBweCIKCSB2aWV3Qm94PSIwIDAgOTQgMjAiIHN0eWxlPSJlbmFibGUtYmFja2dyb3VuZDpuZXcgMCAwIDk0IDIwOyIgeG1sOnNwYWNlPSJwcmVzZXJ2ZSI+CjxzdHlsZSB0eXBlPSJ0ZXh0L2NzcyI+Cgkuc3Qwe2ZpbGw6I0ZGNkMyQzt9Cjwvc3R5bGU+Cjx0aXRsZT5jUGFuZWwgTG9nbyAtIE9yYW5nZTwvdGl0bGU+CjxnIGlkPSJ4TGF5ZXJfMiI+Cgk8ZyBpZD0ieExheWVyXzEtMiI+CgkJPHBhdGggY2xhc3M9InN0MCIgZD0iTTcuOCw0LjloNS45bC0wLjksMy4zYy0wLjEsMC40LTAuNCwwLjgtMC44LDEuMWMtMC40LDAuMy0wLjgsMC40LTEuMywwLjRINy45Yy0wLjYsMC0xLjIsMC4yLTEuNywwLjUKCQkJYy0wLjUsMC40LTAuOCwwLjktMSwxLjRjLTAuMSwwLjQtMC4xLDAuOSwwLDEuM2MwLjEsMC40LDAuMywwLjcsMC41LDEuMWMwLjIsMC4zLDAuNiwwLjYsMC45LDAuN0M3LDE1LDcuNSwxNS4xLDcuOSwxNS4xaDEuNwoJCQljMC4zLDAsMC42LDAuMSwwLjgsMC40YzAuMiwwLjIsMC4zLDAuNSwwLjIsMC44bC0xLDMuN0g3LjZjLTEuMiwwLTIuNC0wLjMtMy40LTAuOGMtMS0wLjUtMS45LTEuMi0yLjYtMi4xCgkJCWMtMS40LTEuOC0xLjktNC4yLTEuMy02LjRsMC4xLTAuNGMwLjQtMS42LDEuNC0yLjksMi43LTMuOUMzLjgsNiw0LjUsNS42LDUuMyw1LjNDNi4xLDUuMSw2LjksNC45LDcuOCw0Ljl6Ii8+CgkJPHBhdGggY2xhc3M9InN0MCIgZD0iTTEwLjcsMjBsNS4xLTE4LjRjMC4xLTAuNCwwLjQtMC44LDAuOC0xLjFDMTcsMC4xLDE3LjUsMCwxOCwwaDUuNGMxLjIsMCwyLjQsMC4zLDMuNCwwLjhjMi4xLDEsMy41LDIuOSw0LDUKCQkJYzAuMywxLjEsMC4yLDIuMy0wLjEsMy40bC0wLjEsMC40Yy0wLjIsMC44LTAuNiwxLjUtMSwyLjJjLTEuNCwyLTMuOCwzLjMtNi4zLDMuM2gtNC43bDAuOS0zLjRjMC4xLTAuNCwwLjQtMC44LDAuOC0xLjEKCQkJYzAuNC0wLjMsMC44LTAuNCwxLjMtMC40aDEuNWMxLjIsMCwyLjMtMC44LDIuNy0yYzAuMS0wLjQsMC4xLTAuOCwwLTEuMmMtMC4xLTAuNC0wLjMtMC43LTAuNS0xLjFjLTAuMi0wLjMtMC42LTAuNi0wLjktMC43CgkJCUMyNCw1LDIzLjYsNC45LDIzLjEsNC45aC0yLjlsLTMuOCwxMy42Yy0wLjEsMC40LTAuNCwwLjgtMC44LDEuMWMtMC40LDAuMy0wLjgsMC40LTEuMywwLjRIMTAuN3oiLz4KCQk8cGF0aCBjbGFzcz0ic3QwIiBkPSJNNDMuMSwxMC4ybDAuMS0wLjNjMC0wLjEsMC0wLjItMC4xLTAuM2MtMC4xLTAuMS0wLjItMC4xLTAuMy0wLjFoLTguNGMtMC4zLDAtMC43LTAuMS0xLTAuMgoJCQljLTAuMy0wLjEtMC41LTAuMy0wLjctMC42Yy0wLjItMC4yLTAuMy0wLjUtMC40LTAuOGMtMC4xLTAuMy0wLjEtMC43LDAtMWwwLjUtMS45aDExLjRjMC43LDAsMS4zLDAuMSwxLjksMC40CgkJCWMwLjYsMC4zLDEuMSwwLjcsMS41LDEuMmMwLjQsMC41LDAuNywxLjEsMC44LDEuN2MwLjEsMC42LDAuMSwxLjMsMCwxLjlsLTIuMSw3LjNDNDYsMTksNDQuNiwyMCw0MywyMGwtOC40LDAKCQkJYy0xLjQsMC0yLjctMC42LTMuNi0xLjdjLTAuNC0wLjUtMC43LTEuMS0wLjgtMS43Yy0wLjItMC43LTAuMS0xLjQsMC4xLTJsMC4xLTAuNGMwLjEtMC41LDAuMy0wLjksMC42LTEuM2MwLjMtMC40LDAuNi0wLjcsMS0xCgkJCWMwLjQtMC4zLDAuOC0wLjUsMS4zLTAuN2MwLjUtMC4yLDEtMC4yLDEuNS0wLjJoNy4xbC0wLjUsMS45Yy0wLjEsMC40LTAuNCwwLjgtMC44LDEuMWMtMC40LDAuMy0wLjgsMC40LTEuMywwLjRoLTMuMgoJCQljLTAuMywwLTAuNSwwLjEtMC42LDAuNGMtMC4xLDAuMiwwLDAuNCwwLjEsMC41YzAuMSwwLjEsMC4zLDAuMiwwLjUsMC4yaDUuMWMwLjIsMCwwLjQsMCwwLjUtMC4xYzAuMS0wLjEsMC4yLTAuMiwwLjMtMC40CgkJCWwwLjEtMC4yTDQzLjEsMTAuMnoiLz4KCQk8cGF0aCBjbGFzcz0ic3QwIiBkPSJNNTguMyw0LjljMS4yLDAsMi40LDAuMywzLjUsMC44YzEsMC41LDEuOSwxLjIsMi42LDIuMWMwLjcsMC45LDEuMiwxLjksMS40LDNjMC4zLDEuMSwwLjIsMi4zLTAuMSwzLjQKCQkJbC0xLjMsNC43Yy0wLjEsMC4zLTAuMywwLjYtMC42LDAuOGMtMC4zLDAuMi0wLjYsMC4zLTEsMC4zSDYwYy0wLjUsMC0xLTAuNC0xLTAuOWMwLTAuMSwwLTAuMiwwLTAuM2wxLjYtNS43CgkJCWMwLjEtMC40LDAuMS0wLjgsMC0xLjJjLTAuMS0wLjQtMC4zLTAuNy0wLjUtMS4xYy0wLjItMC4zLTAuNi0wLjYtMC45LTAuN2MtMC40LTAuMi0wLjgtMC4zLTEuMi0wLjNoLTIuOWwtMi41LDkuMQoJCQljLTAuMSwwLjMtMC4zLDAuNi0wLjYsMC44Yy0wLjMsMC4yLTAuNiwwLjMtMSwwLjNoLTIuOGMtMC4zLDAtMC42LTAuMS0wLjgtMC40Yy0wLjItMC4yLTAuMy0wLjUtMC4yLTAuOGwzLjgtMTMuOUw1OC4zLDQuOXoiLz4KCQk8cGF0aCBjbGFzcz0ic3QwIiBkPSJNNzMuNiw5LjdjLTAuMiwwLjItMC40LDAuNC0wLjQsMC42TDcyLDE0LjVjLTAuMSwwLjQsMC4xLDAuOCwwLjUsMC45YzAuMSwwLDAuMSwwLDAuMiwwaDEwLjhsLTAuOCwzCgkJCWMtMC4xLDAuNC0wLjQsMC44LTAuOCwxLjFDODEuNSwxOS45LDgxLDIwLDgwLjYsMjBoLTkuOGMtMC43LDAtMS4zLTAuMS0xLjktMC40Yy0wLjYtMC4zLTEuMS0wLjctMS41LTEuMgoJCQljLTAuNC0wLjUtMC43LTEuMS0wLjgtMS43Yy0wLjEtMC42LTAuMS0xLjMsMC4xLTEuOWwxLjYtNS43YzAuMi0wLjYsMC40LTEuMiwwLjgtMS43YzAuNy0xLDEuNy0xLjgsMi45LTIuMgoJCQljMC42LTAuMiwxLjMtMC4zLDEuOS0wLjNoNi45YzAuNywwLDEuMywwLjEsMS45LDAuNGMwLjYsMC4zLDEuMSwwLjcsMS41LDEuMkM4NC42LDcsODQuOSw3LjYsODUsOC4yYzAuMSwwLjYsMC4xLDEuMy0wLjEsMS45CgkJCWwtMC41LDEuN2MtMC4yLDAuNy0wLjYsMS40LTEuMywxLjhjLTAuNiwwLjUtMS40LDAuNy0yLjEsMC43aC03LjhsMC41LTEuOGMwLjEtMC40LDAuNC0wLjgsMC44LTEuMWMwLjQtMC4zLDAuOC0wLjQsMS4zLTAuNEg3OQoJCQljMC4zLDAsMC41LTAuMSwwLjYtMC40bDAuMS0wLjRjMC4xLTAuMy0wLjEtMC42LTAuNC0wLjdjMCwwLTAuMSwwLTAuMSwwaC00LjhDNzQsOS40LDczLjgsOS41LDczLjYsOS43eiIvPgoJCTxwYXRoIGNsYXNzPSJzdDAiIGQ9Ik04My41LDIwbDUuMi0xOC45YzAuMS0wLjMsMC4zLTAuNiwwLjYtMC44YzAuMy0wLjIsMC42LTAuMywxLTAuM0g5M2MwLjMsMCwwLjYsMC4xLDAuOCwwLjQKCQkJQzk0LDAuNiw5NC4xLDAuOSw5NCwxLjJsLTMuOSwxMy45Yy0wLjIsMC43LTAuNSwxLjQtMC45LDJjLTAuNCwwLjYtMC45LDEuMS0xLjUsMS41Yy0wLjYsMC40LTEuMiwwLjgtMS45LDEKCQkJQzg1LDE5LjksODQuMiwyMCw4My41LDIweiIvPgoJPC9nPgo8L2c+Cjwvc3ZnPgo=
+                documentation:
+                  url: https://hosting.com/documentation
+                help:
+                  url: https://hosting.com/get-help
+              properties:
+                brand:
+                  description: The customization data.
+                  properties:
+                    colors:
+                      description: The hex-code colors used to apply a custom color palette to the interface.
+                      properties:
+                        accent:
+                          description: The hex-code to set in the customization.
+                          example: '#00FF00'
+                          type: string
+                        primary:
+                          description: The primary color to apply to the interface.
+                          example: '#961218'
+                          type: string
+                      type: object
+                    favicon:
+                      description: The base64-encoded favorites icon. This function **only** accepts the ICO file format.
+                      example: AAABAAEAICACAAEAAQAwAQAAFgAAACgAAAAgAAAAQAAAAAEAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACanZoAAAAAAP///////////////////////////AD//+Ag///AEH//gDB//4AQf/+AuCq/AfAgBwP4IA8H+BABA/gQAwH8EAGArA/AgAQPwMACD+DAAAfA+AIPwP1UBQH//gAB//8AAf//gAP//wAH//+iP//////////////////////////////////////////////////////8AP//4CD//8AQf/+AMH//gBB//4C4Kr8B8CAHA/ggDwf4EAED+BADAfwQAYCsD8CABA/AwAIP4MAAB8D4Ag/A/VQFAf/+AAH//wAB//+AA///AAf//6I///////////////////////////8=
+                      format: base64
+                      type: string
+                    logo:
+                      description: Logo information used to add your custom logo to the interface.
+                      properties:
+                        description:
+                          description: The description of the logo used for accessibility requirements.
+                          example: The orange logo for cPanel.
+                          type: string
+                        forDarkBackground:
+                          description: The base64-encoded logo used on black or dark backgrounds. This function **only** accepts the SVG file format.
+                          example: PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4KPCEtLSBHZW5lcmF0b3I6IEFkb2JlIElsbHVzdHJhdG9yIDIwLjAuMCwgU1ZHIEV4cG9ydCBQbHVnLUluIC4gU1ZHIFZlcnNpb246IDYuMDAgQnVpbGQgMCkgIC0tPgo8c3ZnIHZlcnNpb249IjEuMSIgaWQ9IkxheWVyXzEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHg9IjBweCIgeT0iMHB4IgoJIHZpZXdCb3g9IjAgMCA5NCAyMCIgc3R5bGU9ImVuYWJsZS1iYWNrZ3JvdW5kOm5ldyAwIDAgOTQgMjA7IiB4bWw6c3BhY2U9InByZXNlcnZlIj4KPHN0eWxlIHR5cGU9InRleHQvY3NzIj4KCS5zdDB7ZmlsbDojRkZGRkZGO30KPC9zdHlsZT4KPHRpdGxlPmNQYW5lbCBMb2dvIC0gV2hpdGU8L3RpdGxlPgo8ZyBpZD0iTGF5ZXJfMiI+Cgk8ZyBpZD0iTGF5ZXJfMS0yIj4KCQk8cGF0aCBjbGFzcz0ic3QwIiBkPSJNNy44LDQuOWg1LjlsLTAuOSwzLjNjLTAuMSwwLjQtMC40LDAuOC0wLjgsMS4xYy0wLjQsMC4zLTAuOCwwLjQtMS4zLDAuNEg3LjljLTAuNiwwLTEuMiwwLjItMS43LDAuNQoJCQljLTAuNSwwLjQtMC44LDAuOS0xLDEuNGMtMC4xLDAuNC0wLjEsMC45LDAsMS4zYzAuMSwwLjQsMC4zLDAuNywwLjUsMS4xYzAuMiwwLjMsMC42LDAuNiwwLjksMC43QzcsMTUsNy41LDE1LjEsNy45LDE1LjFoMS43CgkJCWMwLjMsMCwwLjYsMC4xLDAuOCwwLjRjMC4yLDAuMiwwLjMsMC41LDAuMiwwLjhsLTEsMy43SDcuNmMtMS4yLDAtMi40LTAuMy0zLjQtMC44Yy0xLTAuNS0xLjktMS4yLTIuNi0yLjEKCQkJYy0xLjQtMS44LTEuOS00LjItMS4zLTYuNGwwLjEtMC40YzAuNC0xLjYsMS40LTIuOSwyLjctMy45QzMuOCw2LDQuNSw1LjYsNS4zLDUuM0M2LjEsNS4xLDYuOSw0LjksNy44LDQuOXoiLz4KCQk8cGF0aCBjbGFzcz0ic3QwIiBkPSJNMTAuNywyMGw1LjEtMTguNGMwLjEtMC40LDAuNC0wLjgsMC44LTEuMUMxNywwLjEsMTcuNSwwLDE4LDBoNS40YzEuMiwwLDIuNCwwLjMsMy40LDAuOGMyLjEsMSwzLjUsMi45LDQsNQoJCQljMC4zLDEuMSwwLjIsMi4zLTAuMSwzLjRsLTAuMSwwLjRjLTAuMiwwLjgtMC42LDEuNS0xLDIuMmMtMS40LDItMy44LDMuMy02LjMsMy4zaC00LjdsMC45LTMuNGMwLjEtMC40LDAuNC0wLjgsMC44LTEuMQoJCQljMC40LTAuMywwLjgtMC40LDEuMy0wLjRoMS41YzEuMiwwLDIuMy0wLjgsMi43LTJjMC4xLTAuNCwwLjEtMC44LDAtMS4yYy0wLjEtMC40LTAuMy0wLjctMC41LTEuMWMtMC4yLTAuMy0wLjYtMC42LTAuOS0wLjcKCQkJQzI0LDUsMjMuNiw0LjksMjMuMSw0LjloLTIuOWwtMy44LDEzLjZjLTAuMSwwLjQtMC40LDAuOC0wLjgsMS4xYy0wLjQsMC4zLTAuOCwwLjQtMS4zLDAuNEgxMC43eiIvPgoJCTxwYXRoIGNsYXNzPSJzdDAiIGQ9Ik00My4xLDEwLjJsMC4xLTAuM2MwLTAuMSwwLTAuMi0wLjEtMC4zYy0wLjEtMC4xLTAuMi0wLjEtMC4zLTAuMWgtOC40Yy0wLjMsMC0wLjctMC4xLTEtMC4yCgkJCWMtMC4zLTAuMS0wLjUtMC4zLTAuNy0wLjZjLTAuMi0wLjItMC4zLTAuNS0wLjQtMC44Yy0wLjEtMC4zLTAuMS0wLjcsMC0xbDAuNS0xLjloMTEuNGMwLjcsMCwxLjMsMC4xLDEuOSwwLjQKCQkJYzAuNiwwLjMsMS4xLDAuNywxLjUsMS4yYzAuNCwwLjUsMC43LDEuMSwwLjgsMS43YzAuMSwwLjYsMC4xLDEuMywwLDEuOWwtMi4xLDcuM0M0NiwxOSw0NC42LDIwLDQzLDIwbC04LjQsMAoJCQljLTEuNCwwLTIuNy0wLjYtMy42LTEuN2MtMC40LTAuNS0wLjctMS4xLTAuOC0xLjdjLTAuMi0wLjctMC4xLTEuNCwwLjEtMmwwLjEtMC40YzAuMS0wLjUsMC4zLTAuOSwwLjYtMS4zYzAuMy0wLjQsMC42LTAuNywxLTEKCQkJYzAuNC0wLjMsMC44LTAuNSwxLjMtMC43YzAuNS0wLjIsMS0wLjIsMS41LTAuMmg3LjFsLTAuNSwxLjljLTAuMSwwLjQtMC40LDAuOC0wLjgsMS4xYy0wLjQsMC4zLTAuOCwwLjQtMS4zLDAuNGgtMy4yCgkJCWMtMC4zLDAtMC41LDAuMS0wLjYsMC40Yy0wLjEsMC4yLDAsMC40LDAuMSwwLjVjMC4xLDAuMSwwLjMsMC4yLDAuNSwwLjJoNS4xYzAuMiwwLDAuNCwwLDAuNS0wLjFjMC4xLTAuMSwwLjItMC4yLDAuMy0wLjQKCQkJbDAuMS0wLjJMNDMuMSwxMC4yeiIvPgoJCTxwYXRoIGNsYXNzPSJzdDAiIGQ9Ik01OC4zLDQuOWMxLjIsMCwyLjQsMC4zLDMuNSwwLjhjMSwwLjUsMS45LDEuMiwyLjYsMi4xYzAuNywwLjksMS4yLDEuOSwxLjQsM2MwLjMsMS4xLDAuMiwyLjMtMC4xLDMuNAoJCQlsLTEuMyw0LjdjLTAuMSwwLjMtMC4zLDAuNi0wLjYsMC44Yy0wLjMsMC4yLTAuNiwwLjMtMSwwLjNINjBjLTAuNSwwLTEtMC40LTEtMC45YzAtMC4xLDAtMC4yLDAtMC4zbDEuNi01LjcKCQkJYzAuMS0wLjQsMC4xLTAuOCwwLTEuMmMtMC4xLTAuNC0wLjMtMC43LTAuNS0xLjFjLTAuMi0wLjMtMC42LTAuNi0wLjktMC43Yy0wLjQtMC4yLTAuOC0wLjMtMS4yLTAuM2gtMi45bC0yLjUsOS4xCgkJCWMtMC4xLDAuMy0wLjMsMC42LTAuNiwwLjhjLTAuMywwLjItMC42LDAuMy0xLDAuM2gtMi44Yy0wLjMsMC0wLjYtMC4xLTAuOC0wLjRjLTAuMi0wLjItMC4zLTAuNS0wLjItMC44bDMuOC0xMy45TDU4LjMsNC45eiIvPgoJCTxwYXRoIGNsYXNzPSJzdDAiIGQ9Ik03My42LDkuN2MtMC4yLDAuMi0wLjQsMC40LTAuNCwwLjZMNzIsMTQuNWMtMC4xLDAuNCwwLjEsMC44LDAuNSwwLjljMC4xLDAsMC4xLDAsMC4yLDBoMTAuOGwtMC44LDMKCQkJYy0wLjEsMC40LTAuNCwwLjgtMC44LDEuMUM4MS41LDE5LjksODEsMjAsODAuNiwyMGgtOS44Yy0wLjcsMC0xLjMtMC4xLTEuOS0wLjRjLTAuNi0wLjMtMS4xLTAuNy0xLjUtMS4yCgkJCWMtMC40LTAuNS0wLjctMS4xLTAuOC0xLjdjLTAuMS0wLjYtMC4xLTEuMywwLjEtMS45bDEuNi01LjdjMC4yLTAuNiwwLjQtMS4yLDAuOC0xLjdjMC43LTEsMS43LTEuOCwyLjktMi4yCgkJCWMwLjYtMC4yLDEuMy0wLjMsMS45LTAuM2g2LjljMC43LDAsMS4zLDAuMSwxLjksMC40YzAuNiwwLjMsMS4xLDAuNywxLjUsMS4yQzg0LjYsNyw4NC45LDcuNiw4NSw4LjJjMC4xLDAuNiwwLjEsMS4zLTAuMSwxLjkKCQkJbC0wLjUsMS43Yy0wLjIsMC43LTAuNiwxLjQtMS4zLDEuOGMtMC42LDAuNS0xLjQsMC43LTIuMSwwLjdoLTcuOGwwLjUtMS44YzAuMS0wLjQsMC40LTAuOCwwLjgtMS4xYzAuNC0wLjMsMC44LTAuNCwxLjMtMC40SDc5CgkJCWMwLjMsMCwwLjUtMC4xLDAuNi0wLjRsMC4xLTAuNGMwLjEtMC4zLTAuMS0wLjYtMC40LTAuN2MwLDAtMC4xLDAtMC4xLDBoLTQuOEM3NCw5LjQsNzMuOCw5LjUsNzMuNiw5Ljd6Ii8+CgkJPHBhdGggY2xhc3M9InN0MCIgZD0iTTgzLjUsMjBsNS4yLTE4LjljMC4xLTAuMywwLjMtMC42LDAuNi0wLjhjMC4zLTAuMiwwLjYtMC4zLDEtMC4zSDkzYzAuMywwLDAuNiwwLjEsMC44LDAuNAoJCQlDOTQsMC42LDk0LjEsMC45LDk0LDEuMmwtMy45LDEzLjljLTAuMiwwLjctMC41LDEuNC0wLjksMmMtMC40LDAuNi0wLjksMS4xLTEuNSwxLjVjLTAuNiwwLjQtMS4yLDAuOC0xLjksMQoJCQlDODUsMTkuOSw4NC4yLDIwLDgzLjUsMjB6Ii8+Cgk8L2c+CjwvZz4KPC9zdmc+
+                          format: base64
+                          type: string
+                        forLightBackground:
+                          description: The base64-encoded logo used on white or light backgrounds. This function **only** accepts the SVG file format.
+                          example: PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4KPCEtLSBHZW5lcmF0b3I6IEFkb2JlIElsbHVzdHJhdG9yIDIwLjAuMCwgU1ZHIEV4cG9ydCBQbHVnLUluIC4gU1ZHIFZlcnNpb246IDYuMDAgQnVpbGQgMCkgIC0tPgo8c3ZnIHZlcnNpb249IjEuMSIgaWQ9InhMYXllcl8xIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiB4PSIwcHgiIHk9IjBweCIKCSB2aWV3Qm94PSIwIDAgOTQgMjAiIHN0eWxlPSJlbmFibGUtYmFja2dyb3VuZDpuZXcgMCAwIDk0IDIwOyIgeG1sOnNwYWNlPSJwcmVzZXJ2ZSI+CjxzdHlsZSB0eXBlPSJ0ZXh0L2NzcyI+Cgkuc3Qwe2ZpbGw6I0ZGNkMyQzt9Cjwvc3R5bGU+Cjx0aXRsZT5jUGFuZWwgTG9nbyAtIE9yYW5nZTwvdGl0bGU+CjxnIGlkPSJ4TGF5ZXJfMiI+Cgk8ZyBpZD0ieExheWVyXzEtMiI+CgkJPHBhdGggY2xhc3M9InN0MCIgZD0iTTcuOCw0LjloNS45bC0wLjksMy4zYy0wLjEsMC40LTAuNCwwLjgtMC44LDEuMWMtMC40LDAuMy0wLjgsMC40LTEuMywwLjRINy45Yy0wLjYsMC0xLjIsMC4yLTEuNywwLjUKCQkJYy0wLjUsMC40LTAuOCwwLjktMSwxLjRjLTAuMSwwLjQtMC4xLDAuOSwwLDEuM2MwLjEsMC40LDAuMywwLjcsMC41LDEuMWMwLjIsMC4zLDAuNiwwLjYsMC45LDAuN0M3LDE1LDcuNSwxNS4xLDcuOSwxNS4xaDEuNwoJCQljMC4zLDAsMC42LDAuMSwwLjgsMC40YzAuMiwwLjIsMC4zLDAuNSwwLjIsMC44bC0xLDMuN0g3LjZjLTEuMiwwLTIuNC0wLjMtMy40LTAuOGMtMS0wLjUtMS45LTEuMi0yLjYtMi4xCgkJCWMtMS40LTEuOC0xLjktNC4yLTEuMy02LjRsMC4xLTAuNGMwLjQtMS42LDEuNC0yLjksMi43LTMuOUMzLjgsNiw0LjUsNS42LDUuMyw1LjNDNi4xLDUuMSw2LjksNC45LDcuOCw0Ljl6Ii8+CgkJPHBhdGggY2xhc3M9InN0MCIgZD0iTTEwLjcsMjBsNS4xLTE4LjRjMC4xLTAuNCwwLjQtMC44LDAuOC0xLjFDMTcsMC4xLDE3LjUsMCwxOCwwaDUuNGMxLjIsMCwyLjQsMC4zLDMuNCwwLjhjMi4xLDEsMy41LDIuOSw0LDUKCQkJYzAuMywxLjEsMC4yLDIuMy0wLjEsMy40bC0wLjEsMC40Yy0wLjIsMC44LTAuNiwxLjUtMSwyLjJjLTEuNCwyLTMuOCwzLjMtNi4zLDMuM2gtNC43bDAuOS0zLjRjMC4xLTAuNCwwLjQtMC44LDAuOC0xLjEKCQkJYzAuNC0wLjMsMC44LTAuNCwxLjMtMC40aDEuNWMxLjIsMCwyLjMtMC44LDIuNy0yYzAuMS0wLjQsMC4xLTAuOCwwLTEuMmMtMC4xLTAuNC0wLjMtMC43LTAuNS0xLjFjLTAuMi0wLjMtMC42LTAuNi0wLjktMC43CgkJCUMyNCw1LDIzLjYsNC45LDIzLjEsNC45aC0yLjlsLTMuOCwxMy42Yy0wLjEsMC40LTAuNCwwLjgtMC44LDEuMWMtMC40LDAuMy0wLjgsMC40LTEuMywwLjRIMTAuN3oiLz4KCQk8cGF0aCBjbGFzcz0ic3QwIiBkPSJNNDMuMSwxMC4ybDAuMS0wLjNjMC0wLjEsMC0wLjItMC4xLTAuM2MtMC4xLTAuMS0wLjItMC4xLTAuMy0wLjFoLTguNGMtMC4zLDAtMC43LTAuMS0xLTAuMgoJCQljLTAuMy0wLjEtMC41LTAuMy0wLjctMC42Yy0wLjItMC4yLTAuMy0wLjUtMC40LTAuOGMtMC4xLTAuMy0wLjEtMC43LDAtMWwwLjUtMS45aDExLjRjMC43LDAsMS4zLDAuMSwxLjksMC40CgkJCWMwLjYsMC4zLDEuMSwwLjcsMS41LDEuMmMwLjQsMC41LDAuNywxLjEsMC44LDEuN2MwLjEsMC42LDAuMSwxLjMsMCwxLjlsLTIuMSw3LjNDNDYsMTksNDQuNiwyMCw0MywyMGwtOC40LDAKCQkJYy0xLjQsMC0yLjctMC42LTMuNi0xLjdjLTAuNC0wLjUtMC43LTEuMS0wLjgtMS43Yy0wLjItMC43LTAuMS0xLjQsMC4xLTJsMC4xLTAuNGMwLjEtMC41LDAuMy0wLjksMC42LTEuM2MwLjMtMC40LDAuNi0wLjcsMS0xCgkJCWMwLjQtMC4zLDAuOC0wLjUsMS4zLTAuN2MwLjUtMC4yLDEtMC4yLDEuNS0wLjJoNy4xbC0wLjUsMS45Yy0wLjEsMC40LTAuNCwwLjgtMC44LDEuMWMtMC40LDAuMy0wLjgsMC40LTEuMywwLjRoLTMuMgoJCQljLTAuMywwLTAuNSwwLjEtMC42LDAuNGMtMC4xLDAuMiwwLDAuNCwwLjEsMC41YzAuMSwwLjEsMC4zLDAuMiwwLjUsMC4yaDUuMWMwLjIsMCwwLjQsMCwwLjUtMC4xYzAuMS0wLjEsMC4yLTAuMiwwLjMtMC40CgkJCWwwLjEtMC4yTDQzLjEsMTAuMnoiLz4KCQk8cGF0aCBjbGFzcz0ic3QwIiBkPSJNNTguMyw0LjljMS4yLDAsMi40LDAuMywzLjUsMC44YzEsMC41LDEuOSwxLjIsMi42LDIuMWMwLjcsMC45LDEuMiwxLjksMS40LDNjMC4zLDEuMSwwLjIsMi4zLTAuMSwzLjQKCQkJbC0xLjMsNC43Yy0wLjEsMC4zLTAuMywwLjYtMC42LDAuOGMtMC4zLDAuMi0wLjYsMC4zLTEsMC4zSDYwYy0wLjUsMC0xLTAuNC0xLTAuOWMwLTAuMSwwLTAuMiwwLTAuM2wxLjYtNS43CgkJCWMwLjEtMC40LDAuMS0wLjgsMC0xLjJjLTAuMS0wLjQtMC4zLTAuNy0wLjUtMS4xYy0wLjItMC4zLTAuNi0wLjYtMC45LTAuN2MtMC40LTAuMi0wLjgtMC4zLTEuMi0wLjNoLTIuOWwtMi41LDkuMQoJCQljLTAuMSwwLjMtMC4zLDAuNi0wLjYsMC44Yy0wLjMsMC4yLTAuNiwwLjMtMSwwLjNoLTIuOGMtMC4zLDAtMC42LTAuMS0wLjgtMC40Yy0wLjItMC4yLTAuMy0wLjUtMC4yLTAuOGwzLjgtMTMuOUw1OC4zLDQuOXoiLz4KCQk8cGF0aCBjbGFzcz0ic3QwIiBkPSJNNzMuNiw5LjdjLTAuMiwwLjItMC40LDAuNC0wLjQsMC42TDcyLDE0LjVjLTAuMSwwLjQsMC4xLDAuOCwwLjUsMC45YzAuMSwwLDAuMSwwLDAuMiwwaDEwLjhsLTAuOCwzCgkJCWMtMC4xLDAuNC0wLjQsMC44LTAuOCwxLjFDODEuNSwxOS45LDgxLDIwLDgwLjYsMjBoLTkuOGMtMC43LDAtMS4zLTAuMS0xLjktMC40Yy0wLjYtMC4zLTEuMS0wLjctMS41LTEuMgoJCQljLTAuNC0wLjUtMC43LTEuMS0wLjgtMS43Yy0wLjEtMC42LTAuMS0xLjMsMC4xLTEuOWwxLjYtNS43YzAuMi0wLjYsMC40LTEuMiwwLjgtMS43YzAuNy0xLDEuNy0xLjgsMi45LTIuMgoJCQljMC42LTAuMiwxLjMtMC4zLDEuOS0wLjNoNi45YzAuNywwLDEuMywwLjEsMS45LDAuNGMwLjYsMC4zLDEuMSwwLjcsMS41LDEuMkM4NC42LDcsODQuOSw3LjYsODUsOC4yYzAuMSwwLjYsMC4xLDEuMy0wLjEsMS45CgkJCWwtMC41LDEuN2MtMC4yLDAuNy0wLjYsMS40LTEuMywxLjhjLTAuNiwwLjUtMS40LDAuNy0yLjEsMC43aC03LjhsMC41LTEuOGMwLjEtMC40LDAuNC0wLjgsMC44LTEuMWMwLjQtMC4zLDAuOC0wLjQsMS4zLTAuNEg3OQoJCQljMC4zLDAsMC41LTAuMSwwLjYtMC40bDAuMS0wLjRjMC4xLTAuMy0wLjEtMC42LTAuNC0wLjdjMCwwLTAuMSwwLTAuMSwwaC00LjhDNzQsOS40LDczLjgsOS41LDczLjYsOS43eiIvPgoJCTxwYXRoIGNsYXNzPSJzdDAiIGQ9Ik04My41LDIwbDUuMi0xOC45YzAuMS0wLjMsMC4zLTAuNiwwLjYtMC44YzAuMy0wLjIsMC42LTAuMywxLTAuM0g5M2MwLjMsMCwwLjYsMC4xLDAuOCwwLjQKCQkJQzk0LDAuNiw5NC4xLDAuOSw5NCwxLjJsLTMuOSwxMy45Yy0wLjIsMC43LTAuNSwxLjQtMC45LDJjLTAuNCwwLjYtMC45LDEuMS0xLjUsMS41Yy0wLjYsMC40LTEuMiwwLjgtMS45LDEKCQkJQzg1LDE5LjksODQuMiwyMCw4My41LDIweiIvPgoJPC9nPgo8L2c+Cjwvc3ZnPgo=
+                          format: base64
+                          type: string
+                      type: object
+                  type: object
+                documentation:
+                  description: Optional documentation information.
+                  properties:
+                    url:
+                      description: URL to the companies documentation site. This url will replace the default documentation link in the footer if defined.
+                      example: https://hosting.com/documentation
+                      format: url
+                      type: string
+                  type: object
+                help:
+                  description: Optional help information.
+                  properties:
+                    url:
+                      description: URL to the companies customer support site. This url will replace the default help link in the footer if defined.
+                      example: https://hosting.com/get-help
+                      format: url
+                      type: string
+                  type: object
+              type: object
+        description: The theme data to save.
+        in: query
+        name: data
+        required: true
+      - description: The theme name for the customization.
+        in: query
+        name: theme
+        required: true
+        schema:
+          enum:
+          - jupiter
+          example: jupiter
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: update_customizations
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Update customization data
+      tags:
+      - Customizations
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  update_customizations \\\n  application='cpanel' \\\n  theme='jupiter' \\\n  data='{\"brand\":{\"colors\":{\"accent\":\"#00FF00\",\"primary\":\"#961218\"},\"favicon\":\"AAABAAEAICACAAEAAQAwAQAAFgAAACgAAAAgAAAAQAAAAAEAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACanZoAAAAAAP%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FAD%2F%2F%2BAg%2F%2F%2FAEH%2F%2FgDB%2F%2F4AQf%2F%2BAuCq%2FAfAgBwP4IA8H%2BBABA%2FgQAwH8EAGArA%2FAgAQPwMACD%2BDAAAfA%2BAIPwP1UBQH%2F%2FgAB%2F%2F8AAf%2F%2FgAP%2F%2FwAH%2F%2F%2BiP%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F8AP%2F%2F4CD%2F%2F8AQf%2F%2BAMH%2F%2FgBB%2F%2F4C4Kr8B8CAHA%2FggDwf4EAED%2BBADAfwQAYCsD8CABA%2FAwAIP4MAAB8D4Ag%2FA%2FVQFAf%2F%2BAAH%2F%2FwAB%2F%2F%2BAA%2F%2F%2FAAf%2F%2F6I%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F8%3D\",\"logo\":{\"description\":\"The orange logo for cPanel.\",\"forDarkBackground\":\"PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4KPCEtLSBHZW5lcmF0b3I6IEFkb2JlIElsbHVzdHJhdG9yIDIwLjAuMCwgU1ZHIEV4cG9ydCBQbHVnLUluIC4gU1ZHIFZlcnNpb246IDYuMDAgQnVpbGQgMCkgIC0tPgo8c3ZnIHZlcnNpb249IjEuMSIgaWQ9IkxheWVyXzEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHg9IjBweCIgeT0iMHB4IgoJIHZpZXdCb3g9IjAgMCA5NCAyMCIgc3R5bGU9ImVuYWJsZS1iYWNrZ3JvdW5kOm5ldyAwIDAgOTQgMjA7IiB4bWw6c3BhY2U9InByZXNlcnZlIj4KPHN0eWxlIHR5cGU9InRleHQvY3NzIj4KCS5zdDB7ZmlsbDojRkZGRkZGO30KPC9zdHlsZT4KPHRpdGxlPmNQYW5lbCBMb2dvIC0gV2hpdGU8L3RpdGxlPgo8ZyBpZD0iTGF5ZXJfMiI%2BCgk8ZyBpZD0iTGF5ZXJfMS0yIj4KCQk8cGF0aCBjbGFzcz0ic3QwIiBkPSJNNy44LDQuOWg1LjlsLTAuOSwzLjNjLTAuMSwwLjQtMC40LDAuOC0wLjgsMS4xYy0wLjQsMC4zLTAuOCwwLjQtMS4zLDAuNEg3LjljLTAuNiwwLTEuMiwwLjItMS43LDAuNQoJCQljLTAuNSwwLjQtMC44LDAuOS0xLDEuNGMtMC4xLDAuNC0wLjEsMC45LDAsMS4zYzAuMSwwLjQsMC4zLDAuNywwLjUsMS4xYzAuMiwwLjMsMC42LDAuNiwwLjksMC43QzcsMTUsNy41LDE1LjEsNy45LDE1LjFoMS43CgkJCWMwLjMsMCwwLjYsMC4xLDAuOCwwLjRjMC4yLDAuMiwwLjMsMC41LDAuMiwwLjhsLTEsMy43SDcuNmMtMS4yLDAtMi40LTAuMy0zLjQtMC44Yy0xLTAuNS0xLjktMS4yLTIuNi0yLjEKCQkJYy0xLjQtMS44LTEuOS00LjItMS4zLTYuNGwwLjEtMC40YzAuNC0xLjYsMS40LTIuOSwyLjctMy45QzMuOCw2LDQuNSw1LjYsNS4zLDUuM0M2LjEsNS4xLDYuOSw0LjksNy44LDQuOXoiLz4KCQk8cGF0aCBjbGFzcz0ic3QwIiBkPSJNMTAuNywyMGw1LjEtMTguNGMwLjEtMC40LDAuNC0wLjgsMC44LTEuMUMxNywwLjEsMTcuNSwwLDE4LDBoNS40YzEuMiwwLDIuNCwwLjMsMy40LDAuOGMyLjEsMSwzLjUsMi45LDQsNQoJCQljMC4zLDEuMSwwLjIsMi4zLTAuMSwzLjRsLTAuMSwwLjRjLTAuMiwwLjgtMC42LDEuNS0xLDIuMmMtMS40LDItMy44LDMuMy02LjMsMy4zaC00LjdsMC45LTMuNGMwLjEtMC40LDAuNC0wLjgsMC44LTEuMQoJCQljMC40LTAuMywwLjgtMC40LDEuMy0wLjRoMS41YzEuMiwwLDIuMy0wLjgsMi43LTJjMC4xLTAuNCwwLjEtMC44LDAtMS4yYy0wLjEtMC40LTAuMy0wLjctMC41LTEuMWMtMC4yLTAuMy0wLjYtMC42LTAuOS0wLjcKCQkJQzI0LDUsMjMuNiw0LjksMjMuMSw0LjloLTIuOWwtMy44LDEzLjZjLTAuMSwwLjQtMC40LDAuOC0wLjgsMS4xYy0wLjQsMC4zLTAuOCwwLjQtMS4zLDAuNEgxMC43eiIvPgoJCTxwYXRoIGNsYXNzPSJzdDAiIGQ9Ik00My4xLDEwLjJsMC4xLTAuM2MwLTAuMSwwLTAuMi0wLjEtMC4zYy0wLjEtMC4xLTAuMi0wLjEtMC4zLTAuMWgtOC40Yy0wLjMsMC0wLjctMC4xLTEtMC4yCgkJCWMtMC4zLTAuMS0wLjUtMC4zLTAuNy0wLjZjLTAuMi0wLjItMC4zLTAuNS0wLjQtMC44Yy0wLjEtMC4zLTAuMS0wLjcsMC0xbDAuNS0xLjloMTEuNGMwLjcsMCwxLjMsMC4xLDEuOSwwLjQKCQkJYzAuNiwwLjMsMS4xLDAuNywxLjUsMS4yYzAuNCwwLjUsMC43LDEuMSwwLjgsMS43YzAuMSwwLjYsMC4xLDEuMywwLDEuOWwtMi4xLDcuM0M0NiwxOSw0NC42LDIwLDQzLDIwbC04LjQsMAoJCQljLTEuNCwwLTIuNy0wLjYtMy42LTEuN2MtMC40LTAuNS0wLjctMS4xLTAuOC0xLjdjLTAuMi0wLjctMC4xLTEuNCwwLjEtMmwwLjEtMC40YzAuMS0wLjUsMC4zLTAuOSwwLjYtMS4zYzAuMy0wLjQsMC42LTAuNywxLTEKCQkJYzAuNC0wLjMsMC44LTAuNSwxLjMtMC43YzAuNS0wLjIsMS0wLjIsMS41LTAuMmg3LjFsLTAuNSwxLjljLTAuMSwwLjQtMC40LDAuOC0wLjgsMS4xYy0wLjQsMC4zLTAuOCwwLjQtMS4zLDAuNGgtMy4yCgkJCWMtMC4zLDAtMC41LDAuMS0wLjYsMC40Yy0wLjEsMC4yLDAsMC40LDAuMSwwLjVjMC4xLDAuMSwwLjMsMC4yLDAuNSwwLjJoNS4xYzAuMiwwLDAuNCwwLDAuNS0wLjFjMC4xLTAuMSwwLjItMC4yLDAuMy0wLjQKCQkJbDAuMS0wLjJMNDMuMSwxMC4yeiIvPgoJCTxwYXRoIGNsYXNzPSJzdDAiIGQ9Ik01OC4zLDQuOWMxLjIsMCwyLjQsMC4zLDMuNSwwLjhjMSwwLjUsMS45LDEuMiwyLjYsMi4xYzAuNywwLjksMS4yLDEuOSwxLjQsM2MwLjMsMS4xLDAuMiwyLjMtMC4xLDMuNAoJCQlsLTEuMyw0LjdjLTAuMSwwLjMtMC4zLDAuNi0wLjYsMC44Yy0wLjMsMC4yLTAuNiwwLjMtMSwwLjNINjBjLTAuNSwwLTEtMC40LTEtMC45YzAtMC4xLDAtMC4yLDAtMC4zbDEuNi01LjcKCQkJYzAuMS0wLjQsMC4xLTAuOCwwLTEuMmMtMC4xLTAuNC0wLjMtMC43LTAuNS0xLjFjLTAuMi0wLjMtMC42LTAuNi0wLjktMC43Yy0wLjQtMC4yLTAuOC0wLjMtMS4yLTAuM2gtMi45bC0yLjUsOS4xCgkJCWMtMC4xLDAuMy0wLjMsMC42LTAuNiwwLjhjLTAuMywwLjItMC42LDAuMy0xLDAuM2gtMi44Yy0wLjMsMC0wLjYtMC4xLTAuOC0wLjRjLTAuMi0wLjItMC4zLTAuNS0wLjItMC44bDMuOC0xMy45TDU4LjMsNC45eiIvPgoJCTxwYXRoIGNsYXNzPSJzdDAiIGQ9Ik03My42LDkuN2MtMC4yLDAuMi0wLjQsMC40LTAuNCwwLjZMNzIsMTQuNWMtMC4xLDAuNCwwLjEsMC44LDAuNSwwLjljMC4xLDAsMC4xLDAsMC4yLDBoMTAuOGwtMC44LDMKCQkJYy0wLjEsMC40LTAuNCwwLjgtMC44LDEuMUM4MS41LDE5LjksODEsMjAsODAuNiwyMGgtOS44Yy0wLjcsMC0xLjMtMC4xLTEuOS0wLjRjLTAuNi0wLjMtMS4xLTAuNy0xLjUtMS4yCgkJCWMtMC40LTAuNS0wLjctMS4xLTAuOC0xLjdjLTAuMS0wLjYtMC4xLTEuMywwLjEtMS45bDEuNi01LjdjMC4yLTAuNiwwLjQtMS4yLDAuOC0xLjdjMC43LTEsMS43LTEuOCwyLjktMi4yCgkJCWMwLjYtMC4yLDEuMy0wLjMsMS45LTAuM2g2LjljMC43LDAsMS4zLDAuMSwxLjksMC40YzAuNiwwLjMsMS4xLDAuNywxLjUsMS4yQzg0LjYsNyw4NC45LDcuNiw4NSw4LjJjMC4xLDAuNiwwLjEsMS4zLTAuMSwxLjkKCQkJbC0wLjUsMS43Yy0wLjIsMC43LTAuNiwxLjQtMS4zLDEuOGMtMC42LDAuNS0xLjQsMC43LTIuMSwwLjdoLTcuOGwwLjUtMS44YzAuMS0wLjQsMC40LTAuOCwwLjgtMS4xYzAuNC0wLjMsMC44LTAuNCwxLjMtMC40SDc5CgkJCWMwLjMsMCwwLjUtMC4xLDAuNi0wLjRsMC4xLTAuNGMwLjEtMC4zLTAuMS0wLjYtMC40LTAuN2MwLDAtMC4xLDAtMC4xLDBoLTQuOEM3NCw5LjQsNzMuOCw5LjUsNzMuNiw5Ljd6Ii8%2BCgkJPHBhdGggY2xhc3M9InN0MCIgZD0iTTgzLjUsMjBsNS4yLTE4LjljMC4xLTAuMywwLjMtMC42LDAuNi0wLjhjMC4zLTAuMiwwLjYtMC4zLDEtMC4zSDkzYzAuMywwLDAuNiwwLjEsMC44LDAuNAoJCQlDOTQsMC42LDk0LjEsMC45LDk0LDEuMmwtMy45LDEzLjljLTAuMiwwLjctMC41LDEuNC0wLjksMmMtMC40LDAuNi0wLjksMS4xLTEuNSwxLjVjLTAuNiwwLjQtMS4yLDAuOC0xLjksMQoJCQlDODUsMTkuOSw4NC4yLDIwLDgzLjUsMjB6Ii8%2BCgk8L2c%2BCjwvZz4KPC9zdmc%2B\",\"forLightBackground\":\"PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4KPCEtLSBHZW5lcmF0b3I6IEFkb2JlIElsbHVzdHJhdG9yIDIwLjAuMCwgU1ZHIEV4cG9ydCBQbHVnLUluIC4gU1ZHIFZlcnNpb246IDYuMDAgQnVpbGQgMCkgIC0tPgo8c3ZnIHZlcnNpb249IjEuMSIgaWQ9InhMYXllcl8xIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiB4PSIwcHgiIHk9IjBweCIKCSB2aWV3Qm94PSIwIDAgOTQgMjAiIHN0eWxlPSJlbmFibGUtYmFja2dyb3VuZDpuZXcgMCAwIDk0IDIwOyIgeG1sOnNwYWNlPSJwcmVzZXJ2ZSI%2BCjxzdHlsZSB0eXBlPSJ0ZXh0L2NzcyI%2BCgkuc3Qwe2ZpbGw6I0ZGNkMyQzt9Cjwvc3R5bGU%2BCjx0aXRsZT5jUGFuZWwgTG9nbyAtIE9yYW5nZTwvdGl0bGU%2BCjxnIGlkPSJ4TGF5ZXJfMiI%2BCgk8ZyBpZD0ieExheWVyXzEtMiI%2BCgkJPHBhdGggY2xhc3M9InN0MCIgZD0iTTcuOCw0LjloNS45bC0wLjksMy4zYy0wLjEsMC40LTAuNCwwLjgtMC44LDEuMWMtMC40LDAuMy0wLjgsMC40LTEuMywwLjRINy45Yy0wLjYsMC0xLjIsMC4yLTEuNywwLjUKCQkJYy0wLjUsMC40LTAuOCwwLjktMSwxLjRjLTAuMSwwLjQtMC4xLDAuOSwwLDEuM2MwLjEsMC40LDAuMywwLjcsMC41LDEuMWMwLjIsMC4zLDAuNiwwLjYsMC45LDAuN0M3LDE1LDcuNSwxNS4xLDcuOSwxNS4xaDEuNwoJCQljMC4zLDAsMC42LDAuMSwwLjgsMC40YzAuMiwwLjIsMC4zLDAuNSwwLjIsMC44bC0xLDMuN0g3LjZjLTEuMiwwLTIuNC0wLjMtMy40LTAuOGMtMS0wLjUtMS45LTEuMi0yLjYtMi4xCgkJCWMtMS40LTEuOC0xLjktNC4yLTEuMy02LjRsMC4xLTAuNGMwLjQtMS42LDEuNC0yLjksMi43LTMuOUMzLjgsNiw0LjUsNS42LDUuMyw1LjNDNi4xLDUuMSw2LjksNC45LDcuOCw0Ljl6Ii8%2BCgkJPHBhdGggY2xhc3M9InN0MCIgZD0iTTEwLjcsMjBsNS4xLTE4LjRjMC4xLTAuNCwwLjQtMC44LDAuOC0xLjFDMTcsMC4xLDE3LjUsMCwxOCwwaDUuNGMxLjIsMCwyLjQsMC4zLDMuNCwwLjhjMi4xLDEsMy41LDIuOSw0LDUKCQkJYzAuMywxLjEsMC4yLDIuMy0wLjEsMy40bC0wLjEsMC40Yy0wLjIsMC44LTAuNiwxLjUtMSwyLjJjLTEuNCwyLTMuOCwzLjMtNi4zLDMuM2gtNC43bDAuOS0zLjRjMC4xLTAuNCwwLjQtMC44LDAuOC0xLjEKCQkJYzAuNC0wLjMsMC44LTAuNCwxLjMtMC40aDEuNWMxLjIsMCwyLjMtMC44LDIuNy0yYzAuMS0wLjQsMC4xLTAuOCwwLTEuMmMtMC4xLTAuNC0wLjMtMC43LTAuNS0xLjFjLTAuMi0wLjMtMC42LTAuNi0wLjktMC43CgkJCUMyNCw1LDIzLjYsNC45LDIzLjEsNC45aC0yLjlsLTMuOCwxMy42Yy0wLjEsMC40LTAuNCwwLjgtMC44LDEuMWMtMC40LDAuMy0wLjgsMC40LTEuMywwLjRIMTAuN3oiLz4KCQk8cGF0aCBjbGFzcz0ic3QwIiBkPSJNNDMuMSwxMC4ybDAuMS0wLjNjMC0wLjEsMC0wLjItMC4xLTAuM2MtMC4xLTAuMS0wLjItMC4xLTAuMy0wLjFoLTguNGMtMC4zLDAtMC43LTAuMS0xLTAuMgoJCQljLTAuMy0wLjEtMC41LTAuMy0wLjctMC42Yy0wLjItMC4yLTAuMy0wLjUtMC40LTAuOGMtMC4xLTAuMy0wLjEtMC43LDAtMWwwLjUtMS45aDExLjRjMC43LDAsMS4zLDAuMSwxLjksMC40CgkJCWMwLjYsMC4zLDEuMSwwLjcsMS41LDEuMmMwLjQsMC41LDAuNywxLjEsMC44LDEuN2MwLjEsMC42LDAuMSwxLjMsMCwxLjlsLTIuMSw3LjNDNDYsMTksNDQuNiwyMCw0MywyMGwtOC40LDAKCQkJYy0xLjQsMC0yLjctMC42LTMuNi0xLjdjLTAuNC0wLjUtMC43LTEuMS0wLjgtMS43Yy0wLjItMC43LTAuMS0xLjQsMC4xLTJsMC4xLTAuNGMwLjEtMC41LDAuMy0wLjksMC42LTEuM2MwLjMtMC40LDAuNi0wLjcsMS0xCgkJCWMwLjQtMC4zLDAuOC0wLjUsMS4zLTAuN2MwLjUtMC4yLDEtMC4yLDEuNS0wLjJoNy4xbC0wLjUsMS45Yy0wLjEsMC40LTAuNCwwLjgtMC44LDEuMWMtMC40LDAuMy0wLjgsMC40LTEuMywwLjRoLTMuMgoJCQljLTAuMywwLTAuNSwwLjEtMC42LDAuNGMtMC4xLDAuMiwwLDAuNCwwLjEsMC41YzAuMSwwLjEsMC4zLDAuMiwwLjUsMC4yaDUuMWMwLjIsMCwwLjQsMCwwLjUtMC4xYzAuMS0wLjEsMC4yLTAuMiwwLjMtMC40CgkJCWwwLjEtMC4yTDQzLjEsMTAuMnoiLz4KCQk8cGF0aCBjbGFzcz0ic3QwIiBkPSJNNTguMyw0LjljMS4yLDAsMi40LDAuMywzLjUsMC44YzEsMC41LDEuOSwxLjIsMi42LDIuMWMwLjcsMC45LDEuMiwxLjksMS40LDNjMC4zLDEuMSwwLjIsMi4zLTAuMSwzLjQKCQkJbC0xLjMsNC43Yy0wLjEsMC4zLTAuMywwLjYtMC42LDAuOGMtMC4zLDAuMi0wLjYsMC4zLTEsMC4zSDYwYy0wLjUsMC0xLTAuNC0xLTAuOWMwLTAuMSwwLTAuMiwwLTAuM2wxLjYtNS43CgkJCWMwLjEtMC40LDAuMS0wLjgsMC0xLjJjLTAuMS0wLjQtMC4zLTAuNy0wLjUtMS4xYy0wLjItMC4zLTAuNi0wLjYtMC45LTAuN2MtMC40LTAuMi0wLjgtMC4zLTEuMi0wLjNoLTIuOWwtMi41LDkuMQoJCQljLTAuMSwwLjMtMC4zLDAuNi0wLjYsMC44Yy0wLjMsMC4yLTAuNiwwLjMtMSwwLjNoLTIuOGMtMC4zLDAtMC42LTAuMS0wLjgtMC40Yy0wLjItMC4yLTAuMy0wLjUtMC4yLTAuOGwzLjgtMTMuOUw1OC4zLDQuOXoiLz4KCQk8cGF0aCBjbGFzcz0ic3QwIiBkPSJNNzMuNiw5LjdjLTAuMiwwLjItMC40LDAuNC0wLjQsMC42TDcyLDE0LjVjLTAuMSwwLjQsMC4xLDAuOCwwLjUsMC45YzAuMSwwLDAuMSwwLDAuMiwwaDEwLjhsLTAuOCwzCgkJCWMtMC4xLDAuNC0wLjQsMC44LTAuOCwxLjFDODEuNSwxOS45LDgxLDIwLDgwLjYsMjBoLTkuOGMtMC43LDAtMS4zLTAuMS0xLjktMC40Yy0wLjYtMC4zLTEuMS0wLjctMS41LTEuMgoJCQljLTAuNC0wLjUtMC43LTEuMS0wLjgtMS43Yy0wLjEtMC42LTAuMS0xLjMsMC4xLTEuOWwxLjYtNS43YzAuMi0wLjYsMC40LTEuMiwwLjgtMS43YzAuNy0xLDEuNy0xLjgsMi45LTIuMgoJCQljMC42LTAuMiwxLjMtMC4zLDEuOS0wLjNoNi45YzAuNywwLDEuMywwLjEsMS45LDAuNGMwLjYsMC4zLDEuMSwwLjcsMS41LDEuMkM4NC42LDcsODQuOSw3LjYsODUsOC4yYzAuMSwwLjYsMC4xLDEuMy0wLjEsMS45CgkJCWwtMC41LDEuN2MtMC4yLDAuNy0wLjYsMS40LTEuMywxLjhjLTAuNiwwLjUtMS40LDAuNy0yLjEsMC43aC03LjhsMC41LTEuOGMwLjEtMC40LDAuNC0wLjgsMC44LTEuMWMwLjQtMC4zLDAuOC0wLjQsMS4zLTAuNEg3OQoJCQljMC4zLDAsMC41LTAuMSwwLjYtMC40bDAuMS0wLjRjMC4xLTAuMy0wLjEtMC42LTAuNC0wLjdjMCwwLTAuMSwwLTAuMSwwaC00LjhDNzQsOS40LDczLjgsOS41LDczLjYsOS43eiIvPgoJCTxwYXRoIGNsYXNzPSJzdDAiIGQ9Ik04My41LDIwbDUuMi0xOC45YzAuMS0wLjMsMC4zLTAuNiwwLjYtMC44YzAuMy0wLjIsMC42LTAuMywxLTAuM0g5M2MwLjMsMCwwLjYsMC4xLDAuOCwwLjQKCQkJQzk0LDAuNiw5NC4xLDAuOSw5NCwxLjJsLTMuOSwxMy45Yy0wLjIsMC43LTAuNSwxLjQtMC45LDJjLTAuNCwwLjYtMC45LDEuMS0xLjUsMS41Yy0wLjYsMC40LTEuMiwwLjgtMS45LDEKCQkJQzg1LDE5LjksODQuMiwyMCw4My41LDIweiIvPgoJPC9nPgo8L2c%2BCjwvc3ZnPgo%3D\"}},\"documentation\":{\"url\":\"https://hosting.com/documentation\"},\"help\":{\"url\":\"https://hosting.com/get-help\"}}'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/update_customizations?api.version=1&application=cpanel&theme=jupiter&data=%7B%22brand%22%3A%7B%22colors%22%3A%7B%22accent%22%3A%22%2300FF00%22%2C%22primary%22%3A%22%23961218%22%7D%2C%22favicon%22%3A%22AAABAAEAICACAAEAAQAwAQAAFgAAACgAAAAgAAAAQAAAAAEAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACanZoAAAAAAP%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FAD%2F%2F%2BAg%2F%2F%2FAEH%2F%2FgDB%2F%2F4AQf%2F%2BAuCq%2FAfAgBwP4IA8H%2BBABA%2FgQAwH8EAGArA%2FAgAQPwMACD%2BDAAAfA%2BAIPwP1UBQH%2F%2FgAB%2F%2F8AAf%2F%2FgAP%2F%2FwAH%2F%2F%2BiP%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F8AP%2F%2F4CD%2F%2F8AQf%2F%2BAMH%2F%2FgBB%2F%2F4C4Kr8B8CAHA%2FggDwf4EAED%2BBADAfwQAYCsD8CABA%2FAwAIP4MAAB8D4Ag%2FA%2FVQFAf%2F%2BAAH%2F%2FwAB%2F%2F%2BAA%2F%2F%2FAAf%2F%2F6I%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F8%3D%22%2C%22logo%22%3A%7B%22description%22%3A%22The%20orange%20logo%20for%20cPanel.%22%2C%22forDarkBackground%22%3A%22PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4KPCEtLSBHZW5lcmF0b3I6IEFkb2JlIElsbHVzdHJhdG9yIDIwLjAuMCwgU1ZHIEV4cG9ydCBQbHVnLUluIC4gU1ZHIFZlcnNpb246IDYuMDAgQnVpbGQgMCkgIC0tPgo8c3ZnIHZlcnNpb249IjEuMSIgaWQ9IkxheWVyXzEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHg9IjBweCIgeT0iMHB4IgoJIHZpZXdCb3g9IjAgMCA5NCAyMCIgc3R5bGU9ImVuYWJsZS1iYWNrZ3JvdW5kOm5ldyAwIDAgOTQgMjA7IiB4bWw6c3BhY2U9InByZXNlcnZlIj4KPHN0eWxlIHR5cGU9InRleHQvY3NzIj4KCS5zdDB7ZmlsbDojRkZGRkZGO30KPC9zdHlsZT4KPHRpdGxlPmNQYW5lbCBMb2dvIC0gV2hpdGU8L3RpdGxlPgo8ZyBpZD0iTGF5ZXJfMiI%2BCgk8ZyBpZD0iTGF5ZXJfMS0yIj4KCQk8cGF0aCBjbGFzcz0ic3QwIiBkPSJNNy44LDQuOWg1LjlsLTAuOSwzLjNjLTAuMSwwLjQtMC40LDAuOC0wLjgsMS4xYy0wLjQsMC4zLTAuOCwwLjQtMS4zLDAuNEg3LjljLTAuNiwwLTEuMiwwLjItMS43LDAuNQoJCQljLTAuNSwwLjQtMC44LDAuOS0xLDEuNGMtMC4xLDAuNC0wLjEsMC45LDAsMS4zYzAuMSwwLjQsMC4zLDAuNywwLjUsMS4xYzAuMiwwLjMsMC42LDAuNiwwLjksMC43QzcsMTUsNy41LDE1LjEsNy45LDE1LjFoMS43CgkJCWMwLjMsMCwwLjYsMC4xLDAuOCwwLjRjMC4yLDAuMiwwLjMsMC41LDAuMiwwLjhsLTEsMy43SDcuNmMtMS4yLDAtMi40LTAuMy0zLjQtMC44Yy0xLTAuNS0xLjktMS4yLTIuNi0yLjEKCQkJYy0xLjQtMS44LTEuOS00LjItMS4zLTYuNGwwLjEtMC40YzAuNC0xLjYsMS40LTIuOSwyLjctMy45QzMuOCw2LDQuNSw1LjYsNS4zLDUuM0M2LjEsNS4xLDYuOSw0LjksNy44LDQuOXoiLz4KCQk8cGF0aCBjbGFzcz0ic3QwIiBkPSJNMTAuNywyMGw1LjEtMTguNGMwLjEtMC40LDAuNC0wLjgsMC44LTEuMUMxNywwLjEsMTcuNSwwLDE4LDBoNS40YzEuMiwwLDIuNCwwLjMsMy40LDAuOGMyLjEsMSwzLjUsMi45LDQsNQoJCQljMC4zLDEuMSwwLjIsMi4zLTAuMSwzLjRsLTAuMSwwLjRjLTAuMiwwLjgtMC42LDEuNS0xLDIuMmMtMS40LDItMy44LDMuMy02LjMsMy4zaC00LjdsMC45LTMuNGMwLjEtMC40LDAuNC0wLjgsMC44LTEuMQoJCQljMC40LTAuMywwLjgtMC40LDEuMy0wLjRoMS41YzEuMiwwLDIuMy0wLjgsMi43LTJjMC4xLTAuNCwwLjEtMC44LDAtMS4yYy0wLjEtMC40LTAuMy0wLjctMC41LTEuMWMtMC4yLTAuMy0wLjYtMC42LTAuOS0wLjcKCQkJQzI0LDUsMjMuNiw0LjksMjMuMSw0LjloLTIuOWwtMy44LDEzLjZjLTAuMSwwLjQtMC40LDAuOC0wLjgsMS4xYy0wLjQsMC4zLTAuOCwwLjQtMS4zLDAuNEgxMC43eiIvPgoJCTxwYXRoIGNsYXNzPSJzdDAiIGQ9Ik00My4xLDEwLjJsMC4xLTAuM2MwLTAuMSwwLTAuMi0wLjEtMC4zYy0wLjEtMC4xLTAuMi0wLjEtMC4zLTAuMWgtOC40Yy0wLjMsMC0wLjctMC4xLTEtMC4yCgkJCWMtMC4zLTAuMS0wLjUtMC4zLTAuNy0wLjZjLTAuMi0wLjItMC4zLTAuNS0wLjQtMC44Yy0wLjEtMC4zLTAuMS0wLjcsMC0xbDAuNS0xLjloMTEuNGMwLjcsMCwxLjMsMC4xLDEuOSwwLjQKCQkJYzAuNiwwLjMsMS4xLDAuNywxLjUsMS4yYzAuNCwwLjUsMC43LDEuMSwwLjgsMS43YzAuMSwwLjYsMC4xLDEuMywwLDEuOWwtMi4xLDcuM0M0NiwxOSw0NC42LDIwLDQzLDIwbC04LjQsMAoJCQljLTEuNCwwLTIuNy0wLjYtMy42LTEuN2MtMC40LTAuNS0wLjctMS4xLTAuOC0xLjdjLTAuMi0wLjctMC4xLTEuNCwwLjEtMmwwLjEtMC40YzAuMS0wLjUsMC4zLTAuOSwwLjYtMS4zYzAuMy0wLjQsMC42LTAuNywxLTEKCQkJYzAuNC0wLjMsMC44LTAuNSwxLjMtMC43YzAuNS0wLjIsMS0wLjIsMS41LTAuMmg3LjFsLTAuNSwxLjljLTAuMSwwLjQtMC40LDAuOC0wLjgsMS4xYy0wLjQsMC4zLTAuOCwwLjQtMS4zLDAuNGgtMy4yCgkJCWMtMC4zLDAtMC41LDAuMS0wLjYsMC40Yy0wLjEsMC4yLDAsMC40LDAuMSwwLjVjMC4xLDAuMSwwLjMsMC4yLDAuNSwwLjJoNS4xYzAuMiwwLDAuNCwwLDAuNS0wLjFjMC4xLTAuMSwwLjItMC4yLDAuMy0wLjQKCQkJbDAuMS0wLjJMNDMuMSwxMC4yeiIvPgoJCTxwYXRoIGNsYXNzPSJzdDAiIGQ9Ik01OC4zLDQuOWMxLjIsMCwyLjQsMC4zLDMuNSwwLjhjMSwwLjUsMS45LDEuMiwyLjYsMi4xYzAuNywwLjksMS4yLDEuOSwxLjQsM2MwLjMsMS4xLDAuMiwyLjMtMC4xLDMuNAoJCQlsLTEuMyw0LjdjLTAuMSwwLjMtMC4zLDAuNi0wLjYsMC44Yy0wLjMsMC4yLTAuNiwwLjMtMSwwLjNINjBjLTAuNSwwLTEtMC40LTEtMC45YzAtMC4xLDAtMC4yLDAtMC4zbDEuNi01LjcKCQkJYzAuMS0wLjQsMC4xLTAuOCwwLTEuMmMtMC4xLTAuNC0wLjMtMC43LTAuNS0xLjFjLTAuMi0wLjMtMC42LTAuNi0wLjktMC43Yy0wLjQtMC4yLTAuOC0wLjMtMS4yLTAuM2gtMi45bC0yLjUsOS4xCgkJCWMtMC4xLDAuMy0wLjMsMC42LTAuNiwwLjhjLTAuMywwLjItMC42LDAuMy0xLDAuM2gtMi44Yy0wLjMsMC0wLjYtMC4xLTAuOC0wLjRjLTAuMi0wLjItMC4zLTAuNS0wLjItMC44bDMuOC0xMy45TDU4LjMsNC45eiIvPgoJCTxwYXRoIGNsYXNzPSJzdDAiIGQ9Ik03My42LDkuN2MtMC4yLDAuMi0wLjQsMC40LTAuNCwwLjZMNzIsMTQuNWMtMC4xLDAuNCwwLjEsMC44LDAuNSwwLjljMC4xLDAsMC4xLDAsMC4yLDBoMTAuOGwtMC44LDMKCQkJYy0wLjEsMC40LTAuNCwwLjgtMC44LDEuMUM4MS41LDE5LjksODEsMjAsODAuNiwyMGgtOS44Yy0wLjcsMC0xLjMtMC4xLTEuOS0wLjRjLTAuNi0wLjMtMS4xLTAuNy0xLjUtMS4yCgkJCWMtMC40LTAuNS0wLjctMS4xLTAuOC0xLjdjLTAuMS0wLjYtMC4xLTEuMywwLjEtMS45bDEuNi01LjdjMC4yLTAuNiwwLjQtMS4yLDAuOC0xLjdjMC43LTEsMS43LTEuOCwyLjktMi4yCgkJCWMwLjYtMC4yLDEuMy0wLjMsMS45LTAuM2g2LjljMC43LDAsMS4zLDAuMSwxLjksMC40YzAuNiwwLjMsMS4xLDAuNywxLjUsMS4yQzg0LjYsNyw4NC45LDcuNiw4NSw4LjJjMC4xLDAuNiwwLjEsMS4zLTAuMSwxLjkKCQkJbC0wLjUsMS43Yy0wLjIsMC43LTAuNiwxLjQtMS4zLDEuOGMtMC42LDAuNS0xLjQsMC43LTIuMSwwLjdoLTcuOGwwLjUtMS44YzAuMS0wLjQsMC40LTAuOCwwLjgtMS4xYzAuNC0wLjMsMC44LTAuNCwxLjMtMC40SDc5CgkJCWMwLjMsMCwwLjUtMC4xLDAuNi0wLjRsMC4xLTAuNGMwLjEtMC4zLTAuMS0wLjYtMC40LTAuN2MwLDAtMC4xLDAtMC4xLDBoLTQuOEM3NCw5LjQsNzMuOCw5LjUsNzMuNiw5Ljd6Ii8%2BCgkJPHBhdGggY2xhc3M9InN0MCIgZD0iTTgzLjUsMjBsNS4yLTE4LjljMC4xLTAuMywwLjMtMC42LDAuNi0wLjhjMC4zLTAuMiwwLjYtMC4zLDEtMC4zSDkzYzAuMywwLDAuNiwwLjEsMC44LDAuNAoJCQlDOTQsMC42LDk0LjEsMC45LDk0LDEuMmwtMy45LDEzLjljLTAuMiwwLjctMC41LDEuNC0wLjksMmMtMC40LDAuNi0wLjksMS4xLTEuNSwxLjVjLTAuNiwwLjQtMS4yLDAuOC0xLjksMQoJCQlDODUsMTkuOSw4NC4yLDIwLDgzLjUsMjB6Ii8%2BCgk8L2c%2BCjwvZz4KPC9zdmc%2B%22%2C%22forLightBackground%22%3A%22PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4KPCEtLSBHZW5lcmF0b3I6IEFkb2JlIElsbHVzdHJhdG9yIDIwLjAuMCwgU1ZHIEV4cG9ydCBQbHVnLUluIC4gU1ZHIFZlcnNpb246IDYuMDAgQnVpbGQgMCkgIC0tPgo8c3ZnIHZlcnNpb249IjEuMSIgaWQ9InhMYXllcl8xIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiB4PSIwcHgiIHk9IjBweCIKCSB2aWV3Qm94PSIwIDAgOTQgMjAiIHN0eWxlPSJlbmFibGUtYmFja2dyb3VuZDpuZXcgMCAwIDk0IDIwOyIgeG1sOnNwYWNlPSJwcmVzZXJ2ZSI%2BCjxzdHlsZSB0eXBlPSJ0ZXh0L2NzcyI%2BCgkuc3Qwe2ZpbGw6I0ZGNkMyQzt9Cjwvc3R5bGU%2BCjx0aXRsZT5jUGFuZWwgTG9nbyAtIE9yYW5nZTwvdGl0bGU%2BCjxnIGlkPSJ4TGF5ZXJfMiI%2BCgk8ZyBpZD0ieExheWVyXzEtMiI%2BCgkJPHBhdGggY2xhc3M9InN0MCIgZD0iTTcuOCw0LjloNS45bC0wLjksMy4zYy0wLjEsMC40LTAuNCwwLjgtMC44LDEuMWMtMC40LDAuMy0wLjgsMC40LTEuMywwLjRINy45Yy0wLjYsMC0xLjIsMC4yLTEuNywwLjUKCQkJYy0wLjUsMC40LTAuOCwwLjktMSwxLjRjLTAuMSwwLjQtMC4xLDAuOSwwLDEuM2MwLjEsMC40LDAuMywwLjcsMC41LDEuMWMwLjIsMC4zLDAuNiwwLjYsMC45LDAuN0M3LDE1LDcuNSwxNS4xLDcuOSwxNS4xaDEuNwoJCQljMC4zLDAsMC42LDAuMSwwLjgsMC40YzAuMiwwLjIsMC4zLDAuNSwwLjIsMC44bC0xLDMuN0g3LjZjLTEuMiwwLTIuNC0wLjMtMy40LTAuOGMtMS0wLjUtMS45LTEuMi0yLjYtMi4xCgkJCWMtMS40LTEuOC0xLjktNC4yLTEuMy02LjRsMC4xLTAuNGMwLjQtMS42LDEuNC0yLjksMi43LTMuOUMzLjgsNiw0LjUsNS42LDUuMyw1LjNDNi4xLDUuMSw2LjksNC45LDcuOCw0Ljl6Ii8%2BCgkJPHBhdGggY2xhc3M9InN0MCIgZD0iTTEwLjcsMjBsNS4xLTE4LjRjMC4xLTAuNCwwLjQtMC44LDAuOC0xLjFDMTcsMC4xLDE3LjUsMCwxOCwwaDUuNGMxLjIsMCwyLjQsMC4zLDMuNCwwLjhjMi4xLDEsMy41LDIuOSw0LDUKCQkJYzAuMywxLjEsMC4yLDIuMy0wLjEsMy40bC0wLjEsMC40Yy0wLjIsMC44LTAuNiwxLjUtMSwyLjJjLTEuNCwyLTMuOCwzLjMtNi4zLDMuM2gtNC43bDAuOS0zLjRjMC4xLTAuNCwwLjQtMC44LDAuOC0xLjEKCQkJYzAuNC0wLjMsMC44LTAuNCwxLjMtMC40aDEuNWMxLjIsMCwyLjMtMC44LDIuNy0yYzAuMS0wLjQsMC4xLTAuOCwwLTEuMmMtMC4xLTAuNC0wLjMtMC43LTAuNS0xLjFjLTAuMi0wLjMtMC42LTAuNi0wLjktMC43CgkJCUMyNCw1LDIzLjYsNC45LDIzLjEsNC45aC0yLjlsLTMuOCwxMy42Yy0wLjEsMC40LTAuNCwwLjgtMC44LDEuMWMtMC40LDAuMy0wLjgsMC40LTEuMywwLjRIMTAuN3oiLz4KCQk8cGF0aCBjbGFzcz0ic3QwIiBkPSJNNDMuMSwxMC4ybDAuMS0wLjNjMC0wLjEsMC0wLjItMC4xLTAuM2MtMC4xLTAuMS0wLjItMC4xLTAuMy0wLjFoLTguNGMtMC4zLDAtMC43LTAuMS0xLTAuMgoJCQljLTAuMy0wLjEtMC41LTAuMy0wLjctMC42Yy0wLjItMC4yLTAuMy0wLjUtMC40LTAuOGMtMC4xLTAuMy0wLjEtMC43LDAtMWwwLjUtMS45aDExLjRjMC43LDAsMS4zLDAuMSwxLjksMC40CgkJCWMwLjYsMC4zLDEuMSwwLjcsMS41LDEuMmMwLjQsMC41LDAuNywxLjEsMC44LDEuN2MwLjEsMC42LDAuMSwxLjMsMCwxLjlsLTIuMSw3LjNDNDYsMTksNDQuNiwyMCw0MywyMGwtOC40LDAKCQkJYy0xLjQsMC0yLjctMC42LTMuNi0xLjdjLTAuNC0wLjUtMC43LTEuMS0wLjgtMS43Yy0wLjItMC43LTAuMS0xLjQsMC4xLTJsMC4xLTAuNGMwLjEtMC41LDAuMy0wLjksMC42LTEuM2MwLjMtMC40LDAuNi0wLjcsMS0xCgkJCWMwLjQtMC4zLDAuOC0wLjUsMS4zLTAuN2MwLjUtMC4yLDEtMC4yLDEuNS0wLjJoNy4xbC0wLjUsMS45Yy0wLjEsMC40LTAuNCwwLjgtMC44LDEuMWMtMC40LDAuMy0wLjgsMC40LTEuMywwLjRoLTMuMgoJCQljLTAuMywwLTAuNSwwLjEtMC42LDAuNGMtMC4xLDAuMiwwLDAuNCwwLjEsMC41YzAuMSwwLjEsMC4zLDAuMiwwLjUsMC4yaDUuMWMwLjIsMCwwLjQsMCwwLjUtMC4xYzAuMS0wLjEsMC4yLTAuMiwwLjMtMC40CgkJCWwwLjEtMC4yTDQzLjEsMTAuMnoiLz4KCQk8cGF0aCBjbGFzcz0ic3QwIiBkPSJNNTguMyw0LjljMS4yLDAsMi40LDAuMywzLjUsMC44YzEsMC41LDEuOSwxLjIsMi42LDIuMWMwLjcsMC45LDEuMiwxLjksMS40LDNjMC4zLDEuMSwwLjIsMi4zLTAuMSwzLjQKCQkJbC0xLjMsNC43Yy0wLjEsMC4zLTAuMywwLjYtMC42LDAuOGMtMC4zLDAuMi0wLjYsMC4zLTEsMC4zSDYwYy0wLjUsMC0xLTAuNC0xLTAuOWMwLTAuMSwwLTAuMiwwLTAuM2wxLjYtNS43CgkJCWMwLjEtMC40LDAuMS0wLjgsMC0xLjJjLTAuMS0wLjQtMC4zLTAuNy0wLjUtMS4xYy0wLjItMC4zLTAuNi0wLjYtMC45LTAuN2MtMC40LTAuMi0wLjgtMC4zLTEuMi0wLjNoLTIuOWwtMi41LDkuMQoJCQljLTAuMSwwLjMtMC4zLDAuNi0wLjYsMC44Yy0wLjMsMC4yLTAuNiwwLjMtMSwwLjNoLTIuOGMtMC4zLDAtMC42LTAuMS0wLjgtMC40Yy0wLjItMC4yLTAuMy0wLjUtMC4yLTAuOGwzLjgtMTMuOUw1OC4zLDQuOXoiLz4KCQk8cGF0aCBjbGFzcz0ic3QwIiBkPSJNNzMuNiw5LjdjLTAuMiwwLjItMC40LDAuNC0wLjQsMC42TDcyLDE0LjVjLTAuMSwwLjQsMC4xLDAuOCwwLjUsMC45YzAuMSwwLDAuMSwwLDAuMiwwaDEwLjhsLTAuOCwzCgkJCWMtMC4xLDAuNC0wLjQsMC44LTAuOCwxLjFDODEuNSwxOS45LDgxLDIwLDgwLjYsMjBoLTkuOGMtMC43LDAtMS4zLTAuMS0xLjktMC40Yy0wLjYtMC4zLTEuMS0wLjctMS41LTEuMgoJCQljLTAuNC0wLjUtMC43LTEuMS0wLjgtMS43Yy0wLjEtMC42LTAuMS0xLjMsMC4xLTEuOWwxLjYtNS43YzAuMi0wLjYsMC40LTEuMiwwLjgtMS43YzAuNy0xLDEuNy0xLjgsMi45LTIuMgoJCQljMC42LTAuMiwxLjMtMC4zLDEuOS0wLjNoNi45YzAuNywwLDEuMywwLjEsMS45LDAuNGMwLjYsMC4zLDEuMSwwLjcsMS41LDEuMkM4NC42LDcsODQuOSw3LjYsODUsOC4yYzAuMSwwLjYsMC4xLDEuMy0wLjEsMS45CgkJCWwtMC41LDEuN2MtMC4yLDAuNy0wLjYsMS40LTEuMywxLjhjLTAuNiwwLjUtMS40LDAuNy0yLjEsMC43aC03LjhsMC41LTEuOGMwLjEtMC40LDAuNC0wLjgsMC44LTEuMWMwLjQtMC4zLDAuOC0wLjQsMS4zLTAuNEg3OQoJCQljMC4zLDAsMC41LTAuMSwwLjYtMC40bDAuMS0wLjRjMC4xLTAuMy0wLjEtMC42LTAuNC0wLjdjMCwwLTAuMSwwLTAuMSwwaC00LjhDNzQsOS40LDczLjgsOS41LDczLjYsOS43eiIvPgoJCTxwYXRoIGNsYXNzPSJzdDAiIGQ9Ik04My41LDIwbDUuMi0xOC45YzAuMS0wLjMsMC4zLTAuNiwwLjYtMC44YzAuMy0wLjIsMC42LTAuMywxLTAuM0g5M2MwLjMsMCwwLjYsMC4xLDAuOCwwLjQKCQkJQzk0LDAuNiw5NC4xLDAuOSw5NCwxLjJsLTMuOSwxMy45Yy0wLjIsMC43LTAuNSwxLjQtMC45LDJjLTAuNCwwLjYtMC45LDEuMS0xLjUsMS41Yy0wLjYsMC40LTEuMiwwLjgtMS45LDEKCQkJQzg1LDE5LjksODQuMiwyMCw4My41LDIweiIvPgoJPC9nPgo8L2c%2BCjwvc3ZnPgo%3D%22%7D%7D%2C%22documentation%22%3A%7B%22url%22%3A%22https%3A%2F%2Fhosting.com%2Fdocumentation%22%7D%2C%22help%22%3A%7B%22url%22%3A%22https%3A%2F%2Fhosting.com%2Fget-help%22%7D%7D
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '100'
+      x-cpanel-cli-support: true
+components:
+  securitySchemes:
+    BasicAuth:
+      scheme: basic
+      type: http
+externalDocs:
+  url: https://cpanel.net/developers/
+x-tagGroups:
+- name: Account Restoration
+  tags:
+  - Restore Account
+  - Restore Queue Management
+  - Restore Queue Reporting
+- name: Accounts
+  tags:
+  - Account Creation
+  - Account Enhancements
+  - Account Management
+  - Bandwidth and Disk Quotas
+  - Domain Information
+  - Passwords
+  - Styles
+  - Suspensions
+- name: API Development Tools
+  tags:
+  - API Execution
+  - API Statistics
+  - API Token Management
+  - Applications
+  - Session
+- name: Authentication
+  tags:
+  - Authentication Providers
+  - External Authentication
+  - Login URL
+  - SSH Keys and Connections
+  - Two-Factor Authentication
+- name: Backups
+  tags:
+  - Backup Destination
+  - Backup or Restore
+  - Backup Settings
+  - Legacy Migration
+- name: Commerce Integration
+  tags:
+  - Market Integration
+  - Sitejet
+- name: cPanel Market
+  tags:
+  - Product Management
+  - Provider Management
+- name: cPanel Support Tickets
+  tags:
+  - Support Access
+  - Ticket Management
+- name: Customizations
+  tags:
+  - Brand
+  - Customizations
+- name: Databases
+  tags:
+  - Manage MySQL Server
+  - MySQL Databases
+  - PostgreSQL Databases
+  - Remote MySQL Databases
+- name: DNS
+  tags:
+  - DNS Cluster Settings
+  - DNS Security
+  - DNS Zones
+  - Domain Management
+  - Domain Management
+  - Resolvers
+  - Service Records
+- name: Hosting Plans
+  tags:
+  - Feature Access
+  - Feature Lists
+  - Hosting Plan Extensions
+  - Hosting Plans
+- name: InProductSurvey
+  tags:
+  - InProductSurvey
+- name: Integrations
+  tags:
+  - API Authentication
+  - Links
+  - Scripts Hooks
+- name: IP Address Management
+  tags:
+  - IPv4 Address Settings
+  - IPv6 Address Settings
+  - Network Address Translation
+- name: Login Security (cPHulk)
+  tags:
+  - Management
+  - Reporting
+  - Settings
+- name: Logs
+  tags:
+  - Web Log Retention
+- name: Mail
+  tags:
+  - cPanel Account Mail Management
+  - Mail DNS Settings
+  - Mail Server Settings
+  - Spam Management
+  - Spam Protection (Greylisting)
+- name: Monitoring
+  tags:
+  - 360 Monitoring
+- name: NGINX Manager
+  tags:
+  - NGINX Manager
+- name: Resellers
+  tags:
+  - Account Enhancement Limit
+  - Account Limits
+  - Account Permissions
+  - Account Settings
+  - Reseller Account Management
+- name: Security
+  tags:
+  - WHM Access
+- name: Server Administration
+  tags:
+  - Configuration Clusters
+  - Configurations
+  - Connected Applications
+  - Connections
+  - cPanel Analytics
+  - License Management
+  - Notifications
+  - Plugin-Based Features
+  - Security
+  - Server Nodes
+  - Server Profiles
+  - Services
+  - System Information
+  - Updates
+- name: SSL Certificates
+  tags:
+  - Auto-Generated Certificates
+  - cPanel Account Settings
+  - SSL Server Settings
+- name: System Package Management
+  tags:
+  - Install or Uninstall Package
+  - List Package Information
+  - Package Manager Settings
+- name: Transfers
+  tags:
+  - cPanel Account Transfer
+  - Transfer Configuration
+  - Transfer Monitoring
+- name: UserData
+  tags:
+  - UserData
+- name: Web Server Configuration
+  tags:
+  - EasyApache Settings
+  - PHP
+  - PHP-FPM
+- name: Web Server Security (ModSecurity)
+  tags:
+  - Rule Settings
+  - Rule Vendor Settings
+  - Server Settings

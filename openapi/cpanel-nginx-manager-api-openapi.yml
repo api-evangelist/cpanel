@@ -1,0 +1,822 @@
+openapi: 3.2.0
+info:
+  contact:
+    email: cs@cpanel.net
+    name: WebPros International, LLC
+    url: https://cpanel.net/support/
+  description: WHM API.
+  license:
+    name: cPanel License
+    url: https://cpanel.net/legal-notices/
+  termsOfService: https://cpanel.net/legal-notices/
+  title: WHM NGINX Manager API
+  version: 11.137.9999.106
+  x-api-evangelist-provenance: 'Harvested verbatim from cPanel''s developer portal on 2026-09-05 via the MCP tool get-full-api-description at https://api.docs.cpanel.net/mcp. ONE mechanical change was made before storage: example values containing PEM private-key or certificate blocks, and AWS-access-key-shaped example strings, were replaced with REDACTED_* placeholders so the file can be stored in a public git repository without tripping secret scanning. No path, operation, parameter, schema or description was altered, added or removed.'
+servers:
+- description: A server running WHM.
+  url: https://{host}:{port}/json-api
+  variables:
+    host:
+      default: whm-server.tld
+      description: The hostname of a server running WHM.
+    port:
+      default: '2087'
+      description: The WHM port.
+security:
+- BasicAuth: []
+tags:
+- description: The NGINX Manager module for WHM API 1.
+  name: NGINX Manager
+paths:
+  /nginxmanager_clear_cache:
+    get:
+      description: This function clears a user's NGINX cache
+      operationId: NGINXManager-nginxmanager_clear_cache
+      parameters:
+      - description: 'A list of users whose cache you want to clear.
+
+
+          **Note:**
+
+
+          If you do not pass this parameter, this function clears the cache for all users.'
+        explode: true
+        in: query
+        name: user
+        required: false
+        schema:
+          default: []
+          example:
+          - unclebob
+          - auntsue
+          format: username
+          items:
+            format: username
+            type: string
+          type: array
+        style: form
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: nginxmanager_clear_cache
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is 0. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` - Success
+
+                          * `0` - Failed: Check the reason field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Delete the user's NGINX cache
+      tags:
+      - NGINX Manager
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  nginxmanager_clear_cache\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/nginxmanager_clear_cache?api.version=1
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11'
+  /nginxmanager_get_cache_config_system:
+    get:
+      description: This function returns the system NGINX cache configuration.
+      operationId: NGINXManager-nginxmanager_get_cache_config_system
+      parameters:
+      - description: 'Whether to combine the default and system NGINX configurations when returning configuration data.
+
+
+          **Note:**
+
+
+          * `1` - Return the configuration with default and system values combined.'
+        in: query
+        name: merge
+        required: false
+        schema:
+          enum:
+          - 1
+          example: 1
+          type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    example:
+                      default:
+                        enabled: 1
+                        inactive_time: 60m
+                        levels: 62
+                        logging: 0
+                        proxy_cache_background_update: 'on'
+                        proxy_cache_lock: 'on'
+                        proxy_cache_min_uses: 1
+                        proxy_cache_revalidate: 'on'
+                        proxy_cache_use_stale: error timeout http_429 http_500 http_502 http_503 http_504
+                        x_cache_header: 0
+                        zone_size: 10m
+                      system:
+                        enabled: true
+                        inactive_time: 60m
+                        levels: 62
+                        logging: false
+                        proxy_cache_background_update: 'on'
+                        proxy_cache_lock: 'on'
+                        proxy_cache_min_uses: 1
+                        proxy_cache_revalidate: 'on'
+                        proxy_cache_use_stale: error timeout http_429 http_500 http_502 http_503 http_504
+                        x_cache_header: 0
+                        zone_size: 10m
+                    properties:
+                      default:
+                        additionalProperties:
+                          description: 'The default configuration values.
+
+
+                            **Note:**
+
+
+                            The key names are the configuration properties. For more information, read the NGINX Caching documentation.
+
+
+                            [Nginx with Reverse Proxy | cPanel & WHM Documentation](https://go.cpanel.net/nginx-cache-settings)'
+                        description: The default configuration values.
+                        properties:
+                          enabled:
+                            description: 'Caching is enabled or disabled.
+
+
+                              **Note:**
+
+
+                              * `1` - Caching is enabled
+
+                              * `0` - Caching is disabled'
+                            enum:
+                            - 0
+                            - 1
+                            type: integer
+                      system:
+                        additionalProperties:
+                          description: 'The system''s configuration values.
+
+
+                            **Note:**
+
+
+                            The key names are the configuration properties. For more information, read the NGINX Caching documentation.
+
+
+                            [Nginx with Reverse Proxy | cPanel & WHM Documentation](https://go.cpanel.net/nginx-cache-settings)'
+                        description: The system's configuration values.
+                        properties:
+                          enabled:
+                            description: 'Caching is enabled or disabled.
+
+
+                              **Note:**
+
+
+                              * `true` - Caching is enabled
+
+                              * `false` - Caching is disabled
+
+                              enum:
+
+                              - true
+
+                              - false
+
+                              type: boolean'
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: nginxmanager_set_config
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is 0. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` - Success
+
+                          * `0` - Failed: Check the reason field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Return NGINX caching configurations
+      tags:
+      - NGINX Manager
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  nginxmanager_get_cache_config_system\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/nginxmanager_get_cache_config_system?api.version=1
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11'
+  /nginxmanager_get_cache_config_users:
+    get:
+      description: This function returns a user's NGINX cache configuration.
+      operationId: NGINXManager-nginxmanager_get_cache_config_users
+      parameters:
+      - description: 'Combine default, system, and user NGINX configurations when returning configuration data.
+
+
+          **Note:**
+
+
+          * `1` - Return the configuration with default, system, and user values combined.'
+        in: query
+        name: merge
+        required: false
+        schema:
+          enum:
+          - 1
+          example: 1
+          type: integer
+      - description: 'A list of users whose cache configuration you want to retrieve.
+
+
+          **Note:**
+
+
+          If you do not pass this parameter, this function retrieves the cache configuration for all users.'
+        explode: true
+        in: query
+        name: user
+        required: false
+        schema:
+          default: []
+          example:
+          - unclebob
+          - auntsue
+          format: username
+          items:
+            format: username
+            type: string
+          type: array
+        style: form
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    example:
+                      users:
+                      - config:
+                          enabled: true
+                          inactive_time: 60m
+                          levels: 62
+                          logging: false
+                          proxy_cache_background_update: 'on'
+                          proxy_cache_lock: 'on'
+                          proxy_cache_min_uses: 1
+                          proxy_cache_revalidate: 'on'
+                          proxy_cache_use_stale: error timeout http_429 http_500 http_502 http_503 http_504
+                          x_cache_header: false
+                          zone_size: 10m
+                        merged: 0
+                        owner: root
+                        user: cptest1
+                      - config:
+                          enabled: true
+                          inactive_time: 60m
+                          levels: 62
+                          logging: false
+                          proxy_cache_background_update: 'on'
+                          proxy_cache_lock: 'on'
+                          proxy_cache_min_uses: 1
+                          proxy_cache_revalidate: 'on'
+                          proxy_cache_use_stale: error timeout http_429 http_500 http_502 http_503 http_504
+                          x_cache_header: false
+                          zone_size: 10m
+                        merged: 0
+                        owner: root
+                        user: cptest2
+                    properties:
+                      users:
+                        description: An array of objects containing the user configurations.
+                        items:
+                          properties:
+                            config:
+                              additionalProperties:
+                                description: 'The user''s configuration values.
+
+
+                                  **Note:**
+
+
+                                  The key names are the configuration properties. For more information, read the NGINX Caching documentation.
+
+
+                                  [Nginx with Reverse Proxy | cPanel & WHM Documentation](https://go.cpanel.net/nginx-cache-settings)'
+                              description: The user's configuration values.
+                              properties:
+                                enabled:
+                                  description: 'Caching is enabled or disabled.
+
+
+                                    **Note:**
+
+
+                                    * `true` - Caching is enabled
+
+                                    * `false` - Caching is disabled'
+                                  enum:
+                                  - false
+                                  - true
+                                  type: boolean
+                            merged:
+                              description: 'Whether the user''s configuration is combined with the system and default configuration values.
+
+
+                                **Note:**
+
+
+                                This value indicates if the function passed the `merge` flag.
+
+
+                                * `1` - The system and default configuration values are combined with the user''s configuration values.
+
+                                * `0` - The system and default configuration values are not combined with the user''s configuration values.'
+                              enum:
+                              - 1
+                              - 0
+                              type: integer
+                            owner:
+                              description: The reseller who owns this account.
+                              format: username
+                              type: string
+                            user:
+                              description: The user's name.
+                              format: username
+                              type: string
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: nginxmanager_set_config
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is 0. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` - Success
+
+                          * `0` - Failed: Check the reason field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Return user NGINX caching configurations
+      tags:
+      - NGINX Manager
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  nginxmanager_get_cache_config_users\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/nginxmanager_get_cache_config_users?api.version=1
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11'
+  /nginxmanager_rebuild_cache_config:
+    get:
+      description: This function rebuilds the NGINX user configuration.
+      operationId: NGINXManager-nginxmanager_rebuild_cache_config
+      parameters:
+      - description: 'A list of users whose configuration you want to rebuild.
+
+
+          **Note:**
+
+
+          If you do not pass this parameter, this function rebuilds the configuration for all users on the system.'
+        explode: true
+        in: query
+        name: user
+        required: false
+        schema:
+          default: []
+          example:
+          - unclebob
+          - auntsue
+          format: username
+          items:
+            format: username
+            type: string
+          type: array
+        style: form
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: nginxmanager_rebuild_cache_config
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is 0. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` - Success
+
+                          * `0` - Failed: Check the reason field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Update NGINX configuration
+      tags:
+      - NGINX Manager
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  nginxmanager_rebuild_cache_config\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/nginxmanager_rebuild_cache_config?api.version=1
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11'
+  /nginxmanager_reset_users_cache_config:
+    get:
+      description: This function resets a user to the NGINX system default.
+      operationId: NGINXManager-nginxmanager_reset_users_cache_config
+      parameters:
+      - description: 'A list of users to reset to the NGINX system default.
+
+
+          **Note:**
+
+
+          If you do not pass this parameter, this function resets the configuration to the default for all users on the system.'
+        explode: true
+        in: query
+        name: user
+        required: false
+        schema:
+          default: []
+          example:
+          - unclebob
+          - auntsue
+          format: username
+          items:
+            format: username
+            type: string
+          type: array
+        style: form
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: nginxmanager_reset_users_cache_config
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is 0. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` - Success
+
+                          * `0` - Failed: Check the reason field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Restore NGINX configuration to default values
+      tags:
+      - NGINX Manager
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  nginxmanager_reset_users_cache_config\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/nginxmanager_reset_users_cache_config?api.version=1
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11'
+  /nginxmanager_set_cache_config:
+    get:
+      description: This function enables or disables NGINX caching.
+      operationId: NGINXManager-nginxmanager_set_cache_config
+      parameters:
+      - description: 'Whether to enable to disable caching.
+
+
+          **Note:**
+
+
+          * `1` - Enables caching.
+
+          * `0` - Disables caching.'
+        in: query
+        name: enabled
+        required: true
+        schema:
+          enum:
+          - 1
+          - 0
+          example: 1
+          type: integer
+      - description: 'A list of users whose caching you want to enable or disable.
+
+
+          **Note:**
+
+
+          If you do not pass this parameter, this function sets the caching status for all users on the system.'
+        explode: true
+        in: query
+        name: user
+        required: false
+        schema:
+          default: []
+          example:
+          - unclebob
+          - auntsue
+          format: username
+          items:
+            format: username
+            type: string
+          type: array
+        style: form
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: nginxmanager_set_cache_config
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is 0. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` - Success
+
+                          * `0` - Failed: Check the reason field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Update NGINX caching status
+      tags:
+      - NGINX Manager
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  nginxmanager_set_cache_config \\\n  enabled='1'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/nginxmanager_set_cache_config?api.version=1&enabled=1
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11'
+components:
+  securitySchemes:
+    BasicAuth:
+      scheme: basic
+      type: http
+externalDocs:
+  url: https://cpanel.net/developers/
+x-tagGroups:
+- name: Account Restoration
+  tags:
+  - Restore Account
+  - Restore Queue Management
+  - Restore Queue Reporting
+- name: Accounts
+  tags:
+  - Account Creation
+  - Account Enhancements
+  - Account Management
+  - Bandwidth and Disk Quotas
+  - Domain Information
+  - Passwords
+  - Styles
+  - Suspensions
+- name: API Development Tools
+  tags:
+  - API Execution
+  - API Statistics
+  - API Token Management
+  - Applications
+  - Session
+- name: Authentication
+  tags:
+  - Authentication Providers
+  - External Authentication
+  - Login URL
+  - SSH Keys and Connections
+  - Two-Factor Authentication
+- name: Backups
+  tags:
+  - Backup Destination
+  - Backup or Restore
+  - Backup Settings
+  - Legacy Migration
+- name: Commerce Integration
+  tags:
+  - Market Integration
+  - Sitejet
+- name: cPanel Market
+  tags:
+  - Product Management
+  - Provider Management
+- name: cPanel Support Tickets
+  tags:
+  - Support Access
+  - Ticket Management
+- name: Customizations
+  tags:
+  - Brand
+  - Customizations
+- name: Databases
+  tags:
+  - Manage MySQL Server
+  - MySQL Databases
+  - PostgreSQL Databases
+  - Remote MySQL Databases
+- name: DNS
+  tags:
+  - DNS Cluster Settings
+  - DNS Security
+  - DNS Zones
+  - Domain Management
+  - Domain Management
+  - Resolvers
+  - Service Records
+- name: Hosting Plans
+  tags:
+  - Feature Access
+  - Feature Lists
+  - Hosting Plan Extensions
+  - Hosting Plans
+- name: InProductSurvey
+  tags:
+  - InProductSurvey
+- name: Integrations
+  tags:
+  - API Authentication
+  - Links
+  - Scripts Hooks
+- name: IP Address Management
+  tags:
+  - IPv4 Address Settings
+  - IPv6 Address Settings
+  - Network Address Translation
+- name: Login Security (cPHulk)
+  tags:
+  - Management
+  - Reporting
+  - Settings
+- name: Logs
+  tags:
+  - Web Log Retention
+- name: Mail
+  tags:
+  - cPanel Account Mail Management
+  - Mail DNS Settings
+  - Mail Server Settings
+  - Spam Management
+  - Spam Protection (Greylisting)
+- name: Monitoring
+  tags:
+  - 360 Monitoring
+- name: NGINX Manager
+  tags:
+  - NGINX Manager
+- name: Resellers
+  tags:
+  - Account Enhancement Limit
+  - Account Limits
+  - Account Permissions
+  - Account Settings
+  - Reseller Account Management
+- name: Security
+  tags:
+  - WHM Access
+- name: Server Administration
+  tags:
+  - Configuration Clusters
+  - Configurations
+  - Connected Applications
+  - Connections
+  - cPanel Analytics
+  - License Management
+  - Notifications
+  - Plugin-Based Features
+  - Security
+  - Server Nodes
+  - Server Profiles
+  - Services
+  - System Information
+  - Updates
+- name: SSL Certificates
+  tags:
+  - Auto-Generated Certificates
+  - cPanel Account Settings
+  - SSL Server Settings
+- name: System Package Management
+  tags:
+  - Install or Uninstall Package
+  - List Package Information
+  - Package Manager Settings
+- name: Transfers
+  tags:
+  - cPanel Account Transfer
+  - Transfer Configuration
+  - Transfer Monitoring
+- name: UserData
+  tags:
+  - UserData
+- name: Web Server Configuration
+  tags:
+  - EasyApache Settings
+  - PHP
+  - PHP-FPM
+- name: Web Server Security (ModSecurity)
+  tags:
+  - Rule Settings
+  - Rule Vendor Settings
+  - Server Settings

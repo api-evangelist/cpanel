@@ -1,0 +1,1298 @@
+openapi: 3.2.0
+info:
+  contact:
+    email: cs@cpanel.net
+    name: WebPros International, LLC
+    url: https://cpanel.net/support/
+  description: UAPI accesses the cPanel interface's features. Use this API to access and modify cPanel account data and settings.
+  license:
+    name: cPanel License
+    url: https://cpanel.net/legal-notices/
+  termsOfService: https://cpanel.net/legal-notices/
+  title: cPanel U Email DNS Settings API
+  version: 11.137.9999.106
+  x-api-evangelist-provenance: 'Harvested verbatim from cPanel''s developer portal on 2026-09-05 via the MCP tool get-full-api-description at https://api.docs.cpanel.net/mcp. ONE mechanical change was made before storage: example values containing PEM private-key or certificate blocks, and AWS-access-key-shaped example strings, were replaced with REDACTED_* placeholders so the file can be stored in a public git repository without tripping secret scanning. No path, operation, parameter, schema or description was altered, added or removed.'
+servers:
+- description: A server running cPanel.
+  url: https://{host}:{port}/execute
+  variables:
+    host:
+      default: cpanel-server.tld
+      description: The hostname of a server running cPanel.
+    port:
+      default: '2083'
+      description: The cPanel port.
+security:
+- BasicAuth: []
+tags:
+- description: DNS / Email DNS Settings
+  name: Email DNS Settings
+paths:
+  /Email/add_mx:
+    get:
+      x-readonly: false
+      x-rollback: none
+      description: 'This function creates a Mail Exchanger (MX) record. For more information about MX record settings, read our Email Routing Configuration documentation.
+
+
+        **Important:**
+
+
+        When you disable the *Receive Mail* role, the system **disables** this function'
+      operationId: Email-add_mx
+      parameters:
+      - description: The new mail exchanger's domain.
+        in: query
+        name: domain
+        required: true
+        schema:
+          example: example.com
+          format: domain
+          type: string
+      - description: The new mail exchanger's name.
+        in: query
+        name: exchanger
+        required: true
+        schema:
+          example: mail.example.com
+          format: domain
+          type: string
+      - description: "The new mail exchanger's [priority value](https://go.cpanel.net/whmdocsEditMXEntry).\n\n**Note:**\n\n  It is common practice to set a priority value that is divisible by five."
+        in: query
+        name: priority
+        required: true
+        schema:
+          example: 5
+          minimum: 0
+          type: integer
+      - description: 'Whether the mail exchanger accepts all mail for the domain.
+
+          * `1` — The mail exchanger always accepts mail.
+
+          * `0` — The mail exchanger does **not** always accept mail.'
+        in: query
+        name: alwaysaccept
+        required: false
+        schema:
+          default: 0
+          enum:
+          - 0
+          - 1
+          example: 1
+          type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  apiversion:
+                    description: The version of the API.
+                    example: 3
+                    type: integer
+                  func:
+                    description: The name of the method called.
+                    example: add_mx
+                    type: string
+                  module:
+                    description: The name of the module called.
+                    example: Email
+                    type: string
+                  result:
+                    properties:
+                      data:
+                        properties:
+                          checkmx:
+                            description: An object of the mail exchanger's data.
+                            properties:
+                              changed:
+                                description: 'Whether a change occurred during the function.
+
+                                  * `1` - Change occurred.
+
+                                  * `0` - **No** change.'
+                                enum:
+                                - 0
+                                - 1
+                                example: 1
+                                type: integer
+                              detected:
+                                description: 'The mail exchanger type.
+
+                                  * `auto`
+
+                                  * `local`
+
+                                  * `secondary`
+
+                                  * `remote`'
+                                enum:
+                                - auto
+                                - local
+                                - secondary
+                                - remote
+                                example: auto
+                                type: string
+                              isprimary:
+                                description: 'Whether the mail exchanger is the primary mail exchanger.
+
+                                  * `1` - Primary.
+
+                                  * `0` - **Not** primary.'
+                                enum:
+                                - 0
+                                - 1
+                                example: 0
+                                type: integer
+                              issecondary:
+                                description: 'Whether the mail exchanger is a secondary exchanger.
+
+                                  * `1` - Secondary.
+
+                                  * `0` - **Not** secondary.'
+                                enum:
+                                - 0
+                                - 1
+                                example: 0
+                                type: integer
+                              local:
+                                description: 'Whether the mail exchanger is a local exchanger.
+
+                                  * `1` - Local.
+
+                                  * `0` - **Not** local.'
+                                enum:
+                                - 0
+                                - 1
+                                example: 0
+                                type: integer
+                              mxcheck:
+                                description: 'The mail exchanger type.
+
+                                  * `auto`
+
+                                  * `local`
+
+                                  * `secondary`
+
+                                  * `remote`'
+                                enum:
+                                - auto
+                                - local
+                                - secondary
+                                - remote
+                                example: auto
+                                type: string
+                              remote:
+                                description: 'Whether the mail exchanger is a remote exchanger.
+
+                                  * `1` - Remote.
+
+                                  * `0` - **Not** remote.'
+                                enum:
+                                - 0
+                                - 1
+                                example: 0
+                                type: integer
+                              secondary:
+                                description: 'Whether the mail exchanger is a secondary exchanger.
+
+                                  * `1` - Secondary.
+
+                                  * `0` - **Not** secondary.'
+                                enum:
+                                - 0
+                                - 1
+                                example: 0
+                                type: integer
+                              warnings:
+                                description: Warning messages, if any exist.
+                                items:
+                                  example: 'Auto Detect of MX configuration not possible due to non-resolving MX entries. Defaulting to last known setting: local.'
+                                  type: string
+                                type: array
+                            type: object
+                          results:
+                            description: 'A message of success, or an error message.
+
+                              * A message of success that begins with `Added entry:`.
+
+                              * An error message.'
+                            example: 'Added entry:\nBind reloading on example using rndc zone: [example.com]\n'
+                            type: string
+                          status:
+                            description: 'Whether the function succeeded.
+
+                              * `1` - Success.
+
+                              * `0` - Failure.'
+                            enum:
+                            - 0
+                            - 1
+                            example: 1
+                            type: integer
+                          statusmsg:
+                            description: 'A message of success, or an error message.
+
+                              * A message of success that begins with `Added entry:`.
+
+                              * An error message.'
+                            example: 'Added entry:\nBind reloading on example using rndc zone: [example.com]\n'
+                            type: string
+                        type: object
+                      errors:
+                        description: List of errors if the API failed.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      messages:
+                        description: List of messages generated by the API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      metadata:
+                        properties: {}
+                      status:
+                        description: '* `1` - Success.
+
+                          * `0` - Failed. Check the `errors` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      warnings:
+                        description: List of warnings generated by the API. Warnings describe non-critical failures or other problematic conditions noted while running a API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                    type: object
+                type: object
+          description: HTTP Request was successful.
+      summary: Create mail exchanger record
+      tags:
+      - Email DNS Settings
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "uapi --output=jsonpretty \\\n  --user=username \\\n  Email \\\n  add_mx \\\n  domain='example.com' \\\n  exchanger='mail.example.com' \\\n  priority='5'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2083/cpsess##########/execute/Email/add_mx?domain=example.com&exchanger=mail.example.com&priority=5
+      - label: LiveAPI Perl
+        lang: Perl
+        source: "#--------------------------------------------------------------------------------------\n# Instructions:\n#--------------------------------------------------------------------------------------\n# <theme-name> is the theme assigned to cPanel account.\n# 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n# 2) mkdir api_examples\n# 3) cd api_examples\n# 4) create a file Email_add_mx.live.pl and put this code into that file.\n# 5) In your browser login to a cPanel account.\n# 6) Manually change the url from: .../frontend/<theme-name>/\n#    to .../frontend/<theme-name>/api_examples/Email_add_mx.live.pl\n#--------------------------------------------------------------------------------------\n\nuse strict;\n\nuse Cpanel::LiveAPI ();\n\nmy $cpanel = Cpanel::LiveAPI->new(); # Connect to cPanel - only do this once.\n\n# Print the header\nprint \"Content-type: text/plain\\r\\n\\r\\n\";\n\n# Call the API\nmy $response = $cpanel->uapi(\n    q/Email/,\n    q/add_mx/,\n    {\n        'domain' => 'example.com',\n        'exchanger' => 'mail.example.com',\n        'priority' => '5',\n    }\n);\n\n# Handle the response\nif ($response->{cpanelresult}{result}{status}) {\n    my $data = $response->{cpanelresult}{result}{data};\n    # Do something with the $data\n    # So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    # Report errors:\n    print to_json($response->{cpanelresult}{result}{errors});\n}\n\n# Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n#--------------------------------------------------------------------------------------\n# Helper function to convert a perl object to html printable json\n#--------------------------------------------------------------------------------------\nsub to_json {\n    require JSON;\n    my $str = JSON->new->pretty->encode($_[0]);\n    return $str;\n}\n"
+      - label: LiveAPI PHP
+        lang: PHP
+        source: "<?php\n//--------------------------------------------------------------------------------------\n// Instructions:\n//--------------------------------------------------------------------------------------\n// <theme-name> is the theme assigned to cPanel account.\n// 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n// 2) mkdir api_examples\n// 3) cd api_examples\n// 4) create a file Email_add_mx.live.php and put this code into that file.\n// 5) In your browser login to a cPanel account.\n// 6) Manually change the url from: .../frontend/<theme-name>/\n//    to .../frontend/<theme-name>/api_examples/Email_add_mx.live.php\n//--------------------------------------------------------------------------------------\n\n// Instantiate the CPANEL object.\nrequire_once \"/usr/local/cpanel/php/cpanel.php\";\n\n// Print the header\nheader('Content-Type: text/plain');\n\n// Connect to cPanel - only do this once.\n$cpanel = new CPANEL();\n\n// Call the API\n$response = $cpanel->uapi(\n    'Email',\n    'add_mx',\n    array (\n        'domain' => 'example.com',\n        'exchanger' => 'mail.example.com',\n        'priority' => '5',\n    )\n);\n\n// Handle the response\nif ($response['cpanelresult']['result']['status']) {\n    $data = $response['cpanelresult']['result']['data'];\n    // Do something with the $data\n    // So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    // Report errors:\n    print to_json($response['cpanelresult']['result']['errors']);\n}\n\n// Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n//--------------------------------------------------------------------------------------\n// Helper function to convert a PHP value to html printable json\n//--------------------------------------------------------------------------------------\nfunction to_json($data) {\n    return json_encode($data, JSON_PRETTY_PRINT);\n}"
+      x-cpanel-api-version: UAPI
+      x-cpanel-available-version: cPanel 11.42
+  /Email/change_mx:
+    get:
+      x-readonly: false
+      x-rollback: none
+      description: 'This function creates a Mail Exchanger (MX) record. For more information about MX record settings, read our Email Routing Configuration documentation.
+
+
+        **Important:**
+
+
+        When you disable the *Receive Mail* role, the system **disables** this function.'
+      operationId: Email-change_mx
+      parameters:
+      - description: The mail exchanger's domain.
+        in: query
+        name: domain
+        required: true
+        schema:
+          example: example.com
+          format: domain
+          type: string
+      - description: The mail exchanger's name.
+        in: query
+        name: exchanger
+        required: true
+        schema:
+          example: mail.example.com
+          format: domain
+          type: string
+      - description: The mail exchanger's current name.
+        in: query
+        name: oldexchanger
+        required: true
+        schema:
+          example: mail.example.com
+          format: domain
+          type: string
+      - description: "The mail exchanger's new [priority value](https://go.cpanel.net/whmdocsEditMXEntry).\n\n**Note:**\n\n  Common practice sets a priority value divisible by five."
+        in: query
+        name: priority
+        required: true
+        schema:
+          example: 15
+          minimum: 0
+          type: integer
+      - description: 'Whether the mail exchanger accepts all mail for the domain.
+
+          * `1` — The mail exchanger always accepts mail.
+
+          * `0` — The mail exchanger does **not** always accept mail.'
+        in: query
+        name: alwaysaccept
+        required: false
+        schema:
+          default: 0
+          enum:
+          - 0
+          - 1
+          example: 1
+          type: integer
+      - description: The mail exchanger's current priority value. If multiple MX entries match the `oldexchanger` value, the system uses this parameter to find the correct entry.
+        in: query
+        name: oldpriority
+        required: false
+        schema:
+          example: 5
+          minimum: 0
+          type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  apiversion:
+                    description: The version of the API.
+                    example: 3
+                    type: integer
+                  func:
+                    description: The name of the method called.
+                    example: change_mx
+                    type: string
+                  module:
+                    description: The name of the module called.
+                    example: Email
+                    type: string
+                  result:
+                    properties:
+                      data:
+                        properties:
+                          checkmx:
+                            description: An object of the mail exchanger's data.
+                            properties:
+                              changed:
+                                description: 'Whether a change occurred during the function.
+
+                                  * `1` - Change occurred.
+
+                                  * `0` - **No** change.'
+                                enum:
+                                - 0
+                                - 1
+                                example: 1
+                                type: integer
+                              detected:
+                                description: 'The mail exchanger type.
+
+                                  * `auto`
+
+                                  * `local`
+
+                                  * `secondary`
+
+                                  * `remote`'
+                                enum:
+                                - auto
+                                - local
+                                - secondary
+                                - remote
+                                example: auto
+                                type: string
+                              isprimary:
+                                description: 'Whether the mail exchanger is the primary mail exchanger.
+
+                                  * `1` - Primary.
+
+                                  * `0` - **Not** primary.'
+                                enum:
+                                - 0
+                                - 1
+                                example: 0
+                                type: integer
+                              issecondary:
+                                description: 'Whether the mail exchanger is a secondary exchanger.
+
+                                  * `1` - Secondary.
+
+                                  * `0` - **Not** secondary.'
+                                enum:
+                                - 0
+                                - 1
+                                example: 0
+                                type: integer
+                              local:
+                                description: 'Whether the mail exchanger is a local exchanger.
+
+                                  * `1` - Local.
+
+                                  * `0` - **Not** local.'
+                                enum:
+                                - 0
+                                - 1
+                                example: 0
+                                type: integer
+                              mxcheck:
+                                description: 'The mail exchanger type.
+
+                                  * `auto`
+
+                                  * `local`
+
+                                  * `secondary`
+
+                                  * `remote`'
+                                enum:
+                                - auto
+                                - local
+                                - secondary
+                                - remote
+                                example: auto
+                                type: string
+                              remote:
+                                description: 'Whether the mail exchanger is a remote exchanger.
+
+                                  * `1` - Remote.
+
+                                  * `0` - **Not** remote.'
+                                enum:
+                                - 0
+                                - 1
+                                example: 0
+                                type: integer
+                              secondary:
+                                description: 'Whether the mail exchanger is a secondary exchanger.
+
+                                  * `1` - Secondary.
+
+                                  * `0` - **Not** secondary.'
+                                enum:
+                                - 0
+                                - 1
+                                example: 0
+                                type: integer
+                              warnings:
+                                description: Warning messages, if any exist.
+                                items:
+                                  example: 'Auto Detect of MX configuration not possible due to non-resolving MX entries. Defaulting to last known setting: local.'
+                                  type: string
+                                type: array
+                            type: object
+                          results:
+                            description: 'A message of success, or an error message.
+
+                              * A message of success that begins with `Added entry:`.
+
+                              * An error message.'
+                            example: 'Replacing existing entry on line matched old entry and old priority: 51:\nBind reloading on example using rndc zone: [example.com]'
+                            type: string
+                          status:
+                            description: 'Whether the function succeeded.
+
+                              * `1` - Success.
+
+                              * `0` - Failure.'
+                            enum:
+                            - 0
+                            - 1
+                            example: 1
+                            type: integer
+                          statusmsg:
+                            description: 'A message of success, or an error message.
+
+                              * A message of success that begins with `Added entry:`.
+
+                              * An error message.'
+                            example: 'Replacing existing entry on line matched old entry and old priority: 51:\nBind reloading on example using rndc zone: [example.com]'
+                            type: string
+                        type: object
+                      errors:
+                        description: List of errors if the API failed.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      messages:
+                        description: List of messages generated by the API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      metadata:
+                        properties: {}
+                      status:
+                        description: '* `1` - Success.
+
+                          * `0` - Failed. Check the `errors` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      warnings:
+                        description: List of warnings generated by the API. Warnings describe non-critical failures or other problematic conditions noted while running a API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                    type: object
+                type: object
+          description: HTTP Request was successful.
+      summary: Update mail exchanger record
+      tags:
+      - Email DNS Settings
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "uapi --output=jsonpretty \\\n  --user=username \\\n  Email \\\n  change_mx \\\n  domain='example.com' \\\n  exchanger='mail.example.com' \\\n  oldexchanger='mail.example.com' \\\n  priority='15'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2083/cpsess##########/execute/Email/change_mx?domain=example.com&exchanger=mail.example.com&oldexchanger=mail.example.com&priority=15
+      - label: LiveAPI Perl
+        lang: Perl
+        source: "#--------------------------------------------------------------------------------------\n# Instructions:\n#--------------------------------------------------------------------------------------\n# <theme-name> is the theme assigned to cPanel account.\n# 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n# 2) mkdir api_examples\n# 3) cd api_examples\n# 4) create a file Email_change_mx.live.pl and put this code into that file.\n# 5) In your browser login to a cPanel account.\n# 6) Manually change the url from: .../frontend/<theme-name>/\n#    to .../frontend/<theme-name>/api_examples/Email_change_mx.live.pl\n#--------------------------------------------------------------------------------------\n\nuse strict;\n\nuse Cpanel::LiveAPI ();\n\nmy $cpanel = Cpanel::LiveAPI->new(); # Connect to cPanel - only do this once.\n\n# Print the header\nprint \"Content-type: text/plain\\r\\n\\r\\n\";\n\n# Call the API\nmy $response = $cpanel->uapi(\n    q/Email/,\n    q/change_mx/,\n    {\n        'domain' => 'example.com',\n        'exchanger' => 'mail.example.com',\n        'oldexchanger' => 'mail.example.com',\n        'priority' => '15',\n    }\n);\n\n# Handle the response\nif ($response->{cpanelresult}{result}{status}) {\n    my $data = $response->{cpanelresult}{result}{data};\n    # Do something with the $data\n    # So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    # Report errors:\n    print to_json($response->{cpanelresult}{result}{errors});\n}\n\n# Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n#--------------------------------------------------------------------------------------\n# Helper function to convert a perl object to html printable json\n#--------------------------------------------------------------------------------------\nsub to_json {\n    require JSON;\n    my $str = JSON->new->pretty->encode($_[0]);\n    return $str;\n}\n"
+      - label: LiveAPI PHP
+        lang: PHP
+        source: "<?php\n//--------------------------------------------------------------------------------------\n// Instructions:\n//--------------------------------------------------------------------------------------\n// <theme-name> is the theme assigned to cPanel account.\n// 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n// 2) mkdir api_examples\n// 3) cd api_examples\n// 4) create a file Email_change_mx.live.php and put this code into that file.\n// 5) In your browser login to a cPanel account.\n// 6) Manually change the url from: .../frontend/<theme-name>/\n//    to .../frontend/<theme-name>/api_examples/Email_change_mx.live.php\n//--------------------------------------------------------------------------------------\n\n// Instantiate the CPANEL object.\nrequire_once \"/usr/local/cpanel/php/cpanel.php\";\n\n// Print the header\nheader('Content-Type: text/plain');\n\n// Connect to cPanel - only do this once.\n$cpanel = new CPANEL();\n\n// Call the API\n$response = $cpanel->uapi(\n    'Email',\n    'change_mx',\n    array (\n        'domain' => 'example.com',\n        'exchanger' => 'mail.example.com',\n        'oldexchanger' => 'mail.example.com',\n        'priority' => '15',\n    )\n);\n\n// Handle the response\nif ($response['cpanelresult']['result']['status']) {\n    $data = $response['cpanelresult']['result']['data'];\n    // Do something with the $data\n    // So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    // Report errors:\n    print to_json($response['cpanelresult']['result']['errors']);\n}\n\n// Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n//--------------------------------------------------------------------------------------\n// Helper function to convert a PHP value to html printable json\n//--------------------------------------------------------------------------------------\nfunction to_json($data) {\n    return json_encode($data, JSON_PRETTY_PRINT);\n}"
+      x-cpanel-api-version: UAPI
+      x-cpanel-available-version: cPanel 11.42
+  /Email/delete_mx:
+    get:
+      x-readonly: false
+      x-rollback: none
+      description: 'This function deletes a Mail Exchanger (MX) record. For more information about MX record settings, read our Email Routing Configuration documentation.
+
+
+        **Important:**
+
+
+        When you disable the DNS role, the system **disables** this function.'
+      operationId: Email-delete_mx
+      parameters:
+      - description: The mail exchanger's domain.
+        in: query
+        name: domain
+        required: true
+        schema:
+          example: example.com
+          format: domain
+          type: string
+      - description: The mail exchanger's name.
+        in: query
+        name: exchanger
+        required: true
+        schema:
+          example: mail.example.com
+          type: string
+      - description: The mail exchanger's [priority value](https://go.cpanel.net/whmdocsEditMXEntry). If multiple MX entries match the exchanger value, the system uses this parameter to find the correct entry.
+        in: query
+        name: priority
+        required: true
+        schema:
+          example: 15
+          minimum: 1
+          type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  apiversion:
+                    description: The version of the API.
+                    example: 3
+                    type: integer
+                  func:
+                    description: The name of the method called.
+                    example: delete_mx
+                    type: string
+                  module:
+                    description: The name of the module called.
+                    example: Email
+                    type: string
+                  result:
+                    properties:
+                      data:
+                        properties:
+                          checkmx:
+                            description: An object containing the mail exchanger's data.
+                            properties:
+                              changed:
+                                description: 'Whether a change occurred during the function.
+
+                                  * `1` - Change occurred.
+
+                                  * `0` - **No** change.'
+                                enum:
+                                - 0
+                                - 1
+                                example: 1
+                                type: integer
+                              detected:
+                                description: 'The mail exchanger type.
+
+                                  * `auto`
+
+                                  * `local`
+
+                                  * `secondary`
+
+                                  * `remote`'
+                                enum:
+                                - auto
+                                - local
+                                - secondary
+                                - remote
+                                example: auto
+                                type: string
+                              isprimary:
+                                description: 'Whether the mail exchanger is the primary mail exchanger.
+
+                                  * `1` - Primary.
+
+                                  * `0` - **Not** primary.'
+                                enum:
+                                - 0
+                                - 1
+                                example: 0
+                                type: integer
+                              issecondary:
+                                description: 'Whether the mail exchanger is a secondary exchanger.
+
+                                  * `1` - Secondary.
+
+                                  * `0` - **Not** secondary.'
+                                enum:
+                                - 0
+                                - 1
+                                example: 0
+                                type: integer
+                              local:
+                                description: 'Whether the mail exchanger is a local exchanger.
+
+                                  * `1` - Local.
+
+                                  * `0` - **Not** local.'
+                                enum:
+                                - 0
+                                - 1
+                                example: 0
+                                type: integer
+                              mxcheck:
+                                description: 'The mail exchanger type.
+
+                                  * `auto`
+
+                                  * `local`
+
+                                  * `secondary`
+
+                                  * `remote`'
+                                enum:
+                                - auto
+                                - local
+                                - secondary
+                                - remote
+                                example: auto
+                                type: string
+                              remote:
+                                description: 'Whether the mail exchanger is a remote exchanger.
+
+                                  * `1` - Remote.
+
+                                  * `0` - **Not** remote.'
+                                enum:
+                                - 0
+                                - 1
+                                example: 0
+                                type: integer
+                              secondary:
+                                description: 'Whether the mail exchanger is a secondary exchanger.
+
+                                  * `1` - Secondary.
+
+                                  * `0` - **Not** secondary.'
+                                enum:
+                                - 0
+                                - 1
+                                example: 0
+                                type: integer
+                              warnings:
+                                description: Warning messages, if any exist.
+                                example: 'Auto Detect of MX configuration not possible due to non-resolving MX entries. Defaulting to last known setting: local.'
+                                items:
+                                  type: string
+                                type: string
+                            type: object
+                          results:
+                            description: 'A message of success, or an error message.
+
+                              * A message of success that begins with `Removed entry:`.
+
+                              * An error message.'
+                            example: 'Removed entry: example.com. IN MX 15 mail.example.com
+
+                              Bind reloading on example using rndc zone: [example.com]'
+                            type: string
+                          status:
+                            description: 'Whether the function succeeded.
+
+                              * `1` - Success.
+
+                              * `0` - Failure.'
+                            enum:
+                            - 0
+                            - 1
+                            example: 1
+                            type: integer
+                          statusmsg:
+                            description: 'A message of success, or an error message.
+
+                              * A message of success that begins with Added entry.
+
+                              * An error message.'
+                            example: 'Removed entry: example.com. IN MX 15 mail.example.com
+
+                              Bind reloading on example using rndc zone: [example.com]'
+                            type: string
+                        type: object
+                      errors:
+                        description: List of errors if the API failed.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      messages:
+                        description: List of messages generated by the API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      metadata:
+                        properties: {}
+                      status:
+                        description: '- 1 - Success
+
+                          - 0 - Failed: Check the errors field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      warnings:
+                        description: List of warnings generated by the API. Warnings describe non-critical failures or other problematic conditions noted while running a API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                    type: object
+                type: object
+          description: HTTP Request was successful.
+      summary: Delete mail exchanger record
+      tags:
+      - Email DNS Settings
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "uapi --output=jsonpretty \\\n  --user=username \\\n  Email \\\n  delete_mx \\\n  domain='example.com' \\\n  exchanger='mail.example.com' \\\n  priority='15'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2083/cpsess##########/execute/Email/delete_mx?domain=example.com&exchanger=mail.example.com&priority=15
+      - label: LiveAPI Perl
+        lang: Perl
+        source: "#--------------------------------------------------------------------------------------\n# Instructions:\n#--------------------------------------------------------------------------------------\n# <theme-name> is the theme assigned to cPanel account.\n# 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n# 2) mkdir api_examples\n# 3) cd api_examples\n# 4) create a file Email_delete_mx.live.pl and put this code into that file.\n# 5) In your browser login to a cPanel account.\n# 6) Manually change the url from: .../frontend/<theme-name>/\n#    to .../frontend/<theme-name>/api_examples/Email_delete_mx.live.pl\n#--------------------------------------------------------------------------------------\n\nuse strict;\n\nuse Cpanel::LiveAPI ();\n\nmy $cpanel = Cpanel::LiveAPI->new(); # Connect to cPanel - only do this once.\n\n# Print the header\nprint \"Content-type: text/plain\\r\\n\\r\\n\";\n\n# Call the API\nmy $response = $cpanel->uapi(\n    q/Email/,\n    q/delete_mx/,\n    {\n        'domain' => 'example.com',\n        'exchanger' => 'mail.example.com',\n        'priority' => '15',\n    }\n);\n\n# Handle the response\nif ($response->{cpanelresult}{result}{status}) {\n    my $data = $response->{cpanelresult}{result}{data};\n    # Do something with the $data\n    # So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    # Report errors:\n    print to_json($response->{cpanelresult}{result}{errors});\n}\n\n# Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n#--------------------------------------------------------------------------------------\n# Helper function to convert a perl object to html printable json\n#--------------------------------------------------------------------------------------\nsub to_json {\n    require JSON;\n    my $str = JSON->new->pretty->encode($_[0]);\n    return $str;\n}\n"
+      - label: LiveAPI PHP
+        lang: PHP
+        source: "<?php\n//--------------------------------------------------------------------------------------\n// Instructions:\n//--------------------------------------------------------------------------------------\n// <theme-name> is the theme assigned to cPanel account.\n// 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n// 2) mkdir api_examples\n// 3) cd api_examples\n// 4) create a file Email_delete_mx.live.php and put this code into that file.\n// 5) In your browser login to a cPanel account.\n// 6) Manually change the url from: .../frontend/<theme-name>/\n//    to .../frontend/<theme-name>/api_examples/Email_delete_mx.live.php\n//--------------------------------------------------------------------------------------\n\n// Instantiate the CPANEL object.\nrequire_once \"/usr/local/cpanel/php/cpanel.php\";\n\n// Print the header\nheader('Content-Type: text/plain');\n\n// Connect to cPanel - only do this once.\n$cpanel = new CPANEL();\n\n// Call the API\n$response = $cpanel->uapi(\n    'Email',\n    'delete_mx',\n    array (\n        'domain' => 'example.com',\n        'exchanger' => 'mail.example.com',\n        'priority' => '15',\n    )\n);\n\n// Handle the response\nif ($response['cpanelresult']['result']['status']) {\n    $data = $response['cpanelresult']['result']['data'];\n    // Do something with the $data\n    // So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    // Report errors:\n    print to_json($response['cpanelresult']['result']['errors']);\n}\n\n// Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n//--------------------------------------------------------------------------------------\n// Helper function to convert a PHP value to html printable json\n//--------------------------------------------------------------------------------------\nfunction to_json($data) {\n    return json_encode($data, JSON_PRETTY_PRINT);\n}"
+      x-cpanel-api-version: UAPI
+      x-cpanel-available-version: cPanel 11.42
+  /Email/list_mxs:
+    get:
+      x-readonly: true
+      description: 'This function lists Mail Exchanger (MX) records.
+
+
+        **Important:**
+
+
+        When you disable the *DNS* role, the system **disables** this function.'
+      operationId: Email-list_mxs
+      parameters:
+      - description: The domain to query. If you do **not** use this parameter, the function returns MX records for all of the cPanel account's domains.
+        in: query
+        name: domain
+        required: false
+        schema:
+          example: example.com
+          format: domain
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  apiversion:
+                    description: The version of the API.
+                    example: 3
+                    type: integer
+                  func:
+                    description: The name of the method called.
+                    example: list_mxs
+                    type: string
+                  module:
+                    description: The name of the module called.
+                    example: Email
+                    type: string
+                  result:
+                    properties:
+                      data:
+                        items:
+                          properties:
+                            alwaysaccept:
+                              description: 'Whether the domain''s highest-priority mail exchanger accepts local mail.
+
+                                * `1` - Accept local mail.
+
+                                * `0` - Does **not** accept local mail.'
+                              enum:
+                              - 0
+                              - 1
+                              example: 1
+                              type: integer
+                            detected:
+                              description: 'The domain''s highest-priority mail exchanger''s type.
+
+                                * `auto`
+
+                                * `local`
+
+                                * `remote`
+
+                                * `secondary`'
+                              enum:
+                              - auto
+                              - local
+                              - remote
+                              - secondary
+                              example: local
+                              type: string
+                            domain:
+                              description: The domain name.
+                              example: example.com
+                              format: domain
+                              type: string
+                            entries:
+                              description: An array of objects that contains information about mail exchangers.
+                              items:
+                                properties:
+                                  domain:
+                                    description: The mail exchanger's domain.
+                                    example: example.com
+                                    format: domain
+                                    type: string
+                                  entrycount:
+                                    description: The mail exchanger's order in the list of priorities. For example, the mail exchanger with the highest priority returns `1`, and the next highest priority returns `2`.
+                                    example: 1
+                                    minimum: 1
+                                    type: integer
+                                  mx:
+                                    description: The mail exchanger's name.
+                                    example: mx.example.com
+                                    format: domain
+                                    type: string
+                                  priority:
+                                    description: The mail exchanger's [priority value](https://go.cpanel.net/whmdocsEditMXEntry).
+                                    example: 5
+                                    minimum: 0
+                                    type: integer
+                                  row:
+                                    description: 'Whether the mail exchanger is an odd or an even entry.
+
+                                      * `even`
+
+                                      * `odd`'
+                                    enum:
+                                    - even
+                                    - odd
+                                    example: odd
+                                    type: string
+                                type: object
+                              type: array
+                            local:
+                              description: 'Whether the domain''s highest priority mail exchanger is a local mail exchanger.
+
+                                * `1` - Local.
+
+                                * `0` - **Not** local.'
+                              enum:
+                              - 0
+                              - 1
+                              example: 1
+                              type: integer
+                            mx:
+                              description: The domain's highest-priority mail exchanger's name.
+                              example: mx.example.com
+                              format: domain
+                              type: string
+                            mxcheck:
+                              description: 'The domain''s highest-priority mail exchanger''s type.
+
+                                * `auto`
+
+                                * `local`
+
+                                * `remote`
+
+                                * `secondary`'
+                              enum:
+                              - auto
+                              - local
+                              - remote
+                              - secondary
+                              example: auto
+                              type: string
+                            remote:
+                              description: 'Whether the domain''s highest-priority mail exchanger is remote.
+
+                                * `1` - Remote.
+
+                                * `0` - **Not** remote.'
+                              enum:
+                              - 0
+                              - 1
+                              example: 0
+                              type: integer
+                            secondary:
+                              description: 'Whether the domain''s highest-priority mail exchanger is secondary.
+
+                                * `1` - Secondary.
+
+                                * `0` - **Not** secondary.'
+                              enum:
+                              - 0
+                              - 1
+                              example: 0
+                              type: integer
+                            status:
+                              description: 'Whether the function succeeded.
+
+                                * `1` - Success.
+
+                                * `0` - Failure.'
+                              enum:
+                              - 0
+                              - 1
+                              example: 1
+                              type: integer
+                            statusmsg:
+                              description: 'A success or error message message.
+
+                                * A success message.
+
+                                * An error message.'
+                              example: Fetched MX List
+                              type: string
+                          type: object
+                        properties: {}
+                        type: array
+                      errors:
+                        description: List of errors if the API failed.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      messages:
+                        description: List of messages generated by the API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      metadata:
+                        properties:
+                          transformed:
+                            description: Post-processing may have transformed the data.
+                            enum:
+                            - 1
+                            example: 1
+                            type: integer
+                      status:
+                        description: '* `1` - Success.
+
+                          * `0` - Failed. Check the `errors` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      warnings:
+                        description: List of warnings generated by the API. Warnings describe non-critical failures or other problematic conditions noted while running a API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                    type: object
+                type: object
+          description: HTTP Request was successful.
+      summary: Return mail exchanger records
+      tags:
+      - Email DNS Settings
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "uapi --output=jsonpretty \\\n  --user=username \\\n  Email \\\n  list_mxs\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2083/cpsess##########/execute/Email/list_mxs
+      - label: LiveAPI Perl
+        lang: Perl
+        source: "#--------------------------------------------------------------------------------------\n# Instructions:\n#--------------------------------------------------------------------------------------\n# <theme-name> is the theme assigned to cPanel account.\n# 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n# 2) mkdir api_examples\n# 3) cd api_examples\n# 4) create a file Email_list_mxs.live.pl and put this code into that file.\n# 5) In your browser login to a cPanel account.\n# 6) Manually change the url from: .../frontend/<theme-name>/\n#    to .../frontend/<theme-name>/api_examples/Email_list_mxs.live.pl\n#--------------------------------------------------------------------------------------\n\nuse strict;\n\nuse Cpanel::LiveAPI ();\n\nmy $cpanel = Cpanel::LiveAPI->new(); # Connect to cPanel - only do this once.\n\n# Print the header\nprint \"Content-type: text/plain\\r\\n\\r\\n\";\n\n# Call the API\nmy $response = $cpanel->uapi(\n    q/Email/,\n    q/list_mxs/\n);\n\n# Handle the response\nif ($response->{cpanelresult}{result}{status}) {\n    my $data = $response->{cpanelresult}{result}{data};\n    foreach my $item (@{$data}) {\n        # Do something with the $item\n    }\n\n    # So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    # Report errors:\n    print to_json($response->{cpanelresult}{result}{errors});\n}\n\n# Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n#--------------------------------------------------------------------------------------\n# Helper function to convert a perl object to html printable json\n#--------------------------------------------------------------------------------------\nsub to_json {\n    require JSON;\n    my $str = JSON->new->pretty->encode($_[0]);\n    return $str;\n}\n"
+      - label: LiveAPI PHP
+        lang: PHP
+        source: "<?php\n//--------------------------------------------------------------------------------------\n// Instructions:\n//--------------------------------------------------------------------------------------\n// <theme-name> is the theme assigned to cPanel account.\n// 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n// 2) mkdir api_examples\n// 3) cd api_examples\n// 4) create a file Email_list_mxs.live.php and put this code into that file.\n// 5) In your browser login to a cPanel account.\n// 6) Manually change the url from: .../frontend/<theme-name>/\n//    to .../frontend/<theme-name>/api_examples/Email_list_mxs.live.php\n//--------------------------------------------------------------------------------------\n\n// Instantiate the CPANEL object.\nrequire_once \"/usr/local/cpanel/php/cpanel.php\";\n\n// Print the header\nheader('Content-Type: text/plain');\n\n// Connect to cPanel - only do this once.\n$cpanel = new CPANEL();\n\n// Call the API\n$response = $cpanel->uapi(\n    'Email',\n    'list_mxs'\n);\n\n// Handle the response\nif ($response['cpanelresult']['result']['status']) {\n    $data = $response['cpanelresult']['result']['data'];\n    foreach ($data as $item) {\n        // Do something with the $item\n    }\n\n    // So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    // Report errors:\n    print to_json($response['cpanelresult']['result']['errors']);\n}\n\n// Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n//--------------------------------------------------------------------------------------\n// Helper function to convert a PHP value to html printable json\n//--------------------------------------------------------------------------------------\nfunction to_json($data) {\n    return json_encode($data, JSON_PRETTY_PRINT);\n}"
+      x-cpanel-api-version: UAPI
+      x-cpanel-available-version: cPanel 11.42
+components:
+  securitySchemes:
+    BasicAuth:
+      scheme: basic
+      type: http
+externalDocs:
+  url: https://cpanel.net/developers/
+x-tagGroups:
+- name: API Development Tools
+  tags:
+  - API Token Management
+  - Batch
+  - SSE Task Management
+  - URL Parsing
+- name: Authentication
+  tags:
+  - External Authentication
+  - Two-Factor Settings
+- name: Backup Information
+  tags:
+  - BackupInfo
+  - BackupInfo Status
+- name: Block Ip Addresses
+  tags:
+  - Block IP
+- name: Commerce Integration
+  tags:
+  - Market Integration
+  - SSL Certificates
+- name: Contact Information
+  tags:
+  - Contact Information
+- name: cPanel Account
+  tags:
+  - Account Enhancements
+  - Account Information
+  - Account Management
+  - AuditLog
+  - Contact Information
+  - cPanel Features
+  - Disk Quotas
+  - DomainRecommendations
+  - Personalization
+  - Resource Usage and Statistics
+  - Subaccount Management
+  - Team Roles
+  - Team Users
+- name: cPanel Account Backups
+  tags:
+  - Backup
+  - File Restoration
+- name: cPanel Plugin Framework
+  tags:
+  - Formbricks
+  - Plugins
+- name: cPanel Theme Management
+  tags:
+  - Application Information
+  - Brand Management
+  - Branding Files
+  - Browser Cache Management
+  - Language
+  - Theme Settings
+- name: Directory Management
+  tags:
+  - Directory Indexes
+  - Directory Privacy
+  - Directory Protection
+- name: DNS
+  tags:
+  - DNS
+  - DNS Information
+  - DNS Security
+  - Dynamic DNS
+  - Email DNS Settings
+  - ZoneEdit
+- name: Domain
+  tags:
+  - Domain
+- name: Domain Management
+  tags:
+  - AddonDomain
+  - Direct Link Protection (Hotlink)
+  - Domain
+  - Domain Information
+  - Domain Redirection
+  - DomainLookup
+  - Park
+  - SubDomain
+  - Virtual Host Information
+- name: Domains
+  tags:
+  - Subdomains
+- name: Email
+  tags:
+  - Email Accounts
+  - Email Filtering
+  - Email Forwarding
+  - Email Server Information
+  - Email Suspensions
+  - Mail Server Information
+  - Mailbox Management
+  - Mailing Lists
+  - Signing and Encryption (GnuPG Keys)
+  - Spam Filtering (Greylisting)
+  - Spam Management
+  - Spam Prevention (BoxTrapper)
+  - Webmail Applications
+  - Webmail Sessions
+- name: Extract Information
+  tags:
+  - ExtractInfo
+  - ExtractInfo Status
+- name: File Manager
+  tags:
+  - Trash
+- name: Files
+  tags:
+  - FTP Accounts
+  - FTP Server Settings
+  - Image Tools
+  - Jodit
+  - Manage Files
+  - Manage Files
+  - WebDisk Settings
+- name: GIT Management
+  tags:
+  - Deployment Settings
+  - Repository Management
+- name: InProductSurvey
+  tags:
+  - InProductSurvey
+- name: MySQL and MariaDB
+  tags:
+  - Database Information
+  - Database Management
+  - Remote Databases
+  - User Management
+- name: Notifications
+  tags:
+  - Pushbullet
+- name: Optional Applications
+  tags:
+  - Antivirus Protection (ClamAV)
+  - Calendar and Contacts (DAV)
+  - Calendar and Contacts Server
+  - WordPress Manager Backups
+- name: PostgreSQL
+  tags:
+  - PostgreSQL Database Management
+  - PostgreSQL User Management
+- name: Retrieve bandwidth information
+  tags:
+  - Bandwidth
+- name: Security
+  tags:
+  - Known SSH Hosts Management
+  - Login Information
+- name: Server Information
+  tags:
+  - cPanel Server Information
+  - Notifications
+  - Password Strength
+  - SSH
+  - WebPros MCP
+  - WebProsMCP
+- name: ServiceProxy
+  tags:
+  - ServiceProxy
+- name: Site Quality Monitoring
+  tags:
+  - SiteQuality
+- name: SSL Certificates
+  tags:
+  - Auto-generated SSL Certificates
+  - cPanel Account SSL Management
+  - SNI Email Settings
+  - SSL Certificate Management
+  - Verify Domain Ownership
+- name: Statistics
+  tags:
+  - Domain Statistics
+  - Weblog Settings
+- name: UserData
+  tags:
+  - UserData
+- name: Web Server Configuration
+  tags:
+  - EA4
+  - EasyApache Settings
+  - PHP
+- name: Web Server Management
+  tags:
+  - Application Manager
+  - ModSecurity
+  - NginxCaching
+  - PHP Settings
+  - Web Apps
+- name: Website Configuration
+  tags:
+  - Handler Management
+  - Logs
+  - Mime Type Management
+  - Nova
+  - Site Information
+  - Site Installation
+  - Sitejet
+  - WPX

@@ -1,0 +1,487 @@
+openapi: 3.2.0
+info:
+  contact:
+    email: cs@cpanel.net
+    name: WebPros International, LLC
+    url: https://cpanel.net/support/
+  description: UAPI accesses the cPanel interface's features. Use this API to access and modify cPanel account data and settings.
+  license:
+    name: cPanel License
+    url: https://cpanel.net/legal-notices/
+  termsOfService: https://cpanel.net/legal-notices/
+  title: cPanel U Backup Info API
+  version: 11.137.9999.106
+  x-api-evangelist-provenance: 'Harvested verbatim from cPanel''s developer portal on 2026-09-05 via the MCP tool get-full-api-description at https://api.docs.cpanel.net/mcp. ONE mechanical change was made before storage: example values containing PEM private-key or certificate blocks, and AWS-access-key-shaped example strings, were replaced with REDACTED_* placeholders so the file can be stored in a public git repository without tripping secret scanning. No path, operation, parameter, schema or description was altered, added or removed.'
+servers:
+- description: A server running cPanel.
+  url: https://{host}:{port}/execute
+  variables:
+    host:
+      default: cpanel-server.tld
+      description: The hostname of a server running cPanel.
+    port:
+      default: '2083'
+      description: The cPanel port.
+security:
+- BasicAuth: []
+tags:
+- description: The BackupInfo module for UAPI.
+  name: Backup Info
+paths:
+  /BackupInfo/list:
+    get:
+      description: Scans the current cPanel user's home directory for full-account backup archives and returns one entry per archive, deriving real status from the on-disk marker file cPanel writes during a run. Single source of truth for the available-backups table. Read-only.
+      operationId: list
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  apiversion:
+                    example: 3
+                    type: integer
+                  func:
+                    example: list
+                    type: string
+                  module:
+                    example: BackupInfo
+                    type: string
+                  result:
+                    properties:
+                      data:
+                        items:
+                          properties:
+                            name:
+                              description: The archive file name (basename only; never an absolute path).
+                              example: backup-11.128.0.6_2026-06-23_user.tar.gz
+                              type: string
+                            fullpath:
+                              description: The home-relative file name (basename; safe to echo). Never an absolute path.
+                              example: backup-11.128.0.6_2026-06-23_user.tar.gz
+                              type: string
+                            mtime:
+                              description: Archive modification time, epoch seconds.
+                              example: 1750636800
+                              type: integer
+                            sizeBytes:
+                              description: Size of the .tar.gz archive in bytes.
+                              example: 524288000
+                              type: integer
+                            status:
+                              description: Archive status derived from the marker file. 'ready' (marker absent), 'inprogress' (marker present, within timeout), or 'timeout' (marker present, stalled past the timeout threshold).
+                              enum:
+                              - ready
+                              - inprogress
+                              - timeout
+                              example: ready
+                              type: string
+                            startedAtEpoch:
+                              description: Start epoch read from the marker file while a run is active. Null when not running.
+                              example: 1750636800
+                              type:
+                              - integer
+                              - 'null'
+                          type: object
+                        type: array
+                      errors:
+                        items:
+                          type: string
+                        type: array
+                      messages:
+                        items:
+                          type: string
+                        type: array
+                      status:
+                        example: 1
+                        type: integer
+                      warnings:
+                        items:
+                          type: string
+                        type: array
+                    type: object
+                type: object
+          description: HTTP Request was successful.
+      summary: List the current user's full-account backups
+      tags:
+      - Backup Info
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "uapi --output=jsonpretty \\\n  --user=username \\\n  BackupInfo \\\n  list\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2083/cpsess##########/execute/BackupInfo/list
+      x-cpanel-api-version: UAPI
+      x-cpanel-available-version: 136
+      x-cpanel-plugin: BackupInfo
+  /BackupInfo/progress:
+    get:
+      description: Returns telemetry for a full-account backup. When the PkgAcct::Create hook is installed it anchors the run's start and finish; 'complete' is reported only once the published archive is confirmed in the homedir (returning its exact final size), so a run that never publishes an archive is never reported complete. Otherwise it falls back to the on-disk marker. While running, estimatedPercent is an ESTIMATE (the final archive is gzipped, so the byte total is multiplied by a heuristic compression factor) clamped to 99. Degrades to zeros when nothing is running or when quota data is unavailable. Read-only and safe to poll.
+      operationId: progress
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  apiversion:
+                    example: 3
+                    type: integer
+                  func:
+                    example: progress
+                    type: string
+                  module:
+                    example: BackupInfo
+                    type: string
+                  result:
+                    properties:
+                      data:
+                        properties:
+                          state:
+                            description: Current run state. 'inprogress' or 'timeout' while a run is active or finalizing, 'complete' once the published archive is confirmed in the homedir, or 'none' when nothing is running. A confirmed hook 'complete' is sticky - it persists across polls until a new run starts or the reset endpoint is called.
+                            enum:
+                            - inprogress
+                            - timeout
+                            - complete
+                            - none
+                            example: inprogress
+                            type: string
+                          stateSource:
+                            description: Origin of 'state'. 'hook' is the authoritative PkgAcct::Create record (definitive start/finish); 'marker' is the estimated, marker-derived fallback; 'none' when nothing is running.
+                            enum:
+                            - hook
+                            - marker
+                            - none
+                            example: hook
+                            type: string
+                          startedAtEpoch:
+                            description: Start epoch (hook record when available, otherwise the marker file). Null when not running.
+                            example: 1750636800
+                            type:
+                            - integer
+                            - 'null'
+                          finishedAtEpoch:
+                            description: Finish epoch. Set only on a confirmed hook 'complete' (published archive present); null otherwise.
+                            example: 1750640400
+                            type:
+                            - integer
+                            - 'null'
+                          elapsedSeconds:
+                            description: Seconds since the run started. 0 when not running.
+                            example: 42
+                            type: integer
+                          currentBytes:
+                            description: Current size in bytes of the growing .tar.gz archive.
+                            example: 104857600
+                            type: integer
+                          estimatedTotalBytes:
+                            description: Estimated final archive size in bytes, (homedir + DB + mailman bytes) multiplied by the gzip compression factor. 0 when quota data is unavailable.
+                            example: 314572800
+                            type: integer
+                          estimatedPercent:
+                            description: Completion percent (0-100). An ESTIMATE while running (clamped to 99; the UI must label it "estimated"); an exact 100 only on a confirmed 'complete' (published archive present).
+                            example: 33.3
+                            type: number
+                        type: object
+                      errors:
+                        items:
+                          type: string
+                        type: array
+                      messages:
+                        items:
+                          type: string
+                        type: array
+                      status:
+                        example: 1
+                        type: integer
+                      warnings:
+                        items:
+                          type: string
+                        type: array
+                    type: object
+                type: object
+          description: HTTP Request was successful.
+      summary: Get progress for the current user's running full-account backup
+      tags:
+      - Backup Info
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "uapi --output=jsonpretty \\\n  --user=username \\\n  BackupInfo \\\n  progress\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2083/cpsess##########/execute/BackupInfo/progress
+      x-cpanel-api-version: UAPI
+      x-cpanel-available-version: 136
+      x-cpanel-plugin: BackupInfo
+  /BackupInfo/reset:
+    get:
+      description: Clears the authoritative run-state record so a sticky 'complete' stops being reported by progress. After reset, progress reflects only live state ('inprogress' while a run is genuinely active, otherwise 'none'). Idempotent - succeeds whether or not a record exists.
+      operationId: reset
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  apiversion:
+                    example: 3
+                    type: integer
+                  func:
+                    example: reset
+                    type: string
+                  module:
+                    example: BackupInfo
+                    type: string
+                  result:
+                    properties:
+                      data:
+                        properties:
+                          cleared:
+                            description: Always true on success.
+                            example: true
+                            type: boolean
+                        type: object
+                      errors:
+                        items:
+                          type: string
+                        type: array
+                      messages:
+                        items:
+                          type: string
+                        type: array
+                      status:
+                        example: 1
+                        type: integer
+                      warnings:
+                        items:
+                          type: string
+                        type: array
+                    type: object
+                type: object
+          description: HTTP Request was successful.
+      summary: Clear the current user's backup run-state record
+      tags:
+      - Backup Info
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "uapi --output=jsonpretty \\\n  --user=username \\\n  BackupInfo \\\n  reset\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2083/cpsess##########/execute/BackupInfo/reset
+      x-cpanel-api-version: UAPI
+      x-cpanel-available-version: 136
+      x-cpanel-plugin: BackupInfo
+components:
+  securitySchemes:
+    BasicAuth:
+      scheme: basic
+      type: http
+externalDocs:
+  url: https://cpanel.net/developers/
+x-tagGroups:
+- name: API Development Tools
+  tags:
+  - API Token Management
+  - Batch
+  - SSE Task Management
+  - URL Parsing
+- name: Authentication
+  tags:
+  - External Authentication
+  - Two-Factor Settings
+- name: Backup Information
+  tags:
+  - BackupInfo
+  - BackupInfo Status
+- name: Block Ip Addresses
+  tags:
+  - Block IP
+- name: Commerce Integration
+  tags:
+  - Market Integration
+  - SSL Certificates
+- name: Contact Information
+  tags:
+  - Contact Information
+- name: cPanel Account
+  tags:
+  - Account Enhancements
+  - Account Information
+  - Account Management
+  - AuditLog
+  - Contact Information
+  - cPanel Features
+  - Disk Quotas
+  - DomainRecommendations
+  - Personalization
+  - Resource Usage and Statistics
+  - Subaccount Management
+  - Team Roles
+  - Team Users
+- name: cPanel Account Backups
+  tags:
+  - Backup
+  - File Restoration
+- name: cPanel Plugin Framework
+  tags:
+  - Formbricks
+  - Plugins
+- name: cPanel Theme Management
+  tags:
+  - Application Information
+  - Brand Management
+  - Branding Files
+  - Browser Cache Management
+  - Language
+  - Theme Settings
+- name: Directory Management
+  tags:
+  - Directory Indexes
+  - Directory Privacy
+  - Directory Protection
+- name: DNS
+  tags:
+  - DNS
+  - DNS Information
+  - DNS Security
+  - Dynamic DNS
+  - Email DNS Settings
+  - ZoneEdit
+- name: Domain
+  tags:
+  - Domain
+- name: Domain Management
+  tags:
+  - AddonDomain
+  - Direct Link Protection (Hotlink)
+  - Domain
+  - Domain Information
+  - Domain Redirection
+  - DomainLookup
+  - Park
+  - SubDomain
+  - Virtual Host Information
+- name: Domains
+  tags:
+  - Subdomains
+- name: Email
+  tags:
+  - Email Accounts
+  - Email Filtering
+  - Email Forwarding
+  - Email Server Information
+  - Email Suspensions
+  - Mail Server Information
+  - Mailbox Management
+  - Mailing Lists
+  - Signing and Encryption (GnuPG Keys)
+  - Spam Filtering (Greylisting)
+  - Spam Management
+  - Spam Prevention (BoxTrapper)
+  - Webmail Applications
+  - Webmail Sessions
+- name: Extract Information
+  tags:
+  - ExtractInfo
+  - ExtractInfo Status
+- name: File Manager
+  tags:
+  - Trash
+- name: Files
+  tags:
+  - FTP Accounts
+  - FTP Server Settings
+  - Image Tools
+  - Jodit
+  - Manage Files
+  - Manage Files
+  - WebDisk Settings
+- name: GIT Management
+  tags:
+  - Deployment Settings
+  - Repository Management
+- name: InProductSurvey
+  tags:
+  - InProductSurvey
+- name: MySQL and MariaDB
+  tags:
+  - Database Information
+  - Database Management
+  - Remote Databases
+  - User Management
+- name: Notifications
+  tags:
+  - Pushbullet
+- name: Optional Applications
+  tags:
+  - Antivirus Protection (ClamAV)
+  - Calendar and Contacts (DAV)
+  - Calendar and Contacts Server
+  - WordPress Manager Backups
+- name: PostgreSQL
+  tags:
+  - PostgreSQL Database Management
+  - PostgreSQL User Management
+- name: Retrieve bandwidth information
+  tags:
+  - Bandwidth
+- name: Security
+  tags:
+  - Known SSH Hosts Management
+  - Login Information
+- name: Server Information
+  tags:
+  - cPanel Server Information
+  - Notifications
+  - Password Strength
+  - SSH
+  - WebPros MCP
+  - WebProsMCP
+- name: ServiceProxy
+  tags:
+  - ServiceProxy
+- name: Site Quality Monitoring
+  tags:
+  - SiteQuality
+- name: SSL Certificates
+  tags:
+  - Auto-generated SSL Certificates
+  - cPanel Account SSL Management
+  - SNI Email Settings
+  - SSL Certificate Management
+  - Verify Domain Ownership
+- name: Statistics
+  tags:
+  - Domain Statistics
+  - Weblog Settings
+- name: UserData
+  tags:
+  - UserData
+- name: Web Server Configuration
+  tags:
+  - EA4
+  - EasyApache Settings
+  - PHP
+- name: Web Server Management
+  tags:
+  - Application Manager
+  - ModSecurity
+  - NginxCaching
+  - PHP Settings
+  - Web Apps
+- name: Website Configuration
+  tags:
+  - Handler Management
+  - Logs
+  - Mime Type Management
+  - Nova
+  - Site Information
+  - Site Installation
+  - Sitejet
+  - WPX

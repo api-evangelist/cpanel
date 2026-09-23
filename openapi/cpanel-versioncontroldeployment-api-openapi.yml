@@ -1,0 +1,665 @@
+openapi: 3.2.0
+info:
+  contact:
+    email: cs@cpanel.net
+    name: WebPros International, LLC
+    url: https://cpanel.net/support/
+  description: UAPI accesses the cPanel interface's features. Use this API to access and modify cPanel account data and settings.
+  license:
+    name: cPanel License
+    url: https://cpanel.net/legal-notices/
+  termsOfService: https://cpanel.net/legal-notices/
+  title: cPanel U Version Control Deployment API
+  version: 11.137.9999.106
+  x-api-evangelist-provenance: 'Harvested verbatim from cPanel''s developer portal on 2026-09-05 via the MCP tool get-full-api-description at https://api.docs.cpanel.net/mcp. ONE mechanical change was made before storage: example values containing PEM private-key or certificate blocks, and AWS-access-key-shaped example strings, were replaced with REDACTED_* placeholders so the file can be stored in a public git repository without tripping secret scanning. No path, operation, parameter, schema or description was altered, added or removed.'
+servers:
+- description: A server running cPanel.
+  url: https://{host}:{port}/execute
+  variables:
+    host:
+      default: cpanel-server.tld
+      description: The hostname of a server running cPanel.
+    port:
+      default: '2083'
+      description: The cPanel port.
+security:
+- BasicAuth: []
+tags:
+- description: The VersionControlDeployment module for UAPI.
+  name: VersionControlDeployment
+paths:
+  /VersionControlDeployment/create:
+    get:
+      x-readonly: false
+      x-rollback: none
+      description: 'This function deploys the changes from a cPanel-managed repository.
+
+
+        **Important:**
+
+
+        The system logs messages for this function in the `~/.cpanel/logs/vc_TIMESTAMP_git_deploy.log` file, where TIMESTAMP represents the time in Unix epoch time. The system pulls changes with the `--ff-only` option and will only succeed if the branch''s HEAD commit is up-to-date or Git can fast forward it. For more information about our suggested deployment configuration and how users can set it up, read our Guide to Git™ - Deployment documentation. Before deployment, repositories must meet the following requirements:
+
+        * A valid checked-in `.cpanel.yml` file in the top-level directory.
+
+        * One or more local or remote branches.
+
+        * A clean working tree.
+
+
+        If a repository does **not** meet these requirements, the system will **not** display deployment information. Also, it will disable deployment functionality. For more information, read our Guide to Git™ - Deployment documentation.'
+      operationId: VersionControlDeployment-create
+      parameters:
+      - description: The repository's directory.
+        in: query
+        name: repository_root
+        required: true
+        schema:
+          example: /home/user/public_html/example
+          format: path
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  apiversion:
+                    description: The version of the API.
+                    example: 3
+                    type: integer
+                  func:
+                    description: The name of the method called.
+                    example: create
+                    type: string
+                  module:
+                    description: The name of the module called.
+                    example: VersionControlDeployment
+                    type: string
+                  result:
+                    properties:
+                      data:
+                        properties:
+                          deploy_id:
+                            description: The deployment ID number.
+                            example: '12'
+                            type: string
+                          log_path:
+                            description: The absolute path to the task's log file vc_TIMESTAMP_git_deploy.log, where TIMESTAMP represents the time in Unix epoch time.
+                            example: /home/user/.cpanel/logs/vc_1525289545.785367_git_deploy.log
+                            format: path
+                            type: string
+                          repository_root:
+                            description: The repository's directory.
+                            example: /home/username/example
+                            format: path
+                            type: string
+                          sse_url:
+                            description: The SSE interface to track the progress of the deployment process.
+                            example: /sse/UserTasks/B3A27B96-51F7-11E8-92E3-CC90C4F823F0
+                            format: url-path
+                            type: string
+                          task_id:
+                            description: The Task Queue system's task ID number.
+                            example: 00000000/5a9ec8dd4c345d
+                            type: string
+                          timestamps:
+                            description: A hash of timestamps for the deployment process.
+                            format: object
+                            properties:
+                              queued:
+                                description: The time at which the deployment process. entered the task queue.
+                                example: '1525289545.16293'
+                                type: string
+                            type: object
+                        type: object
+                      errors:
+                        description: List of errors if the API failed.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      messages:
+                        description: List of messages generated by the API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      metadata:
+                        properties: {}
+                      status:
+                        description: '- 1 - Success
+
+                          - 0 - Failed: Check the errors field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      warnings:
+                        description: List of warnings generated by the API. Warnings describe non-critical failures or other problematic conditions noted while running a API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                    type: object
+                type: object
+          description: HTTP Request was successful.
+      summary: Create Git deployment task
+      tags:
+      - VersionControlDeployment
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "uapi --output=jsonpretty \\\n  --user=username \\\n  VersionControlDeployment \\\n  create \\\n  repository_root='/home/user/public_html/example'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2083/cpsess##########/execute/VersionControlDeployment/create?repository_root=%2fhome%2fuser%2fpublic_html%2fexample
+      - label: LiveAPI Perl
+        lang: Perl
+        source: "#--------------------------------------------------------------------------------------\n# Instructions:\n#--------------------------------------------------------------------------------------\n# <theme-name> is the theme assigned to cPanel account.\n# 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n# 2) mkdir api_examples\n# 3) cd api_examples\n# 4) create a file VersionControlDeployment_create.live.pl and put this code into that file.\n# 5) In your browser login to a cPanel account.\n# 6) Manually change the url from: .../frontend/<theme-name>/\n#    to .../frontend/<theme-name>/api_examples/VersionControlDeployment_create.live.pl\n#--------------------------------------------------------------------------------------\n\nuse strict;\n\nuse Cpanel::LiveAPI ();\n\nmy $cpanel = Cpanel::LiveAPI->new(); # Connect to cPanel - only do this once.\n\n# Print the header\nprint \"Content-type: text/plain\\r\\n\\r\\n\";\n\n# Call the API\nmy $response = $cpanel->uapi(\n    q/VersionControlDeployment/,\n    q/create/,\n    {\n        'repository_root' => '/home/user/public_html/example',\n    }\n);\n\n# Handle the response\nif ($response->{cpanelresult}{result}{status}) {\n    my $data = $response->{cpanelresult}{result}{data};\n    # Do something with the $data\n    # So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    # Report errors:\n    print to_json($response->{cpanelresult}{result}{errors});\n}\n\n# Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n#--------------------------------------------------------------------------------------\n# Helper function to convert a perl object to html printable json\n#--------------------------------------------------------------------------------------\nsub to_json {\n    require JSON;\n    my $str = JSON->new->pretty->encode($_[0]);\n    return $str;\n}\n"
+      - label: LiveAPI PHP
+        lang: PHP
+        source: "<?php\n//--------------------------------------------------------------------------------------\n// Instructions:\n//--------------------------------------------------------------------------------------\n// <theme-name> is the theme assigned to cPanel account.\n// 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n// 2) mkdir api_examples\n// 3) cd api_examples\n// 4) create a file VersionControlDeployment_create.live.php and put this code into that file.\n// 5) In your browser login to a cPanel account.\n// 6) Manually change the url from: .../frontend/<theme-name>/\n//    to .../frontend/<theme-name>/api_examples/VersionControlDeployment_create.live.php\n//--------------------------------------------------------------------------------------\n\n// Instantiate the CPANEL object.\nrequire_once \"/usr/local/cpanel/php/cpanel.php\";\n\n// Print the header\nheader('Content-Type: text/plain');\n\n// Connect to cPanel - only do this once.\n$cpanel = new CPANEL();\n\n// Call the API\n$response = $cpanel->uapi(\n    'VersionControlDeployment',\n    'create',\n    array (\n        'repository_root' => '/home/user/public_html/example',\n    )\n);\n\n// Handle the response\nif ($response['cpanelresult']['result']['status']) {\n    $data = $response['cpanelresult']['result']['data'];\n    // Do something with the $data\n    // So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    // Report errors:\n    print to_json($response['cpanelresult']['result']['errors']);\n}\n\n// Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n//--------------------------------------------------------------------------------------\n// Helper function to convert a PHP value to html printable json\n//--------------------------------------------------------------------------------------\nfunction to_json($data) {\n    return json_encode($data, JSON_PRETTY_PRINT);\n}"
+      x-cpanel-api-version: UAPI
+      x-cpanel-available-version: cPanel 74
+  /VersionControlDeployment/delete:
+    get:
+      x-readonly: false
+      x-rollback: none
+      description: This function deletes a deployment task. For more information, read our Guide to Git - Deployment documentation.
+      operationId: VersionControlDeployment-delete
+      parameters:
+      - description: The [Task Queue system's](https://go.cpanel.net/whmdocsTaskQueueMonitor) task ID number.
+        in: query
+        name: deploy_id
+        required: true
+        schema:
+          example: '13'
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  apiversion:
+                    description: The version of the API.
+                    example: 3
+                    type: integer
+                  func:
+                    description: The name of the method called.
+                    example: delete
+                    type: string
+                  module:
+                    description: The name of the module called.
+                    example: VersionControlDeployment
+                    type: string
+                  result:
+                    properties:
+                      data:
+                        default: null
+                        type:
+                        - object
+                        - 'null'
+                      errors:
+                        description: List of errors if the API failed.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      messages:
+                        description: List of messages generated by the API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      metadata:
+                        properties: {}
+                      status:
+                        description: '* `1` - Success.
+
+                          * `0` - Failed. Check the errors field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      warnings:
+                        description: List of warnings generated by the API. Warnings describe non-critical failures or other problematic conditions noted while running a API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                type: object
+          description: HTTP Request was successful.
+      summary: Delete Git deployment task
+      tags:
+      - VersionControlDeployment
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "uapi --output=jsonpretty \\\n  --user=username \\\n  VersionControlDeployment \\\n  delete \\\n  deploy_id='13'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2083/cpsess##########/execute/VersionControlDeployment/delete?deploy_id=13
+      - label: LiveAPI Perl
+        lang: Perl
+        source: "#--------------------------------------------------------------------------------------\n# Instructions:\n#--------------------------------------------------------------------------------------\n# <theme-name> is the theme assigned to cPanel account.\n# 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n# 2) mkdir api_examples\n# 3) cd api_examples\n# 4) create a file VersionControlDeployment_delete.live.pl and put this code into that file.\n# 5) In your browser login to a cPanel account.\n# 6) Manually change the url from: .../frontend/<theme-name>/\n#    to .../frontend/<theme-name>/api_examples/VersionControlDeployment_delete.live.pl\n#--------------------------------------------------------------------------------------\n\nuse strict;\n\nuse Cpanel::LiveAPI ();\n\nmy $cpanel = Cpanel::LiveAPI->new(); # Connect to cPanel - only do this once.\n\n# Print the header\nprint \"Content-type: text/plain\\r\\n\\r\\n\";\n\n# Call the API\nmy $response = $cpanel->uapi(\n    q/VersionControlDeployment/,\n    q/delete/,\n    {\n        'deploy_id' => '13',\n    }\n);\n\n# Handle the response\nif ($response->{cpanelresult}{result}{status}) {\n    my $data = $response->{cpanelresult}{result}{data};\n    # Do something with the $data\n    # So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    # Report errors:\n    print to_json($response->{cpanelresult}{result}{errors});\n}\n\n# Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n#--------------------------------------------------------------------------------------\n# Helper function to convert a perl object to html printable json\n#--------------------------------------------------------------------------------------\nsub to_json {\n    require JSON;\n    my $str = JSON->new->pretty->encode($_[0]);\n    return $str;\n}\n"
+      - label: LiveAPI PHP
+        lang: PHP
+        source: "<?php\n//--------------------------------------------------------------------------------------\n// Instructions:\n//--------------------------------------------------------------------------------------\n// <theme-name> is the theme assigned to cPanel account.\n// 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n// 2) mkdir api_examples\n// 3) cd api_examples\n// 4) create a file VersionControlDeployment_delete.live.php and put this code into that file.\n// 5) In your browser login to a cPanel account.\n// 6) Manually change the url from: .../frontend/<theme-name>/\n//    to .../frontend/<theme-name>/api_examples/VersionControlDeployment_delete.live.php\n//--------------------------------------------------------------------------------------\n\n// Instantiate the CPANEL object.\nrequire_once \"/usr/local/cpanel/php/cpanel.php\";\n\n// Print the header\nheader('Content-Type: text/plain');\n\n// Connect to cPanel - only do this once.\n$cpanel = new CPANEL();\n\n// Call the API\n$response = $cpanel->uapi(\n    'VersionControlDeployment',\n    'delete',\n    array (\n        'deploy_id' => '13',\n    )\n);\n\n// Handle the response\nif ($response['cpanelresult']['result']['status']) {\n    $data = $response['cpanelresult']['result']['data'];\n    // Do something with the $data\n    // So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    // Report errors:\n    print to_json($response['cpanelresult']['result']['errors']);\n}\n\n// Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n//--------------------------------------------------------------------------------------\n// Helper function to convert a PHP value to html printable json\n//--------------------------------------------------------------------------------------\nfunction to_json($data) {\n    return json_encode($data, JSON_PRETTY_PRINT);\n}"
+      x-cpanel-api-version: UAPI
+      x-cpanel-available-version: cPanel 74
+  /VersionControlDeployment/retrieve:
+    get:
+      x-readonly: false
+      x-rollback: none
+      description: 'This function retrieves the status of deployment tasks. Before deployment, repositories must meet the following requirements:
+
+        * A valid checked-in `.cpanel.yml` file in the top-level directory.
+
+        * One or more local or remote branches.
+
+        * A clean working tree.
+
+
+        If a repository does **not** meet these requirements, the system will **not** display deployment information. Also, it will disable deployment functionality. For more information, read our Guide to Git™ - Deployment documentation.
+
+
+        **Important:**
+
+
+        The system logs messages for this function in the `~/.cpanel/logs/vc_TIMESTAMP_git_deploy.log` file, where `TIMESTAMP` represents the time in Unix epoch time.'
+      operationId: VersionControlDeployment-retrieve
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  apiversion:
+                    description: The version of the API.
+                    example: 3
+                    type: integer
+                  func:
+                    description: The name of the method called.
+                    example: retrieve
+                    type: string
+                  module:
+                    description: The name of the module called.
+                    example: VersionControlDeployment
+                    type: string
+                  result:
+                    properties:
+                      data:
+                        description: An array of objects containing deployment task data.
+                        items:
+                          properties:
+                            deploy_id:
+                              description: The deployment ID number.
+                              example: 13
+                              type: integer
+                            log_path:
+                              description: The absolute path to the task's log file.
+                              example: /home/user/.cpanel/logs/vc_1525289448.759720_git_deploy.log
+                              format: path
+                              type: string
+                            repository_root:
+                              description: The aboslute path to the cPanel-managed repository directory.
+                              example: /home/username/example
+                              format: path
+                              type: string
+                            repository_state:
+                              description: An object containing information about the repository's state at the time of deployment.
+                              properties:
+                                author:
+                                  description: The most-recent commit's author's name and email address as they exist in the user's Git configuration files.
+                                  example: Jane Doe <jane.doe@example.com>
+                                  type: string
+                                branch:
+                                  description: The repository's current branch.
+                                  example: master
+                                  type: string
+                                date:
+                                  description: The timestamp for the most-recent commit, in Unix time format.
+                                  example: 1410277881
+                                  format: unix_timestamp
+                                  type: integer
+                                identifier:
+                                  description: The identifier (SHA-1 value) for the most-recent commit.
+                                  example: 2fd4e1c67a2d28fced849ee1bb76e7391b93eb12
+                                  type: string
+                                message:
+                                  description: The commit message.
+                                  example: This is a commit.
+                                  type: string
+                              type: object
+                            sse_url:
+                              description: The SSE interface to track the progress of the deployment process.
+                              example: /sse/UserTasks/B3A27B96-51F7-11E8-92E3-CC90C4F823F0
+                              format: url-path
+                              type: string
+                            task_id:
+                              description: The [Task Queue](https://go.cpanel.net/whmdocsTaskQueueMonitor) system's task ID number.
+                              example: 00000000/5aea11e886a5d8
+                              type: string
+                            timestamps:
+                              description: An object containing timestamps for the deployment process.
+                              properties:
+                                active:
+                                  description: The time at which the system started the deployment process, in Unix time format.
+                                  example: '1525289448.83553'
+                                  type: string
+                                canceled:
+                                  description: 'The time at which the system cancelled the deployment process, in Unix time format.
+
+
+                                    **Note:**
+
+
+                                    * The function only returns this value if the system cancelled the deployment process.
+
+                                    * The system logs messages for this function in the `~/.cpanel/logs/vc_TIMESTAMP_git_deploy.log` file, where `TIMESTAMP` represents the Unix timestamp.'
+                                  example: '1525289448.83553'
+                                  type: string
+                                failed:
+                                  description: 'The time at which the deployment process failed, in Unix time format.
+
+
+                                    **Note:**
+
+
+                                    * The function only returns this value if the deployment process failed.
+
+                                    * The system logs messages for this function in the `~/.cpanel/logs/vc_TIMESTAMP_git_deploy.log` file, where `TIMESTAMP` represents the Unix timestamp.'
+                                  example: '1525289448.83553'
+                                  type: string
+                                queued:
+                                  description: The time at which the deployment process entered the task queue, in Unix time format.
+                                  example: '1525289448.83553'
+                                  type: string
+                                succeeded:
+                                  description: "The time at which the deployment process finished successfully, in Unix time format.\n\n**Note:**\n\n The function only returns this value if the deployment process succeeded."
+                                  example: '1525289448.83553'
+                                  type: string
+                              type: object
+                          type: object
+                        type: array
+                      errors:
+                        description: List of errors if the API failed.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      messages:
+                        description: List of messages generated by the API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      metadata:
+                        properties: {}
+                      status:
+                        description: '- 1 - Success
+
+                          - 0 - Failed: Check the errors field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      warnings:
+                        description: List of warnings generated by the API. Warnings describe non-critical failures or other problematic conditions noted while running a API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                    type: object
+                type: object
+          description: HTTP Request was successful.
+      summary: Return Git deployment task status
+      tags:
+      - VersionControlDeployment
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "uapi --output=jsonpretty \\\n  --user=username \\\n  VersionControlDeployment \\\n  retrieve\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2083/cpsess##########/execute/VersionControlDeployment/retrieve
+      - label: LiveAPI Perl
+        lang: Perl
+        source: "#--------------------------------------------------------------------------------------\n# Instructions:\n#--------------------------------------------------------------------------------------\n# <theme-name> is the theme assigned to cPanel account.\n# 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n# 2) mkdir api_examples\n# 3) cd api_examples\n# 4) create a file VersionControlDeployment_retrieve.live.pl and put this code into that file.\n# 5) In your browser login to a cPanel account.\n# 6) Manually change the url from: .../frontend/<theme-name>/\n#    to .../frontend/<theme-name>/api_examples/VersionControlDeployment_retrieve.live.pl\n#--------------------------------------------------------------------------------------\n\nuse strict;\n\nuse Cpanel::LiveAPI ();\n\nmy $cpanel = Cpanel::LiveAPI->new(); # Connect to cPanel - only do this once.\n\n# Print the header\nprint \"Content-type: text/plain\\r\\n\\r\\n\";\n\n# Call the API\nmy $response = $cpanel->uapi(\n    q/VersionControlDeployment/,\n    q/retrieve/\n);\n\n# Handle the response\nif ($response->{cpanelresult}{result}{status}) {\n    my $data = $response->{cpanelresult}{result}{data};\n    foreach my $item (@{$data}) {\n        # Do something with the $item\n    }\n\n    # So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    # Report errors:\n    print to_json($response->{cpanelresult}{result}{errors});\n}\n\n# Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n#--------------------------------------------------------------------------------------\n# Helper function to convert a perl object to html printable json\n#--------------------------------------------------------------------------------------\nsub to_json {\n    require JSON;\n    my $str = JSON->new->pretty->encode($_[0]);\n    return $str;\n}\n"
+      - label: LiveAPI PHP
+        lang: PHP
+        source: "<?php\n//--------------------------------------------------------------------------------------\n// Instructions:\n//--------------------------------------------------------------------------------------\n// <theme-name> is the theme assigned to cPanel account.\n// 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n// 2) mkdir api_examples\n// 3) cd api_examples\n// 4) create a file VersionControlDeployment_retrieve.live.php and put this code into that file.\n// 5) In your browser login to a cPanel account.\n// 6) Manually change the url from: .../frontend/<theme-name>/\n//    to .../frontend/<theme-name>/api_examples/VersionControlDeployment_retrieve.live.php\n//--------------------------------------------------------------------------------------\n\n// Instantiate the CPANEL object.\nrequire_once \"/usr/local/cpanel/php/cpanel.php\";\n\n// Print the header\nheader('Content-Type: text/plain');\n\n// Connect to cPanel - only do this once.\n$cpanel = new CPANEL();\n\n// Call the API\n$response = $cpanel->uapi(\n    'VersionControlDeployment',\n    'retrieve'\n);\n\n// Handle the response\nif ($response['cpanelresult']['result']['status']) {\n    $data = $response['cpanelresult']['result']['data'];\n    foreach ($data as $item) {\n        // Do something with the $item\n    }\n\n    // So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    // Report errors:\n    print to_json($response['cpanelresult']['result']['errors']);\n}\n\n// Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n//--------------------------------------------------------------------------------------\n// Helper function to convert a PHP value to html printable json\n//--------------------------------------------------------------------------------------\nfunction to_json($data) {\n    return json_encode($data, JSON_PRETTY_PRINT);\n}"
+      x-cpanel-api-version: UAPI
+      x-cpanel-available-version: cPanel 74
+components:
+  securitySchemes:
+    BasicAuth:
+      scheme: basic
+      type: http
+externalDocs:
+  url: https://cpanel.net/developers/
+x-tagGroups:
+- name: API Development Tools
+  tags:
+  - API Token Management
+  - Batch
+  - SSE Task Management
+  - URL Parsing
+- name: Authentication
+  tags:
+  - External Authentication
+  - Two-Factor Settings
+- name: Backup Information
+  tags:
+  - BackupInfo
+  - BackupInfo Status
+- name: Block Ip Addresses
+  tags:
+  - Block IP
+- name: Commerce Integration
+  tags:
+  - Market Integration
+  - SSL Certificates
+- name: Contact Information
+  tags:
+  - Contact Information
+- name: cPanel Account
+  tags:
+  - Account Enhancements
+  - Account Information
+  - Account Management
+  - AuditLog
+  - Contact Information
+  - cPanel Features
+  - Disk Quotas
+  - DomainRecommendations
+  - Personalization
+  - Resource Usage and Statistics
+  - Subaccount Management
+  - Team Roles
+  - Team Users
+- name: cPanel Account Backups
+  tags:
+  - Backup
+  - File Restoration
+- name: cPanel Plugin Framework
+  tags:
+  - Formbricks
+  - Plugins
+- name: cPanel Theme Management
+  tags:
+  - Application Information
+  - Brand Management
+  - Branding Files
+  - Browser Cache Management
+  - Language
+  - Theme Settings
+- name: Directory Management
+  tags:
+  - Directory Indexes
+  - Directory Privacy
+  - Directory Protection
+- name: DNS
+  tags:
+  - DNS
+  - DNS Information
+  - DNS Security
+  - Dynamic DNS
+  - Email DNS Settings
+  - ZoneEdit
+- name: Domain
+  tags:
+  - Domain
+- name: Domain Management
+  tags:
+  - AddonDomain
+  - Direct Link Protection (Hotlink)
+  - Domain
+  - Domain Information
+  - Domain Redirection
+  - DomainLookup
+  - Park
+  - SubDomain
+  - Virtual Host Information
+- name: Domains
+  tags:
+  - Subdomains
+- name: Email
+  tags:
+  - Email Accounts
+  - Email Filtering
+  - Email Forwarding
+  - Email Server Information
+  - Email Suspensions
+  - Mail Server Information
+  - Mailbox Management
+  - Mailing Lists
+  - Signing and Encryption (GnuPG Keys)
+  - Spam Filtering (Greylisting)
+  - Spam Management
+  - Spam Prevention (BoxTrapper)
+  - Webmail Applications
+  - Webmail Sessions
+- name: Extract Information
+  tags:
+  - ExtractInfo
+  - ExtractInfo Status
+- name: File Manager
+  tags:
+  - Trash
+- name: Files
+  tags:
+  - FTP Accounts
+  - FTP Server Settings
+  - Image Tools
+  - Jodit
+  - Manage Files
+  - Manage Files
+  - WebDisk Settings
+- name: GIT Management
+  tags:
+  - Deployment Settings
+  - Repository Management
+- name: InProductSurvey
+  tags:
+  - InProductSurvey
+- name: MySQL and MariaDB
+  tags:
+  - Database Information
+  - Database Management
+  - Remote Databases
+  - User Management
+- name: Notifications
+  tags:
+  - Pushbullet
+- name: Optional Applications
+  tags:
+  - Antivirus Protection (ClamAV)
+  - Calendar and Contacts (DAV)
+  - Calendar and Contacts Server
+  - WordPress Manager Backups
+- name: PostgreSQL
+  tags:
+  - PostgreSQL Database Management
+  - PostgreSQL User Management
+- name: Retrieve bandwidth information
+  tags:
+  - Bandwidth
+- name: Security
+  tags:
+  - Known SSH Hosts Management
+  - Login Information
+- name: Server Information
+  tags:
+  - cPanel Server Information
+  - Notifications
+  - Password Strength
+  - SSH
+  - WebPros MCP
+  - WebProsMCP
+- name: ServiceProxy
+  tags:
+  - ServiceProxy
+- name: Site Quality Monitoring
+  tags:
+  - SiteQuality
+- name: SSL Certificates
+  tags:
+  - Auto-generated SSL Certificates
+  - cPanel Account SSL Management
+  - SNI Email Settings
+  - SSL Certificate Management
+  - Verify Domain Ownership
+- name: Statistics
+  tags:
+  - Domain Statistics
+  - Weblog Settings
+- name: UserData
+  tags:
+  - UserData
+- name: Web Server Configuration
+  tags:
+  - EA4
+  - EasyApache Settings
+  - PHP
+- name: Web Server Management
+  tags:
+  - Application Manager
+  - ModSecurity
+  - NginxCaching
+  - PHP Settings
+  - Web Apps
+- name: Website Configuration
+  tags:
+  - Handler Management
+  - Logs
+  - Mime Type Management
+  - Nova
+  - Site Information
+  - Site Installation
+  - Sitejet
+  - WPX

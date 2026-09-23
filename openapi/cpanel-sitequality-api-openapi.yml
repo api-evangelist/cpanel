@@ -1,0 +1,1872 @@
+openapi: 3.2.0
+info:
+  contact:
+    email: cs@cpanel.net
+    name: WebPros International, LLC
+    url: https://cpanel.net/support/
+  description: UAPI accesses the cPanel interface's features. Use this API to access and modify cPanel account data and settings.
+  license:
+    name: cPanel License
+    url: https://cpanel.net/legal-notices/
+  termsOfService: https://cpanel.net/legal-notices/
+  title: cPanel U Site Quality API
+  version: 11.137.9999.106
+  x-api-evangelist-provenance: 'Harvested verbatim from cPanel''s developer portal on 2026-09-05 via the MCP tool get-full-api-description at https://api.docs.cpanel.net/mcp. ONE mechanical change was made before storage: example values containing PEM private-key or certificate blocks, and AWS-access-key-shaped example strings, were replaced with REDACTED_* placeholders so the file can be stored in a public git repository without tripping secret scanning. No path, operation, parameter, schema or description was altered, added or removed.'
+servers:
+- description: A server running cPanel.
+  url: https://{host}:{port}/execute
+  variables:
+    host:
+      default: cpanel-server.tld
+      description: The hostname of a server running cPanel.
+    port:
+      default: '2083'
+      description: The cPanel port.
+security:
+- BasicAuth: []
+tags:
+- description: The SiteQuality module for UAPI.
+  name: SiteQuality
+paths:
+  /SiteQuality/create_project:
+    post:
+      description: This function creates a Site Quality Monitoring project. A project bundles together one or more URLs with a shared domain for monitoring.
+      operationId: SiteQuality-create_project
+      parameters:
+      - description: The name of the project to create.
+        in: query
+        name: name
+        required: true
+        schema:
+          example: MyProject
+          type: string
+      - description: The URL to monitor.
+        in: query
+        name: url
+        required: true
+        schema:
+          example: https://example.com
+          type: string
+      - description: "Whether to enable standard email alerts.\n  * `1` - Enable standard alerting.\n  * `0` - Do not enable standard alerting.\n  * `null` - Do not enable standard alerting."
+        in: query
+        name: standard_alerting
+        required: false
+        schema:
+          example: 0
+          default: null
+          type:
+          - integer
+          - 'null'
+          enum:
+          - 0
+          - 1
+          - null
+      - description: The monitoring template to use for the project.
+        in: query
+        name: system_type
+        required: false
+        schema:
+          example: Website
+          default: Website
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  apiversion:
+                    description: The version of the API.
+                    example: 3
+                    type: integer
+                  func:
+                    description: The name of the method called.
+                    example: create_project
+                    type: string
+                  module:
+                    description: The name of the module called.
+                    example: SiteQuality
+                    type: string
+                  result:
+                    properties:
+                      data:
+                        description: An object that contains project attributes.
+                        properties:
+                          id:
+                            description: The project ID number.
+                            example: 1754
+                            type: integer
+                          identifier:
+                            description: The project identifier.
+                            example: pro-1754
+                            type: string
+                          location:
+                            description: The region where monitoring checks originate.
+                            example: us
+                            type: string
+                          name:
+                            description: The project's name.
+                            example: MyProject
+                            type: string
+                          role:
+                            description: Information about the user that owns the project.
+                            type: object
+                            properties:
+                              id:
+                                description: The user's role ID number.
+                                example: 0
+                                type: integer
+                              name:
+                                description: The user's role title.
+                                example: Owner
+                                type: string
+                          systems:
+                            description: Information about the system that the project monitors.
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                name:
+                                  description: The name of the system.
+                                  example: MyProject
+                                  type: string
+                                description:
+                                  description: A description of the system.
+                                  default: null
+                                  example: null
+                                  type:
+                                  - string
+                                  - 'null'
+                                domain:
+                                  description: The system's base domain.
+                                  example: https://example.com
+                                  type: string
+                                id:
+                                  description: The system's ID number.
+                                  example: 2542
+                                  type: integer
+                                interval:
+                                  description: The time interval for monitoring checks.
+                                  example: hour
+                                  type: string
+                                limits:
+                                  description: Restrictions placed on the monitoring checks.
+                                  type: object
+                                  properties:
+                                    maximumCrawlDepth:
+                                      description: The maximum number of URLs to check for dead links on a page.
+                                      example: 500
+                                      default: 500
+                                      type: integer
+                                system_type:
+                                  description: The monitoring template used for the system.
+                                  type: object
+                                  properties:
+                                    name:
+                                      description: The name of the system type.
+                                      example: Website
+                                      default: Website
+                                      type: string
+                                    id:
+                                      description: The system's type ID number.
+                                      example: 1
+                                      default: 1
+                                    fixedComponents:
+                                      description: "Whether the system components are immutable.\n  * `true` - The components are immutable.\n  * `false` - The components are not immutable.."
+                                      example: true
+                                      default: true
+                                      type: boolean
+                        type: object
+                      errors:
+                        description: List of errors if the API failed.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      messages:
+                        description: List of messages generated by the API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      metadata:
+                        properties: {}
+                      status:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the `errors` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      warnings:
+                        description: List of warnings generated by the API. Warnings describe non-critical failures or other problematic conditions noted while running an API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                type: object
+          description: HTTP Request was successful.
+      summary: Add domain to monitoring
+      tags:
+      - SiteQuality
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "uapi --output=jsonpretty \\\n  --user=username \\\n  SiteQuality \\\n  create_project \\\n  name=MyProject \\\n  url='https://example.com'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2083/cpsess##########/execute/SiteQuality/create_project?name=MyProject&url=https://example.com
+      - label: LiveAPI Perl
+        lang: Perl
+        source: "#--------------------------------------------------------------------------------------\n# Instructions:\n#--------------------------------------------------------------------------------------\n# <theme-name> is the theme assigned to cPanel account.\n# 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n# 2) mkdir api_examples\n# 3) cd api_examples\n# 4) create a file SiteQuality_create_project.live.pl and put this code into that file.\n# 5) In your browser login to a cPanel account.\n# 6) Manually change the url from: .../frontend/<theme-name>\n#    to .../frontend/<theme-name>/api_examples/SiteQuality_create_project.live.pl\n#--------------------------------------------------------------------------------------\n\nuse strict;\n\nuse Cpanel::LiveAPI ();\n\nmy $cpanel = Cpanel::LiveAPI->new(); # Connect to cPanel - only do this once.\n\n# Print the header\nprint \"Content-type: text/plain\\r\\n\\r\\n\";\n\n# Call the API\nmy $response = $cpanel->uapi(\n    q/SiteQuality/,\n    q/create_project/,\n    {\n        'name' => 'MyProject',\n        'url' => 'https://example.com',\n    }\n);\n\n# Handle the response\nif ($response->{cpanelresult}{result}{status}) {\n    my $data = $response->{cpanelresult}{result}{data};\n    # Do something with the $data\n    # So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    # Report errors:\n    print to_json($response->{cpanelresult}{result}{errors});\n}\n\n# Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n#--------------------------------------------------------------------------------------\n# Helper function to convert a perl object to html printable json\n#--------------------------------------------------------------------------------------\nsub to_json {\n    require JSON;\n    my $str = JSON->new->pretty->encode($_[0]);\n    return $str;\n}\n"
+      - label: LiveAPI PHP
+        lang: PHP
+        source: "<?php\n//--------------------------------------------------------------------------------------\n// Instructions:\n//--------------------------------------------------------------------------------------\n// <theme-name> is the theme assigned to cPanel account.\n// 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n// 2) mkdir api_examples\n// 3) cd api_examples\n// 4) create a file SiteQuality_create_project.live.php and put this code into that file.\n// 5) In your browser login to a cPanel account.\n// 6) Manually change the url from: .../frontend/<theme-name>\n//    to .../frontend/<theme-name>/api_examples/SiteQuality_create_project.live.php\n//--------------------------------------------------------------------------------------\n\n// Instantiate the CPANEL object.\nrequire_once \"/usr/local/cpanel/php/cpanel.php\";\n\n// Print the header\nheader('Content-Type: text/plain');\n\n// Connect to cPanel - only do this once.\n$cpanel = new CPANEL();\n\n// Call the API\n$response = $cpanel->uapi(\n    'SiteQuality',\n    'create_project',\n    array (\n        'name' => 'MyProject',\n        'url' => 'https://example.com',\n    )\n);\n\n// Handle the response\nif ($response['cpanelresult']['result']['status']) {\n    $data = $response['cpanelresult']['result']['data'];\n    // Do something with the $data\n    // So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    // Report errors:\n    print to_json($response['cpanelresult']['result']['errors']);\n}\n\n// Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n//--------------------------------------------------------------------------------------\n// Helper function to convert a PHP value to html printable json\n//--------------------------------------------------------------------------------------\nfunction to_json($data) {\n    return json_encode($data, JSON_PRETTY_PRINT);\n}"
+      x-cpanel-api-version: UAPI
+      x-cpanel-available-version: 110
+      x-cpanel-plugin: SiteQuality
+  /SiteQuality/create_site_quality_user:
+    post:
+      description: This function creates a Site Quality Monitoring user account associated with a cPanel user account.
+      operationId: SiteQuality-create_site_quality_user
+      parameters:
+      - description: The cPanel account's email address.
+        in: query
+        name: email
+        required: true
+        schema:
+          example: username@example.com
+          type: string
+      - description: 'The account''s password.
+
+
+          **Note:**
+
+
+          If no password is given, one is auto-generated.
+
+
+          The system does not save this value.'
+        in: query
+        name: password
+        required: false
+        schema:
+          example: An3xample!?
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  apiversion:
+                    description: The version of the API.
+                    example: 3
+                    type: integer
+                  func:
+                    description: The name of the method called.
+                    example: create_site_quality_user
+                    type: string
+                  module:
+                    description: The name of the module called.
+                    example: SiteQuality
+                    type: string
+                  result:
+                    properties:
+                      data:
+                        description: An object that contains user attributes.
+                        properties:
+                          app_token:
+                            description: The long-lived token for this account. The <a href="https://go.cpanel.net/5k" target="_blank">koality</a> servers require this token to authenticate. If this token is lost, the user must create a new account.
+                            example: eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9...
+                            type: string
+                          username:
+                            description: The account's username. This value reflects the `email` parameter.
+                            example: username@example.com
+                            type: string
+                          enabled:
+                            description: "Whether the account is enabled to process user data.\n * `false` - The account is disabled.\n * `true` - The account is enabled."
+                            example: true
+                            type:
+                            - boolean
+                            - 'null'
+                        type: object
+                      errors:
+                        description: List of errors if the API failed.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      messages:
+                        description: List of messages the API generated.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      metadata:
+                        properties: {}
+                      status:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the `errors` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      warnings:
+                        description: List of warnings that the API generated. Warnings describe non-critical failures or issues the system noted while running an API function.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                type: object
+          description: HTTP Request was successful.
+      summary: Register cPanel user for monitoring
+      tags:
+      - SiteQuality
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "uapi --output=jsonpretty \\\n  --user=username \\\n  SiteQuality \\\n  create_site_quality_user \\\n  email=username@example.com\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2083/cpsess##########/execute/SiteQuality/create_site_quality_user?email=username@example.com
+      - label: HTTP Request (Wire Format)
+        lang: HTTP
+        source: 'POST /cpsess##########/execute/SiteQuality/create_site_quality_user HTTP/1.1
+
+          Host: example.com:2083
+
+          Cookie: ###################################
+
+          Content-Type: application/json
+
+          Content-Length: 0
+
+          '
+      - label: LiveAPI Perl
+        lang: Perl
+        source: "#--------------------------------------------------------------------------------------\n# Instructions:\n#--------------------------------------------------------------------------------------\n# <theme-name> is the theme assigned to cPanel account.\n# 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n# 2) mkdir api_examples\n# 3) cd api_examples\n# 4) create a file SiteQuality_create_site_quality_user.live.pl and put this code into that file.\n# 5) In your browser login to a cPanel account.\n# 6) Manually change the url from: .../frontend/<theme-name>\n#    to .../frontend/<theme-name>/api_examples/SiteQuality_create_site_quality_user.live.pl\n#--------------------------------------------------------------------------------------\n\nuse strict;\n\nuse Cpanel::LiveAPI ();\n\nmy $cpanel = Cpanel::LiveAPI->new(); # Connect to cPanel - only do this once.\n\n# Print the header\nprint \"Content-type: text/plain\\r\\n\\r\\n\";\n\n# Call the API\nmy $response = $cpanel->uapi(\n    q/SiteQuality/,\n    q/create_site_quality_user/,\n    {\n        'email' => 'username@example.com',\n    }\n);\n\n# Handle the response\nif ($response->{cpanelresult}{result}{status}) {\n    my $data = $response->{cpanelresult}{result}{data};\n    # Do something with the $data\n    # So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    # Report errors:\n    print to_json($response->{cpanelresult}{result}{errors});\n}\n\n# Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n#--------------------------------------------------------------------------------------\n# Helper function to convert a perl object to html printable json\n#--------------------------------------------------------------------------------------\nsub to_json {\n    require JSON;\n    my $str = JSON->new->pretty->encode($_[0]);\n    return $str;\n}\n"
+      - label: LiveAPI PHP
+        lang: PHP
+        source: "<?php\n//--------------------------------------------------------------------------------------\n// Instructions:\n//--------------------------------------------------------------------------------------\n// <theme-name> is the theme assigned to cPanel account.\n// 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n// 2) mkdir api_examples\n// 3) cd api_examples\n// 4) create a file SiteQuality_create_site_quality_user.live.php and put this code into that file.\n// 5) In your browser login to a cPanel account.\n// 6) Manually change the url from: .../frontend/<theme-name>\n//    to .../frontend/<theme-name>/api_examples/SiteQuality_create_site_quality_user.live.php\n//--------------------------------------------------------------------------------------\n\n// Instantiate the CPANEL object.\nrequire_once \"/usr/local/cpanel/php/cpanel.php\";\n\n// Print the header\nheader('Content-Type: text/plain');\n\n// Connect to cPanel - only do this once.\n$cpanel = new CPANEL();\n\n// Call the API\n$response = $cpanel->uapi(\n    'SiteQuality',\n    'create_site_quality_user',\n    array (\n        'email' => 'username@example.com',\n    )\n);\n\n// Handle the response\nif ($response['cpanelresult']['result']['status']) {\n    $data = $response['cpanelresult']['result']['data'];\n    // Do something with the $data\n    // So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    // Report errors:\n    print to_json($response['cpanelresult']['result']['errors']);\n}\n\n// Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n//--------------------------------------------------------------------------------------\n// Helper function to convert a PHP value to html printable json\n//--------------------------------------------------------------------------------------\nfunction to_json($data) {\n    return json_encode($data, JSON_PRETTY_PRINT);\n}"
+      x-cpanel-api-version: UAPI
+      x-cpanel-available-version: 110
+      x-cpanel-plugin: SiteQuality
+  /SiteQuality/delete_site_quality_user:
+    get:
+      description: This function initiates the deletion of the Site Quality Monitoring user account associated with a cPanel user account.
+      operationId: SiteQuality-delete_site_quality_user
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  apiversion:
+                    description: The version of the API.
+                    example: 3
+                    type: integer
+                  func:
+                    description: The name of the method called.
+                    example: delete_site_quality_user
+                    type: string
+                  module:
+                    description: The name of the module called.
+                    example: SiteQuality
+                    type: string
+                  result:
+                    properties:
+                      data:
+                        description: An object that contains whether the user has been deleted.
+                        properties:
+                          deleted:
+                            description: 'Whether or not the account has been successfully deleted.
+
+                              * `1` - Success
+
+                              * `0` - Failed'
+                            enum:
+                            - 0
+                            - 1
+                            example: 1
+                            type: integer
+                        type: object
+                      errors:
+                        description: List of errors that the API generated.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      messages:
+                        description: List of messages the API generated.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      metadata:
+                        properties: {}
+                      status:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the `errors` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      warnings:
+                        description: List of warnings generated by the API. Warnings describe non-critical failures or other problematic conditions noted while running an API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                type: object
+          description: HTTP Request was successful.
+      summary: Delete Site Quality Monitoring account
+      tags:
+      - SiteQuality
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "uapi --output=jsonpretty \\\n  --user=username \\\n  SiteQuality \\\n  delete_site_quality_user\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2083/cpsess##########/execute/SiteQuality/delete_site_quality_user
+      - label: LiveAPI Perl
+        lang: Perl
+        source: "#--------------------------------------------------------------------------------------\n# Instructions:\n#--------------------------------------------------------------------------------------\n# <theme-name> is the theme assigned to cPanel account.\n# 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n# 2) mkdir api_examples\n# 3) cd api_examples\n# 4) create a file SiteQuality_delete_site_quality_user.live.pl and put this code into that file.\n# 5) In your browser login to a cPanel account.\n# 6) Manually change the url from: .../frontend/<theme-name>\n#    to .../frontend/<theme-name>/api_examples/SiteQuality_delete_site_quality_user.live.pl\n#--------------------------------------------------------------------------------------\n\nuse strict;\n\nuse Cpanel::LiveAPI ();\n\nmy $cpanel = Cpanel::LiveAPI->new(); # Connect to cPanel - only do this once.\n\n# Print the header\nprint \"Content-type: text/plain\\r\\n\\r\\n\";\n\n# Call the API\nmy $response = $cpanel->uapi(\n    q/SiteQuality/,\n    q/delete_site_quality_user/\n);\n\n# Handle the response\nif ($response->{cpanelresult}{result}{status}) {\n    my $data = $response->{cpanelresult}{result}{data};\n    # Do something with the $data\n    # So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    # Report errors:\n    print to_json($response->{cpanelresult}{result}{errors});\n}\n\n# Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n#--------------------------------------------------------------------------------------\n# Helper function to convert a perl object to html printable json\n#--------------------------------------------------------------------------------------\nsub to_json {\n    require JSON;\n    my $str = JSON->new->pretty->encode($_[0]);\n    return $str;\n}\n"
+      - label: LiveAPI PHP
+        lang: PHP
+        source: "<?php\n//--------------------------------------------------------------------------------------\n// Instructions:\n//--------------------------------------------------------------------------------------\n// <theme-name> is the theme assigned to cPanel account.\n// 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n// 2) mkdir api_examples\n// 3) cd api_examples\n// 4) create a file SiteQuality_delete_site_quality_user.live.php and put this code into that file.\n// 5) In your browser login to a cPanel account.\n// 6) Manually change the url from: .../frontend/<theme-name>\n//    to .../frontend/<theme-name>/api_examples/SiteQuality_delete_site_quality_user.live.php\n//--------------------------------------------------------------------------------------\n\n// Instantiate the CPANEL object.\nrequire_once \"/usr/local/cpanel/php/cpanel.php\";\n\n// Print the header\nheader('Content-Type: text/plain');\n\n// Connect to cPanel - only do this once.\n$cpanel = new CPANEL();\n\n// Call the API\n$response = $cpanel->uapi(\n    'SiteQuality',\n    'delete_site_quality_user'\n);\n\n// Handle the response\nif ($response['cpanelresult']['result']['status']) {\n    $data = $response['cpanelresult']['result']['data'];\n    // Do something with the $data\n    // So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    // Report errors:\n    print to_json($response['cpanelresult']['result']['errors']);\n}\n\n// Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n//--------------------------------------------------------------------------------------\n// Helper function to convert a PHP value to html printable json\n//--------------------------------------------------------------------------------------\nfunction to_json($data) {\n    return json_encode($data, JSON_PRETTY_PRINT);\n}"
+      x-cpanel-api-version: UAPI
+      x-cpanel-available-version: 110
+      x-cpanel-plugin: SiteQuality
+  /SiteQuality/get_all_scores:
+    post:
+      description: This function returns information about the cPanel user's Site Quality Monitoring projects' most recent monitoring check results.
+      operationId: SiteQuality-get_all_scores
+      parameters:
+      - description: 'Whether to enable verbose output.
+
+
+          ** Note: **
+
+
+          This includes information about the user''s Site Quality Monitoring project''s most recent results in each monitoring check subcategory.'
+        in: query
+        name: verbose
+        required: true
+        schema:
+          example: 1
+          default: null
+          type:
+          - integer
+          - 'null'
+          enum:
+          - 0
+          - 1
+          - null
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  apiversion:
+                    description: The version of the API.
+                    example: 3
+                    type: integer
+                  func:
+                    description: The name of the method called.
+                    example: get_all_scores
+                    type: string
+                  module:
+                    description: The name of the module called.
+                    example: SiteQuality
+                    type: string
+                  result:
+                    properties:
+                      data:
+                        description: An object that contains score details.
+                        type: object
+                        properties:
+                          scores:
+                            description: An array of objects containing score data and the associated system information.
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                system:
+                                  type: object
+                                  properties:
+                                    name:
+                                      description: The name of the project.
+                                      type: string
+                                      example: MyProject
+                                    id:
+                                      description: The project's ID number.
+                                      example: 2542
+                                      type: integer
+                                scores:
+                                  type: object
+                                  properties:
+                                    basic-uptime:
+                                      $ref: '#/components/schemas/Score'
+                                    basic-performance:
+                                      $ref: '#/components/schemas/Score'
+                                    basic-seo:
+                                      $ref: '#/components/schemas/Score'
+                                    basic-content:
+                                      $ref: '#/components/schemas/Score'
+                                    basic-tech:
+                                      $ref: '#/components/schemas/Score'
+                                    basic-security:
+                                      $ref: '#/components/schemas/Score'
+                      errors:
+                        description: List of errors if the API failed.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      messages:
+                        description: List of messages generated by the API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      metadata:
+                        properties: {}
+                      status:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the `errors` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      warnings:
+                        description: List of warnings generated by the API. Warnings describe non-critical failures or other problematic conditions noted while running an API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                type: object
+          description: HTTP Request was successful.
+      summary: Return all projects' monitoring results
+      tags:
+      - SiteQuality
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "uapi --output=jsonpretty \\\n  --user=username \\\n  SiteQuality \\\n  get_all_scores \\\n  verbose=1\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2083/cpsess##########/execute/SiteQuality/get_all_scores?verbose=1
+      - label: LiveAPI Perl
+        lang: Perl
+        source: "#--------------------------------------------------------------------------------------\n# Instructions:\n#--------------------------------------------------------------------------------------\n# <theme-name> is the theme assigned to cPanel account.\n# 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n# 2) mkdir api_examples\n# 3) cd api_examples\n# 4) create a file SiteQuality_get_all_scores.live.pl and put this code into that file.\n# 5) In your browser login to a cPanel account.\n# 6) Manually change the url from: .../frontend/<theme-name>\n#    to .../frontend/<theme-name>/api_examples/SiteQuality_get_all_scores.live.pl\n#--------------------------------------------------------------------------------------\n\nuse strict;\n\nuse Cpanel::LiveAPI ();\n\nmy $cpanel = Cpanel::LiveAPI->new(); # Connect to cPanel - only do this once.\n\n# Print the header\nprint \"Content-type: text/plain\\r\\n\\r\\n\";\n\n# Call the API\nmy $response = $cpanel->uapi(\n    q/SiteQuality/,\n    q/get_all_scores/,\n    {\n        'verbose' => 1,\n    }\n);\n\n# Handle the response\nif ($response->{cpanelresult}{result}{status}) {\n    my $data = $response->{cpanelresult}{result}{data};\n    # Do something with the $data\n    # So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    # Report errors:\n    print to_json($response->{cpanelresult}{result}{errors});\n}\n\n# Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n#--------------------------------------------------------------------------------------\n# Helper function to convert a perl object to html printable json\n#--------------------------------------------------------------------------------------\nsub to_json {\n    require JSON;\n    my $str = JSON->new->pretty->encode($_[0]);\n    return $str;\n}\n"
+      - label: LiveAPI PHP
+        lang: PHP
+        source: "<?php\n//--------------------------------------------------------------------------------------\n// Instructions:\n//--------------------------------------------------------------------------------------\n// <theme-name> is the theme assigned to cPanel account.\n// 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n// 2) mkdir api_examples\n// 3) cd api_examples\n// 4) create a file SiteQuality_get_all_scores.live.php and put this code into that file.\n// 5) In your browser login to a cPanel account.\n// 6) Manually change the url from: .../frontend/<theme-name>\n//    to .../frontend/<theme-name>/api_examples/SiteQuality_get_all_scores.live.php\n//--------------------------------------------------------------------------------------\n\n// Instantiate the CPANEL object.\nrequire_once \"/usr/local/cpanel/php/cpanel.php\";\n\n// Print the header\nheader('Content-Type: text/plain');\n\n// Connect to cPanel - only do this once.\n$cpanel = new CPANEL();\n\n// Call the API\n$response = $cpanel->uapi(\n    'SiteQuality',\n    'get_all_scores',\n    array (\n        'verbose' => 1,\n    )\n);\n\n// Handle the response\nif ($response['cpanelresult']['result']['status']) {\n    $data = $response['cpanelresult']['result']['data'];\n    // Do something with the $data\n    // So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    // Report errors:\n    print to_json($response['cpanelresult']['result']['errors']);\n}\n\n// Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n//--------------------------------------------------------------------------------------\n// Helper function to convert a PHP value to html printable json\n//--------------------------------------------------------------------------------------\nfunction to_json($data) {\n    return json_encode($data, JSON_PRETTY_PRINT);\n}"
+      x-cpanel-api-version: UAPI
+      x-cpanel-available-version: 110
+      x-cpanel-plugin: SiteQuality
+  /SiteQuality/get_app_token:
+    get:
+      description: This function returns the long-lived application token used to authenticate with koality's authentication servers.
+      operationId: SiteQuality-get_app_token
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  apiversion:
+                    description: The version of the API.
+                    example: 3
+                    type: integer
+                  func:
+                    description: The name of the method called.
+                    example: get_app_token
+                    type: string
+                  module:
+                    description: The name of the module called.
+                    example: SiteQuality
+                    type: string
+                  result:
+                    properties:
+                      data:
+                        description: An object that contains user authentication attributes.
+                        properties:
+                          app_token:
+                            description: The long-lived token for this account. The <a href="https://go.cpanel.net/5k" target="_blank">koality</a> servers require this token to authenticate. If this token is lost, the user must create a new account.
+                            example: eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9...
+                            type: string
+                        type: object
+                      errors:
+                        description: List of errors if the API failed.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      messages:
+                        description: List of messages that the API generated.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      metadata:
+                        properties: {}
+                      status:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the `errors` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      warnings:
+                        description: List of warnings that the API generated. Warnings describe non-critical failures or issues the system noted while running an API function.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                type: object
+          description: HTTP Request was successful.
+      summary: Return koality authentication token
+      tags:
+      - SiteQuality
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "uapi --output=jsonpretty \\\n  --user=username \\\n  SiteQuality \\\n  get_app_token\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2083/cpsess##########/execute/SiteQuality/get_app_token
+      - label: LiveAPI Perl
+        lang: Perl
+        source: "#--------------------------------------------------------------------------------------\n# Instructions:\n#--------------------------------------------------------------------------------------\n# <theme-name> is the theme assigned to cPanel account.\n# 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n# 2) mkdir api_examples\n# 3) cd api_examples\n# 4) create a file SiteQuality_get_app_token.live.pl and put this code into that file.\n# 5) In your browser login to a cPanel account.\n# 6) Manually change the url from: .../frontend/<theme-name>\n#    to .../frontend/<theme-name>/api_examples/SiteQuality_get_app_token.live.pl\n#--------------------------------------------------------------------------------------\n#\n\nuse strict;\n\nuse Cpanel::LiveAPI ();\n\nmy $cpanel = Cpanel::LiveAPI->new(); # Connect to cPanel - only do this once.\n\n# Print the header\nprint \"Content-type: text/plain\\r\\n\\r\\n\";\n\n# Call the API\nmy $response = $cpanel->uapi(\n    q/SiteQuality/,\n    q/get_app_token/\n);\n\n# Handle the response\nif ($response->{cpanelresult}{result}{status}) {\n    my $data = $response->{cpanelresult}{result}{data};\n    # Do something with the $data\n    # So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    # Report errors:\n    print to_json($response->{cpanelresult}{result}{errors});\n}\n\n# Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n#--------------------------------------------------------------------------------------\n# Helper function to convert a perl object to html printable json\n#--------------------------------------------------------------------------------------\nsub to_json {\n    require JSON;\n    my $str = JSON->new->pretty->encode($_[0]);\n    return $str;\n}\n"
+      - label: LiveAPI PHP
+        lang: PHP
+        source: "<?php\n//--------------------------------------------------------------------------------------\n// Instructions:\n//--------------------------------------------------------------------------------------\n// <theme-name> is the theme assigned to cPanel account.\n// 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n// 2) mkdir api_examples\n// 3) cd api_examples\n// 4) create a file SiteQuality_get_app_token.live.php and put this code into that file.\n// 5) In your browser login to a cPanel account.\n// 6) Manually change the url from: .../frontend/<theme-name>\n//    to .../frontend/<theme-name>/api_examples/SiteQuality_get_app_token.live.php\n//--------------------------------------------------------------------------------------\n\n// Instantiate the CPANEL object.\nrequire_once \"/usr/local/cpanel/php/cpanel.php\";\n\n// Print the header\nheader('Content-Type: text/plain');\n\n// Connect to cPanel - only do this once.\n$cpanel = new CPANEL();\n\n// Call the API\n$response = $cpanel->uapi(\n    'SiteQuality',\n    'get_app_token'\n);\n\n// Handle the response\nif ($response['cpanelresult']['result']['status']) {\n    $data = $response['cpanelresult']['result']['data'];\n    // Do something with the $data\n    // So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    // Report errors:\n    print to_json($response['cpanelresult']['result']['errors']);\n}\n\n// Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n//--------------------------------------------------------------------------------------\n// Helper function to convert a PHP value to html printable json\n//--------------------------------------------------------------------------------------\nfunction to_json($data) {\n    return json_encode($data, JSON_PRETTY_PRINT);\n}"
+      x-cpanel-api-version: UAPI
+      x-cpanel-available-version: 110
+      x-cpanel-plugin: SiteQuality
+  /SiteQuality/get_monitored_domains:
+    get:
+      description: This function returns a list of the user's Site Quality Monitoring-enabled domains. It also returns the domains' associated project and system IDs.
+      operationId: SiteQuality-get_monitored_domains
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  apiversion:
+                    description: The version of the API.
+                    example: 3
+                    type: integer
+                  func:
+                    description: The name of the method called.
+                    example: get_monitored_domains
+                    type: string
+                  module:
+                    description: The name of the module called.
+                    example: SiteQuality
+                    type: string
+                  result:
+                    properties:
+                      errors:
+                        description: List of errors if the API failed.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      messages:
+                        description: List of messages that the API generated.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      metadata:
+                        properties: {}
+                      monitored_domains:
+                        description: An array of objects containing the user's monitored domains.
+                        items:
+                          description: An object that contains information about the user's monitored domain.
+                          properties:
+                            domain:
+                              description: The domain name of the monitored domain.
+                              example: https://example.test
+                              type: string
+                            project_id:
+                              description: The project identification number for the monitored domain.
+                              example: 1234
+                              type: integer
+                            system_id:
+                              description: The system identification number for the monitored domain.
+                              example: 1234
+                              type: integer
+                          type: object
+                        type: array
+                      status:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the `errors` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      warnings:
+                        description: List of warnings that the API generated. Warnings describe non-critical failures or issues the system noted while running an API function.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                type: object
+          description: HTTP Request was successful.
+      summary: Return the user's monitored domains
+      tags:
+      - SiteQuality
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "uapi --output=jsonpretty \\\n  --user=username \\\n  SiteQuality \\\n  get_monitored_domains\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2083/cpsess##########/execute/SiteQuality/get_monitored_domains
+      - label: LiveAPI Perl
+        lang: Perl
+        source: "#--------------------------------------------------------------------------------------\n# Instructions:\n#--------------------------------------------------------------------------------------\n# <theme-name> is the theme assigned to cPanel account.\n# 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n# 2) mkdir api_examples\n# 3) cd api_examples\n# 4) create a file SiteQuality_get_monitored_domains.live.pl and put this code into that file.\n# 5) In your browser login to a cPanel account.\n# 6) Manually change the url from: .../frontend/<theme-name>\n#    to .../frontend/<theme-name>/api_examples/SiteQuality_get_monitored_domains.live.pl\n#--------------------------------------------------------------------------------------\n#\n\nuse strict;\n\nuse Cpanel::LiveAPI ();\n\nmy $cpanel = Cpanel::LiveAPI->new(); # Connect to cPanel - only do this once.\n\n# Print the header\nprint \"Content-type: text/plain\\r\\n\\r\\n\";\n\n# Call the API\nmy $response = $cpanel->uapi(\n    q/SiteQuality/,\n    q/get_monitored_domains/\n);\n\n# Handle the response\nif ($response->{cpanelresult}{result}{status}) {\n    my $data = $response->{cpanelresult}{result}{data};\n    # Do something with the $data\n    # So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    # Report errors:\n    print to_json($response->{cpanelresult}{result}{errors});\n}\n\n# Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n#--------------------------------------------------------------------------------------\n# Helper function to convert a perl object to html printable json\n#--------------------------------------------------------------------------------------\nsub to_json {\n    require JSON;\n    my $str = JSON->new->pretty->encode($_[0]);\n    return $str;\n}\n"
+      - label: LiveAPI PHP
+        lang: PHP
+        source: "<?php\n//--------------------------------------------------------------------------------------\n// Instructions:\n//--------------------------------------------------------------------------------------\n// <theme-name> is the theme assigned to cPanel account.\n// 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n// 2) mkdir api_examples\n// 3) cd api_examples\n// 4) create a file SiteQuality_get_monitored_domains.live.php and put this code into that file.\n// 5) In your browser login to a cPanel account.\n// 6) Manually change the url from: .../frontend/<theme-name>\n//    to .../frontend/<theme-name>/api_examples/SiteQuality_get_monitored_domains.live.php\n//--------------------------------------------------------------------------------------\n\n// Instantiate the CPANEL object.\nrequire_once \"/usr/local/cpanel/php/cpanel.php\";\n\n// Print the header\nheader('Content-Type: text/plain');\n\n// Connect to cPanel - only do this once.\n$cpanel = new CPANEL();\n\n// Call the API\n$response = $cpanel->uapi(\n    'SiteQuality',\n    'get_monitored_domains'\n);\n\n// Handle the response\nif ($response['cpanelresult']['result']['status']) {\n    $data = $response['cpanelresult']['result']['data'];\n    // Do something with the $data\n    // So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    // Report errors:\n    print to_json($response['cpanelresult']['result']['errors']);\n}\n\n// Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n//--------------------------------------------------------------------------------------\n// Helper function to convert a PHP value to html printable json\n//--------------------------------------------------------------------------------------\nfunction to_json($data) {\n    return json_encode($data, JSON_PRETTY_PRINT);\n}"
+      x-cpanel-api-version: UAPI
+      x-cpanel-available-version: 110
+      x-cpanel-plugin: SiteQuality
+  /SiteQuality/get_monitored_system_scores:
+    get:
+      description: This function returns a monitoring score and system ID for each domain the user monitors with Site Quality Monitoring.
+      operationId: SiteQuality-get_monitored_system_scores
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  apiversion:
+                    description: The version of the API.
+                    example: 3
+                    type: integer
+                  func:
+                    description: The name of the method called.
+                    example: get_monitored_system_scores
+                    type: string
+                  module:
+                    description: The name of the module called.
+                    example: SiteQuality
+                    type: string
+                  result:
+                    properties:
+                      errors:
+                        description: List of errors if the API failed.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      messages:
+                        description: List of messages that the API generated.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      metadata:
+                        properties: {}
+                      status:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the `errors` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      system_scores:
+                        description: An array of objects containing the user's monitored domain score and system ID.
+                        items:
+                          description: An object that contains information about the user's monitored domain.
+                          properties:
+                            status:
+                              description: 'The check''s summarized status.
+
+                                * `good`  — The monitored domain passes all monitoring checks.
+
+                                * `bad`   — The monitored domain reports failures in Security, Content, and/or Availability monitoring checks.
+
+                                * `warn`  — The monitored domain reports failures in Performance, Technical, and/or SEO monitoring checks.'
+                              enum:
+                              - good
+                              - bad
+                              - warn
+                              example: good
+                              type: string
+                            system_id:
+                              description: The system identification number for the monitored domain.
+                              example: 1234
+                              type: integer
+                          type: object
+                        type: array
+                      warnings:
+                        description: List of warnings that the API generated. Warnings describe non-critical failures or issues the system noted while running an API function.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                type: object
+          description: HTTP Request was successful.
+      summary: Return status for a user's monitored domains
+      tags:
+      - SiteQuality
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "uapi --output=jsonpretty \\\n  --user=username \\\n  SiteQuality \\\n  get_monitored_system_scores\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2083/cpsess##########/execute/SiteQuality/get_monitored_system_scores
+      - label: LiveAPI Perl
+        lang: Perl
+        source: "#--------------------------------------------------------------------------------------\n# Instructions:\n#--------------------------------------------------------------------------------------\n# <theme-name> is the theme assigned to cPanel account.\n# 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n# 2) mkdir api_examples\n# 3) cd api_examples\n# 4) create a file SiteQuality_get_monitored_system_scores.live.pl and put this code into that file.\n# 5) In your browser login to a cPanel account.\n# 6) Manually change the url from: .../frontend/<theme-name>\n#    to .../frontend/<theme-name>/api_examples/SiteQuality_get_monitored_system_scores.live.pl\n#--------------------------------------------------------------------------------------\n#\n\nuse strict;\n\nuse Cpanel::LiveAPI ();\n\nmy $cpanel = Cpanel::LiveAPI->new(); # Connect to cPanel - only do this once.\n\n# Print the header\nprint \"Content-type: text/plain\\r\\n\\r\\n\";\n\n# Call the API\nmy $response = $cpanel->uapi(\n    q/SiteQuality/,\n    q/get_monitored_system_scores/\n);\n\n# Handle the response\nif ($response->{cpanelresult}{result}{status}) {\n    my $data = $response->{cpanelresult}{result}{data};\n    # Do something with the $data\n    # So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    # Report errors:\n    print to_json($response->{cpanelresult}{result}{errors});\n}\n\n# Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n#--------------------------------------------------------------------------------------\n# Helper function to convert a perl object to html printable json\n#--------------------------------------------------------------------------------------\nsub to_json {\n    require JSON;\n    my $str = JSON->new->pretty->encode($_[0]);\n    return $str;\n}\n"
+      - label: LiveAPI PHP
+        lang: PHP
+        source: "<?php\n//--------------------------------------------------------------------------------------\n// Instructions:\n//--------------------------------------------------------------------------------------\n// <theme-name> is the theme assigned to cPanel account.\n// 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n// 2) mkdir api_examples\n// 3) cd api_examples\n// 4) create a file SiteQuality_get_monitored_system_scores.live.php and put this code into that file.\n// 5) In your browser login to a cPanel account.\n// 6) Manually change the url from: .../frontend/<theme-name>\n//    to .../frontend/<theme-name>/api_examples/SiteQuality_get_monitored_system_scores.live.php\n//--------------------------------------------------------------------------------------\n\n// Instantiate the CPANEL object.\nrequire_once \"/usr/local/cpanel/php/cpanel.php\";\n\n// Print the header\nheader('Content-Type: text/plain');\n\n// Connect to cPanel - only do this once.\n$cpanel = new CPANEL();\n\n// Call the API\n$response = $cpanel->uapi(\n    'SiteQuality',\n    'get_monitored_system_scores'\n);\n\n// Handle the response\nif ($response['cpanelresult']['result']['status']) {\n    $data = $response['cpanelresult']['result']['data'];\n    // Do something with the $data\n    // So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    // Report errors:\n    print to_json($response['cpanelresult']['result']['errors']);\n}\n\n// Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n//--------------------------------------------------------------------------------------\n// Helper function to convert a PHP value to html printable json\n//--------------------------------------------------------------------------------------\nfunction to_json($data) {\n    return json_encode($data, JSON_PRETTY_PRINT);\n}"
+      x-cpanel-api-version: UAPI
+      x-cpanel-available-version: 110
+      x-cpanel-plugin: SiteQuality
+  /SiteQuality/has_site_quality_user:
+    get:
+      description: This function returns whether the cPanel user has an associated Site Quality Monitoring account.
+      operationId: SiteQuality-has_site_quality_user
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  apiversion:
+                    description: The version of the API.
+                    example: 3
+                    type: integer
+                  func:
+                    description: The name of the method called.
+                    example: has_site_quality_user
+                    type: string
+                  module:
+                    description: The name of the module called.
+                    example: SiteQuality
+                    type: string
+                  result:
+                    properties:
+                      data:
+                        description: An object that contains Site Quality Monitoring user attributes.
+                        properties:
+                          has_site_quality_user:
+                            description: 'Whether the cPanel user has an associated Site Quality Monitoring account.
+
+                              * `1` - The user does have an associated account.
+
+                              * `0` - The user does not have an associated account.'
+                            enum:
+                            - 0
+                            - 1
+                            example: 1
+                            type: integer
+                        type: object
+                      errors:
+                        description: List of errors if the API failed.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      messages:
+                        description: List of messages the API generated.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      metadata:
+                        properties: {}
+                      status:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the `errors` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      warnings:
+                        description: List of warnings that the API generated. Warnings describe non-critical failures or issues the system noted while running an API function.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                type: object
+          description: HTTP Request was successful.
+      summary: Validate monitoring account existence
+      tags:
+      - SiteQuality
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "uapi --output=jsonpretty \\\n  --user=username \\\n  SiteQuality \\\n  has_site_quality_user\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2083/cpsess##########/execute/SiteQuality/has_site_quality_user
+      - label: LiveAPI Perl
+        lang: Perl
+        source: "#--------------------------------------------------------------------------------------\n# Instructions:\n#--------------------------------------------------------------------------------------\n# <theme-name> is the theme assigned to cPanel account.\n# 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n# 2) mkdir api_examples\n# 3) cd api_examples\n# 4) create a file SiteQuality_has_site_quality_user.live.pl and put this code into that file.\n# 5) In your browser login to a cPanel account.\n# 6) Manually change the url from: .../frontend/<theme-name>\n#    to .../frontend/<theme-name>/api_examples/SiteQuality_has_site_quality_user.live.pl\n#--------------------------------------------------------------------------------------\n\nuse strict;\n\nuse Cpanel::LiveAPI ();\n\nmy $cpanel = Cpanel::LiveAPI->new(); # Connect to cPanel - only do this once.\n\n# Print the header\nprint \"Content-type: text/plain\\r\\n\\r\\n\";\n\n# Call the API\nmy $response = $cpanel->uapi(\n    q/SiteQuality/,\n    q/has_site_quality_user/\n);\n\n# Handle the response\nif ($response->{cpanelresult}{result}{status}) {\n    my $data = $response->{cpanelresult}{result}{data};\n    # Do something with the $data\n    # So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    # Report errors:\n    print to_json($response->{cpanelresult}{result}{errors});\n}\n\n# Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n#--------------------------------------------------------------------------------------\n# Helper function to convert a perl object to html printable json\n#--------------------------------------------------------------------------------------\nsub to_json {\n    require JSON;\n    my $str = JSON->new->pretty->encode($_[0]);\n    return $str;\n}\n"
+      - label: LiveAPI PHP
+        lang: PHP
+        source: "<?php\n//--------------------------------------------------------------------------------------\n// Instructions:\n//--------------------------------------------------------------------------------------\n// <theme-name> is the theme assigned to cPanel account.\n// 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n// 2) mkdir api_examples\n// 3) cd api_examples\n// 4) create a file SiteQuality_has_site_quality_user.live.php and put this code into that file.\n// 5) In your browser login to a cPanel account.\n// 6) Manually change the url from: .../frontend/<theme-name>\n//    to .../frontend/<theme-name>/api_examples/SiteQuality_has_site_quality_user.live.php\n//--------------------------------------------------------------------------------------\n\n// Instantiate the CPANEL object.\nrequire_once \"/usr/local/cpanel/php/cpanel.php\";\n\n// Print the header\nheader('Content-Type: text/plain');\n\n// Connect to cPanel - only do this once.\n$cpanel = new CPANEL();\n\n// Call the API\n$response = $cpanel->uapi(\n    'SiteQuality',\n    'has_site_quality_user'\n);\n\n// Handle the response\nif ($response['cpanelresult']['result']['status']) {\n    $data = $response['cpanelresult']['result']['data'];\n    // Do something with the $data\n    // So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    // Report errors:\n    print to_json($response['cpanelresult']['result']['errors']);\n}\n\n// Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n//--------------------------------------------------------------------------------------\n// Helper function to convert a PHP value to html printable json\n//--------------------------------------------------------------------------------------\nfunction to_json($data) {\n    return json_encode($data, JSON_PRETTY_PRINT);\n}"
+      x-cpanel-api-version: UAPI
+      x-cpanel-available-version: 110
+      x-cpanel-plugin: SiteQuality
+  /SiteQuality/is_site_quality_user_enabled:
+    get:
+      description: This function verifies that koality has enabled the cPanel user's Site Quality Monitoring account.
+      operationId: SiteQuality-is_site_quality_user_enabled
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  apiversion:
+                    description: The version of the API.
+                    example: 3
+                    type: integer
+                  func:
+                    description: The name of the method called.
+                    example: is_site_quality_user_enabled
+                    type: string
+                  module:
+                    description: The name of the module called.
+                    example: SiteQuality
+                    type: string
+                  result:
+                    properties:
+                      data:
+                        description: An object that contains user attributes.
+                        properties:
+                          enabled:
+                            description: 'Whether or not the account has been enabled.
+
+                              * `1` - Enabled
+
+                              * `0` - Disabled'
+                            enum:
+                            - 0
+                            - 1
+                            example: 1
+                            type: integer
+                        type: object
+                      errors:
+                        description: List of errors that the API generated.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      messages:
+                        description: List of messages the API generated.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      metadata:
+                        properties: {}
+                      status:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the `errors` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      warnings:
+                        description: List of warnings generated by the API. Warnings describe non-critical failures or other problematic conditions noted while running an API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                type: object
+          description: HTTP Request was successful.
+      summary: Validate monitoring account enablement
+      tags:
+      - SiteQuality
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "uapi --output=jsonpretty \\\n  --user=username \\\n  SiteQuality \\\n  is_site_quality_user_enabled\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2083/cpsess##########/execute/SiteQuality/is_site_quality_user_enabled
+      - label: LiveAPI Perl
+        lang: Perl
+        source: "#--------------------------------------------------------------------------------------\n# Instructions:\n#--------------------------------------------------------------------------------------\n# <theme-name> is the theme assigned to cPanel account.\n# 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n# 2) mkdir api_examples\n# 3) cd api_examples\n# 4) create a file SiteQuality_is_site_quality_user_enabled.live.pl and put this code into that file.\n# 5) In your browser login to a cPanel account.\n# 6) Manually change the url from: .../frontend/<theme-name>\n#    to .../frontend/<theme-name>/api_examples/SiteQuality_is_site_quality_user_enabled.live.pl\n#--------------------------------------------------------------------------------------\n\nuse strict;\n\nuse Cpanel::LiveAPI ();\n\nmy $cpanel = Cpanel::LiveAPI->new(); # Connect to cPanel - only do this once.\n\n# Print the header\nprint \"Content-type: text/plain\\r\\n\\r\\n\";\n\n# Call the API\nmy $response = $cpanel->uapi(\n    q/SiteQuality/,\n    q/is_site_quality_user_enabled/\n);\n\n# Handle the response\nif ($response->{cpanelresult}{result}{status}) {\n    my $data = $response->{cpanelresult}{result}{data};\n    # Do something with the $data\n    # So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    # Report errors:\n    print to_json($response->{cpanelresult}{result}{errors});\n}\n\n# Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n#--------------------------------------------------------------------------------------\n# Helper function to convert a perl object to html printable json\n#--------------------------------------------------------------------------------------\nsub to_json {\n    require JSON;\n    my $str = JSON->new->pretty->encode($_[0]);\n    return $str;\n}\n"
+      - label: LiveAPI PHP
+        lang: PHP
+        source: "<?php\n//--------------------------------------------------------------------------------------\n// Instructions:\n//--------------------------------------------------------------------------------------\n// <theme-name> is the theme assigned to cPanel account.\n// 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n// 2) mkdir api_examples\n// 3) cd api_examples\n// 4) create a file SiteQuality_is_site_quality_user_enabled.live.php and put this code into that file.\n// 5) In your browser login to a cPanel account.\n// 6) Manually change the url from: .../frontend/<theme-name>\n//    to .../frontend/<theme-name>/api_examples/SiteQuality_is_site_quality_user_enabled.live.php\n//--------------------------------------------------------------------------------------\n\n// Instantiate the CPANEL object.\nrequire_once \"/usr/local/cpanel/php/cpanel.php\";\n\n// Print the header\nheader('Content-Type: text/plain');\n\n// Connect to cPanel - only do this once.\n$cpanel = new CPANEL();\n\n// Call the API\n$response = $cpanel->uapi(\n    'SiteQuality',\n    'is_site_quality_user_enabled'\n);\n\n// Handle the response\nif ($response['cpanelresult']['result']['status']) {\n    $data = $response['cpanelresult']['result']['data'];\n    // Do something with the $data\n    // So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    // Report errors:\n    print to_json($response['cpanelresult']['result']['errors']);\n}\n\n// Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n//--------------------------------------------------------------------------------------\n// Helper function to convert a PHP value to html printable json\n//--------------------------------------------------------------------------------------\nfunction to_json($data) {\n    return json_encode($data, JSON_PRETTY_PRINT);\n}"
+      x-cpanel-api-version: UAPI
+      x-cpanel-available-version: 110
+      x-cpanel-plugin: SiteQuality
+  /SiteQuality/reset_config:
+    get:
+      description: 'This function will remove Site Quality Monitoring account data from the cPanel user''s configuration.
+
+
+        **Note:**
+
+        * This function will prevent cPanel & WHM from automatically logging the user into their Site Quality Monitoring account.
+
+        * This function does not delete the Site Quality Monitoring account from the koality servers.'
+      operationId: SiteQuality-reset_config
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  apiversion:
+                    description: The version of the API.
+                    example: 3
+                    type: integer
+                  func:
+                    description: The name of the method called.
+                    example: reset_config
+                    type: string
+                  module:
+                    description: The name of the module called.
+                    example: SiteQuality
+                    type: string
+                  result:
+                    properties:
+                      data:
+                        description: An object that contains the status of the account data removal from the cPanel user's configuration.
+                        properties:
+                          reset:
+                            description: 'Whether the account data was removed.
+
+                              * `1` - The account data was removed.
+
+                              * `0` - The account data was not removed.'
+                            enum:
+                            - 0
+                            - 1
+                            example: 1
+                            type: integer
+                        type: object
+                      errors:
+                        description: List of errors if the API failed.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      messages:
+                        description: List of messages that the API generated.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      metadata:
+                        properties: {}
+                      status:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the `errors` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      warnings:
+                        description: List of warnings that the API generated. Warnings describe non-critical failures or issues the system noted while running an API function.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                type: object
+          description: HTTP Request was successful.
+      summary: Remove monitoring user from cPanel configuration
+      tags:
+      - SiteQuality
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "uapi --output=jsonpretty \\\n  --user=username \\\n  SiteQuality \\\n  reset_config\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2083/cpsess##########/execute/SiteQuality/reset_config
+      - label: LiveAPI Perl
+        lang: Perl
+        source: "#--------------------------------------------------------------------------------------\n# Instructions:\n#--------------------------------------------------------------------------------------\n# <theme-name> is the theme assigned to cPanel account.\n# 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n# 2) mkdir api_examples\n# 3) cd api_examples\n# 4) create a file SiteQuality_reset_config.live.pl and put this code into that file.\n# 5) In your browser login to a cPanel account.\n# 6) Manually change the url from: .../frontend/<theme-name>\n#    to .../frontend/<theme-name>/api_examples/SiteQuality_reset_config.live.pl\n#--------------------------------------------------------------------------------------\n\nuse strict;\n\nuse Cpanel::LiveAPI ();\n\nmy $cpanel = Cpanel::LiveAPI->new(); # Connect to cPanel - only do this once.\n\n# Print the header\nprint \"Content-type: text/plain\\r\\n\\r\\n\";\n\n# Call the API\nmy $response = $cpanel->uapi(\n    q/SiteQuality/,\n    q/reset_config/\n);\n\n# Handle the response\nif ($response->{cpanelresult}{result}{status}) {\n    my $data = $response->{cpanelresult}{result}{data};\n    # Do something with the $data\n    # So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    # Report errors:\n    print to_json($response->{cpanelresult}{result}{errors});\n}\n\n# Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n#--------------------------------------------------------------------------------------\n# Helper function to convert a perl object to html printable json\n#--------------------------------------------------------------------------------------\nsub to_json {\n    require JSON;\n    my $str = JSON->new->pretty->encode($_[0]);\n    return $str;\n}\n"
+      - label: LiveAPI PHP
+        lang: PHP
+        source: "<?php\n//--------------------------------------------------------------------------------------\n// Instructions:\n//--------------------------------------------------------------------------------------\n// <theme-name> is the theme assigned to cPanel account.\n// 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n// 2) mkdir api_examples\n// 3) cd api_examples\n// 4) create a file SiteQuality_reset_config.live.php and put this code into that file.\n// 5) In your browser login to a cPanel account.\n// 6) Manually change the url from: .../frontend/<theme-name>\n//    to .../frontend/<theme-name>/api_examples/SiteQuality_reset_config.live.php\n//--------------------------------------------------------------------------------------\n\n// Instantiate the CPANEL object.\nrequire_once \"/usr/local/cpanel/php/cpanel.php\";\n\n// Print the header\nheader('Content-Type: text/plain');\n\n// Connect to cPanel - only do this once.\n$cpanel = new CPANEL();\n\n// Call the API\n$response = $cpanel->uapi(\n    'SiteQuality',\n    'reset_config'\n);\n\n// Handle the response\nif ($response['cpanelresult']['result']['status']) {\n    $data = $response['cpanelresult']['result']['data'];\n    // Do something with the $data\n    // So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    // Report errors:\n    print to_json($response['cpanelresult']['result']['errors']);\n}\n\n// Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n//--------------------------------------------------------------------------------------\n// Helper function to convert a PHP value to html printable json\n//--------------------------------------------------------------------------------------\nfunction to_json($data) {\n    return json_encode($data, JSON_PRETTY_PRINT);\n}"
+      x-cpanel-api-version: UAPI
+      x-cpanel-available-version: 110
+      x-cpanel-plugin: SiteQuality
+  /SiteQuality/send_activation_email:
+    get:
+      description: 'This function sends a Site Quality Monitoring activation email to the currently-authenticated Site Quality Monitoring user.
+
+
+        **Note:**
+
+        This email contains the Site Quality Monitoring activation code.'
+      operationId: SiteQuality-send_activation_email
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  apiversion:
+                    description: The version of the API.
+                    example: 3
+                    type: integer
+                  func:
+                    description: The name of the method called.
+                    example: send_activation_email
+                    type: string
+                  module:
+                    description: The name of the module called.
+                    example: SiteQuality
+                    type: string
+                  result:
+                    properties:
+                      data:
+                        description: An object that contains the activation email request status.
+                        properties:
+                          send_activation_email:
+                            description: 'Whether the request to send an activation email was successful.
+
+                              * `1` - The request was successful. An activation email will send.
+
+                              * `0` - The request was not successful. An activation email will not send.'
+                            enum:
+                            - 0
+                            - 1
+                            example: 1
+                            type: integer
+                        type: object
+                      errors:
+                        description: List of errors if the API failed.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      messages:
+                        description: List of messages that the API generated.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      metadata:
+                        properties: {}
+                      status:
+                        description: '* `1` - Success
+
+                          * `0` - Failed: Check the `errors` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      warnings:
+                        description: List of warnings that the API generated. Warnings describe non-critical failures or issues the system noted while running an API function.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                type: object
+          description: HTTP Request was successful.
+      summary: Request activation email
+      tags:
+      - SiteQuality
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "uapi --output=jsonpretty \\\n  --user=username \\\n  SiteQuality \\\n  reset_config\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2083/cpsess##########/execute/SiteQuality/send_activation_email
+      - label: LiveAPI Perl
+        lang: Perl
+        source: "#--------------------------------------------------------------------------------------\n# Instructions:\n#--------------------------------------------------------------------------------------\n# <theme-name> is the theme assigned to cPanel account.\n# 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n# 2) mkdir api_examples\n# 3) cd api_examples\n# 4) create a file SiteQuality_send_activation_email.live.pl and put this code into that file.\n# 5) In your browser login to a cPanel account.\n# 6) Manually change the url from: .../frontend/<theme-name>\n#    to .../frontend/<theme-name>/api_examples/SiteQuality_send_activation_email.live.pl\n#--------------------------------------------------------------------------------------\n\nuse strict;\n\nuse Cpanel::LiveAPI ();\n\nmy $cpanel = Cpanel::LiveAPI->new(); # Connect to cPanel - only do this once.\n\n# Print the header\nprint \"Content-type: text/plain\\r\\n\\r\\n\";\n\n# Call the API\nmy $response = $cpanel->uapi(\n    q/SiteQuality/,\n    q/send_activation_email/\n);\n\n# Handle the response\nif ($response->{cpanelresult}{result}{status}) {\n    my $data = $response->{cpanelresult}{result}{data};\n    # Do something with the $data\n    # So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    # Report errors:\n    print to_json($response->{cpanelresult}{result}{errors});\n}\n\n# Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n#--------------------------------------------------------------------------------------\n# Helper function to convert a perl object to html printable json\n#--------------------------------------------------------------------------------------\nsub to_json {\n    require JSON;\n    my $str = JSON->new->pretty->encode($_[0]);\n    return $str;\n}\n"
+      - label: LiveAPI PHP
+        lang: PHP
+        source: "<?php\n//--------------------------------------------------------------------------------------\n// Instructions:\n//--------------------------------------------------------------------------------------\n// <theme-name> is the theme assigned to cPanel account.\n// 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n// 2) mkdir api_examples\n// 3) cd api_examples\n// 4) create a file SiteQuality_send_activation_email.live.php and put this code into that file.\n// 5) In your browser login to a cPanel account.\n// 6) Manually change the url from: .../frontend/<theme-name>\n//    to .../frontend/<theme-name>/api_examples/SiteQuality_send_activation_email.live.php\n//--------------------------------------------------------------------------------------\n\n// Instantiate the CPANEL object.\nrequire_once \"/usr/local/cpanel/php/cpanel.php\";\n\n// Print the header\nheader('Content-Type: text/plain');\n\n// Connect to cPanel - only do this once.\n$cpanel = new CPANEL();\n\n// Call the API\n$response = $cpanel->uapi(\n    'SiteQuality',\n    'send_activation_email'\n);\n\n// Handle the response\nif ($response['cpanelresult']['result']['status']) {\n    $data = $response['cpanelresult']['result']['data'];\n    // Do something with the $data\n    // So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    // Report errors:\n    print to_json($response['cpanelresult']['result']['errors']);\n}\n\n// Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n//--------------------------------------------------------------------------------------\n// Helper function to convert a PHP value to html printable json\n//--------------------------------------------------------------------------------------\nfunction to_json($data) {\n    return json_encode($data, JSON_PRETTY_PRINT);\n}"
+      x-cpanel-api-version: UAPI
+      x-cpanel-available-version: 110
+      x-cpanel-plugin: SiteQuality
+  /SiteQuality/update_domain:
+    post:
+      description: This function updates the domain name for a Site Quality Monitoring project. It searches through all projects owned by the user to find systems that match the specified old domain and updates them to use the new domain. This is typically used when a website's domain name changes and the monitoring configuration needs to be updated accordingly.
+      operationId: SiteQuality-update_domain
+      parameters:
+      - description: The new domain name to replace the old domain in the Site Quality Monitoring project.
+        in: query
+        name: new_domain
+        required: true
+        schema:
+          example: newdomain.com
+          type: string
+      - description: The current domain name that needs to be updated in the Site Quality Monitoring project.
+        in: query
+        name: old_domain
+        required: true
+        schema:
+          example: olddomain.com
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  apiversion:
+                    description: The version of the API.
+                    example: 3
+                    type: integer
+                  func:
+                    description: The name of the method called.
+                    example: update_domain
+                    type: string
+                  module:
+                    description: The name of the module called.
+                    example: SiteQuality
+                    type: string
+                  result:
+                    properties:
+                      data:
+                        description: An object that contains the updated system information from the Site Quality Monitoring API.
+                        properties:
+                          system:
+                            description: Information about the updated monitoring system.
+                            properties:
+                              id:
+                                description: The system's ID number.
+                                example: 623358
+                                type: integer
+                              name:
+                                description: The updated system name (typically the new domain).
+                                example: newdomain.com
+                                type: string
+                              system_size:
+                                description: Information about the system's subscription plan.
+                                properties:
+                                  id:
+                                    description: The system size ID number.
+                                    example: 3
+                                    type: integer
+                                  name:
+                                    description: The name of the system size/subscription plan.
+                                    example: Unlimited lite
+                                    type: string
+                                type: object
+                              url:
+                                description: The updated system URL with the new domain.
+                                example: https://newdomain.com
+                                type: string
+                            type: object
+                        type: object
+                      errors:
+                        description: List of errors if the API failed.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      messages:
+                        description: List of messages generated by the API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      metadata:
+                        properties: {}
+                      status:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the `errors` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      warnings:
+                        description: List of warnings generated by the API. Warnings describe non-critical failures or other problematic conditions noted while running an API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                type: object
+          description: HTTP Request was successful.
+      summary: Update domain name in Site Quality Monitoring project
+      tags:
+      - SiteQuality
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "uapi --output=jsonpretty \\\n  --user=username \\\n  SiteQuality \\\n  update_domain \\\n  old_domain=olddomain.com \\\n  new_domain=newdomain.com\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2083/cpsess##########/execute/SiteQuality/update_domain?old_domain=olddomain.com&new_domain=newdomain.com
+      - label: LiveAPI Perl
+        lang: Perl
+        source: "#--------------------------------------------------------------------------------------\n# Instructions:\n#--------------------------------------------------------------------------------------\n# <theme-name> is the theme assigned to cPanel account.\n# 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n# 2) mkdir api_examples\n# 3) cd api_examples\n# 4) create a file SiteQuality_update_domain.live.pl and put this code into that file.\n# 5) In your browser login to a cPanel account.\n# 6) Manually change the url from: .../frontend/<theme-name>\n#    to .../frontend/<theme-name>/api_examples/SiteQuality_update_domain.live.pl\n#--------------------------------------------------------------------------------------\n\nuse strict;\n\nuse Cpanel::LiveAPI ();\n\nmy $cpanel = Cpanel::LiveAPI->new(); # Connect to cPanel - only do this once.\n\n# Print the header\nprint \"Content-type: text/plain\\r\\n\\r\\n\";\n\n# Call the API\nmy $response = $cpanel->uapi(\n    q/SiteQuality/,\n    q/update_domain/,\n    {\n        'old_domain' => 'olddomain.com',\n        'new_domain' => 'newdomain.com',\n    }\n);\n\n# Handle the response\nif ($response->{cpanelresult}{result}{status}) {\n    my $data = $response->{cpanelresult}{result}{data};\n    # Do something with the $data\n    # So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    # Report errors:\n    print to_json($response->{cpanelresult}{result}{errors});\n}\n\n# Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n#--------------------------------------------------------------------------------------\n# Helper function to convert a perl object to html printable json\n#--------------------------------------------------------------------------------------\nsub to_json {\n    require JSON;\n    my $str = JSON->new->pretty->encode($_[0]);\n    return $str;\n}\n"
+      - label: LiveAPI PHP
+        lang: PHP
+        source: "<?php\n//--------------------------------------------------------------------------------------\n// Instructions:\n//--------------------------------------------------------------------------------------\n// <theme-name> is the theme assigned to cPanel account.\n// 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n// 2) mkdir api_examples\n// 3) cd api_examples\n// 4) create a file SiteQuality_update_domain.live.php and put this code into that file.\n// 5) In your browser login to a cPanel account.\n// 6) Manually change the url from: .../frontend/<theme-name>\n//    to .../frontend/<theme-name>/api_examples/SiteQuality_update_domain.live.php\n//--------------------------------------------------------------------------------------\n\n// Instantiate the CPANEL object.\nrequire_once \"/usr/local/cpanel/php/cpanel.php\";\n\n// Print the header\nheader('Content-Type: text/plain');\n\n// Connect to cPanel - only do this once.\n$cpanel = new CPANEL();\n\n// Call the API\n$response = $cpanel->uapi(\n    'SiteQuality',\n    'update_domain',\n    array (\n        'old_domain' => 'olddomain.com',\n        'new_domain' => 'newdomain.com',\n    )\n);\n\n// Handle the response\nif ($response['cpanelresult']['result']['status']) {\n    $data = $response['cpanelresult']['result']['data'];\n    # Do something with the $data\n    # So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    # Report errors:\n    print to_json($response['cpanelresult']['result']['errors']);\n}\n\n# Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n//--------------------------------------------------------------------------------------\n// Helper function to convert a PHP value to html printable json\n//--------------------------------------------------------------------------------------\nfunction to_json($data) {\n    return json_encode($data, JSON_PRETTY_PRINT);\n}"
+      x-cpanel-api-version: UAPI
+      x-cpanel-available-version: 110
+      x-cpanel-plugin: SiteQuality
+  /SiteQuality/verify_code:
+    get:
+      description: This function validates the activation code in a cPanel user's Site Quality Monitoring registration email.
+      operationId: SiteQuality-verify_code
+      parameters:
+      - description: 'The user''s Site Quality Monitoring activation code.
+
+
+          **Note:**
+
+
+          A user will receive an email with their activation code when they create a Site Quality Monitoring user account.'
+        in: query
+        name: code
+        required: true
+        schema:
+          example: '123456'
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  apiversion:
+                    description: The version of the API.
+                    example: 3
+                    type: integer
+                  func:
+                    description: The name of the method called.
+                    example: verify_code
+                    type: string
+                  module:
+                    description: The name of the module called.
+                    example: SiteQuality
+                    type: string
+                  result:
+                    properties:
+                      data:
+                        description: An object that contains information about the user's activation code validation.
+                        properties:
+                          status:
+                            description: 'Whether the user''s activation code is valid.
+
+                              * `1` - Valid.
+
+                              * `0` - Invalid.'
+                            enum:
+                            - 0
+                            - 1
+                            example: 1
+                            type: integer
+                        type: object
+                      errors:
+                        description: List of errors that the API generated.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      messages:
+                        description: List of messages the API generated.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      metadata:
+                        properties: {}
+                      status:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the `errors` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      warnings:
+                        description: List of warnings generated by the API. Warnings describe non-critical failures or other problematic conditions noted while running an API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                type: object
+          description: HTTP Request was successful.
+      summary: Validate activation code
+      tags:
+      - SiteQuality
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "uapi --output=jsonpretty \\\n  --user=username \\\n  SiteQuality \\\n  verify_code\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2083/cpsess##########/execute/SiteQuality/verify_code
+      - label: LiveAPI Perl
+        lang: Perl
+        source: "#--------------------------------------------------------------------------------------\n# Instructions:\n#--------------------------------------------------------------------------------------\n# <theme-name> is the theme assigned to cPanel account.\n# 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n# 2) mkdir api_examples\n# 3) cd api_examples\n# 4) create a file SiteQuality_verify_code.live.pl and put this code into that file.\n# 5) In your browser login to a cPanel account.\n# 6) Manually change the url from: .../frontend/<theme-name>\n#    to .../frontend/<theme-name>/api_examples/SiteQuality_verify_code.live.pl\n#--------------------------------------------------------------------------------------\n\nuse strict;\n\nuse Cpanel::LiveAPI ();\n\nmy $cpanel = Cpanel::LiveAPI->new(); # Connect to cPanel - only do this once.\n\n# Print the header\nprint \"Content-type: text/plain\\r\\n\\r\\n\";\n\n# Call the API\nmy $response = $cpanel->uapi(\n    q/SiteQuality/,\n    q/verify_code/,\n    {\n        'code' => '123456',\n    }\n);\n\n# Handle the response\nif ($response->{cpanelresult}{result}{status}) {\n    my $data = $response->{cpanelresult}{result}{data};\n    # Do something with the $data\n    # So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    # Report errors:\n    print to_json($response->{cpanelresult}{result}{errors});\n}\n\n# Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n#--------------------------------------------------------------------------------------\n# Helper function to convert a perl object to html printable json\n#--------------------------------------------------------------------------------------\nsub to_json {\n    require JSON;\n    my $str = JSON->new->pretty->encode($_[0]);\n    return $str;\n}\n"
+      - label: LiveAPI PHP
+        lang: PHP
+        source: "<?php\n//--------------------------------------------------------------------------------------\n// Instructions:\n//--------------------------------------------------------------------------------------\n// <theme-name> is the theme assigned to cPanel account.\n// 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n// 2) mkdir api_examples\n// 3) cd api_examples\n// 4) create a file SiteQuality_verify_code.live.php and put this code into that file.\n// 5) In your browser login to a cPanel account.\n// 6) Manually change the url from: .../frontend/<theme-name>\n//    to .../frontend/<theme-name>/api_examples/SiteQuality_verify_code.live.php\n//--------------------------------------------------------------------------------------\n\n// Instantiate the CPANEL object.\nrequire_once \"/usr/local/cpanel/php/cpanel.php\";\n\n// Print the header\nheader('Content-Type: text/plain');\n\n// Connect to cPanel - only do this once.\n$cpanel = new CPANEL();\n\n// Call the API\n$response = $cpanel->uapi(\n    'SiteQuality',\n    'verify_code',\n    {\n        'code' => '123456',\n    }\n);\n\n// Handle the response\nif ($response['cpanelresult']['result']['status']) {\n    $data = $response['cpanelresult']['result']['data'];\n    // Do something with the $data\n    // So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    // Report errors:\n    print to_json($response['cpanelresult']['result']['errors']);\n}\n\n// Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n//--------------------------------------------------------------------------------------\n// Helper function to convert a PHP value to html printable json\n//--------------------------------------------------------------------------------------\nfunction to_json($data) {\n    return json_encode($data, JSON_PRETTY_PRINT);\n}"
+      x-cpanel-api-version: UAPI
+      x-cpanel-available-version: 110
+      x-cpanel-plugin: SiteQuality
+components:
+  schemas:
+    Score:
+      type: object
+      properties:
+        master:
+          description: The overall results for the check.
+          type: object
+          properties:
+            title:
+              description: The title of the check.
+              example: Uptime
+              type: string
+            status:
+              description: "The check's summarized status.\n  * `good` — The check has returned a positive result.\n  * `bad`  — The check has returned a negative result."
+              type: string
+              example: good
+              enum:
+              - good
+              - bad
+            message:
+              description: The check's status message.
+              example: The project is proving to be very reliable (currently and in the last 30 days) and has good accessibility. The current level should be maintained.
+              type: string
+            description:
+              description: A description of the check.
+              example: If a project is unavailable, customers cannot visit, browse or make purchases. The accessibility assessment is based on the current situation, but also on historical values and trends.
+              type: string
+            identifier:
+              description: An unique identifier for the check.
+              example: Score:Basic:Uptime
+              type: string
+            score:
+              description: 'A numeral score for the check.
+
+
+                ** Note: **
+
+
+                A higher score indicates that your website performs well in that check.'
+              example: 100
+              type: integer
+            incidents:
+              type: array
+              example: []
+              default: []
+            attributes:
+              type: object
+              properties:
+                score:
+                  type: integer
+                  example: 100
+                limit:
+                  type: integer
+                  example: 0
+        sub_scores:
+          description: 'Monitoring checks subcategory results.
+
+
+            ** Note: **
+
+
+            We use the check subcategory results to calculate the master results.'
+          type: array
+          example: []
+          default: []
+          items:
+            type: object
+            properties:
+              title:
+                description: The title of the check subcategory.
+                example: Current availability
+                type: string
+              status:
+                description: "The check subcategory's summarized status.\n  * `good` — The check has returned a positive result.\n  * `bad`  — The check has returned a negative result."
+                type: string
+                example: good
+                enum:
+                - good
+                - bad
+              message:
+                description: The check subcategory's status message.
+                example: All project pages can be reached and thus be visited by potential customers.
+                type: string
+              description:
+                description: A description of the check.
+                example: It is evaluated whether the project is currently accessible. If it is not, this is usually due to technical reasons.
+                type: string
+              identifier:
+                description: An unique identifier for the check.
+                example: Score:Uptime:Down
+                type: string
+              score:
+                description: 'A numeral score for the check subcategory.
+
+
+                  ** Note: **
+
+
+                  A higher score indicates that your website performs well in that check.'
+                example: 100
+                type: integer
+              incidents:
+                example: []
+                type: array
+                default: []
+              weight:
+                description: The weighted contribution of the subcategory check's `score` result to the `master` object's `score` result.
+                example: 20
+                type: integer
+              weighted_score:
+                description: The score after weight has been adjusted.
+                example: 20
+                type: integer
+              attributes:
+                type: object
+                properties:
+                  scoring:
+                    type: string
+                    example: good
+                  score:
+                    type: integer
+                    example: 100
+                  components_processed:
+                    type: integer
+                    example: 1
+                  components_failed:
+                    type: integer
+                    example: 0
+                  limit:
+                    type: integer
+                    example: 0
+                  tool:
+                    type: string
+                    example: KoalaPing
+  securitySchemes:
+    BasicAuth:
+      scheme: basic
+      type: http
+externalDocs:
+  url: https://cpanel.net/developers/
+x-tagGroups:
+- name: API Development Tools
+  tags:
+  - API Token Management
+  - Batch
+  - SSE Task Management
+  - URL Parsing
+- name: Authentication
+  tags:
+  - External Authentication
+  - Two-Factor Settings
+- name: Backup Information
+  tags:
+  - BackupInfo
+  - BackupInfo Status
+- name: Block Ip Addresses
+  tags:
+  - Block IP
+- name: Commerce Integration
+  tags:
+  - Market Integration
+  - SSL Certificates
+- name: Contact Information
+  tags:
+  - Contact Information
+- name: cPanel Account
+  tags:
+  - Account Enhancements
+  - Account Information
+  - Account Management
+  - AuditLog
+  - Contact Information
+  - cPanel Features
+  - Disk Quotas
+  - DomainRecommendations
+  - Personalization
+  - Resource Usage and Statistics
+  - Subaccount Management
+  - Team Roles
+  - Team Users
+- name: cPanel Account Backups
+  tags:
+  - Backup
+  - File Restoration
+- name: cPanel Plugin Framework
+  tags:
+  - Formbricks
+  - Plugins
+- name: cPanel Theme Management
+  tags:
+  - Application Information
+  - Brand Management
+  - Branding Files
+  - Browser Cache Management
+  - Language
+  - Theme Settings
+- name: Directory Management
+  tags:
+  - Directory Indexes
+  - Directory Privacy
+  - Directory Protection
+- name: DNS
+  tags:
+  - DNS
+  - DNS Information
+  - DNS Security
+  - Dynamic DNS
+  - Email DNS Settings
+  - ZoneEdit
+- name: Domain
+  tags:
+  - Domain
+- name: Domain Management
+  tags:
+  - AddonDomain
+  - Direct Link Protection (Hotlink)
+  - Domain
+  - Domain Information
+  - Domain Redirection
+  - DomainLookup
+  - Park
+  - SubDomain
+  - Virtual Host Information
+- name: Domains
+  tags:
+  - Subdomains
+- name: Email
+  tags:
+  - Email Accounts
+  - Email Filtering
+  - Email Forwarding
+  - Email Server Information
+  - Email Suspensions
+  - Mail Server Information
+  - Mailbox Management
+  - Mailing Lists
+  - Signing and Encryption (GnuPG Keys)
+  - Spam Filtering (Greylisting)
+  - Spam Management
+  - Spam Prevention (BoxTrapper)
+  - Webmail Applications
+  - Webmail Sessions
+- name: Extract Information
+  tags:
+  - ExtractInfo
+  - ExtractInfo Status
+- name: File Manager
+  tags:
+  - Trash
+- name: Files
+  tags:
+  - FTP Accounts
+  - FTP Server Settings
+  - Image Tools
+  - Jodit
+  - Manage Files
+  - Manage Files
+  - WebDisk Settings
+- name: GIT Management
+  tags:
+  - Deployment Settings
+  - Repository Management
+- name: InProductSurvey
+  tags:
+  - InProductSurvey
+- name: MySQL and MariaDB
+  tags:
+  - Database Information
+  - Database Management
+  - Remote Databases
+  - User Management
+- name: Notifications
+  tags:
+  - Pushbullet
+- name: Optional Applications
+  tags:
+  - Antivirus Protection (ClamAV)
+  - Calendar and Contacts (DAV)
+  - Calendar and Contacts Server
+  - WordPress Manager Backups
+- name: PostgreSQL
+  tags:
+  - PostgreSQL Database Management
+  - PostgreSQL User Management
+- name: Retrieve bandwidth information
+  tags:
+  - Bandwidth
+- name: Security
+  tags:
+  - Known SSH Hosts Management
+  - Login Information
+- name: Server Information
+  tags:
+  - cPanel Server Information
+  - Notifications
+  - Password Strength
+  - SSH
+  - WebPros MCP
+  - WebProsMCP
+- name: ServiceProxy
+  tags:
+  - ServiceProxy
+- name: Site Quality Monitoring
+  tags:
+  - SiteQuality
+- name: SSL Certificates
+  tags:
+  - Auto-generated SSL Certificates
+  - cPanel Account SSL Management
+  - SNI Email Settings
+  - SSL Certificate Management
+  - Verify Domain Ownership
+- name: Statistics
+  tags:
+  - Domain Statistics
+  - Weblog Settings
+- name: UserData
+  tags:
+  - UserData
+- name: Web Server Configuration
+  tags:
+  - EA4
+  - EasyApache Settings
+  - PHP
+- name: Web Server Management
+  tags:
+  - Application Manager
+  - ModSecurity
+  - NginxCaching
+  - PHP Settings
+  - Web Apps
+- name: Website Configuration
+  tags:
+  - Handler Management
+  - Logs
+  - Mime Type Management
+  - Nova
+  - Site Information
+  - Site Installation
+  - Sitejet
+  - WPX

@@ -1,0 +1,1572 @@
+openapi: 3.2.0
+info:
+  contact:
+    email: cs@cpanel.net
+    name: WebPros International, LLC
+    url: https://cpanel.net/support/
+  description: WHM API.
+  license:
+    name: cPanel License
+    url: https://cpanel.net/legal-notices/
+  termsOfService: https://cpanel.net/legal-notices/
+  title: WHM RPM API
+  version: 11.137.9999.106
+  x-api-evangelist-provenance: 'Harvested verbatim from cPanel''s developer portal on 2026-09-05 via the MCP tool get-full-api-description at https://api.docs.cpanel.net/mcp. ONE mechanical change was made before storage: example values containing PEM private-key or certificate blocks, and AWS-access-key-shaped example strings, were replaced with REDACTED_* placeholders so the file can be stored in a public git repository without tripping secret scanning. No path, operation, parameter, schema or description was altered, added or removed.'
+servers:
+- description: A server running WHM.
+  url: https://{host}:{port}/json-api
+  variables:
+    host:
+      default: whm-server.tld
+      description: The hostname of a server running WHM.
+    port:
+      default: '2087'
+      description: The WHM port.
+security:
+- BasicAuth: []
+tags:
+- description: The RPM module for WHM API 1.
+  name: RPM
+paths:
+  /delete_rpm_version:
+    get:
+      description: 'This function removes RPM data. When you call this function, it performs the same
+
+        actions as the following command:
+
+
+        `/usr/local/cpanel/scripts/update_local_rpm_versions --del section.key value`
+
+
+        For more information, read our
+
+        rpm.versions system
+
+        documentation.
+
+
+        **Note:**
+
+
+        After you call this function, we **strongly** recommend that you run the
+
+        `/usr/local/cpanel/scripts/check_cpanel_pkgs` script.'
+      operationId: RPMVersions-delete_rpm_version
+      parameters:
+      - description: The [RPM's target](https://docs.cpanel.net/knowledge-base/rpm-versions/rpm-targets/).
+        in: query
+        name: key
+        required: true
+        schema:
+          example: 3rdparty
+          type: string
+      - description: The RPM's section within the `rpm.versions` file.
+        in: query
+        name: section
+        required: true
+        schema:
+          example: rpm_groups
+          type: string
+      - description: The RPM name.
+        in: query
+        name: value
+        required: true
+        schema:
+          example: cpanel-pcre
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      status:
+                        description: 'Whether the function was successful.
+
+
+                          * `1` — Success.
+
+                          * `0` — Failure.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: delete_rpm_version
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Remove rpm.versions system configuration
+      tags:
+      - RPM
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  delete_rpm_version \\\n  section='rpm_groups' \\\n  key='3rdparty' \\\n  value='cpanel-pcre'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/delete_rpm_version?api.version=1&section=rpm_groups&key=3rdparty&value=cpanel-pcre
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11.32'
+  /edit_rpm_version:
+    get:
+      description: 'This function edits RPM data. When you call this function, it performs the same actions
+
+        as the following command:
+
+
+        `/usr/local/cpanel/scripts/update_local_rpm_versions --edit section.key value`
+
+
+        For more information, read our
+
+        rpm.versions system
+
+        documentation.
+
+
+        **Note:**
+
+
+        After you call this function, we **strongly** recommend that you run the
+
+        `/usr/local/cpanel/scripts/check_cpanel_pkgs` script.'
+      operationId: RPMVersions-edit_rpm_version
+      parameters:
+      - description: The RPM's key.
+        in: query
+        name: key
+        required: true
+        schema:
+          example: 3rdparty
+          type: string
+      - description: The RPM's section.
+        in: query
+        name: section
+        required: true
+        schema:
+          example: rpm_groups
+          type: string
+      - description: The RPM's value.
+        in: query
+        name: value
+        required: true
+        schema:
+          example: cpanel-pcre
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      status:
+                        description: 'Whether the function succeeded.
+
+
+                          * `1` — Success.
+
+                          * `0` — Failure.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: edit_rpm_version
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Update rpm.versions system configuration
+      tags:
+      - RPM
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  edit_rpm_version \\\n  section='rpm_groups' \\\n  key='3rdparty' \\\n  value='cpanel-pcre'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/edit_rpm_version?api.version=1&section=rpm_groups&key=3rdparty&value=cpanel-pcre
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11.32'
+  /get_rpm_version_data:
+    get:
+      description: 'This function lists a key''s available RPMs. For more information, read our
+
+        rpm.versions system
+
+        documentation.'
+      operationId: RPMVersions-get_rpm_version_data
+      parameters:
+      - description: The RPM's section.
+        in: query
+        name: section
+        required: true
+        schema:
+          example: rpm_groups
+          type: string
+      - description: The RPM's key. If you do **not** specify a value, the function returns all RPM categories.
+        in: query
+        name: key
+        required: false
+        schema:
+          example: 3rdparty
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    description: 'The RPM section and its associated RPMs.
+
+
+                      **Note:**
+
+
+                      * This function uses the RPM section''s name and RPM key''s name for each return value.
+
+                      * If you specify the `key` parameter, this function returns **only** the called RPM key.
+
+                      * If you do **not** specify the `key` parameter, the function returns **all** RPM keys
+
+                      in the called `section` parameter. '
+                    oneOf:
+                    - additionalProperties:
+                        description: A list of all available RPMs. The system uses the RPM key's name as the return name.
+                        items:
+                          type: string
+                        type: array
+                      example:
+                        3rdparty:
+                        - cpanel-pcre
+                        - cpanel-pixman
+                        - cpanel-analog
+                    - additionalProperties:
+                        additionalProperties:
+                          description: A list of all available RPMs. The system uses the RPM key's name as the return name.
+                          items:
+                            type: string
+                          type: array
+                        description: A list containing the RPM section's RPM information. The system uses the RPM section name as the return name.
+                        type: object
+                      example:
+                        rpm_groups:
+                          3rdparty:
+                          - cpanel-pcre
+                          - cpanel-pixman
+                          - cpanel-analog
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: get_rpm_version_data
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Return available RPM packages
+      tags:
+      - RPM
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  get_rpm_version_data \\\n  section='rpm_groups'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/get_rpm_version_data?api.version=1&section=rpm_groups
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11.32'
+  /install_rpm_plugin:
+    get:
+      description: This function starts a plugin installation. The installation runs as a background process.
+      operationId: Plugins-install_rpm_plugin
+      parameters:
+      - description: The name of a plugin RPM to install.
+        in: query
+        name: name
+        required: true
+        schema:
+          example: plugin name
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      log_entry:
+                        description: The name of the RPM plugin log entry for this installation, which includes a timestamp.
+                        example: 2017-01-01T19:39:27Z_plugin_name
+                        type: string
+                      pid:
+                        description: The PID of the process that will install the RPM.
+                        example: 1234
+                        minimum: 0
+                        type: integer
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: install_rpm_plugin
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Install WHM plugin RPM package
+      tags:
+      - RPM
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  install_rpm_plugin \\\n  name='plugin name'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/install_rpm_plugin?api.version=1&name=plugin%20name
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '64'
+  /list_rpms:
+    get:
+      description: 'This function lists RPMs that the server needs, but the server owner has not yet installed.
+
+        When you call this function, it performs the same actions as the following command:
+
+
+        `/usr/local/cpanel/scripts/check_cpanel_pkgs --list-only --targets[target]`
+
+
+        For more information, read our
+
+        rpm.versions system
+
+        documentation.'
+      operationId: RPMVersions-list_rpms
+      parameters:
+      - description: The target that depends on the uninstalled RPMs. If you do not specify a value, the function lists all of the required but uninstalled RPMs for all RPM targets.
+        in: query
+        name: target
+        required: false
+        schema:
+          example: 3rdparty
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      rpms:
+                        description: A list of all RPM dependencies that the server owner has not yet installed.
+                        items:
+                          example: cpanel-pcre
+                          type: string
+                        type: array
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: list_rpms
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Return required but uninstalled server RPM package
+      tags:
+      - RPM
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  list_rpms\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/list_rpms?api.version=1
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11.32'
+  /package_manager_fixcache:
+    get:
+      description: This function attempts to repair yum cache issues.
+      operationId: PackageManager-package_manager_fixcache
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      cache_seems_ok_now:
+                        description: 'Whether the system resolved the current error.
+
+
+                          * `1` — Resolved.
+
+
+                          **Note:**
+
+
+                          * The function **only** returns this value if the function succeeds.
+
+                          * If the function fails, it **only** returns metadata.'
+                        enum:
+                        - 1
+                        example: 1
+                        type: integer
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: package_manager_fixcache
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Repair RPM management yum cache issues
+      tags:
+      - RPM
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  package_manager_fixcache\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/package_manager_fixcache?api.version=1
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '64'
+  /package_manager_get_build_log:
+    get:
+      description: This function returns build log content.
+      operationId: PackageManager-package_manager_get_build_log
+      parameters:
+      - description: The build process ID returned by the `package_manager_submit_actions` function.
+        in: query
+        name: build
+        required: true
+        schema:
+          example: 1234
+          minimum: 1
+          type: integer
+      - description: The position in the build log from which you wish to display entries.
+        in: query
+        name: offset
+        required: true
+        schema:
+          example: 4567
+          format: bytes
+          minimum: 0
+          type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      content:
+                        description: The most recent build log entries.
+                        example:
+                        - line1
+                        - line2
+                        - line3
+                        items:
+                          type: string
+                        type: array
+                      offset:
+                        description: The last position that the system read in the build log.
+                        example: 9672
+                        format: bytes
+                        minimum: 0
+                        type: integer
+                      still_running:
+                        description: 'Whether the build process is in progress.
+
+
+                          * `1` — In progress.
+
+                          * `0` — Complete.'
+                        enum:
+                        - 1
+                        - 0
+                        example: 1
+                        type: integer
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: package_manager_get_build_log
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 1
+                        - 0
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Return RPM management build log
+      tags:
+      - RPM
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  package_manager_get_build_log \\\n  build='1234' \\\n  offset='4567'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/package_manager_get_build_log?api.version=1&build=1234&offset=4567
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11.52'
+  /package_manager_get_package_info:
+    get:
+      description: 'This function retrieves information about the system''s available
+
+        RPM packages.
+
+
+        **Note:**
+
+
+        You must use **either** the `ns` or the `package` parameters.'
+      operationId: PackageManager-package_manager_get_package_info
+      parameters:
+      - description: 'An available RPM package namespace.
+
+
+          **Note:**
+
+
+          * `ea` and any from `ea4_get_additional_pkg_prefixes` API call are the **only** possible values.
+
+          * If you use this parameter, you cannot use the `package` parameter.
+
+          * To view more than one namespace, pass the parameter multiple times. For example,
+
+          `ns=ea` and `ns=altea`.'
+        examples:
+          multiple:
+            summary: View multiple namespaces.
+            value: ns=ea ns=altea
+          single:
+            summary: View one namespace.
+            value: ea
+        in: query
+        name: ns
+        required: true
+        schema:
+          enum:
+          - ea
+          type: string
+      - description: 'An RPM package name on the system.
+
+
+          **Note:**
+
+
+          * If you use this parameter, you cannot use the `ns` parameter.
+
+          * To view more than one package, pass the parameter multiple times. For example,
+
+          `package=ea-php55` and `package=ea-apr-util`.'
+        examples:
+          multiple:
+            summary: View multiple packages.
+            value: package=ea-php55 package=ea-apr-util
+          single:
+            summary: View one package.
+            value: ea-php55
+        in: query
+        name: package
+        required: true
+        schema:
+          type: string
+      - description: 'Whether the system will disable [yum](https://en.wikipedia.org/wiki/Yum_(software))''s
+
+          exclude behavior.
+
+
+          * `1` — Disable yum''s exclude behavior.
+
+          * `0` — Do **not** disable yum''s exclude behavior.'
+        in: query
+        name: disable-excludes
+        required: false
+        schema:
+          default: 0
+          enum:
+          - 1
+          - 0
+          example: 1
+          type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      packages:
+                        description: An array of objects containing information about the RPM packages on the system.
+                        items:
+                          properties:
+                            architecture:
+                              description: The required system architecture.
+                              example: x86_64
+                              type: string
+                            license:
+                              description: The RPM package's distribution license.
+                              example: ASL 2.0
+                              type: string
+                            long_description:
+                              description: A detailed description of the RPM package.
+                              example: The mission of the Apache Portable Runtime (APR) is to provide a\nfree library of C data structures and routines.
+                              type: string
+                            more_info_url:
+                              description: The RPM package developer's URL, if available.
+                              example: http://apr.apache.org
+                              format: url
+                              type:
+                              - string
+                              - 'null'
+                            package:
+                              description: The RPM package name.
+                              example: ea-apr-util
+                              type: string
+                            pkg_dep:
+                              description: The RPM package's dependencies and conflicts.
+                              properties:
+                                conflicts:
+                                  description: A list of the RPM package's conflicts, if any exist.
+                                  example:
+                                  - ea-php55-php-ioncube5
+                                  items:
+                                    type: string
+                                  type: array
+                                requires:
+                                  description: A list of the RPM package's requirements, if any exist.
+                                  example:
+                                  - glibc
+                                  - libuuid
+                                  - expat
+                                  - libdb
+                                  - ea-apr
+                                  items:
+                                    type: string
+                                  type: array
+                              type: object
+                            pkg_group:
+                              description: The RPM package's group.
+                              example: System Environment/Libraries
+                              type: string
+                            release:
+                              description: The RPM package's cPanel release number.
+                              example: 7.7.1.cpanel
+                              type: string
+                            repo_name:
+                              description: The repository where the RPM package resides.
+                              example: NYI
+                              type: string
+                            short_description:
+                              description: A short description of the RPM package.
+                              example: Apache Portable Runtime Utility library
+                              type: string
+                            size:
+                              description: The RPM package's size.
+                              example: 214647
+                              minimum: 1
+                              type: integer
+                            state:
+                              description: 'The install state of the RPM package.
+
+
+                                * `installed`
+
+                                * `not_installed`
+
+                                * `updatable`'
+                              enum:
+                              - installed
+                              - not_installed
+                              - updatable
+                              example: updatable
+                              type: string
+                            version:
+                              description: The version of the RPM package's software.
+                              example: 1.6.1
+                              type: string
+                            version_installed:
+                              description: The currently installed version of an RPM package.
+                              example: 1.6.1-4.4.8.cpanel
+                              type: string
+                            version_latest:
+                              description: The latest available version of an RPM package.
+                              example: 1.6.1-7.7.1.cpanel
+                              type: string
+                          type: object
+                        type: array
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: package_manager_get_package_info
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 1
+                        - 0
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Return available RPM packages information
+      tags:
+      - RPM
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  package_manager_get_package_info \\\n  ns='ea' \\\n  package='ea-php55'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/package_manager_get_package_info?api.version=1&ns=ea&package=ea-php55
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11.52'
+  /package_manager_is_performing_actions:
+    get:
+      description: This function checks the activity of the process that you executed in the WHM API 1 `package_manager_submit_actions` function.
+      operationId: PackageManager-package_manager_is_performing_actions
+      parameters:
+      - description: The process's build number returned by the WHM API 1 `package_manager_submit_actions` function.
+        in: query
+        name: build
+        required: true
+        schema:
+          example: 10053
+          type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      active:
+                        description: 'Whether the process is active.
+
+
+                          * `1` — Active.
+
+                          * `0` — Inactive.'
+                        enum:
+                        - 1
+                        - 0
+                        example: 1
+                        type: integer
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: package_manager_is_performing_actions
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 1
+                        - 0
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Return RPM package update status
+      tags:
+      - RPM
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  package_manager_is_performing_actions \\\n  build='10053'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/package_manager_is_performing_actions?api.version=1&build=10053
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11.52'
+  /package_manager_list_packages:
+    get:
+      description: This function lists information about the system's available RPM packages.
+      operationId: PackageManager-package_manager_list_packages
+      parameters:
+      - description: 'Return RPM packages that exist in a specified state.
+
+
+          * `any` — All RPMs available on the system.
+
+          * `installed` — The RPMs installed on the system.
+
+          * `not_installed` — The available RPMs not yet installed on the system.
+
+          * `updatable` — The RPMs with updates available.'
+        in: query
+        name: state
+        schema:
+          default: any
+          enum:
+          - any
+          - installed
+          - not_installed
+          - updatable
+          example: installed
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    description: A list of RPM objects that match the requested `state`.
+                    properties:
+                      packages:
+                        description: An array of objects that contains the RPM packages on the system.
+                        example:
+                        - package: MariaDB-client
+                        - package: MariaDB-common
+                        items:
+                          properties:
+                            package:
+                              description: An RPM package.
+                              type: string
+                          type: object
+                        type: array
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: package_manager_list_packages
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 1
+                        - 0
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Return available RPM packages
+      tags:
+      - RPM
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  package_manager_list_packages\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/package_manager_list_packages?api.version=1
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11.52'
+  /package_manager_resolve_actions:
+    get:
+      description: This function determines the actions that would result from the provisioning of a specified RPM package or packages.
+      operationId: PackageManager-package_manager_resolve_actions
+      parameters:
+      - description: 'The name of an RPM package.
+
+
+          **Note:**
+
+
+          * To submit more than one package, pass the parameter multiple times. For example,
+
+          `package=ea-php55` and `package=ea-apr-util`.'
+        examples:
+          multiple:
+            summary: Submit multiple RPM packages.
+            value: package=ea-apache24-mod_headers package=ea-apache24-mod_cgid package=ea-apache24-mod_mpm_event
+          single:
+            summary: Submit a single RPM package.
+            value: ea-apache24-mod_headers
+        in: query
+        name: package
+        required: true
+        schema:
+          type: string
+      - description: 'The RPM namespace that represents a set of packages.
+
+          **Note:**
+
+          * `ea` and any from `ea4_get_additional_pkg_prefixes` API call are the **only** possible values. * When more than one namespace is involved, pass the parameter multiple times. For example, `ns=ea` and `ns=altea`.'
+        examples:
+          multiple:
+            summary: Operate under multiple namespaces.
+            value: ns=ea ns=altea
+          single:
+            summary: Operate under one namespace.
+            value: ea
+        in: query
+        name: ns
+        required: false
+        schema:
+          enum:
+          - ea
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      install:
+                        description: A list of RPM packages that the system would install if you provisioned them as currently selected.
+                        example:
+                        - ea-apache24-mod_mpm_event
+                        - ea-apache24-mod_cgid
+                        items:
+                          type: string
+                        type: array
+                      unaffected:
+                        description: A list of unaffected RPM packages.
+                        example:
+                        - ea-php70-php-devel
+                        - ea-php56-runtime
+                        - ea-php55-php-common
+                        - ea-apache24-mod_headers
+                        - ea-php56-php-bcmath
+                        - ea-php70-php-curl
+                        - ea-php70-php-xml
+                        items:
+                          type: string
+                        type: array
+                      uninstall:
+                        description: A list of RPM packages that the system would uninstall if you provisioned them as currently selected.
+                        example:
+                        - ea-apache24-mod_cgi
+                        - ea-apache24-mod_mpm_prefork
+                        items:
+                          type: string
+                        type: array
+                      upgrade:
+                        description: A list of RPM packages that the system would upgrade if you provisioned them as currently selected.
+                        example:
+                        - ea-php56
+                        items:
+                          type: string
+                        type: array
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: package_manager_resolve_actions
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Return possible RPM package changes
+      tags:
+      - RPM
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  package_manager_resolve_actions \\\n  package='ea-apache24-mod_headers'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/package_manager_resolve_actions?api.version=1&package=ea-apache24-mod_headers
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11.52'
+  /package_manager_submit_actions:
+    get:
+      description: 'This function installs, upgrades, or uninstalls RPM packages.
+
+
+        **Note:**
+
+
+        The system queues this function''s actions to run as background tasks. The actions may
+
+        require additional time to finish.'
+      operationId: PackageManager-package_manager_submit_actions
+      parameters:
+      - description: 'The RPM package that you want to install. If you do not use this parameter, the function
+
+          does not install a package.
+
+
+          **Note:**
+
+
+          You can pass this parameter multiple times to install more than one RPM package'
+        examples:
+          multiple:
+            summary: Install multiple RPM packages.
+            value: install=package1 install=package2
+          single:
+            summary: Install a single RPM package.
+            value: package1
+        in: query
+        name: install
+        required: false
+        schema:
+          type: string
+      - description: 'The RPM package that you want to uninstall. If you do not use this parameter, the function
+
+          does not uninstall a package.
+
+
+          **Note:**
+
+
+          You can pass this parameter multiple times to uninstall more than one RPM package.'
+        examples:
+          multiple:
+            summary: Uninstall multiple RPM packages.
+            value: uninstall=package3 uninstall=package4 uninstall=package5
+          single:
+            summary: Uninstall a single RPM package.
+            value: package3
+        in: query
+        name: uninstall
+        required: false
+        schema:
+          type: string
+      - description: 'The RPM package that you want to upgrade. If you do not use this parameter, the function
+
+          does not upgrade a package.
+
+
+          **Note:**
+
+
+          You can pass this parameter multiple times to upgrade more than one RPM package.'
+        examples:
+          multiple:
+            summary: Upgrade multiple RPM packages.
+            value: upgrade=package6 upgrade=package7 upgrade=package8
+          single:
+            summary: Upgrade a single RPM package.
+            value: package6
+        in: query
+        name: upgrade
+        required: false
+        schema:
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      build:
+                        description: A valid Process ID (PID).
+                        example: 9717
+                        type: integer
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: package_manager_submit_actions
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Start RPM package installation, update, or removal
+      tags:
+      - RPM
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  package_manager_submit_actions\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/package_manager_submit_actions?api.version=1
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11.52'
+  /package_manager_upgrade:
+    get:
+      description: This function downloads and installs package updates on the server.
+      operationId: PackageManager-package_manager_upgrade
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      build:
+                        description: A valid Process ID (PID).
+                        example: 10111
+                        type: integer
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: package_manager_upgrade
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Start RPM package upgrade
+      tags:
+      - RPM
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  package_manager_upgrade\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/package_manager_upgrade?api.version=1
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '54'
+  /uninstall_rpm_plugin:
+    get:
+      description: This function starts the uninstall process for a plugin. The uninstall process runs as a background process.
+      operationId: Plugins-uninstall_rpm_plugin
+      parameters:
+      - description: The name of a plugin RPM to uninstall.
+        in: query
+        name: name
+        required: true
+        schema:
+          example: plugin_name
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      log_entry:
+                        description: The name of the RPM plugin log entry for this uninstall process, including a timestamp.
+                        example: 2017-01-01T19:39:27Z_plugin_name
+                        type: string
+                      pid:
+                        description: The PID of the process that is doing the removal.
+                        example: 1234
+                        minimum: 0
+                        type: integer
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: uninstall_rpm_plugin
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Uninstall WHM plugin RPM package
+      tags:
+      - RPM
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  uninstall_rpm_plugin \\\n  name='plugin_name'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/uninstall_rpm_plugin?api.version=1&name=plugin_name
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '64'
+components:
+  securitySchemes:
+    BasicAuth:
+      scheme: basic
+      type: http
+externalDocs:
+  url: https://cpanel.net/developers/
+x-tagGroups:
+- name: Account Restoration
+  tags:
+  - Restore Account
+  - Restore Queue Management
+  - Restore Queue Reporting
+- name: Accounts
+  tags:
+  - Account Creation
+  - Account Enhancements
+  - Account Management
+  - Bandwidth and Disk Quotas
+  - Domain Information
+  - Passwords
+  - Styles
+  - Suspensions
+- name: API Development Tools
+  tags:
+  - API Execution
+  - API Statistics
+  - API Token Management
+  - Applications
+  - Session
+- name: Authentication
+  tags:
+  - Authentication Providers
+  - External Authentication
+  - Login URL
+  - SSH Keys and Connections
+  - Two-Factor Authentication
+- name: Backups
+  tags:
+  - Backup Destination
+  - Backup or Restore
+  - Backup Settings
+  - Legacy Migration
+- name: Commerce Integration
+  tags:
+  - Market Integration
+  - Sitejet
+- name: cPanel Market
+  tags:
+  - Product Management
+  - Provider Management
+- name: cPanel Support Tickets
+  tags:
+  - Support Access
+  - Ticket Management
+- name: Customizations
+  tags:
+  - Brand
+  - Customizations
+- name: Databases
+  tags:
+  - Manage MySQL Server
+  - MySQL Databases
+  - PostgreSQL Databases
+  - Remote MySQL Databases
+- name: DNS
+  tags:
+  - DNS Cluster Settings
+  - DNS Security
+  - DNS Zones
+  - Domain Management
+  - Domain Management
+  - Resolvers
+  - Service Records
+- name: Hosting Plans
+  tags:
+  - Feature Access
+  - Feature Lists
+  - Hosting Plan Extensions
+  - Hosting Plans
+- name: InProductSurvey
+  tags:
+  - InProductSurvey
+- name: Integrations
+  tags:
+  - API Authentication
+  - Links
+  - Scripts Hooks
+- name: IP Address Management
+  tags:
+  - IPv4 Address Settings
+  - IPv6 Address Settings
+  - Network Address Translation
+- name: Login Security (cPHulk)
+  tags:
+  - Management
+  - Reporting
+  - Settings
+- name: Logs
+  tags:
+  - Web Log Retention
+- name: Mail
+  tags:
+  - cPanel Account Mail Management
+  - Mail DNS Settings
+  - Mail Server Settings
+  - Spam Management
+  - Spam Protection (Greylisting)
+- name: Monitoring
+  tags:
+  - 360 Monitoring
+- name: NGINX Manager
+  tags:
+  - NGINX Manager
+- name: Resellers
+  tags:
+  - Account Enhancement Limit
+  - Account Limits
+  - Account Permissions
+  - Account Settings
+  - Reseller Account Management
+- name: Security
+  tags:
+  - WHM Access
+- name: Server Administration
+  tags:
+  - Configuration Clusters
+  - Configurations
+  - Connected Applications
+  - Connections
+  - cPanel Analytics
+  - License Management
+  - Notifications
+  - Plugin-Based Features
+  - Security
+  - Server Nodes
+  - Server Profiles
+  - Services
+  - System Information
+  - Updates
+- name: SSL Certificates
+  tags:
+  - Auto-Generated Certificates
+  - cPanel Account Settings
+  - SSL Server Settings
+- name: System Package Management
+  tags:
+  - Install or Uninstall Package
+  - List Package Information
+  - Package Manager Settings
+- name: Transfers
+  tags:
+  - cPanel Account Transfer
+  - Transfer Configuration
+  - Transfer Monitoring
+- name: UserData
+  tags:
+  - UserData
+- name: Web Server Configuration
+  tags:
+  - EasyApache Settings
+  - PHP
+  - PHP-FPM
+- name: Web Server Security (ModSecurity)
+  tags:
+  - Rule Settings
+  - Rule Vendor Settings
+  - Server Settings

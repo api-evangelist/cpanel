@@ -1,0 +1,709 @@
+openapi: 3.2.0
+info:
+  contact:
+    email: cs@cpanel.net
+    name: WebPros International, LLC
+    url: https://cpanel.net/support/
+  description: UAPI accesses the cPanel interface's features. Use this API to access and modify cPanel account data and settings.
+  license:
+    name: cPanel License
+    url: https://cpanel.net/legal-notices/
+  termsOfService: https://cpanel.net/legal-notices/
+  title: cPanel U Stats Manager API
+  version: 11.137.9999.106
+  x-api-evangelist-provenance: 'Harvested verbatim from cPanel''s developer portal on 2026-09-05 via the MCP tool get-full-api-description at https://api.docs.cpanel.net/mcp. ONE mechanical change was made before storage: example values containing PEM private-key or certificate blocks, and AWS-access-key-shaped example strings, were replaced with REDACTED_* placeholders so the file can be stored in a public git repository without tripping secret scanning. No path, operation, parameter, schema or description was altered, added or removed.'
+servers:
+- description: A server running cPanel.
+  url: https://{host}:{port}/execute
+  variables:
+    host:
+      default: cpanel-server.tld
+      description: The hostname of a server running cPanel.
+    port:
+      default: '2083'
+      description: The cPanel port.
+security:
+- BasicAuth: []
+tags:
+- description: The StatsManager module for UAPI.
+  name: StatsManager
+paths:
+  /StatsManager/get_configuration:
+    get:
+      x-readonly: true
+      description: 'This function lists the configuration of the web log anayzers for each domain on the cPanel account.
+
+
+        **Important:**
+
+
+        When you disable the WebServer role the system disables this function. For more information, read our How to Use Server Profiles documentation.
+
+
+        **Note**
+
+
+        Additional web log analyzer configuration such as if the user can edit their own configuration is provided in the metadata section of the return.'
+      operationId: StatsManager-get_configuration
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  apiversion:
+                    description: The version of the API.
+                    example: 3
+                    type: integer
+                  func:
+                    description: The name of the method called.
+                    example: get_configuration
+                    type: string
+                  module:
+                    description: The name of the module called.
+                    example: StatsManager
+                    type: string
+                  result:
+                    properties:
+                      data:
+                        description: A list of domains and the status of each of the web log analyzers available in cPanel for that domain.
+                        items:
+                          properties:
+                            analyzers:
+                              description: List of log analyzer configuration objects for this domain. Only analyzers that are enabled for this user on the system are shown.
+                              example:
+                              - enabled: 1
+                                enabled_by_user: 1
+                                name: awstats
+                              - enabled: 0
+                                enabled_by_user: 0
+                                name: analog
+                              - enabled: 0
+                                enabled_by_user: 1
+                                name: webalizer
+                              items:
+                                properties:
+                                  enabled:
+                                    description: 'Whether the analyzer is turned on or off for the domain.
+
+
+                                      - `1` - the analyzer is enabled.
+
+                                      - `0` - the analyzer is disabled.
+
+
+                                      **Note:** This is the cumulative effect of the choices the server admin and user make.'
+                                    enum:
+                                    - 1
+                                    - 0
+                                    type: integer
+                                  enabled_by_user:
+                                    description: 'Whether the analyzer is turned on or off for the domain specifically by this user.
+
+
+                                      - `1` - the analyzer is enabled by the user.
+
+                                      - `0` - the analyzer is disabled by the user.'
+                                    enum:
+                                    - 1
+                                    - 0
+                                    type: integer
+                                  name:
+                                    description: 'Name of the analyzer.
+
+
+                                      It must be one of the following:
+
+
+                                      - `analog` - Analog weblog analyzer.
+
+                                      - `awstats` - AWStats weblog analyzer.
+
+                                      - `webalizer` - The Webalizer weblog analyzer.'
+                                    enum:
+                                    - analog
+                                    - awstats
+                                    - webalizer
+                                    type: string
+                                type: object
+                              type: array
+                            domain:
+                              description: The domain.
+                              example: domain.com
+                              type: string
+                          type: object
+                        type: array
+                      errors:
+                        description: List of errors if the API failed.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      messages:
+                        description: List of messages generated by the API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      metadata:
+                        properties:
+                          analyzers:
+                            description: System configruation for each analyzer.
+                            example:
+                            - available_for_user: 1
+                              enabled_by_default: 0
+                              name: analog
+                            - available_for_user: 1
+                              enabled_by_default: 1
+                              name: awstats
+                            - available_for_user: 1
+                              enabled_by_default: 0
+                              name: webalizer
+                            items:
+                              properties:
+                                available_for_user:
+                                  description: 'Whether the analyzer can be configured by this user.
+
+
+                                    - `1` - the analyzer can be configured by this user.
+
+                                    - `0` - the analyzer cannot be configured by this user.'
+                                  enum:
+                                  - 1
+                                  - 0
+                                  type: integer
+                                enabled_by_default:
+                                  description: 'Whether the analyzer is turned on or off by default for all users.
+
+
+                                    - `1` - the analyzer is enabled for all users on the server.
+
+                                    - `0` - the analyzer is disabled for all users on the server.'
+                                  enum:
+                                  - 1
+                                  - 0
+                                  type: integer
+                                name:
+                                  description: 'Name of the analyzer.
+
+
+                                    It must be one of the following:
+
+
+                                    - `analog` - Analog weblog analyzer.
+
+                                    - `awstats` - AWStats weblog analyzer.
+
+                                    - `webalizer` - The Webalizer weblog analyzer.'
+                                  enum:
+                                  - analog
+                                  - awstats
+                                  - webalizer
+                                  type: string
+                              type: object
+                            type: array
+                          locked:
+                            description: 'Whether the analyzer can be turned on or off for the domain by the cPanel user.
+
+
+                              - `1` - the analyzer cannot be managed by the cPanel user. The reseller or `root` controls the configuration.
+
+                              - `0` - the analyzer can be managed by the cPanel user.'
+                            enum:
+                            - 1
+                            - 0
+                            type: integer
+                          transformed:
+                            description: Post-processing may have transformed the data.
+                            enum:
+                            - 1
+                            example: 1
+                            type: integer
+                      status:
+                        description: '- 1 - Success
+
+                          - 0 - Failed: Check the errors field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      warnings:
+                        description: List of warnings generated by the API. Warnings describe non-critical failures or other problematic conditions noted while running a API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                    type: object
+                type: object
+          description: HTTP Request was successful.
+      summary: Returns weblog analyzers' configuration
+      tags:
+      - StatsManager
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "uapi --output=jsonpretty \\\n  --user=username \\\n  StatsManager \\\n  get_configuration\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2083/cpsess##########/execute/StatsManager/get_configuration
+      - label: LiveAPI Perl
+        lang: Perl
+        source: "#--------------------------------------------------------------------------------------\n# Instructions:\n#--------------------------------------------------------------------------------------\n# <theme-name> is the theme assigned to cPanel account.\n# 1) cd /usr/local/cpanel/base/frontend/<theme_name>\n# 2) mkdir api_examples\n# 3) cd api_examples\n# 4) create a file StatsManager_get_configuration.live.pl and put this code into that file.\n# 5) In your browser login to a cPanel account.\n# 6) Manually change the url from: .../frontend/<theme_name>/\n#    to .../frontend/<theme_name>/api_examples/StatsManager_get_configuration.live.pl\n#--------------------------------------------------------------------------------------\n\nuse strict;\n\nuse Cpanel::LiveAPI ();\n\nmy $cpanel = Cpanel::LiveAPI->new(); # Connect to cPanel - only do this once.\n\n# Print the header\nprint \"Content-type: text/plain\\r\\n\\r\\n\";\n\n# Call the API\nmy $response = $cpanel->uapi(\n    q/StatsManager/,\n    q/get_configuration/\n);\n\n# Handle the response\nif ($response->{cpanelresult}{result}{status}) {\n    my $data = $response->{cpanelresult}{result}{data};\n    foreach my $item (@{$data}) {\n        # Do something with the $item\n    }\n\n    # So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    # Report errors:\n    print to_json($response->{cpanelresult}{result}{errors});\n}\n\n# Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n#--------------------------------------------------------------------------------------\n# Helper function to convert a perl object to html printable json\n#--------------------------------------------------------------------------------------\nsub to_json {\n    require JSON;\n    my $str = JSON->new->pretty->encode($_[0]);\n    return $str;\n}\n"
+      - label: LiveAPI PHP
+        lang: PHP
+        source: "<?php\n//--------------------------------------------------------------------------------------\n// Instructions:\n//--------------------------------------------------------------------------------------\n// <theme-name> is the theme assigned to cPanel account.\n// 1) cd /usr/local/cpanel/base/frontend/<theme_name>\n// 2) mkdir api_examples\n// 3) cd api_examples\n// 4) create a file StatsManager_get_configuration.live.php and put this code into that file.\n// 5) In your browser login to a cPanel account.\n// 6) Manually change the url from: .../frontend/<theme_name>/\n//    to .../frontend/<theme_name>/api_examples/StatsManager_get_configuration.live.php\n//--------------------------------------------------------------------------------------\n\n// Instantiate the CPANEL object.\nrequire_once \"/usr/local/cpanel/php/cpanel.php\";\n\n// Print the header\nheader('Content-Type: text/plain');\n\n// Connect to cPanel - only do this once.\n$cpanel = new CPANEL();\n\n// Call the API\n$response = $cpanel->uapi(\n    'StatsManager',\n    'get_configuration'\n);\n\n// Handle the response\nif ($response['cpanelresult']['result']['status']) {\n    $data = $response['cpanelresult']['result']['data'];\n    foreach ($data as $item) {\n        // Do something with the $item\n    }\n\n    // So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    // Report errors:\n    print to_json($response['cpanelresult']['result']['errors']);\n}\n\n// Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n//--------------------------------------------------------------------------------------\n// Helper function to convert a PHP value to html printable json\n//--------------------------------------------------------------------------------------\nfunction to_json($data) {\n    return json_encode($data, JSON_PRETTY_PRINT);\n}"
+      x-cpanel-api-version: UAPI
+      x-cpanel-available-version: 90
+  /StatsManager/save_configuration:
+    post:
+      x-readonly: false
+      x-rollback: none
+      description: 'This function saves the users choice about which web log anayzers are enabled for each domain on their cPanel users account.
+
+        If the log anayzers are controlled by the reseller or root account, the user cannot manage which log analyzers are enabled or disabled.
+
+
+        **Important:**
+
+
+        When you disable the WebServer role the system disables this function. For more information, read our How to Use Server Profiles documentation.'
+      operationId: StatsManager-save_configuration
+      requestBody:
+        content:
+          application/json:
+            schema:
+              properties:
+                changes:
+                  items:
+                    properties:
+                      analyzers:
+                        description: List of log analyzer configuration objects.
+                        example:
+                        - enabled: 1
+                          name: awstats
+                        - enabled: 0
+                          name: analog
+                        - enabled: 0
+                          name: webalizer
+                        items:
+                          properties:
+                            enabled:
+                              description: 'Whether the analyzer is turned on or off for the domain.
+
+
+                                - `1` - the analyzer is enabled.
+
+                                - `0` - the analyzer is disabled.'
+                              enum:
+                              - 1
+                              - 0
+                              type: integer
+                            name:
+                              description: 'Name of the analyzer.
+
+
+                                It must be one of the following:
+
+
+                                - `analog` - Analog weblog analyzer.
+
+                                - `awstats` - AWStats weblog analyzer.
+
+                                - `webalizer` - The Webalizer weblog analyzer.'
+                              enum:
+                              - analog
+                              - awstats
+                              - webalizer
+                              type: string
+                          type: object
+                        type: array
+                      domain:
+                        description: Domain you want to configure.
+                        example: domain.com
+                        type: string
+                    type: object
+                  type: array
+              type: object
+        description: List of domains and what web log analyzers to change.
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  apiversion:
+                    description: The version of the API.
+                    example: 3
+                    type: integer
+                  func:
+                    description: The name of the method called.
+                    example: save_configuration
+                    type: string
+                  module:
+                    description: The name of the module called.
+                    example: StatsManager
+                    type: string
+                  result:
+                    properties:
+                      data:
+                        description: A list of domains and the status of each of the web log analyzers available in cPanel for that domain.
+                        items:
+                          properties:
+                            analyzers:
+                              description: List of log analyzer configuration objects for this domain
+                              example:
+                              - available: 1
+                                enabled: 1
+                                locked: 0
+                                name: awstats
+                              - available: 1
+                                enabled: 0
+                                locked: 0
+                                name: analog
+                              - available: 0
+                                enabled: 0
+                                locked: 0
+                                name: webalizer
+                              items:
+                                properties:
+                                  available:
+                                    description: 'Whether the analyzer is turned on or off for the whole server.
+
+
+                                      - `1` - the analyzer is enabled on the server.
+
+                                      - `0` - the analyzer is disabled on the server.'
+                                    enum:
+                                    - 1
+                                    - 0
+                                    type: integer
+                                  enabled:
+                                    description: 'Whether the analyzer is turned on or off for the domain.
+
+
+                                      - `1` - the analyzer is enabled.
+
+                                      - `0` - the analyzer is disabled.'
+                                    enum:
+                                    - 1
+                                    - 0
+                                    type: integer
+                                  locked:
+                                    description: 'Whether the analyzer can be turned on or off for the domain by the cPanel user.
+
+
+                                      - `1` - the analyzer can be managed by the cPanel user.
+
+                                      - `0` - the analyzer cannot be managed by the cPanel user. The reseller or `root` controls the configuration.'
+                                    enum:
+                                    - 1
+                                    - 0
+                                    type: integer
+                                  name:
+                                    description: 'Name of the analyzer.
+
+
+                                      It must be one of the following:
+
+
+                                      - `analog` - Analog weblog analyzer.
+
+                                      - `awstats` - AWStats weblog analyzer.
+
+                                      - `webalizer` - The Webalizer weblog analyzer.'
+                                    enum:
+                                    - analog
+                                    - awstats
+                                    - webalizer
+                                    type: string
+                                type: object
+                              type: array
+                            domain:
+                              description: The domain.
+                              example: user
+                              type: string
+                          type: object
+                        type: array
+                      errors:
+                        description: List of errors if the API failed.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      messages:
+                        description: List of messages generated by the API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      metadata:
+                        properties:
+                          transformed:
+                            description: Post-processing may have transformed the data.
+                            enum:
+                            - 1
+                            example: 1
+                            type: integer
+                      status:
+                        description: '- 1 - Success
+
+                          - 0 - Failed: Check the errors field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      warnings:
+                        description: List of warnings generated by the API. Warnings describe non-critical failures or other problematic conditions noted while running a API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                    type: object
+                type: object
+          description: HTTP Request was successful.
+      summary: Save current user's weblog analyzers configuration
+      tags:
+      - StatsManager
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "echo '{\"changes\":[{\"analyzers\":[{\"enabled\":\"1\",\"name\":\"awstats\"},{\"enabled\":\"0\",\"name\":\"analog\"},{\"enabled\":\"0\",\"name\":\"webalizer\"}],\"domain\":\"domain.com\"}]}' | \\\nuapi --input=json --output=jsonpretty \\\n  --user=username \\\n  StatsManager \\\n  save_configuration"
+      - label: HTTP Request (Wire Format)
+        lang: HTTP
+        source: 'POST /cpsess##########/execute/StatsManager/save_configuration HTTP/1.1
+
+          Host: example.com:2083
+
+          Cookie: ###################################
+
+          Content-Type: application/json
+
+          Content-Length: 151
+
+
+          {"changes":[{"analyzers":[{"enabled":"1","name":"awstats"},{"enabled":"0","name":"analog"},{"enabled":"0","name":"webalizer"}],"domain":"domain.com"}]}'
+      x-cpanel-api-version: UAPI
+      x-cpanel-available-version: 90
+components:
+  securitySchemes:
+    BasicAuth:
+      scheme: basic
+      type: http
+externalDocs:
+  url: https://cpanel.net/developers/
+x-tagGroups:
+- name: API Development Tools
+  tags:
+  - API Token Management
+  - Batch
+  - SSE Task Management
+  - URL Parsing
+- name: Authentication
+  tags:
+  - External Authentication
+  - Two-Factor Settings
+- name: Backup Information
+  tags:
+  - BackupInfo
+  - BackupInfo Status
+- name: Block Ip Addresses
+  tags:
+  - Block IP
+- name: Commerce Integration
+  tags:
+  - Market Integration
+  - SSL Certificates
+- name: Contact Information
+  tags:
+  - Contact Information
+- name: cPanel Account
+  tags:
+  - Account Enhancements
+  - Account Information
+  - Account Management
+  - AuditLog
+  - Contact Information
+  - cPanel Features
+  - Disk Quotas
+  - DomainRecommendations
+  - Personalization
+  - Resource Usage and Statistics
+  - Subaccount Management
+  - Team Roles
+  - Team Users
+- name: cPanel Account Backups
+  tags:
+  - Backup
+  - File Restoration
+- name: cPanel Plugin Framework
+  tags:
+  - Formbricks
+  - Plugins
+- name: cPanel Theme Management
+  tags:
+  - Application Information
+  - Brand Management
+  - Branding Files
+  - Browser Cache Management
+  - Language
+  - Theme Settings
+- name: Directory Management
+  tags:
+  - Directory Indexes
+  - Directory Privacy
+  - Directory Protection
+- name: DNS
+  tags:
+  - DNS
+  - DNS Information
+  - DNS Security
+  - Dynamic DNS
+  - Email DNS Settings
+  - ZoneEdit
+- name: Domain
+  tags:
+  - Domain
+- name: Domain Management
+  tags:
+  - AddonDomain
+  - Direct Link Protection (Hotlink)
+  - Domain
+  - Domain Information
+  - Domain Redirection
+  - DomainLookup
+  - Park
+  - SubDomain
+  - Virtual Host Information
+- name: Domains
+  tags:
+  - Subdomains
+- name: Email
+  tags:
+  - Email Accounts
+  - Email Filtering
+  - Email Forwarding
+  - Email Server Information
+  - Email Suspensions
+  - Mail Server Information
+  - Mailbox Management
+  - Mailing Lists
+  - Signing and Encryption (GnuPG Keys)
+  - Spam Filtering (Greylisting)
+  - Spam Management
+  - Spam Prevention (BoxTrapper)
+  - Webmail Applications
+  - Webmail Sessions
+- name: Extract Information
+  tags:
+  - ExtractInfo
+  - ExtractInfo Status
+- name: File Manager
+  tags:
+  - Trash
+- name: Files
+  tags:
+  - FTP Accounts
+  - FTP Server Settings
+  - Image Tools
+  - Jodit
+  - Manage Files
+  - Manage Files
+  - WebDisk Settings
+- name: GIT Management
+  tags:
+  - Deployment Settings
+  - Repository Management
+- name: InProductSurvey
+  tags:
+  - InProductSurvey
+- name: MySQL and MariaDB
+  tags:
+  - Database Information
+  - Database Management
+  - Remote Databases
+  - User Management
+- name: Notifications
+  tags:
+  - Pushbullet
+- name: Optional Applications
+  tags:
+  - Antivirus Protection (ClamAV)
+  - Calendar and Contacts (DAV)
+  - Calendar and Contacts Server
+  - WordPress Manager Backups
+- name: PostgreSQL
+  tags:
+  - PostgreSQL Database Management
+  - PostgreSQL User Management
+- name: Retrieve bandwidth information
+  tags:
+  - Bandwidth
+- name: Security
+  tags:
+  - Known SSH Hosts Management
+  - Login Information
+- name: Server Information
+  tags:
+  - cPanel Server Information
+  - Notifications
+  - Password Strength
+  - SSH
+  - WebPros MCP
+  - WebProsMCP
+- name: ServiceProxy
+  tags:
+  - ServiceProxy
+- name: Site Quality Monitoring
+  tags:
+  - SiteQuality
+- name: SSL Certificates
+  tags:
+  - Auto-generated SSL Certificates
+  - cPanel Account SSL Management
+  - SNI Email Settings
+  - SSL Certificate Management
+  - Verify Domain Ownership
+- name: Statistics
+  tags:
+  - Domain Statistics
+  - Weblog Settings
+- name: UserData
+  tags:
+  - UserData
+- name: Web Server Configuration
+  tags:
+  - EA4
+  - EasyApache Settings
+  - PHP
+- name: Web Server Management
+  tags:
+  - Application Manager
+  - ModSecurity
+  - NginxCaching
+  - PHP Settings
+  - Web Apps
+- name: Website Configuration
+  tags:
+  - Handler Management
+  - Logs
+  - Mime Type Management
+  - Nova
+  - Site Information
+  - Site Installation
+  - Sitejet
+  - WPX

@@ -1,0 +1,745 @@
+openapi: 3.2.0
+info:
+  contact:
+    email: cs@cpanel.net
+    name: WebPros International, LLC
+    url: https://cpanel.net/support/
+  description: WHM API.
+  license:
+    name: cPanel License
+    url: https://cpanel.net/legal-notices/
+  termsOfService: https://cpanel.net/legal-notices/
+  title: WHM Script Hooks API
+  version: 11.137.9999.106
+  x-api-evangelist-provenance: 'Harvested verbatim from cPanel''s developer portal on 2026-09-05 via the MCP tool get-full-api-description at https://api.docs.cpanel.net/mcp. ONE mechanical change was made before storage: example values containing PEM private-key or certificate blocks, and AWS-access-key-shaped example strings, were replaced with REDACTED_* placeholders so the file can be stored in a public git repository without tripping secret scanning. No path, operation, parameter, schema or description was altered, added or removed.'
+servers:
+- description: A server running WHM.
+  url: https://{host}:{port}/json-api
+  variables:
+    host:
+      default: whm-server.tld
+      description: The hostname of a server running WHM.
+    port:
+      default: '2087'
+      description: The WHM port.
+security:
+- BasicAuth: []
+tags:
+- description: The Script Hooks module for WHM API 1.
+  name: Script Hooks
+paths:
+  /delete_hook:
+    get:
+      description: This function removes a script hook.
+      operationId: Hooks-delete_hook
+      parameters:
+      - description: 'The script hook''s ID.
+
+
+          **Note:**
+
+
+          To retrieve a hook''s ID, use the WHM API 1 `list_hooks` function.'
+        in: query
+        name: id
+        required: true
+        schema:
+          example: HzEpGvT6QGUYwxuX3hWB8AUq
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: delete_hook
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Delete script hook
+      tags:
+      - Script Hooks
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  delete_hook \\\n  id='HzEpGvT6QGUYwxuX3hWB8AUq'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/delete_hook?api.version=1&id=HzEpGvT6QGUYwxuX3hWB8AUq
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11.32'
+  /edit_hook:
+    get:
+      description: This function edits a script hook.
+      operationId: Hooks-edit_hook
+      parameters:
+      - description: 'The script hook''s ID.
+
+
+          **Note:**
+
+
+          To retrieve a hook''s ID, use the WHM API 1 `list_hooks` function.'
+        in: query
+        name: id
+        required: true
+        schema:
+          example: HzEpGvT6QGUYwxuX3hWB8AUq
+          type: string
+      - description: The absolute file path to the script that runs after the hook script to check the results.
+        in: query
+        name: check
+        required: false
+        schema:
+          example: /scripts/postcourier-authlibup
+          type: string
+      - description: 'Whether the hook script is enabled.
+
+
+          * `1` — Enabled.
+
+          * `0` — Disabled.'
+        in: query
+        name: enabled
+        required: false
+        schema:
+          enum:
+          - 0
+          - 1
+          example: 1
+          type: integer
+      - description: 'Whether to escalate privileges to run the hook script as root.
+
+
+          * `1` — Escalate privileges.
+
+          * `0` — Do **not** escalate privileges.
+
+
+          **Note:**
+
+
+          * This parameter **only** applies to script hooks and **not** module hooks.
+
+          * Module hooks cannot escalate privileges.'
+        in: query
+        name: escalateprivs
+        required: false
+        schema:
+          default: 0
+          enum:
+          - 0
+          - 1
+          example: 0
+          type: integer
+      - description: 'The type of function that the script hook launches.
+
+
+          * `script` — Runs a script.
+
+          * `module` — Calls a function in a module.'
+        in: query
+        name: exectype
+        required: false
+        schema:
+          enum:
+          - script
+          - module
+          example: script
+          type: string
+      - description: The hook script's absolute file path or its `module::subroutine` invocation.
+        in: query
+        name: hook
+        required: false
+        schema:
+          example: /scripts/postcourier-authlibup
+          type: string
+      - description: The script hook's notes.
+        in: query
+        name: notes
+        required: false
+        schema:
+          example: Note.
+          type: string
+      - description: The absolute file path to the script that rolls back the hook script.
+        in: query
+        name: rollback
+        required: false
+        schema:
+          example: /scripts/postcourier-authlibup
+          type: string
+      - description: 'The condition when the hook script executes.
+
+
+          * `pre` — The script runs before the function.
+
+          * `post` — The script runs after the function.'
+        in: query
+        name: stage
+        required: false
+        schema:
+          enum:
+          - pre
+          - post
+          example: post
+          type: string
+      - description: The script hook's priority in the hook's stage, where a lower value runs before a higher value.
+        in: query
+        name: weight
+        required: false
+        schema:
+          example: 100
+          minimum: 1
+          type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: edit_hook
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Update script hook
+      tags:
+      - Script Hooks
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  edit_hook \\\n  id='HzEpGvT6QGUYwxuX3hWB8AUq'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/edit_hook?api.version=1&id=HzEpGvT6QGUYwxuX3hWB8AUq
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11.32'
+  /list_hooks:
+    get:
+      description: This function lists the server's script hooks.
+      operationId: Hooks-list_hooks
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      categories:
+                        description: An array of objects containing hook categories.
+                        items:
+                          properties:
+                            category:
+                              description: The script hook's category.
+                              example: RPM::Versions
+                              type: string
+                            events:
+                              description: An array of objects containing events.
+                              items:
+                                properties:
+                                  event:
+                                    description: The event that triggers the script hook.
+                                    example: MariaDB-server
+                                    type: string
+                                  stage_order:
+                                    description: 'When the hook script will execute. It is possible for a hook script
+
+                                      to have both values.
+
+
+                                      * `pre` — The script runs before the function.
+
+                                      * `post` — The script runs after the function.'
+                                    example:
+                                    - pre
+                                    - post
+                                    items:
+                                      type: string
+                                    type: array
+                                  stages:
+                                    description: An array of objects containing stage information.
+                                    items:
+                                      properties:
+                                        actions:
+                                          description: An array of objects containing information about hook script actions.
+                                          items:
+                                            properties:
+                                              blocking:
+                                                description: 'Whether the script hook has a blocking contest.
+
+
+                                                  * `1` — Blocking contest.
+
+                                                  * `0` — No blocking contest.'
+                                                enum:
+                                                - 1
+                                                - 0
+                                                example: 0
+                                                type: integer
+                                              category:
+                                                description: The script hook's category.
+                                                example: RPM::Versions
+                                                type: string
+                                              check:
+                                                description: The absolute file path to the script that runs after the hook script to check the results.
+                                                example: null
+                                                type:
+                                                - string
+                                                - 'null'
+                                              description:
+                                                description: The hook script's description.
+                                                example: A script description.
+                                                type:
+                                                - string
+                                                - 'null'
+                                              enabled:
+                                                description: 'Whether the hook script is enabled.
+
+
+                                                  * `1` — Enabled.
+
+                                                  * `0` — Disabled.'
+                                                enum:
+                                                - 0
+                                                - 1
+                                                example: 1
+                                                type: integer
+                                              escalateprivs:
+                                                description: 'Whether the hook script will run with escalated root privileges.
+
+
+                                                  * `1` — Runs with escalated privileges.
+
+                                                  * `0` — Does not run with escalated privileges.'
+                                                enum:
+                                                - 0
+                                                - 1
+                                                example: 0
+                                                type: integer
+                                              event:
+                                                description: The event that triggers the script hook.
+                                                example: MariaDB-server
+                                                type: string
+                                              exectype:
+                                                description: 'The type of function that the script hook launches.
+
+
+                                                  * `script` — A script function.
+
+                                                  * `module` — A Perl module function.'
+                                                enum:
+                                                - script
+                                                - module
+                                                example: script
+                                                type: string
+                                              hook:
+                                                description: The absolute file path to the hook script.
+                                                example: /scripts/postcourier-authlibup
+                                                type: string
+                                              id:
+                                                description: The script hook's ID.
+                                                example: KQVO65K_8MWe__3JMPETn43S
+                                                type: string
+                                              rollback:
+                                                description: The absolute file path to the script that can roll back the hook script.
+                                                example: null
+                                                type:
+                                                - string
+                                                - 'null'
+                                              stage:
+                                                description: 'When the hook script will execute.
+
+
+                                                  * `pre` — The script runs before the function.
+
+                                                  * `post` — The script runs after the function.'
+                                                example: post
+                                                type: string
+                                              weight:
+                                                description: The priority of the script hook, where lower values run before higher values.
+                                                example: 100
+                                                minimum: 1
+                                                type: integer
+                                            type: object
+                                          type: array
+                                        attributes:
+                                          description: A list of hook script attributes.
+                                          properties:
+                                            blocking:
+                                              description: 'Whether the script hook contains a blocking context.
+
+
+                                                * `1` — Blocking context.
+
+                                                * `0` — No blocking context.'
+                                              enum:
+                                              - 1
+                                              - 0
+                                              example: 0
+                                              type: integer
+                                            escalateprivs:
+                                              description: 'Whether the hook script will run with escalated root
+
+                                                privileges.
+
+
+                                                * `1` — Runs with escalated privileges.
+
+                                                * `0` — Does not run with escalated privileges.'
+                                              enum:
+                                              - 1
+                                              - 0
+                                              example: 0
+                                              type: integer
+                                          type: object
+                                        description:
+                                          description: The hook script's description.
+                                          example: My hook script.
+                                          type: string
+                                        stage:
+                                          description: 'When the hook script will execute.
+
+
+                                            * `pre` — The script runs before the function.
+
+                                            * `post` — The script runs after the function.'
+                                          example: post
+                                          type: string
+                                      type: object
+                                    type: array
+                                type: object
+                              type: array
+                          type: object
+                        type: array
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: list_hooks
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` - Success.
+
+                          * `0` - Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 1
+                        - 0
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Return script hooks list
+      tags:
+      - Script Hooks
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  list_hooks\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/list_hooks?api.version=1
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11.32'
+  /reorder_hooks:
+    get:
+      description: This function changes the order of script hooks.
+      operationId: Hooks-reorder_hooks
+      parameters:
+      - description: 'A comma-seprated list of script hook IDs, in order of priority.
+
+
+          **Note:**
+
+
+          To retrieve a hook''s ID, use the WHM API 1 `list_hooks` function.'
+        in: query
+        name: ids
+        required: true
+        schema:
+          example: HzEpGvT6QGUYwxuX3hWB8AUq,UNs8a8IbbAVf5oi_hXbcEw5a
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      hook_order:
+                        description: A list of the script hook details.
+                        example:
+                        - id: HzEpGvT6QGUYwxuX3hWB8AUq
+                          weight: 100
+                        - id: UNs8a8IbbAVf5oi_hXbcEw5a
+                          weight: 200
+                        items:
+                          properties:
+                            id:
+                              description: The script hook's ID.
+                              example: HzEpGvT6QGUYwxuX3hWB8AUq
+                              type: string
+                            weight:
+                              description: The script hook's weight. The lower the number, the greater the priority.
+                              example: 100
+                              minimum: 1
+                              type: integer
+                          type: object
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: reorder_hooks
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Update script hooks order
+      tags:
+      - Script Hooks
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  reorder_hooks \\\n  ids='HzEpGvT6QGUYwxuX3hWB8AUq,UNs8a8IbbAVf5oi_hXbcEw5a'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/reorder_hooks?api.version=1&ids=HzEpGvT6QGUYwxuX3hWB8AUq%2cUNs8a8IbbAVf5oi_hXbcEw5a
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11.32'
+components:
+  securitySchemes:
+    BasicAuth:
+      scheme: basic
+      type: http
+externalDocs:
+  url: https://cpanel.net/developers/
+x-tagGroups:
+- name: Account Restoration
+  tags:
+  - Restore Account
+  - Restore Queue Management
+  - Restore Queue Reporting
+- name: Accounts
+  tags:
+  - Account Creation
+  - Account Enhancements
+  - Account Management
+  - Bandwidth and Disk Quotas
+  - Domain Information
+  - Passwords
+  - Styles
+  - Suspensions
+- name: API Development Tools
+  tags:
+  - API Execution
+  - API Statistics
+  - API Token Management
+  - Applications
+  - Session
+- name: Authentication
+  tags:
+  - Authentication Providers
+  - External Authentication
+  - Login URL
+  - SSH Keys and Connections
+  - Two-Factor Authentication
+- name: Backups
+  tags:
+  - Backup Destination
+  - Backup or Restore
+  - Backup Settings
+  - Legacy Migration
+- name: Commerce Integration
+  tags:
+  - Market Integration
+  - Sitejet
+- name: cPanel Market
+  tags:
+  - Product Management
+  - Provider Management
+- name: cPanel Support Tickets
+  tags:
+  - Support Access
+  - Ticket Management
+- name: Customizations
+  tags:
+  - Brand
+  - Customizations
+- name: Databases
+  tags:
+  - Manage MySQL Server
+  - MySQL Databases
+  - PostgreSQL Databases
+  - Remote MySQL Databases
+- name: DNS
+  tags:
+  - DNS Cluster Settings
+  - DNS Security
+  - DNS Zones
+  - Domain Management
+  - Domain Management
+  - Resolvers
+  - Service Records
+- name: Hosting Plans
+  tags:
+  - Feature Access
+  - Feature Lists
+  - Hosting Plan Extensions
+  - Hosting Plans
+- name: InProductSurvey
+  tags:
+  - InProductSurvey
+- name: Integrations
+  tags:
+  - API Authentication
+  - Links
+  - Scripts Hooks
+- name: IP Address Management
+  tags:
+  - IPv4 Address Settings
+  - IPv6 Address Settings
+  - Network Address Translation
+- name: Login Security (cPHulk)
+  tags:
+  - Management
+  - Reporting
+  - Settings
+- name: Logs
+  tags:
+  - Web Log Retention
+- name: Mail
+  tags:
+  - cPanel Account Mail Management
+  - Mail DNS Settings
+  - Mail Server Settings
+  - Spam Management
+  - Spam Protection (Greylisting)
+- name: Monitoring
+  tags:
+  - 360 Monitoring
+- name: NGINX Manager
+  tags:
+  - NGINX Manager
+- name: Resellers
+  tags:
+  - Account Enhancement Limit
+  - Account Limits
+  - Account Permissions
+  - Account Settings
+  - Reseller Account Management
+- name: Security
+  tags:
+  - WHM Access
+- name: Server Administration
+  tags:
+  - Configuration Clusters
+  - Configurations
+  - Connected Applications
+  - Connections
+  - cPanel Analytics
+  - License Management
+  - Notifications
+  - Plugin-Based Features
+  - Security
+  - Server Nodes
+  - Server Profiles
+  - Services
+  - System Information
+  - Updates
+- name: SSL Certificates
+  tags:
+  - Auto-Generated Certificates
+  - cPanel Account Settings
+  - SSL Server Settings
+- name: System Package Management
+  tags:
+  - Install or Uninstall Package
+  - List Package Information
+  - Package Manager Settings
+- name: Transfers
+  tags:
+  - cPanel Account Transfer
+  - Transfer Configuration
+  - Transfer Monitoring
+- name: UserData
+  tags:
+  - UserData
+- name: Web Server Configuration
+  tags:
+  - EasyApache Settings
+  - PHP
+  - PHP-FPM
+- name: Web Server Security (ModSecurity)
+  tags:
+  - Rule Settings
+  - Rule Vendor Settings
+  - Server Settings

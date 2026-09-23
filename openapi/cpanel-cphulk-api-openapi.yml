@@ -1,0 +1,2760 @@
+openapi: 3.2.0
+info:
+  contact:
+    email: cs@cpanel.net
+    name: WebPros International, LLC
+    url: https://cpanel.net/support/
+  description: WHM API.
+  license:
+    name: cPanel License
+    url: https://cpanel.net/legal-notices/
+  termsOfService: https://cpanel.net/legal-notices/
+  title: WHM C P Hulk API
+  version: 11.137.9999.106
+  x-api-evangelist-provenance: 'Harvested verbatim from cPanel''s developer portal on 2026-09-05 via the MCP tool get-full-api-description at https://api.docs.cpanel.net/mcp. ONE mechanical change was made before storage: example values containing PEM private-key or certificate blocks, and AWS-access-key-shaped example strings, were replaced with REDACTED_* placeholders so the file can be stored in a public git repository without tripping secret scanning. No path, operation, parameter, schema or description was altered, added or removed.'
+servers:
+- description: A server running WHM.
+  url: https://{host}:{port}/json-api
+  variables:
+    host:
+      default: whm-server.tld
+      description: The hostname of a server running WHM.
+    port:
+      default: '2087'
+      description: The WHM port.
+security:
+- BasicAuth: []
+tags:
+- description: The cPHulk module for WHM API 1.
+  name: cPHulk
+paths:
+  /batch_create_cphulk_records:
+    post:
+      description: This function adds one or more records to cPHulk's whitelist or blacklist. The function includes the option to add unique comments for each IP address that you add.
+      operationId: cPHulk-batch_create_cphulk_records
+      requestBody:
+        content:
+          application/json:
+            schema:
+              example:
+                api.version: 1
+                list_name: white
+                records:
+                - comment: Automated update tools.
+                  ip: 192.168.0.1
+                - comment: System administrators and support systems.
+                  ip: 192.168.1.0/30
+                - comment: Owner of example.com.
+                  ip: 122.1.56.7-122.1.56.8
+                - comment: Special access group 1
+                  ip: '2001:db9::'
+                - comment: Special access group 1
+                  ip: 2001:db9::1-2001:db9::5
+                - comment: Special access group 2
+                  ip: 2001:db8::/32
+              properties:
+                api.version:
+                  description: The WHM API version number.
+                  enum:
+                  - 1
+                  type: integer
+                list_name:
+                  description: 'The cPHulk list''s name.
+
+
+                    * `black` - Add a new record or records to the blacklist.
+
+                    * `white` - Add a new record or records to the whitelist. '
+                  enum:
+                  - black
+                  - white
+                  example: white
+                  type: string
+                records:
+                  description: The list of records to add to the whitelist or blacklist.
+                  items:
+                    description: A whitelist or blacklist record.
+                    properties:
+                      comment:
+                        example: Dangerous website
+                        maximum: 255
+                        type: string
+                      ip:
+                        $ref: '#/components/schemas/ip-address'
+                    required:
+                    - ip
+                    type: object
+                  type: array
+                skip_enabled_check:
+                  default: 0
+                  description: "Whether to skip checking if cPHulk runs on the server.\n\n* `1` - Do **not** check if cPHulk is running.\n* `0` - Check if cPHulk is running.\n\n**Note:**\n\n If cPHulk is disabled and you check its status, the function returns the following message: `cPHulk is disabled on the server.` "
+                  enum:
+                  - 0
+                  - 1
+                  example: 1
+                  type: integer
+              required:
+              - api.version
+              - list_name
+              - records
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      comment:
+                        description: The comment that you included when you called the function.
+                        example: George Wendt flying through the air.
+                        type: string
+                      ip_blocks_removed:
+                        description: The number of IP address blocks that the function deleted.
+                        example: 1
+                        type: integer
+                      ips_added:
+                        description: An array of IP addresses that the function added from the list. This function will always returns ranges in the IP1-IP2 format.
+                        example:
+                        - 192.168.0.1
+                        - 192.168.1.0-192.168.1.3
+                        - 122.1.56.7-122.1.56.8
+                        items:
+                          $ref: '#/components/schemas/ip-address'
+                        type: array
+                      ips_failed:
+                        additionalProperties:
+                          description: 'The reason why the system failed to add an IP address to the list.
+
+
+                            **Note:**
+
+
+                            The IP address is the return''s name.'
+                          type: string
+                        description: An object of IP addresses that the system failed to add to the list. This object contains one or more IP address returns.
+                        example:
+                          192.168.0.1: 'Invalid IP address or range: "192.68.0.1"'
+                        type: object
+                      iptable_bans_removed:
+                        description: The number of `iptables` temporary block rules that the function deleted.
+                        example: 0
+                        minimum: 0
+                        type: integer
+                      list_name:
+                        description: 'The cPHulk list''s name.
+
+                          * `black`
+
+                          * `white`'
+                        enum:
+                        - black
+                        - white
+                        example: white
+                        type: string
+                      original_ips_added:
+                        description: "An array of IP addresses that the function added from the list.\n  The system will return the one of the following formats:\n\n - A IPv4 address (192.168.0.1).\n - A simple IPv4 address range (192.168.1.1-192.168.1.4).\n - A CIDR IPv4 address range (192.168.1.0/30)."
+                        example:
+                        - 192.168.0.1
+                        - 192.168.1.0/30
+                        - 122.1.56.7-122.1.56.8
+                        items:
+                          $ref: '#/components/schemas/ip-address'
+                        type: array
+                      requester_ip:
+                        anyOf:
+                        - format: ipv4
+                          type: string
+                        - format: ipv6
+                          type: string
+                        description: The IP address of the user or system that requested the addition.
+                        example: 10.1.4.228
+                      requester_ip_is_whitelisted:
+                        description: 'Whether the requester''s IP address exists on cPHulk''s whitelist.
+
+                          * `1` - Whitelisted.
+
+                          * `0` - Not whitelisted.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 0
+                        type: integer
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: batch_create_cphulk_records
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is 0. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` - Success.
+
+                          * `0` - Failed. Check the reason field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Add login security record to list with comment
+      tags:
+      - cPHulk
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "echo '{\"api.version\":\"1\",\"list_name\":\"white\",\"records\":[{\"comment\":\"Automated update tools.\",\"ip\":\"192.168.0.1\"},{\"comment\":\"System administrators and support systems.\",\"ip\":\"192.168.1.1/30\"},{\"comment\":\"Owner of example.com.\",\"ip\":\"122.1.56.7-122.1.56.8\"}]}' | \\\nwhmapi1 --input=json --output=jsonpretty \\\n  batch_create_cphulk_records"
+      - label: HTTP Request (Wire Format)
+        lang: HTTP
+        source: 'POST /cpsess##########/json-api/batch_create_cphulk_records HTTP/1.1
+
+          Host: example.com:2083
+
+          Cookie: ###################################
+
+          Content-Type: application/json
+
+          Content-Length: 260
+
+
+          {"api.version":"1","list_name":"white","records":[{"comment":"Automated update tools.","ip":"192.168.0.1"},{"comment":"System administrators and support systems.","ip":"192.168.1.1/30"},{"comment":"Owner of example.com.","ip":"122.1.56.7-122.1.56.8"}]}'
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11.48'
+  /cphulk_status:
+    get:
+      description: This function returns the status of the cPHulk service.
+      operationId: cPHulk-cphulk_status
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      is_enabled:
+                        description: 'Whether the cPHulk service is enabled.
+
+                          * `1` - cPHulk is enabled.
+
+                          * `0` - cPHulk is disabled.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      service:
+                        description: The cPHulk service's name.
+                        example: cPHulk
+                        type: string
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: cphulk_status
+                        type: string
+                      reason:
+                        description: 'The reason the API function failed when the `metadata.result`
+
+                          field is `0`. This field may display a success message when
+
+                          a function succeeds.'
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` - Success
+
+                          * `0` - Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Return login security status
+      tags:
+      - cPHulk
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  cphulk_status\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/cphulk_status?api.version=1
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11.48'
+  /create_cphulk_record:
+    get:
+      description: This function adds a new record or records to cPHulk's whitelist or blacklist.
+      operationId: cPHulk-create_cphulk_record
+      parameters:
+      - description: 'The record''s IP address, if there is only one IP address to add.
+
+
+          **Note:**
+
+
+          To add multiple IP addresses, increment the parameter name. For example, `ip-1`, `ip-2`, and `ip-3`.'
+        examples:
+          multiple:
+            description: Add multiple IP addresses.
+            value:
+            - 192.168.0.1
+            - 192.168.0.2
+            - 192.168.0.3
+          single:
+            description: Add a single IP address.
+            value:
+            - 192.168.0.1
+        explode: true
+        in: query
+        name: ip
+        required: true
+        schema:
+          items:
+            $ref: '#/components/schemas/ip-address'
+        style: form
+      - description: 'The cPHulk list''s name.
+
+
+          * `black` - Add a new record or records to the blacklist.
+
+          * `white` - Add a new record or records to the whitelist. '
+        in: query
+        name: list_name
+        required: true
+        schema:
+          enum:
+          - black
+          - white
+          example: white
+          type: string
+      - description: A comment to include.
+        in: query
+        name: comment
+        required: false
+        schema:
+          example: George Wendt flying through the air.
+          maximum: 255
+          type: string
+      - description: "Whether to skip checking if cPHulk runs on the server.\n\n* `1` - Do **not** check if cPHulk is running.\n* `0` - Check if cPHulk is running.\n\n**Note:**\n\n If cPHulk is disabled and you check its status, the function returns the following message: `cPHulk is disabled on the server.` "
+        in: query
+        name: skip_enabled_check
+        required: false
+        schema:
+          default: 0
+          enum:
+          - 0
+          - 1
+          example: 1
+          type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      comment:
+                        description: The comment that you included when you called the function.
+                        example: George Wendt flying through the air.
+                        type: string
+                      ip_blocks_removed:
+                        description: The number of IP address blocks that the function deleted.
+                        example: 1
+                        type: integer
+                      ips_added:
+                        description: An array of IP addresses that the function added to the list.
+                        items:
+                          $ref: '#/components/schemas/ip-address'
+                        type: array
+                      ips_failed:
+                        additionalProperties:
+                          description: 'The reason why the system failed to add an IP address to the list.
+
+
+                            **Note:**
+
+
+                            The IP address is the return''s name.'
+                          type: string
+                        description: A object of IP addresses that the system failed to add to the list. This object contains one or more IP address returns.
+                        example:
+                          192.168.0.1: 'Invalid IP address or range: "192.68.0.1"'
+                        type: object
+                      iptable_bans_removed:
+                        description: The number of `iptables` temporary block rules that the function deleted.
+                        example: 0
+                        minimum: 0
+                        type: integer
+                      list_name:
+                        description: 'The cPHulk list''s name.
+
+                          * `black`
+
+                          * `white`'
+                        enum:
+                        - black
+                        - white
+                        example: white
+                        type: string
+                      requester_ip:
+                        anyOf:
+                        - format: ipv4
+                          type: string
+                        - format: ipv6
+                          type: string
+                        description: The IP address of the user or system that requested the addition.
+                        example: 10.1.4.228
+                      requester_ip_is_whitelisted:
+                        description: 'Whether the requester''s IP address exists on cPHulk''s whitelist.
+
+                          * `1` - Whitelisted.
+
+                          * `0` - Not whitelisted.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 0
+                        type: integer
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: create_cphulk_record
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is 0. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` - Success.
+
+                          * `0` - Failed. Check the reason field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Add login security record to list
+      tags:
+      - cPHulk
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  create_cphulk_record \\\n  list_name='white' \\\n  ip='192.168.0.1'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/create_cphulk_record?api.version=1&list_name=white&ip=192.168.0.1
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11.48'
+  /delete_cphulk_record:
+    get:
+      description: This function deletes a record or records from cPHulk's whitelist or blacklist.
+      operationId: cPHulk-delete_cphulk_record
+      parameters:
+      - description: "The record's IP address.\n\n**Note:**\n\n To delete multiple IP addresses, increment the parameter name. For example, `ip-1`, `ip-2`, `ip-3`."
+        examples:
+          multiple:
+            description: Multiple IP addresses.
+            value:
+            - 192.168.0.1
+            - 192.168.0.2
+            - 2001:db8::1
+            - 2002:db8::1
+          single:
+            description: Single IP address.
+            value:
+            - 192.168.0.1
+        explode: true
+        in: query
+        name: ip
+        required: true
+        schema:
+          items:
+            $ref: '#/components/schemas/ip-address'
+          type: array
+        style: form
+      - description: 'The cPHulk list''s name.
+
+
+          * `white`
+
+          * `black`'
+        in: query
+        name: list_name
+        required: true
+        schema:
+          enum:
+          - white
+          - black
+          example: white
+          type: string
+      - description: "Whether to skip checking if cPHulk runs on the server.\n\n* `1` - Don’t check cPHulk’s status.\n* `0` - Check cPHulk’s status.\n\n**Note:**\n\n If cPHulk is disabled and you check its status, the function returns the following message:\n`cPHulk is disabled on the server`."
+        in: query
+        name: skip_enabled_check
+        required: false
+        schema:
+          default: 0
+          enum:
+          - 0
+          - 1
+          example: 1
+          type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      ips_failed:
+                        additionalProperties:
+                          description: "The reason why the system failed to add the IP address to the list.\n\n**Note:**\n\n The IP address is the property name."
+                          example: Invalid IP address or range "192.68.0.1"
+                          type: string
+                        description: Information about IP addresses that the system failed to add to the list.
+                        example:
+                          192.168.0.1: This is why, alpha.
+                          192.168.9.1: This is why, beta.
+                        type: object
+                      ips_removed:
+                        description: The IP addresses that the function removed from the list.
+                        items:
+                          example: 192.168.0.1
+                          format: ipv4
+                          type: string
+                        type: array
+                      list_name:
+                        description: 'The cPHulk list''s name.
+
+                          * `black`
+
+                          * `white`'
+                        enum:
+                        - black
+                        - white
+                        example: white
+                        type: string
+                      requester_ip:
+                        description: The requester's IP address.
+                        example: 192.168.0.1
+                        format: ipv4
+                        type: string
+                      requester_ip_is_whitelisted:
+                        description: 'Whether the requester''s IP address exists on cPHulk''s whitelist.
+
+                          * `1` - Whitelisted.
+
+                          * `0` - **Not** whitelisted.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: delete_cphulk_record
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is 0. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` - Success
+
+                          * `0` - Failed: Check the reason field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Remove login security record from list
+      tags:
+      - cPHulk
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  delete_cphulk_record \\\n  list_name='white' \\\n  ip='192.168.0.1'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/delete_cphulk_record?api.version=1&list_name=white&ip=192.168.0.1
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11.48'
+  /disable_cphulk:
+    get:
+      description: This function disables the cPHulk service.
+      operationId: cPHulk-disable_cphulk
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: disable_cphulk
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the reason field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Disable login security
+      tags:
+      - cPHulk
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  disable_cphulk\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/disable_cphulk?api.version=1
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11.48'
+  /enable_cphulk:
+    get:
+      description: This function enables the cPHulk service.
+      operationId: cPHulk-enable_cphulk
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: enable_cphulk
+                        type: string
+                      reason:
+                        description: 'The reason the API function failed when the `metadata.result`
+
+                          field is `0`. This field may display a success message when
+
+                          a function succeeds.'
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` - Success
+
+                          * `0` - Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Enable login security
+      tags:
+      - cPHulk
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  enable_cphulk\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/enable_cphulk?api.version=1
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11.48'
+  /flush_cphulk_login_history:
+    get:
+      description: 'This function removes the login history entries from the cPHulk
+
+        database.'
+      operationId: cPHulk-flush_cphulk_login_history
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      records_removed:
+                        description: 'The number of entries that the function deleted
+
+                          from the cPHulk database.'
+                        example: 10
+                        minimum: 0
+                        type: integer
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: flush_cphulk_login_history
+                        type: string
+                      reason:
+                        description: 'The reason the API function failed when the `metadata.result`
+
+                          field is `0`. This field may display a success message when
+
+                          a function succeeds.'
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` - Success
+
+                          * `0` - Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Remove all login security records
+      tags:
+      - cPHulk
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  flush_cphulk_login_history\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/flush_cphulk_login_history?api.version=1
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11.48'
+  /flush_cphulk_login_history_for_ips:
+    get:
+      description: This function removes specific login history entries from the cPHulk database. Use this function to unblock one or more IP addresses.
+      operationId: cPHulk-flush_cphulk_login_history_for_ips
+      parameters:
+      - description: "The record's IP address.\n\n**Note:**\n\n To unblock multiple IP addresses, increment the parameter name (for example, to unblock three IP addresses, use the `ip-1`, `ip-2`, and `ip-3` parameters)."
+        examples:
+          multiple:
+            description: Multiple IPv4 addresses.
+            value:
+            - 192.168.0.1
+            - 192.168.0.2
+            - 192.168.0.3
+          multiple-ipv6:
+            summary: Multiple IPv6 addresses.
+            value:
+            - 2001:db8::1
+            - 2002:db8::1
+            - 2003:db8::1
+          single:
+            description: A single IPv4 address.
+            value:
+            - 192.168.0.1
+          single-ipv6:
+            summary: Single IPv6 Address
+            value:
+            - 2001:db8::1
+        explode: true
+        in: query
+        name: ip
+        required: true
+        schema:
+          items:
+            anyOf:
+            - format: ipv4
+              type: string
+            - format: ipv6
+              type: string
+          type: array
+        style: form
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      iptable_bans_removed:
+                        description: The number of `iptables` temporary block rules that the function deleted.
+                        example: 1
+                        minimum: 0
+                        type: integer
+                      records_removed:
+                        description: The number of entries that the function deleted.
+                        example: 1
+                        minimum: 0
+                        type: integer
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: flush_cphulk_login_history_for_ips
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Remove login security IP address block
+      tags:
+      - cPHulk
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  flush_cphulk_login_history_for_ips \\\n  ip='192.168.0.1'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/flush_cphulk_login_history_for_ips?api.version=1&ip=192.168.0.1
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11.50'
+  /get_countries_with_known_ip_ranges:
+    get:
+      description: This function lists the country codes available for whitelist and blacklist functions.
+      operationId: CountryCodes-get_countries_with_known_ip_ranges
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      countries:
+                        description: 'A list of the [ISO 3166-1 alpha-2 country codes](https://www.iso.org/iso-3166-country-codes.html).
+
+                          You can enter these codes to whitelist or blacklist a country''s
+
+                          range of IP addresses in the WHM API 1 function `set_cphulk_config_key`.'
+                        items:
+                          properties:
+                            code:
+                              description: A valid [ISO 3166-1 alpha-2 country code](https://www.iso.org/iso-3166-country-codes.html).
+                              example: US
+                              format: ISO-3166-1 (alpha-2)
+                              pattern: ^[A-Z]{2}$
+                              type: string
+                            name:
+                              description: The country's name.
+                              example: United States
+                              type: string
+                          type: object
+                        type: array
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: get_countries_with_known_ip_ranges
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '- `1` — Success.
+
+                          - `0` — Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Return login security country codes
+      tags:
+      - cPHulk
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  get_countries_with_known_ip_ranges\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/get_countries_with_known_ip_ranges?api.version=1
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '70'
+  /get_cphulk_brutes:
+    get:
+      description: This function lists brute force attack entries from the cPHulk database.
+      operationId: cPHulk-get_cphulk_brutes
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      brutes:
+                        description: An array of information about each brute force attack.
+                        items:
+                          properties:
+                            exptime:
+                              description: When the login request will time out.
+                              example: '2014-12-07T00:00:00.000Z'
+                              format: ISO-8601 Date Time (Space Separated)
+                              type: string
+                            ip:
+                              anyOf:
+                              - format: ipv4
+                                type: string
+                              - format: ipv6
+                                type: string
+                              description: The IP address of the login attempt.
+                              example: 192.168.0.1
+                            logintime:
+                              description: When the login attempt occurred.
+                              example: '2014-11-20T00:00:00.000Z'
+                              format: ISO-8601 Date Time (Space Separated)
+                              type: string
+                            notes:
+                              description: The login entry's notes.
+                              example: this was a triumph
+                              type: string
+                            timeleft:
+                              description: The number of minutes that remain before cPHulk removes the block.
+                              example: 14
+                              minimum: 1
+                              type: integer
+                          type: object
+                        type: array
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: get_cphulk_brutes
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is 0. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` - Success
+
+                          * `0` - Failed: Check the reason field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Return login security brute force attacks
+      tags:
+      - cPHulk
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  get_cphulk_brutes\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/get_cphulk_brutes?api.version=1
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11.48'
+  /get_cphulk_excessive_brutes:
+    get:
+      description: This function retrieves excessive brute force attack entries from the cPHulk database.
+      operationId: cPHulk-get_cphulk_excessive_brutes
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      excessive_brutes:
+                        description: Information about each brute force attack.
+                        items:
+                          properties:
+                            exptime:
+                              description: When the login request will time out.
+                              example: '2014-12-07T00:00:00.000Z'
+                              format: ISO-8601 Date Time (Space Separated)
+                              type: string
+                            ip:
+                              anyOf:
+                              - format: ipv4
+                                type: string
+                              - format: ipv6
+                                type: string
+                              description: The IP address of the login attempt.
+                              example: 192.168.0.1
+                            logintime:
+                              description: When the login attempt occurred.
+                              example: '2014-11-20T00:00:00.000Z'
+                              format: ISO-8601 Date Time (Space Separated)
+                              type: string
+                            notes:
+                              description: The login entry's notes.
+                              example: this was a triumph
+                              type: string
+                            timeleft:
+                              description: The number of minutes that remain before cPHulk removes the block.
+                              example: 14
+                              minimum: 1
+                              type: number
+                          type: object
+                        type: array
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: get_cphulk_excessive_brutes
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is 0. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` - Success
+
+                          * `0` - Failed: Check the reason field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Return login security excessive brute force attacks
+      tags:
+      - cPHulk
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  get_cphulk_excessive_brutes\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/get_cphulk_excessive_brutes?api.version=1
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11.48'
+  /get_cphulk_failed_logins:
+    get:
+      description: This function lists failed login attempt entries from the cPHulk database.
+      operationId: cPHulk-get_cphulk_failed_logins
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      failed_logins:
+                        description: Information about each failed login attempt.
+                        items:
+                          properties:
+                            authservice:
+                              description: The name of the authentication service that the login attempt used.
+                              example: dovecot
+                              type: string
+                            exptime:
+                              description: When the login request will time out.
+                              example: '2014-12-07T00:00:00.000Z'
+                              format: ISO-8601 Date Time (Space Separated)
+                              type: string
+                            ip:
+                              anyOf:
+                              - format: ipv4
+                                type: string
+                              - format: ipv6
+                                type: string
+                              description: The login attempt's IP address.
+                              example: 192.168.0.1
+                            logintime:
+                              description: When the login attempt occurred.
+                              example: '2014-11-20T00:00:00.000Z'
+                              format: ISO-8601 Date Time (Space Separated)
+                              type: string
+                            service:
+                              description: The login attempt's service. name.
+                              example: ftp
+                              type: string
+                            timeleft:
+                              description: The number of minutes that remain before cPHulk removes the block.
+                              example: 14
+                              minimum: 1
+                              type: integer
+                            user:
+                              description: The login attempt's username.
+                              example: example
+                              type: string
+                          type: object
+                        type: array
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: get_cphulk_failed_logins
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is 0. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` - Success
+
+                          * `0` - Failed: Check the reason field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Return login security failed logins
+      tags:
+      - cPHulk
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  get_cphulk_failed_logins\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/get_cphulk_failed_logins?api.version=1
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11.48'
+  /get_cphulk_user_brutes:
+    get:
+      description: This function lists brute force attack entries from the cPHulk database, ordered by user accounts.
+      operationId: cPHulk-get_cphulk_user_brutes
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      user_brutes:
+                        description: Information about each brute force attempt.
+                        items:
+                          properties:
+                            authservice:
+                              description: The authentication service on which the login attempt occurred.
+                              example: dovecot
+                              type: string
+                            exptime:
+                              description: When the login request will time out.
+                              example: '2014-12-07T00:00:00.000Z'
+                              format: ISO-8601 Date Time (Space Separated)
+                              type: string
+                            ip:
+                              anyOf:
+                              - format: ipv4
+                                type: string
+                              - format: ipv6
+                                type: string
+                              description: The IP address of the login attempt.
+                              example: 192.168.0.1
+                            logintime:
+                              description: When the login attempt occurred.
+                              example: '2014-11-20T00:00:00.000Z'
+                              format: ISO-8601 Date Time (Space Separated)
+                              type: string
+                            service:
+                              description: The name of the service on which the login attempt occurred.
+                              example: ftp
+                              type: string
+                            timeleft:
+                              description: The number of minutes that remain before cPHulk removes the block.
+                              example: 14
+                              type: integer
+                            user:
+                              description: The username for which login attempt occurred.
+                              example: example
+                              type: string
+                          type: object
+                        type: array
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: get_cphulk_user_brutes
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is 0. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` - Success
+
+                          * `0` - Failed: Check the reason field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Return login security brute force attacks by user
+      tags:
+      - cPHulk
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  get_cphulk_user_brutes\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/get_cphulk_user_brutes?api.version=1
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11.48'
+  /load_cphulk_config:
+    get:
+      description: This function returns cPHulk's current settings.
+      operationId: cPHulk-load_cphulk_config
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      cphulk_config:
+                        description: An object that contains cPHulk's current settings.
+                        properties:
+                          block_brute_force_with_firewall:
+                            description: 'Whether to use the server''s firewall to block brute force attacks.
+
+                              * `1` - Block.
+
+                              * `0` - Don''t block.'
+                            enum:
+                            - 0
+                            - 1
+                            example: 1
+                            type: integer
+                          block_excessive_brute_force_with_firewall:
+                            description: 'Whether to use the server''s firewall to block excessive brute force attacks.
+
+                              * `1` - Block.
+
+                              * `0` - Don''t block.'
+                            enum:
+                            - 0
+                            - 1
+                            example: 1
+                            type: integer
+                          brute_force_period_mins:
+                            description: The number of minutes during which cPHulk measures all login attempts to a specific user's account.
+                            example: 5
+                            minimum: 1
+                            type: integer
+                          brute_force_period_sec:
+                            description: The number of seconds over which cPHulk measures all login attempts to a specific user's account.
+                            example: 360
+                            minimum: 1
+                            type: integer
+                          can_temp_ban_firewall:
+                            description: 'Whether to add temporary IP bans via the server''s firewall.
+
+                              * `1` - Add.
+
+                              * `0` - Don''t add.'
+                            enum:
+                            - 0
+                            - 1
+                            example: 1
+                            type: integer
+                          command_to_run_on_brute_force:
+                            description: The command to run when the system detects a brute force attack. A valid BASH command.
+                            example: echo "BRUTE"
+                            type: string
+                          command_to_run_on_excessive_brute_force:
+                            description: The command to run when the system detects an excessive brute force attack. A valid BASH command.
+                            example: echo "TOO MUCH BRUTE"
+                            type: string
+                          ip_based_protection:
+                            description: 'Whether cPHulk will track failed login attempts via IP addresses.
+
+                              * `1` - Track.
+
+                              * `0` - Don''t track.'
+                            enum:
+                            - 0
+                            - 1
+                            example: 1
+                            type: integer
+                          ip_brute_force_period_mins:
+                            description: The number of minutes during which cPHulk measures an attacker's login attempts.
+                            example: 15
+                            minimum: 1
+                            type: integer
+                          ip_brute_force_period_sec:
+                            description: The number of seconds during which cPHulk measures an attacker's login attempts.
+                            example: 300
+                            minimum: 1
+                            type: integer
+                          is_enabled:
+                            description: 'Whether the cPHulk service is enabled.
+
+                              * `1` - Enabled.
+
+                              * `0` - Disabled.'
+                            enum:
+                            - 0
+                            - 1
+                            example: 1
+                            type: integer
+                          lookback_period_min:
+                            description: The number of minutes during which cPHulk counts failed logins against a user.
+                            example: 360
+                            minimum: 1
+                            type: integer
+                          lookback_time:
+                            description: The number of seconds during which cPHulk counts failed logins against a user.
+                            example: 21600
+                            minimum: 1
+                            type: integer
+                          mark_as_brute:
+                            description: The maximum number of failures that cPHulk will allow per account from a specific IP address before the system locks out that address for two weeks.
+                            example: 30
+                            minimum: 0
+                            type: integer
+                          max_failures:
+                            description: The maximum number of failures that cPHulk will allow per account within the defined time range.
+                            example: 30
+                            minimum: 0
+                            type: integer
+                          max_failures_byip:
+                            description: The maximum number of failures that cPHulk will allow per account from a specific IP address within the defined time range.
+                            example: 5
+                            minimum: 0
+                            type: integer
+                          notify_on_brute:
+                            description: 'Whether cPHulk will send a notification when it detects a brute force attack.
+
+                              * `1` - Send.
+
+                              * `0` - Do not send.'
+                            enum:
+                            - 0
+                            - 1
+                            example: 1
+                            type: integer
+                          notify_on_root_login:
+                            description: 'Whether cPHulk will send a notification when the root user successfully logs in from an IP address that is not on the whitelist.
+
+                              * `1` - Send.
+
+                              * `0` - Do not send.'
+                            enum:
+                            - 0
+                            - 1
+                            example: 1
+                            type: integer
+                          notify_on_root_login_for_known_netblock:
+                            description: 'Whether cPHulk will send a notification when the root user successfully logs in from an IP address in the same netblock.
+
+                              * `1` - Send.
+
+                              * `0` - Do not send.'
+                            enum:
+                            - 0
+                            - 1
+                            example: 1
+                            type: integer
+                          username_based_protection:
+                            description: 'Whether cPHulk will track failed logins by username.
+
+                              * `1` - Track.
+
+                              * `0` - Don''t track.'
+                            enum:
+                            - 0
+                            - 1
+                            example: 1
+                            type: integer
+                          username_based_protection_for_root:
+                            description: 'Whether cPHulk will track the root user''s failed logins.
+
+                              * `1` - Track.
+
+                              * `0` - Don''t track.'
+                            enum:
+                            - 0
+                            - 1
+                            example: 1
+                            type: integer
+                          username_based_protection_local_origin:
+                            description: 'Whether cPHulk will only track failed logins for requests originating locally.
+
+                              * `1` - Track.
+
+                              * `0` - Don''t track.'
+                            enum:
+                            - 0
+                            - 1
+                            example: 1
+                            type: integer
+                        type: object
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: load_cphulk_config
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is 0. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` - Success
+
+                          * `0` - Failed: Check the reason field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Return login security configuration settings
+      tags:
+      - cPHulk
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  load_cphulk_config\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/load_cphulk_config?api.version=1
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11.48'
+  /read_cphulk_records:
+    get:
+      description: This function displays a cPHulk list's records.
+      operationId: cPHulk-read_cphulk_records
+      parameters:
+      - description: 'The cPHulk list''s name.
+
+
+          * `black`
+
+          * `white`'
+        example: white
+        in: query
+        name: list_name
+        required: true
+        schema:
+          enum:
+          - black
+          - white
+          example: white
+          type: string
+      - description: "Whether to skip checking if cPHulk runs on the server.\n\n**Note:**\n\n If cPHulk is disabled, the function returns the following message:\n`cPHulk is disabled on the server.`"
+        in: query
+        name: skip_enabled_check
+        required: false
+        schema:
+          default: 0
+          enum:
+          - 0
+          - 1
+          example: 1
+          type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      ips_in_list:
+                        additionalProperties:
+                          description: 'The IP address’s comment.
+
+
+                            **Note:**
+
+
+                            The IP address is the return''s name.'
+                          example: A helpful comment about the IP address.
+                          type: string
+                        description: IP address information.
+                        example:
+                          10.1.4.44: A helpful comment about the IP address.
+                          DEED::1: A helpful comment about the IP address.
+                        type: object
+                      list_name:
+                        description: 'The cPHulk list''s name.
+
+                          * `black`
+
+                          * `white`'
+                        enum:
+                        - black
+                        - white
+                        example: white
+                        type: string
+                      requester_ip:
+                        anyOf:
+                        - format: ipv4
+                          type: string
+                        - format: ipv6
+                          type: string
+                        description: The requester's IP address.
+                        example: 10.1.4.228
+                      requester_ip_is_whitelisted:
+                        description: 'Whether the requester''s IP address exists on cPHulk''s whitelist.
+
+                          * `1` - The IP address exists on the whitelist.
+
+                          * `0` - The IP address does not exist on the white list.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      restart_ssh:
+                        description: 'Whether you must restart `sshd` in order to implement changes.
+
+
+                          * `1` — You **must** restart the `sshd` daemon.
+
+                          * `0` — The system will implement changes without a restart.
+
+
+                          **Note:**
+
+
+                          This return **only** appears if `sshd`’s `UseDNS` setting is enabled. Because `UseDNS` and cPHulk are incompatible, the system disables `UseDNS` when you enable cPHulk.
+
+                          * `1` - You must restart `sshd`.
+
+                          * `0` - The system will implement changes without a restart.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      warning_ip:
+                        description: A localized warning message, if the requester's IP address does not exist on the whitelist.
+                        example: The IP address is not on the white list.
+                        type: string
+                      warning_ssh:
+                        description: "A message that explains why you must restart `sshd`.\n\n**Note:**\n\n This return **only** appears if the `restart_ssh` return's value is `1`."
+                        example: The system disabled the UseDNS setting for sshd in order to add IP addresses to the whitelist. You must restart sshd to implement the change.
+                        type: string
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: read_cphulk_records
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is 0. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` - Success
+
+                          * `0` - Failed: Check the reason field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Return login security list records
+      tags:
+      - cPHulk
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  read_cphulk_records \\\n  list_name='white'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/read_cphulk_records?api.version=1&list_name=white
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11.48'
+  /save_cphulk_config:
+    get:
+      description: This function modifies cPHulk's configuration settings.
+      operationId: cPHulk-save_cphulk_config
+      parameters:
+      - description: 'Whether to use the server firewall to block brute force attacks.
+
+          * `1` — Use the firewall.
+
+          * `0` — Do **not** use the firewall.'
+        in: query
+        name: block_brute_force_with_firewall
+        required: false
+        schema:
+          default: 0
+          enum:
+          - 0
+          - 1
+          example: 0
+          type: integer
+      - description: 'Whether to use the server firewall to block excessive brute force attacks.
+
+          * `1` — Use the firewall.
+
+          * `0` — Do **not** use the firewall.'
+        in: query
+        name: block_excessive_brute_force_with_firewall
+        required: false
+        schema:
+          default: 0
+          enum:
+          - 0
+          - 1
+          example: 0
+          type: integer
+      - description: The number of minutes over which cPHulk measures all login attempts to a specific user's account.
+        in: query
+        name: brute_force_period_mins
+        required: false
+        schema:
+          default: 5
+          example: 5
+          minimum: 1
+          type: integer
+      - description: "The command to run when an IP address triggers brute force protection.\n\n**Note:**\n\n For a list of commands, read the *Command variables* section of our [cPHulk Brute Force Protection](https://go.cpanel.net/whmdocscPHulkBruteForceProtection) documentation."
+        in: query
+        name: command_to_run_on_brute_force
+        required: false
+        schema:
+          default: ''
+          example: ''
+          type: string
+      - description: "The command to run when the system blocks an IP address for a one day period.\n\n**Note:**\n\n For a list of commands, read the *Command variables* section of our [cPHulk Brute Force Protection](https://go.cpanel.net/whmdocscPHulkBruteForceProtection) documentation."
+        in: query
+        name: command_to_run_on_excessive_brute_force
+        required: false
+        schema:
+          default: ''
+          example: ''
+          type: string
+      - description: "Whether to enable IP address-based protection on all requests.\n* `1` — Enable IP-based protection.\n* `0` — Disable IP-based protection.\n\n**Note:**\n\n If you set this parameter to `0`, you **cannot** use the following parameters:\n * `block_brute_force_with_firewall`\n * `block_excessive_brute_force_with_firewall`\n * `ip_brute_force_period_mins`"
+        in: query
+        name: ip_based_protection
+        required: false
+        schema:
+          default: 1
+          enum:
+          - 0
+          - 1
+          example: 1
+          type: integer
+      - description: The number of minutes in which cPHulk measures an attacker's login attempts.
+        in: query
+        name: ip_brute_force_period_mins
+        required: false
+        schema:
+          default: 15
+          example: 15
+          minimum: 1
+          type: integer
+      - description: The number of minutes over which cPHulk counts failed logins against a user.
+        in: query
+        name: lookback_period_min
+        required: false
+        schema:
+          default: 360
+          example: 360
+          minimum: 0
+          type: integer
+      - description: The maximum number of failures from a specific IP address before cPHulk blocks that address for a two-week period.
+        in: query
+        name: mark_as_brute
+        required: false
+        schema:
+          default: 30
+          example: 30
+          minimum: 0
+          type: integer
+      - description: The maximum number of failures that cPHulk allows per account within the defined time range.
+        in: query
+        name: max_failures
+        required: false
+        schema:
+          default: 30
+          example: 30
+          minimum: 0
+          type: integer
+      - description: The maximum number of failures from a specific IP address before cPHulk locks out that address.
+        in: query
+        name: max_failures_byip
+        required: false
+        schema:
+          default: 5
+          example: 5
+          minimum: 0
+          type: integer
+      - description: 'Whether cPHulk will send a notification when it detects a brute force attack.
+
+          * `1` — Send the notification.
+
+          * `0` — Do **not** send the notification.'
+        in: query
+        name: notify_on_brute
+        required: false
+        schema:
+          default: 0
+          enum:
+          - 0
+          - 1
+          example: 0
+          type: integer
+      - description: 'Whether cPHulk will send a notification when the `root` user successfully logs in from an IP address that is not on the whitelist.
+
+          * `1` — Send the notification.
+
+          * `0` — Do **not** send the notification.'
+        in: query
+        name: notify_on_root_login
+        required: false
+        schema:
+          default: 0
+          enum:
+          - 0
+          - 1
+          example: 0
+          type: integer
+      - description: 'Whether cPHulk sends a notification upon successful `root` login when the IP address is not on the whitelist, but from a known netblock.
+
+          * `1` — Send the notification.
+
+          * `0` — Do **not** send the notification.'
+        in: query
+        name: notify_on_root_login_for_known_netblock
+        required: false
+        schema:
+          default: 0
+          enum:
+          - 0
+          - 1
+          example: 0
+          type: integer
+      - description: 'Whether to skip checking if cPHulk runs on the server.
+
+          * `1` — Don''t check cPHulk''s status.
+
+          * `0` — Check cPHulk''s status.
+
+
+          **Note:**
+
+
+          If cPHulk is disabled, the function returns the following message:
+
+          `cPHulk is disabled on the server.`'
+        in: query
+        name: skip_enabled_check
+        required: false
+        schema:
+          default: 0
+          enum:
+          - 0
+          - 1
+          example: 0
+          type: integer
+      - description: 'Whether to enable username-based protection on all requests.
+
+          * `1` — Enable.
+
+          * `0` — Disable.'
+        in: query
+        name: username_based_protection
+        required: false
+        schema:
+          default: 0
+          enum:
+          - 0
+          - 1
+          example: 0
+          type: integer
+      - description: 'Whether to allow username-based protection to lock out the `root` user.
+
+          * `1` — Allow.
+
+          * `0` — Do **not** allow.'
+        in: query
+        name: username_based_protection_for_root
+        required: false
+        schema:
+          default: 0
+          enum:
+          - 0
+          - 1
+          example: 0
+          type: integer
+      - description: 'Whether to enable username-based protection **only** on requests that originate from a local IP address.
+
+          * `1` — Enable.
+
+          * `0` — Disable.'
+        in: query
+        name: username_based_protection_local_origin
+        required: false
+        schema:
+          default: 1
+          enum:
+          - 0
+          - 1
+          example: 1
+          type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      cphulk_config:
+                        description: An object containing cPHulk configuration settings.
+                        properties:
+                          block_brute_force_with_firewall:
+                            description: 'Whether to use cPanel & WHM''s firewall to block brute force attacks.
+
+                              * `1` -  Use the firewall.
+
+                              * `0` - Do **not** use the firewall.'
+                            enum:
+                            - 0
+                            - 1
+                            example: 0
+                            type: integer
+                          block_excessive_brute_force_with_firewall:
+                            description: 'Whether to use cPanel & WHM''s firewall to block excessive brute force attacks.
+
+                              * `1` - Use the firewall.
+
+                              * `0` - Do **not** use the firewall.'
+                            enum:
+                            - 0
+                            - 1
+                            example: 0
+                            type: integer
+                          brute_force_period_mins:
+                            description: The number of minutes over which cPHulk measures all login attempts to a specific user's account.
+                            example: 5
+                            minimum: 1
+                            type: integer
+                          brute_force_period_sec:
+                            description: The number of seconds over which cPHulk measures all login attempts to a specific user's account.
+                            example: 300
+                            type: integer
+                          can_temp_ban_firewall:
+                            description: 'Whether the system firewall can apply temporary IP address bans.
+
+                              * `1` - Can temporarily apply IP address bans.
+
+                              * `0` - **Cannot** temporarily apply IP address bans.
+
+
+                              **Note:**
+
+
+                              If this return''s value is `0`, then the `ip_based_protection` parameter is **not** available, which means that you cannot use the following parameters:
+
+                              * `block_brute_force_with_firewall`
+
+                              * `block_excessive_brute_force_with_firewall`
+
+                              * `ip_brute_force_period_mins`
+
+                              * `ip_brute_force_period_sec`'
+                            enum:
+                            - 0
+                            - 1
+                            example: 1
+                            type: integer
+                          command_to_run_on_brute_force:
+                            description: The command to run when an IP address triggers brute force protection.
+                            example: ''
+                            type: string
+                          command_to_run_on_excessive_brute_force:
+                            description: The command to run when the system blocks an IP address blocked for a one day period.
+                            example: ''
+                            type: string
+                          ip_based_protection:
+                            description: 'Whether IP address-based protection on all requests is enabled.
+
+                              * `1` - Enabled.
+
+                              * `0` - Disabled.'
+                            enum:
+                            - 0
+                            - 1
+                            example: 1
+                            type: integer
+                          ip_brute_force_period_mins:
+                            description: The number of minutes in which cPHulk measures an attacker's login attempts.
+                            example: 15
+                            minimum: 1
+                            type: integer
+                          ip_brute_force_period_sec:
+                            description: The number of seconds in which cPHulk measures an attacker's login attempts.
+                            example: 900
+                            type: integer
+                          is_enabled:
+                            description: 'Whether the cPHulk service is enabled.
+
+                              * `1` - Enabled.
+
+                              * `0` - Disabled.'
+                            enum:
+                            - 0
+                            - 1
+                            example: 1
+                            type: integer
+                          lookback_period_min:
+                            description: The number of minutes over which cPHulk counts failed logins against a user.
+                            example: 360
+                            minimum: 0
+                            type: integer
+                          lookback_time:
+                            description: The number of seconds over which cPHulk counts failed logins against a user.
+                            example: 21600
+                            type: integer
+                          mark_as_brute:
+                            description: The maximum number of failures from a specific IP address before cPHulk blocks that address for a two-week period.
+                            example: 30
+                            minimum: 0
+                            type: integer
+                          max_failures:
+                            description: The maximum number of failures that cPHulk allows per account within the defined time range.
+                            example: 30
+                            minimum: 0
+                            type: integer
+                          max_failures_byip:
+                            description: The maximum number of failures from a specific IP address before cPHulk locks out that address.
+                            example: 5
+                            minimum: 0
+                            type: integer
+                          notify_on_brute:
+                            description: 'Whether cPHulk will send a notification when it detects a brute force attack.
+
+                              * `1` - Send the notification.
+
+                              * `0` - Do **not** send the notification.'
+                            enum:
+                            - 0
+                            - 1
+                            example: 0
+                            type: integer
+                          notify_on_root_login:
+                            description: 'Whether cPHulk will send a notification when the `root` user successfully logs in from an IP address that is not on the whitelist.
+
+                              * `1` - Send the notification.
+
+                              * `0` - Do **not** send the notification.'
+                            enum:
+                            - 0
+                            - 1
+                            example: 0
+                            type: integer
+                          notify_on_root_login_for_known_netblock:
+                            description: 'Whether cPHulk sends a notification upon successful `root` login when the IP address is not on the whitelist, but from a known netblock.
+
+                              * `1` - Send the notification.
+
+                              * `0` - Do **not** send the notification.'
+                            enum:
+                            - 0
+                            - 1
+                            example: 0
+                            type: integer
+                          username_based_protection:
+                            description: 'Whether username-based protection on all requests is enabled.
+
+                              * `1` - Enabled.
+
+                              * `0` - Disabled.'
+                            enum:
+                            - 0
+                            - 1
+                            example: 0
+                            type: integer
+                          username_based_protection_for_root:
+                            description: 'Whether username-based protection can lock out the `root` user.
+
+                              * `1` - Allowed.
+
+                              * `0` - **Not** allowed.'
+                            enum:
+                            - 0
+                            - 1
+                            example: 0
+                            type: integer
+                          username_based_protection_local_origin:
+                            description: 'Whether username-based protection **only** on requests that originate from a local IP address.
+
+                              * `1` - Enabled.
+
+                              * `0` - Disabled.'
+                            enum:
+                            - 0
+                            - 1
+                            example: 1
+                            type: integer
+                        type: object
+                      restart_ssh:
+                        description: "Whether the system disabled UseDNS in the `sshd.conf` file and restarted the `sshd` daemon to allow cPHulk to add IP addresses to the whitelist.\n\n**Note:**\n\n This return **only** appears if the `UseDNS` setting is `yes` in the `/etc/ssh/sshd_config` file. Because UseDNS and cPHulk are incompatible, the system sets the `UseDNS` setting to `no` when you enable cPHulk.\n* `1` - Disabled UseDNS in the `sshd` daemon and restarted the `sshd` service.\n* `0` - Did **not** alter the `sshd.conf` file or restart the `sshd` service."
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      warning:
+                        description: 'A warning message about the restart.
+
+
+                          **Note:**
+
+
+                          The function **only** returns this value if the `restart_ssh` return''s value is `1`.'
+                        example: null
+                        type:
+                        - string
+                        - 'null'
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: save_cphulk_config
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` - Success.
+
+                          * `0` - Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Save login security configuration settings
+      tags:
+      - cPHulk
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  save_cphulk_config\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/save_cphulk_config?api.version=1
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11.48'
+  /set_cphulk_config_key:
+    get:
+      description: This function modifies a single cPHulk configuration settings as specified.
+      operationId: cPHulk-set_cphulk_config_key
+      parameters:
+      - description: 'The configuration key for the setting to set/modify.
+
+
+          It should be one of the following:
+
+          *  `block_brute_force_with_firewall` - Whether to use cPanel & WHM''s firewall to block brute force attacks.
+
+          *  `block_excessive_brute_force_with_firewall` - Whether to use cPanel & WHM''s firewall to block excessive brute force attacks.
+
+          *  `brute_force_period_mins` - The number of minutes over which cPHulk measures all login attempts to a specific user''s account.
+
+          *  `brute_force_period_sec` - The number of seconds over which cPHulk measures all login attempts to a specific user''s account.
+
+          *  `command_to_run_on_brute_force` - The command to run when an IP address triggers brute force protection.
+
+          *  `command_to_run_on_excessive_brute_force` - The command to run when the system blocks an IP address blocked for a one day period.
+
+          *  `country_blacklist` - The countries to blacklist.
+
+          *  `country_whitelist` - The countries to whitelist.
+
+          *  `ip_based_protection` - Whether to enable IP address-based protection on all requests.
+
+          *  `ip_brute_force_period_mins` - The number of minutes in which cPHulk measures an attacker''s login attempts.
+
+          *  `ip_brute_force_period_sec` - The number of seconds in which cPHulk measures an attacker''s login attempts.
+
+          *  `is_enabled` - Whether to enable the cPHulk service.
+
+          *  `lookback_period_min` - The number of minutes over which cPHulk counts failed logins against a user.
+
+          *  `lookback_time` - The number of seconds over which cPHulk counts failed logins against a user.
+
+          *  `mark_as_brute` - The maximum number of failures from a specific IP address before cPHulk blocks that address for a two-week period.
+
+          *  `max_failures` - The maximum number of failures that cPHulk allows per account within the defined time range.
+
+          *  `max_failures_byip` - The maximum number of failures from a specific IP address before cPHulk locks out that address.
+
+          *  `notify_on_brute` - Whether cPHulk will send a notification when it detects a brute force attack.
+
+          *  `notify_on_root_login` - Whether cPHulk will send a notification when the root user successfully logs in from an IP address that is **not** on the whitelist.
+
+          *  `notify_on_root_login_for_known_netblock` - Whether cPHulk sends a notification upon successful root login when the IP address is **not** on the whitelist, but from a known netblock.
+
+          *  `username_based_protection` - Whether to enable username-based protection on all requests.
+
+          *  `username_based_protection_for_root` - Whether to allow username-based protection to lock out the root user.
+
+          *  `username_based_protection_local_origin` - Whether to enable username-based protection only on requests that originate from a local IP address.'
+        in: query
+        name: key
+        required: true
+        schema:
+          enum:
+          - block_brute_force_with_firewall
+          - block_excessive_brute_force_with_firewall
+          - brute_force_period_mins
+          - brute_force_period_sec
+          - command_to_run_on_brute_force
+          - command_to_run_on_excessive_brute_force
+          - country_blacklist
+          - country_whitelist
+          - ip_based_protection
+          - ip_brute_force_period_mins
+          - ip_brute_force_period_sec
+          - is_enabled
+          - lookback_period_min
+          - lookback_time
+          - mark_as_brute
+          - max_failures
+          - max_failures_byip
+          - notify_on_brute
+          - notify_on_root_login
+          - notify_on_root_login_for_known_netblock
+          - username_based_protection
+          - username_based_protection_for_root
+          - username_based_protection_local_origin
+          example: is_enabled
+          type: string
+      - description: 'The new value for the specified key. The allowable value depends on which key is being set.
+
+
+          For the following keys, the value must be 0 or 1:
+
+          * `block_brute_force_with_firewall`
+
+          * `block_excessive_brute_force_with_firewall`
+
+          * `ip_based_protection`
+
+          * `is_enabled`
+
+          * `notify_on_brute`
+
+          * `notify_on_root_login`
+
+          * `notify_on_root_login_for_known_netblock`
+
+          * `username_based_protection`
+
+          * `username_based_protection_for_root`
+
+          * `username_based_protection_local_origin`
+
+
+          For the following keys, the value must be an integer which specifies a number of minutes or seconds:
+
+          * `brute_force_period_mins`
+
+          * `brute_force_period_sec`
+
+          * `ip_brute_force_period_mins`
+
+          * `ip_brute_force_period_sec`
+
+          * `lookback_period_min`
+
+          * `lookback_time` - This one is in seconds despite not having `sec` in the name
+
+
+          These keys require the value to be a string containing a command to be run:
+
+          (For a list of commands, read the _Command Variables_ section of our [cPHulk Brute Force Protection](https://go.cpanel.net/whmdocscPHulkBruteForceProtection) documentation.)
+
+          * `command_to_run_on_brute_force`
+
+          * `command_to_run_on_excessive_brute_force`
+
+
+          These keys require the value to be a string containing a comma-separated list of country codes:
+
+          (For a list of countries, run the WHM API 1 `get_countries_with_known_ip_ranges` function.)
+
+          * `country_blacklist`
+
+          * `country_whitelist`
+
+
+          The following keys require an integer representing a maximum number of failures
+
+          * `mark_as_brute`
+
+          * `max_failures`
+
+          * `max_failures_byip`'
+        in: query
+        name: value
+        required: true
+        schema:
+          example: 1
+          oneOf:
+          - type: string
+          - type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      cphulk_config:
+                        description: cPHulk configuration settings.
+                        properties:
+                          block_brute_force_with_firewall:
+                            description: 'Whether to use cPanel & WHM''s firewall to block brute force attacks.
+
+                              * `1` - Use the firewall.
+
+                              * `0` - Do **not** use the firewall.'
+                            enum:
+                            - 0
+                            - 1
+                            example: 0
+                            type: integer
+                          block_excessive_brute_force_with_firewall:
+                            description: 'Whether to use cPanel & WHM''s firewall to block excessive brute force attacks.
+
+                              * `1` - Use the firewall.
+
+                              * `0` - Do **not** use the firewall.'
+                            enum:
+                            - 0
+                            - 1
+                            example: 0
+                            type: integer
+                          brute_force_period_mins:
+                            description: The number of minutes over which cPHulk measures all login attempts to a specific user's account.
+                            example: 5
+                            type: integer
+                          brute_force_period_sec:
+                            description: The number of seconds over which cPHulk measures all login attempts to a specific user's account.
+                            example: 300
+                            type: integer
+                          can_temp_ban_firewall:
+                            description: 'Whether the system firewall can apply temporary IP address bans.
+
+                              * `1` - Can temporarily apply IP address bans.
+
+                              * `0` - Cannot temporarily apply IP address bans.
+
+
+                              **Note:**
+
+
+                              If this return''s value is 0, then the `ip_based_protection parameter` is **not** available, which means that you cannot use the following parameters:
+
+                              * `block_brute_force_with_firewall`
+
+                              * `block_excessive_brute_force_with_firewall`
+
+                              * `ip_brute_force_period_mins`
+
+                              * `ip_brute_force_period_sec`'
+                            enum:
+                            - 0
+                            - 1
+                            example: 1
+                            type: integer
+                          command_to_run_on_brute_force:
+                            description: 'The command to run when an IP address triggers brute force protection.
+
+                              - A valid command.
+
+                              - An empty string.'
+                            example: ''
+                            type: string
+                          command_to_run_on_excessive_brute_force:
+                            description: 'The command to run when the system blocks an IP address blocked for a one day period.
+
+                              * A valid command.
+
+                              * An empty string.'
+                            example: ''
+                            type: string
+                          country_blacklist:
+                            description: The countries to blacklist. A comma-separated list of valid ISO 3166-1 alpha-2 country codes. This value may be empty.
+                            example: PK,BR
+                            format: ISO-3166-1 (alpha-2)
+                            type: string
+                          country_whitelist:
+                            description: The countries to whitelist. A comma-separated list of valid ISO 3166-1 alpha-2 country codes. This value may be empty.
+                            example: US,AU
+                            format: ISO-3166-1 (alpha-2)
+                            type: string
+                          ip_based_protection:
+                            description: 'Whether IP address-based protection on all requests is enabled.
+
+                              * `1` - Enabled.
+
+                              * `0` - Disabled.'
+                            enum:
+                            - 0
+                            - 1
+                            example: 1
+                            type: integer
+                          ip_brute_force_period_mins:
+                            description: The number of minutes in which cPHulk measures an attacker's login attempts.
+                            example: 15
+                            type: integer
+                          ip_brute_force_period_sec:
+                            description: The number of seconds in which cPHulk measures an attacker's login attempts.
+                            example: 900
+                            type: integer
+                          is_enabled:
+                            description: 'Whether the cPHulk service is enabled.
+
+                              * `1` - Enabled.
+
+                              * `0` - Disabled.'
+                            enum:
+                            - 0
+                            - 1
+                            example: 1
+                            type: integer
+                          lookback_period_min:
+                            description: The number of minutes over which cPHulk counts failed logins against a user.
+                            example: 360
+                            type: integer
+                          lookback_time:
+                            description: The number of seconds over which cPHulk counts failed logins against a user.
+                            example: 21600
+                            type: integer
+                          mark_as_brute:
+                            description: The maximum number of failures from a specific IP address before cPHulk blocks that address for a two-week period.
+                            example: 30
+                            type: integer
+                          max_failures:
+                            description: The maximum number of failures that cPHulk allows per account within the defined time range.
+                            example: 30
+                            type: integer
+                          max_failures_byip:
+                            description: The maximum number of failures from a specific IP address before cPHulk locks out that address.
+                            example: 5
+                            type: integer
+                          notify_on_brute:
+                            description: 'Whether cPHulk will send a notification when it detects a brute force attack.
+
+                              * `1` - Send the notification.
+
+                              * `0` - Do **not** send the notification.'
+                            enum:
+                            - 0
+                            - 1
+                            example: 0
+                            type: integer
+                          notify_on_root_login:
+                            description: 'Whether cPHulk will send a notification when the root user successfully logs in from an IP address that is **not** on the whitelist.
+
+                              * `1` - Send the notification.
+
+                              * `0` - Do **not** send the notification.'
+                            enum:
+                            - 0
+                            - 1
+                            example: 0
+                            type: integer
+                          notify_on_root_login_for_known_netblock:
+                            description: 'Whether cPHulk sends a notification upon successful root login when the IP address is **not** on the whitelist, but from a known netblock
+
+                              * `1` - Send the notification.
+
+                              * `0` - Do **not** send the notification.'
+                            enum:
+                            - 0
+                            - 1
+                            example: 0
+                            type: integer
+                          username_based_protection:
+                            description: 'Whether username-based protection on all requests is enabled.
+
+                              * `1` - Enabled.
+
+                              * `0` - Disabled.'
+                            enum:
+                            - 0
+                            - 1
+                            example: 0
+                            type: integer
+                          username_based_protection_for_root:
+                            description: 'Whether username-based protection can lock out the root user.
+
+                              * `1` - Allowed.
+
+                              * `0` - Not allowed.'
+                            enum:
+                            - 0
+                            - 1
+                            example: 0
+                            type: integer
+                          username_based_protection_local_origin:
+                            description: 'Whether username-based protection only on requests that originate from a local IP address.
+
+                              * `1` - Enabled.
+
+                              * `0` - Disabled.'
+                            enum:
+                            - 0
+                            - 1
+                            example: 1
+                            type: integer
+                        type: object
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: set_cphulk_config_key
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is 0. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` - Success
+
+                          * `0` - Failed: Check the reason field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Update login security configuration settings
+      tags:
+      - cPHulk
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  set_cphulk_config_key key=is_enabled value=1\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/set_cphulk_config_key?api.version=1&key=is_enabled&value=1
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '70'
+components:
+  schemas:
+    ip-address:
+      anyOf:
+      - example: 192.168.0.1
+        format: ipv4
+        type: string
+      - example: 192.168.0.1/30
+        format: cidr
+        type: string
+      - example: 192.168.0.1-192.168.0.2
+        format: ipv4-ipv4
+        type: string
+      - example: '2001:db8::'
+        format: ipv6
+        type: string
+      - example: 2001:db8::/32
+        format: cidr
+        type: string
+      - example: 2001:0db8::-2001:0db8:ffff:ffff:ffff:ffff:ffff:ffff
+        format: ipv6-ipv6
+        type: string
+  securitySchemes:
+    BasicAuth:
+      scheme: basic
+      type: http
+externalDocs:
+  url: https://cpanel.net/developers/
+x-tagGroups:
+- name: Account Restoration
+  tags:
+  - Restore Account
+  - Restore Queue Management
+  - Restore Queue Reporting
+- name: Accounts
+  tags:
+  - Account Creation
+  - Account Enhancements
+  - Account Management
+  - Bandwidth and Disk Quotas
+  - Domain Information
+  - Passwords
+  - Styles
+  - Suspensions
+- name: API Development Tools
+  tags:
+  - API Execution
+  - API Statistics
+  - API Token Management
+  - Applications
+  - Session
+- name: Authentication
+  tags:
+  - Authentication Providers
+  - External Authentication
+  - Login URL
+  - SSH Keys and Connections
+  - Two-Factor Authentication
+- name: Backups
+  tags:
+  - Backup Destination
+  - Backup or Restore
+  - Backup Settings
+  - Legacy Migration
+- name: Commerce Integration
+  tags:
+  - Market Integration
+  - Sitejet
+- name: cPanel Market
+  tags:
+  - Product Management
+  - Provider Management
+- name: cPanel Support Tickets
+  tags:
+  - Support Access
+  - Ticket Management
+- name: Customizations
+  tags:
+  - Brand
+  - Customizations
+- name: Databases
+  tags:
+  - Manage MySQL Server
+  - MySQL Databases
+  - PostgreSQL Databases
+  - Remote MySQL Databases
+- name: DNS
+  tags:
+  - DNS Cluster Settings
+  - DNS Security
+  - DNS Zones
+  - Domain Management
+  - Domain Management
+  - Resolvers
+  - Service Records
+- name: Hosting Plans
+  tags:
+  - Feature Access
+  - Feature Lists
+  - Hosting Plan Extensions
+  - Hosting Plans
+- name: InProductSurvey
+  tags:
+  - InProductSurvey
+- name: Integrations
+  tags:
+  - API Authentication
+  - Links
+  - Scripts Hooks
+- name: IP Address Management
+  tags:
+  - IPv4 Address Settings
+  - IPv6 Address Settings
+  - Network Address Translation
+- name: Login Security (cPHulk)
+  tags:
+  - Management
+  - Reporting
+  - Settings
+- name: Logs
+  tags:
+  - Web Log Retention
+- name: Mail
+  tags:
+  - cPanel Account Mail Management
+  - Mail DNS Settings
+  - Mail Server Settings
+  - Spam Management
+  - Spam Protection (Greylisting)
+- name: Monitoring
+  tags:
+  - 360 Monitoring
+- name: NGINX Manager
+  tags:
+  - NGINX Manager
+- name: Resellers
+  tags:
+  - Account Enhancement Limit
+  - Account Limits
+  - Account Permissions
+  - Account Settings
+  - Reseller Account Management
+- name: Security
+  tags:
+  - WHM Access
+- name: Server Administration
+  tags:
+  - Configuration Clusters
+  - Configurations
+  - Connected Applications
+  - Connections
+  - cPanel Analytics
+  - License Management
+  - Notifications
+  - Plugin-Based Features
+  - Security
+  - Server Nodes
+  - Server Profiles
+  - Services
+  - System Information
+  - Updates
+- name: SSL Certificates
+  tags:
+  - Auto-Generated Certificates
+  - cPanel Account Settings
+  - SSL Server Settings
+- name: System Package Management
+  tags:
+  - Install or Uninstall Package
+  - List Package Information
+  - Package Manager Settings
+- name: Transfers
+  tags:
+  - cPanel Account Transfer
+  - Transfer Configuration
+  - Transfer Monitoring
+- name: UserData
+  tags:
+  - UserData
+- name: Web Server Configuration
+  tags:
+  - EasyApache Settings
+  - PHP
+  - PHP-FPM
+- name: Web Server Security (ModSecurity)
+  tags:
+  - Rule Settings
+  - Rule Vendor Settings
+  - Server Settings

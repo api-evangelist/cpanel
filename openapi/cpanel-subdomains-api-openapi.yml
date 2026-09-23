@@ -1,0 +1,357 @@
+openapi: 3.2.0
+info:
+  contact:
+    email: cs@cpanel.net
+    name: WebPros International, LLC
+    url: https://cpanel.net/support/
+  description: UAPI accesses the cPanel interface's features. Use this API to access and modify cPanel account data and settings.
+  license:
+    name: cPanel License
+    url: https://cpanel.net/legal-notices/
+  termsOfService: https://cpanel.net/legal-notices/
+  title: cPanel U Subdomains API
+  version: 11.137.9999.106
+  x-api-evangelist-provenance: 'Harvested verbatim from cPanel''s developer portal on 2026-09-05 via the MCP tool get-full-api-description at https://api.docs.cpanel.net/mcp. ONE mechanical change was made before storage: example values containing PEM private-key or certificate blocks, and AWS-access-key-shaped example strings, were replaced with REDACTED_* placeholders so the file can be stored in a public git repository without tripping secret scanning. No path, operation, parameter, schema or description was altered, added or removed.'
+servers:
+- description: A server running cPanel.
+  url: https://{host}:{port}/execute
+  variables:
+    host:
+      default: cpanel-server.tld
+      description: The hostname of a server running cPanel.
+    port:
+      default: '2083'
+      description: The cPanel port.
+security:
+- BasicAuth: []
+tags:
+- description: The SubDomain module for cPanel UAPI.
+  name: Subdomains
+paths:
+  /SubDomain/changedocroot:
+    get:
+      x-readonly: false
+      x-rollback: none
+      description: 'This function changes the document root for a subdomain or addon domain
+
+        that the calling cPanel user owns.
+
+
+        **Important:**
+
+
+        - This function does **not** apply to the account''s primary domain.
+
+        Use the WHM API `set_primary_domain_docroot` function to change the document root for a primary domain.
+
+        - The target directory must already exist before you call this function.
+
+        The function does not create it.
+
+        - This function does **not** move any files. You must ensure that the files
+
+        exist in the new path when you call this function.
+
+        - Any parked domains (`ServerAlias` entries) on the affected domain will
+
+        inherit the new document root.
+
+        - AutoSSL HTTP-01 renewals will fail if the new document root is empty
+
+        or missing at renewal time.
+
+        - To revert a document root change, call this function again with the
+
+        original path.
+
+
+        When you disable the Web Server role,
+
+        the system **disables** this function.'
+      operationId: SubDomain-changedocroot
+      parameters:
+      - description: 'The new document root as a path relative to the user''s home
+
+          directory. The target directory **must** already exist, and the path **must** begin with `public_html/` if the
+
+          *Restrict document roots to public_html* value is set to *On* in
+
+          WHM''s [*Tweak Settings*](https://go.cpanel.net/TweakSettings-Domains)
+
+          interface (*WHM >> Home >> Server Configuration >> Tweak Settings*).'
+        in: query
+        name: docroot
+        required: true
+        schema:
+          example: public_html/myapp/public
+          format: path
+          type: string
+      - description: The full domain name of the subdomain or addon domain whose document root you want to change. The domain must belong to the calling cPanel user.
+        in: query
+        name: domain
+        required: true
+        schema:
+          example: sub.example.com
+          format: domain
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      documentroot:
+                        description: The absolute path of the new document root.
+                        example: /home/username/public_html/myapp/public
+                        type: string
+                    type: object
+                  errors:
+                    items:
+                      type: string
+                    type: array
+                  messages:
+                    items:
+                      type: string
+                    type: array
+                  metadata:
+                    properties:
+                      transformed:
+                        type: integer
+                    type: object
+                  status:
+                    description: '* `1` — Success.
+
+                      * `0` — Failed. Check the `errors` field for more details.'
+                    enum:
+                    - 0
+                    - 1
+                    example: 1
+                    type: integer
+                  warnings:
+                    items:
+                      type: string
+                    type: array
+                type: object
+          description: HTTP Request was successful.
+      summary: Change a subdomain or addon domain document root
+      tags:
+      - Subdomains
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "uapi --user=username --output=jsonpretty \\\n  SubDomain \\\n  changedocroot \\\n  domain='sub.example.com' \\\n  docroot='public_html/myapp/public'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2083/cpsess##########/execute/SubDomain/changedocroot?domain=sub.example.com&docroot=public_html%2Fmyapp%2Fpublic
+      x-cpanel-api-version: UAPI
+      x-cpanel-available-version: '11'
+components:
+  securitySchemes:
+    BasicAuth:
+      scheme: basic
+      type: http
+externalDocs:
+  url: https://cpanel.net/developers/
+x-tagGroups:
+- name: API Development Tools
+  tags:
+  - API Token Management
+  - Batch
+  - SSE Task Management
+  - URL Parsing
+- name: Authentication
+  tags:
+  - External Authentication
+  - Two-Factor Settings
+- name: Backup Information
+  tags:
+  - BackupInfo
+  - BackupInfo Status
+- name: Block Ip Addresses
+  tags:
+  - Block IP
+- name: Commerce Integration
+  tags:
+  - Market Integration
+  - SSL Certificates
+- name: Contact Information
+  tags:
+  - Contact Information
+- name: cPanel Account
+  tags:
+  - Account Enhancements
+  - Account Information
+  - Account Management
+  - AuditLog
+  - Contact Information
+  - cPanel Features
+  - Disk Quotas
+  - DomainRecommendations
+  - Personalization
+  - Resource Usage and Statistics
+  - Subaccount Management
+  - Team Roles
+  - Team Users
+- name: cPanel Account Backups
+  tags:
+  - Backup
+  - File Restoration
+- name: cPanel Plugin Framework
+  tags:
+  - Formbricks
+  - Plugins
+- name: cPanel Theme Management
+  tags:
+  - Application Information
+  - Brand Management
+  - Branding Files
+  - Browser Cache Management
+  - Language
+  - Theme Settings
+- name: Directory Management
+  tags:
+  - Directory Indexes
+  - Directory Privacy
+  - Directory Protection
+- name: DNS
+  tags:
+  - DNS
+  - DNS Information
+  - DNS Security
+  - Dynamic DNS
+  - Email DNS Settings
+  - ZoneEdit
+- name: Domain
+  tags:
+  - Domain
+- name: Domain Management
+  tags:
+  - AddonDomain
+  - Direct Link Protection (Hotlink)
+  - Domain
+  - Domain Information
+  - Domain Redirection
+  - DomainLookup
+  - Park
+  - SubDomain
+  - Virtual Host Information
+- name: Domains
+  tags:
+  - Subdomains
+- name: Email
+  tags:
+  - Email Accounts
+  - Email Filtering
+  - Email Forwarding
+  - Email Server Information
+  - Email Suspensions
+  - Mail Server Information
+  - Mailbox Management
+  - Mailing Lists
+  - Signing and Encryption (GnuPG Keys)
+  - Spam Filtering (Greylisting)
+  - Spam Management
+  - Spam Prevention (BoxTrapper)
+  - Webmail Applications
+  - Webmail Sessions
+- name: Extract Information
+  tags:
+  - ExtractInfo
+  - ExtractInfo Status
+- name: File Manager
+  tags:
+  - Trash
+- name: Files
+  tags:
+  - FTP Accounts
+  - FTP Server Settings
+  - Image Tools
+  - Jodit
+  - Manage Files
+  - Manage Files
+  - WebDisk Settings
+- name: GIT Management
+  tags:
+  - Deployment Settings
+  - Repository Management
+- name: InProductSurvey
+  tags:
+  - InProductSurvey
+- name: MySQL and MariaDB
+  tags:
+  - Database Information
+  - Database Management
+  - Remote Databases
+  - User Management
+- name: Notifications
+  tags:
+  - Pushbullet
+- name: Optional Applications
+  tags:
+  - Antivirus Protection (ClamAV)
+  - Calendar and Contacts (DAV)
+  - Calendar and Contacts Server
+  - WordPress Manager Backups
+- name: PostgreSQL
+  tags:
+  - PostgreSQL Database Management
+  - PostgreSQL User Management
+- name: Retrieve bandwidth information
+  tags:
+  - Bandwidth
+- name: Security
+  tags:
+  - Known SSH Hosts Management
+  - Login Information
+- name: Server Information
+  tags:
+  - cPanel Server Information
+  - Notifications
+  - Password Strength
+  - SSH
+  - WebPros MCP
+  - WebProsMCP
+- name: ServiceProxy
+  tags:
+  - ServiceProxy
+- name: Site Quality Monitoring
+  tags:
+  - SiteQuality
+- name: SSL Certificates
+  tags:
+  - Auto-generated SSL Certificates
+  - cPanel Account SSL Management
+  - SNI Email Settings
+  - SSL Certificate Management
+  - Verify Domain Ownership
+- name: Statistics
+  tags:
+  - Domain Statistics
+  - Weblog Settings
+- name: UserData
+  tags:
+  - UserData
+- name: Web Server Configuration
+  tags:
+  - EA4
+  - EasyApache Settings
+  - PHP
+- name: Web Server Management
+  tags:
+  - Application Manager
+  - ModSecurity
+  - NginxCaching
+  - PHP Settings
+  - Web Apps
+- name: Website Configuration
+  tags:
+  - Handler Management
+  - Logs
+  - Mime Type Management
+  - Nova
+  - Site Information
+  - Site Installation
+  - Sitejet
+  - WPX

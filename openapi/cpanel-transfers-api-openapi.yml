@@ -1,0 +1,3014 @@
+openapi: 3.2.0
+info:
+  contact:
+    email: cs@cpanel.net
+    name: WebPros International, LLC
+    url: https://cpanel.net/support/
+  description: WHM API.
+  license:
+    name: cPanel License
+    url: https://cpanel.net/legal-notices/
+  termsOfService: https://cpanel.net/legal-notices/
+  title: WHM Transfers API
+  version: 11.137.9999.106
+  x-api-evangelist-provenance: 'Harvested verbatim from cPanel''s developer portal on 2026-09-05 via the MCP tool get-full-api-description at https://api.docs.cpanel.net/mcp. ONE mechanical change was made before storage: example values containing PEM private-key or certificate blocks, and AWS-access-key-shaped example strings, were replaced with REDACTED_* placeholders so the file can be stored in a public git repository without tripping secret scanning. No path, operation, parameter, schema or description was altered, added or removed.'
+servers:
+- description: A server running WHM.
+  url: https://{host}:{port}/json-api
+  variables:
+    host:
+      default: whm-server.tld
+      description: The hostname of a server running WHM.
+    port:
+      default: '2087'
+      description: The WHM port.
+security:
+- BasicAuth: []
+tags:
+- description: The Transfers module for WHM API 1.
+  name: Transfers
+paths:
+  /abort_transfer_session:
+    get:
+      description: This function aborts an active transfer session.
+      operationId: Transfers-abort_transfer_session
+      parameters:
+      - description: The transfer session's ID.
+        in: query
+        name: transfer_session_id
+        required: true
+        schema:
+          example: exampleservercopya20140206192428NtyW
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: abort_transfer_session
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Stop transfer session
+      tags:
+      - Transfers
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  abort_transfer_session \\\n  transfer_session_id='exampleservercopya20140206192428NtyW'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/abort_transfer_session?api.version=1&transfer_session_id=exampleservercopya20140206192428NtyW
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11.44'
+  /analyze_transfer_session_remote:
+    get:
+      description: This function checks the remote server's credentials, which a transfer session uses to connect.
+      operationId: Transfers-analyze_transfer_session_remote
+      parameters:
+      - description: The transfer session's ID.
+        in: query
+        name: transfer_session_id
+        required: true
+        schema:
+          example: exampleservercopya20140206192428NtyW
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: analyze_transfer_session_remote
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is 0. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` - Success.
+
+                          * `0` - Failed. Check the reason field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Validate remote server's credentials
+      tags:
+      - Transfers
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  analyze_transfer_session_remote \\\n  transfer_session_id='exampleservercopya20140206192428NtyW'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/analyze_transfer_session_remote?api.version=1&transfer_session_id=exampleservercopya20140206192428NtyW
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11.44'
+  /available_transfer_modules:
+    get:
+      description: 'This function lists all available transfer modules.
+
+
+        **Note:**
+
+
+        For more information about how this function works with other functions in the transfer and restore process, read our
+
+        Guide to Transfer and Restore API Functions
+
+        documentation.'
+      operationId: Transfers-available_transfer_modules
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      modules:
+                        additionalProperties:
+                          description: 'The priority of the transfer module.
+
+
+                            **Note:**
+
+
+                            The key is the transfer module''s name.'
+                          example: '6000'
+                          pattern: ^[1-9][0-9]*$
+                          type: string
+                        description: The transfer module's information.
+                        example:
+                          AccountLocal: '5000'
+                          AccountRemoteRoot: '3000'
+                          AccountRemoteUser: '4000'
+                          FeatureListRemoteRoot: '1000'
+                          LegacyAccountBackup: '6000'
+                          PackageRemoteRoot: '2000'
+                        type: object
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: available_transfer_modules
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is 0. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` - Success.
+
+                          * `0` - Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Return available transfer modules
+      tags:
+      - Transfers
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  available_transfer_modules\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/available_transfer_modules?api.version=1
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11.44'
+  /create_remote_root_transfer_session:
+    get:
+      description: 'This function creates a transfer session as the `root` user.
+
+
+        **Important:**
+
+
+        For information about the ports that cPanel & WHM uses, read our How to Configure Your Firewall for cPanel Services documentation.
+
+
+        **Note:**
+
+
+        For more information about how this function works with other functions in the transfer and restore process, read our Guide to Transfer and Restore API Functions documentation.
+
+
+        ### Authentication
+
+        There are several methods that you can use to authenticate a transfer session with the remote server:
+
+
+        #### Authenticate as root
+
+        If you use SSH to authenticate as the `root` user, the remote server''s SSH must accept `root` logins. For more information read OpenSSH''s `sshd_config` documentation.
+
+
+        The following table displays the correct parameters and values for this authentication method:
+
+
+        | Parameter | Value |
+
+        |-|-|
+
+        | `user` | `root` |
+
+        | `password` | `root`''s password |
+
+
+        You can also use an SSH public key to authenticate the `root` user. If the SSH public key is encrypted, include the SSH key''s passphrase.
+
+
+        The following table displays the correct parameters and values for this authentication method:
+
+
+        | Parameter | Value if the SSH Key is not encrypted | Value if the SSH Key is encrypted |
+
+        |-|-|-|
+
+        | `user` | `root` | `root` |
+
+        | `sshkey_name` | The `root` user''s SSH key. | The `root` user''s SSH key. |
+
+        | `sshkey_passphrase` | *(none)* | The `root` user''s SSH key passphrase. |
+
+
+        #### Authenticate as a user
+
+        Many server administrators do not permit direct `root` logins via SSH on their servers.
+
+        * If the remote server forbids root logins, you **must** use another user and their password on the remote server, and then escalate to the `root` user. For more information read OpenSSH''s `sshd_config` documentation.
+
+        * If the system administrator used WHM''s *Manage Wheel Group Users* interface (*WHM >> Home >> Security Center >> Manage Wheel Group Users*) to grant the user `su` access, then you will need to specify `su` and the `root` password.
+
+        * If the user has `sudo` access, you do **not** need the `root` password.
+
+
+        The following table displays the correct parameters and values for this authentication method:
+
+
+        | Parameter | Value if the user has sudo access | Value if the user has su access |
+
+        |-|-|-|
+
+        | `user` | The username. | The username. |
+
+        | `password` | The user''s password. | The user''s password. |
+
+        | `root_escalation_method` | `sudo` | `su` |
+
+        | `root_password` | *(none)* | The `root` user''s password. |
+
+
+        You can also use an SSH public key instead of a password to authenticate that user. If the SSH public key is encrypted, include the SSH key''s passphrase.
+
+
+        The following table displays the correct parameters and values for this authentication method:
+
+
+        | Parameter | sudo | su |
+
+        |-|-|-|
+
+        | `user` | The username. | The username. |
+
+        | `sshkey_name` | The user''s SSH key. | The user''s SSH key. |
+
+        | `sshkey_passphrase` (If encrypted) | The user''s SSH key passphrase. | The user''s SSH key passphrase. |
+
+        | `root_escalation_method` | `sudo` | `su` |
+
+        | `root_password` | *(none)* | The `root` user''s password. |'
+      operationId: Transfers-create_remote_root_transfer_session
+      parameters:
+      - description: 'The method by which the transfer system will execute commands on the remote system.
+
+          * `ssh` — Use SSH. The function uses the remote server''s indicated SSH `port` value.
+
+          * `whostmgr` — Use the remote server''s secure WHM port. This will reject invalid  TLS handshakes.
+
+          * `whostmgr_insecure` — Use the remote server''s secure WHM port, but **ignores** any TLS verification failures.'
+        in: query
+        name: comm_transport
+        required: true
+        schema:
+          default: ssh
+          enum:
+          - ssh
+          - whostmgr
+          - whostmgr_insecure
+          example: ssh
+          type: string
+      - description: 'Whether to compress data before transfer.
+
+          * `1` — Compress.
+
+          * `0` — Do **not** compress.'
+        in: query
+        name: compressed
+        required: true
+        schema:
+          enum:
+          - 0
+          - 1
+          example: 1
+          type: integer
+      - description: 'Whether to transfer reseller privileges.
+
+          * `1` — Transfer.
+
+          * `0` — Do **not** transfer.'
+        in: query
+        name: copy_reseller_privs
+        required: true
+        schema:
+          enum:
+          - 0
+          - 1
+          example: 1
+          type: integer
+      - description: 'Whether to use a custom `pkgacct` scripts on the remote server for the transfer session.
+
+          * `1` — Use a custom `pkgacct` script.
+
+          * `0` — Do **not** use a custom script.'
+        in: query
+        name: enable_custom_pkgacct
+        required: true
+        schema:
+          enum:
+          - 0
+          - 1
+          example: 1
+          type: integer
+      - description: The remote server's hostname or IP address.
+        example: 192.168.0.0
+        in: query
+        name: host
+        required: true
+        schema:
+          anyOf:
+          - description: A valid IP address.
+            example: 192.168.0.0
+            format: ipv4
+            type: string
+          - description: A valid domain.
+            example: remote.example.com
+            format: domain
+            type: string
+      - description: 'Whether to run the remote server processes at low priority in order to reduce impact on server performance.
+
+          * `1` — Run at low priority.
+
+          * `0` — Run at high priority.'
+        in: query
+        name: low_priority
+        required: true
+        schema:
+          enum:
+          - 0
+          - 1
+          example: 1
+          type: integer
+      - description: The number of CPU threads to use for restore sessions.
+        in: query
+        name: restore_threads
+        required: true
+        schema:
+          example: 1
+          minimum: 1
+          type: integer
+      - description: The number of CPU threads to use for transfer sessions.
+        in: query
+        name: transfer_threads
+        required: true
+        schema:
+          example: 1
+          minimum: 1
+          type: integer
+      - description: 'Whether to not use SSL to encrypt data.
+
+          * `1` — Do **not** use SSL.
+
+          * `0` — Use SSL.'
+        in: query
+        name: unencrypted
+        required: true
+        schema:
+          enum:
+          - 0
+          - 1
+          example: 0
+          type: integer
+      - description: "Whether to skip the Restricted Restore system.\n* `1` — Skip.\n* `0` — Do **not** skip.\n\n**Note:**\n\n  If you want to pass the `force` parameter in the WHM API 1 `enqueue_transfer_item` function, you **must** set this parameter to a value of `0`."
+        in: query
+        name: unrestricted_restore
+        required: true
+        schema:
+          enum:
+          - 0
+          - 1
+          example: 1
+          type: integer
+      - description: 'Whether to use an existing backup instead of packaging the data again if the backup is less than 24 hours old.
+
+          * `1` — Use an existing backup.
+
+          * `0` — Package the data.'
+        in: query
+        name: use_backups
+        required: true
+        schema:
+          enum:
+          - 0
+          - 1
+          example: 1
+          type: integer
+      - description: The username to use to connect to the remote server.
+        in: query
+        name: user
+        required: true
+        schema:
+          example: root
+          type: string
+      - description: "The username's password.\n\n**Note:**\n\n Use this parameter if you will authenticate to the remote server with a password. Do **not** use this parameter if you will authenticate to the remote server with an SSH key."
+        in: query
+        name: password
+        required: false
+        schema:
+          example: 123456luggage
+          type: string
+      - description: The remote server's SSH port number.
+        in: query
+        name: port
+        required: false
+        schema:
+          default: 22
+          example: 22
+          maximum: 65535
+          minimum: 1
+          type: integer
+      - description: "The escalation method to use to connect to the remote server.\n* `su`\n* `sudo`\n\n**Note:**\n\n Use this parameter if the `sshd_config` file's `PermitRootLogin` value is `No`."
+        in: query
+        name: root_escalation_method
+        required: false
+        schema:
+          enum:
+          - su
+          - sudo
+          example: sudo
+          type: string
+      - description: "`root`'s password on the remote server.\n\n**Note:**\n\n Use this parameter if the `sshd_config` file's `PermitRootLogin` value is `No` and you will use the `root` user's password to escalate access."
+        in: query
+        name: root_password
+        required: false
+        schema:
+          example: 123456luggage
+          type: string
+      - description: 'The SSH key''s name.
+
+
+          **Note:**
+
+
+          * Use this parameter if you will authenticate to the remote server with an SSH key. Do **not** use this parameter if you will authenticate to the remote server with a password.
+
+          * SSH keys are available in WHM''s [*Manage root''s SSH Keys*](https://go.cpanel.net/whmdocsManagerootsSSHKeys) interface (*WHM >> Home >> Security Center >> Manage root’s SSH Keys*).'
+        in: query
+        name: sshkey_name
+        required: false
+        schema:
+          example: FrancisScott
+          type: string
+      - description: "The SSH key's passphrase.\n\n**Note:**\n\n Use this parameter if you will authenticate to the remote server with an SSH key, and the key is encrypted."
+        in: query
+        name: sshkey_passphrase
+        required: false
+        schema:
+          example: kkwtoowoygidsa
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      analyze_rawout:
+                        description: The HTML output from the analysis of the remote server connection.
+                        example: 'Fetching information from remote host: \u201c10.1.100.35\u201d \u2026 \u2026\nDone\nFetching information from remote host: \u201c10.1.100.35\u201d \u2026 \u2026\nDone\n",'
+                        type: string
+                      create_rawout:
+                        description: The HTML output from the creation of the remote server connection.
+                        example: 'Basic credential check \u2026 \u2026\nDone\nFetching information from remote host: \u201c10.1.100.35\u201d \u2026 \u2026\nDone\nFetching WHM Version \u2026\nDone\nTesting \u201cvm5.docs.cpanel.net\u201d for transfer streaming support with password authentication....<strong>Streaming Supported</strong>\nRemote Server Type: \u201cWHM1130\u201d\n",'
+                        type: string
+                      transfer_session_id:
+                        description: The transfer session's ID.
+                        example: vm5docscpanelcopya20140430200606V06z
+                        type: string
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: create_remote_root_transfer_session
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` - Success.
+
+                          * `0` - Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Create remote server transfer session as root user
+      tags:
+      - Transfers
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  create_remote_root_transfer_session \\\n  host='192.168.0.0' \\\n  user='root' \\\n  transfer_threads='1' \\\n  restore_threads='1' \\\n  unrestricted_restore='1' \\\n  comm_transport='ssh' \\\n  copy_reseller_privs='1' \\\n  compressed='1' \\\n  unencrypted='0' \\\n  use_backups='1' \\\n  low_priority='1' \\\n  enable_custom_pkgacct='1'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/create_remote_root_transfer_session?api.version=1&host=192.168.0.0&user=root&transfer_threads=1&restore_threads=1&unrestricted_restore=1&comm_transport=ssh&copy_reseller_privs=1&compressed=1&unencrypted=0&use_backups=1&low_priority=1&enable_custom_pkgacct=1
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11.44'
+  /create_remote_user_transfer_session:
+    get:
+      description: 'This function creates a transfer session with a non-root user to a remote server.
+
+
+        **Important:**
+
+
+        * The source and target servers must be able to communicate over port `2087` to use this feature.
+
+        * The source and target servers must also be able to communicate over the port that your servers use for SSH connections.
+
+        * For more information about the ports that cPanel & WHM uses, read our How to Configure Your Firewall for cPanel & WHM Services documentation.
+
+
+        **Note:**
+
+
+        For more information about how this function works with other functions in the transfer and restore process, read our Guide to Transfer and Restore API Functions documentation.'
+      operationId: Transfers-create_remote_user_transfer_session
+      parameters:
+      - description: The server hostname for the account.
+        in: query
+        name: host
+        required: true
+        schema:
+          example: hostname.example.com
+          format: domain
+          type: string
+      - description: The account's password.
+        in: query
+        name: password
+        required: true
+        schema:
+          example: 12345luggage
+          type: string
+      - description: 'Whether to skip the Restricted Restore process.
+
+          * `1` - Skip Restricted Restore.
+
+          * `0` - Use Restricted Restore.
+
+
+          **Note:**
+
+
+          You **must** set this parameter to a value of 1.'
+        in: query
+        name: unrestricted_restore
+        required: true
+        schema:
+          enum:
+          - 1
+          example: 1
+          type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      transfer_session_id:
+                        description: The transfer session's ID.
+                        example: vm5docscpanelnoroo201402251939519hmy
+                        type: string
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: create_remote_user_transfer_session
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is 0. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` - Success
+
+                          * `0` - Failed: Check the reason field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Create remote server transfer session
+      tags:
+      - Transfers
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  create_remote_user_transfer_session \\\n  host='hostname.example.com' \\\n  password='12345luggage' \\\n  unrestricted_restore='1'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/create_remote_user_transfer_session?api.version=1&host=hostname.example.com&password=12345luggage&unrestricted_restore=1
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11.44'
+  /delete_account_archives:
+    get:
+      description: This function removes a cPanel user account's archives.
+      operationId: Transfers-delete_account_archives
+      parameters:
+      - description: The cPanel account username.
+        in: query
+        name: user
+        required: true
+        schema:
+          example: username
+          format: username
+          type: string
+      - description: The filepath to the archive storage location.
+        in: query
+        name: mountpoint
+        required: false
+        schema:
+          default: /home
+          example: /home/example/
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: delete_account_archives
+                        type: string
+                      output:
+                        properties:
+                          messages:
+                            description: An array of status messages.
+                            items:
+                              example: 'Found archive: /home/example/example.tar.gz'
+                              type: string
+                            type: array
+                          warnings:
+                            description: An array of warning messages.
+                            items:
+                              example: This is a warning message.
+                              type: string
+                            type: array
+                        type: object
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                    type: object
+                type: object
+          description: HTTP Request was successful.
+      summary: Remove cPanel account's archives
+      tags:
+      - Transfers
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  delete_account_archives \\\n  user='username'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/delete_account_archives?api.version=1&user=username
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '70'
+  /enqueue_transfer_item:
+    get:
+      description: 'This function adds a transfer session to a queue. For more information about how this function works with other
+
+        functions in the transfer and restore process, read our
+
+        Guide to Transfer and Restore API Functions documentation.
+
+
+        **Important:**
+
+
+        The `module` parameter determines which additional parameters to use with the function.'
+      operationId: Transfers-enqueue_transfer_item
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/schemas-Transfers_EnqueueTransferItem_Type'
+        description: An enqueue transfer item.
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: enqueue_transfer_item
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` - Success
+
+                          * `0` - Failed: Check the reason field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Add module to transfer session
+      tags:
+      - Transfers
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --input=json --output=jsonpretty \\\n  enqueue_transfer_item\n"
+      - label: HTTP Request (Wire Format)
+        lang: HTTP
+        source: 'GET /cpsess##########/json-api/enqueue_transfer_item HTTP/1.1
+
+          Host: example.com:2083
+
+          Cookie: ###################################
+
+          Content-Type: application/json
+
+          Content-Length: 0
+
+
+          '
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11.44'
+  /fetch_transfer_session_log:
+    get:
+      description: 'This function returns a transfer session''s log file.
+
+
+        **Note:**
+
+
+        For more information about how this function works with other functions in the transfer and restore process, read our Guide to Transfer and Restore API Functions documentation.'
+      operationId: Transfers-fetch_transfer_session_log
+      parameters:
+      - description: The log file's name.
+        in: query
+        name: logfile
+        required: true
+        schema:
+          example: master.log
+          oneOf:
+          - enum:
+            - master.log
+            - master.error_log
+            type: string
+          - description: A valid log file name found in the `master.log` file.
+            example: item-TRANSFER_AccountRemoteUser_root
+            type: string
+      - description: The transfer session's ID.
+        in: query
+        name: transfer_session_id
+        required: true
+        schema:
+          example: vm5docscpanelcopya20140224163412sylG
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      log:
+                        description: The logfile's contents.
+                        example: '{"contents":{"action":"start","time":1598991042,"child_number":0},"pid":12789,"type":"control","indent":0,"partial":0}
+
+                          {"partial":0,"indent":0,"type":"control","pid":12789,"contents":{"time":1598991042,"action":"initiator","child_number":0,"msg":"norootcopy"}}
+
+                          {"partial":0,"indent":0,"pid":12789,"type":"control","contents":{"msg":2.3,"child_number":0,"time":1598991042,"action":"version"}}
+
+                          {"type":"control","pid":12789,"contents":{"time":1598991042,"queue":"TRANSFER","action":"queue_count","msg":1,"child_number":0},"partial":0,"indent":0}
+
+                          {"contents":{"time":1598991042,"action":"queue_size","queue":"TRANSFER","child_number":0,"msg":1},"type":"control","pid":12789,"indent":0,"partial":0}
+
+                          {"type":"control","pid":12789,"contents":{"time":1598991042,"queue":"RESTORE","action":"queue_count","child_number":0,"msg":1},"partial":0,"indent":0}
+
+                          {"partial":0,"indent":0,"pid":12789,"type":"control","contents":{"child_number":0,"msg":1,"time":1598991042,"action":"queue_size","queue":"RESTORE"}}
+
+                          {"partial":0,"indent":0,"pid":12789,"type":"control","contents":{"action":"remotehost","time":1598991042,"msg":"10.1.32.200","child_number":0}}
+
+                          {"partial":0,"indent":0,"type":"control","pid":12790,"contents":{"item":"root","time":1598991042,"child_number":1,"action":"start","queue":"TRANSFER","logfile":"item-TRANSFER_AccountRemoteUser_root","local_item":"root","item_name":"Account","item_type":"AccountRemoteUser"}}
+
+                          {"indent":0,"partial":0,"contents":{"action":"process-item","queue":"TRANSFER","logfile":"item-TRANSFER_AccountRemoteUser_root","item_type":"AccountRemoteUser","item_name":"Account","local_item":"root","msg":"item-TRANSFER_AccountRemoteUser_root","item":"root","time":1598991042,"child_number":1},"pid":12790,"type":"control"}
+
+                          {"indent":0,"partial":0,"contents":{"logfile":"item-TRANSFER_AccountRemoteUser_root","item_name":"Account","item_type":"AccountRemoteUser","local_item":"root","msg":{"size":1},"queue":"TRANSFER","action":"start-item","child_number":1,"item":"root","time":1598991042},"pid":12790,"type":"control"}
+
+                          {"contents":{"child_number":1,"item":"root","time":1598991042,"logfile":"item-TRANSFER_AccountRemoteUser_root","local_item":"root","msg":{"dangerous_items":0,"skipped_items":0,"altered_items":0,"failure":"The account “root” already exists on “control.box.new”.","size":1,"warnings":0,"contents":{"warnings":null,"skipped_items":null,"dangerous_items":null,"altered_items":null}},"item_name":"Account","item_type":"AccountRemoteUser","queue":"TRANSFER","action":"failed-item"},"type":"control","pid":12790,"indent":0,"partial":0}
+
+                          {"indent":0,"partial":0,"contents":{"item_type":"AccountRemoteUser","item_name":"Account","msg":{"size":1},"local_item":"root","logfile":"item-RESTORE_AccountRemoteUser_root","action":"start-item","queue":"RESTORE","child_number":1,"time":1598991042,"item":"root"},"type":"control","pid":12790}
+
+                          {"pid":12790,"type":"control","contents":{"item_type":"AccountRemoteUser","item_name":"Account","msg":{"size":1,"failure":"The account “root” already exists on “control.box.new”."},"local_item":"root","logfile":"item-RESTORE_AccountRemoteUser_root","action":"failed-item","queue":"RESTORE","child_number":1,"time":1598991042,"item":"root"},"partial":0,"indent":0}
+
+                          {"contents":{"time":1598991042,"action":"complete","queue":"TRANSFER","child_number":1},"pid":12790,"type":"control","indent":0,"partial":0}
+
+                          {"type":"control","pid":12791,"contents":{"queue":"RESTORE","action":"complete","time":1598991043,"child_number":1},"partial":0,"indent":0}
+
+                          {"pid":12789,"type":"control","contents":{"child_number":0,"action":"complete","time":1598991043},"partial":0,"indent":0}
+
+                          '
+                        format: json
+                        type: string
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: fetch_transfer_session_log
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` - Success
+
+                          * `0` - Failed. Check the reason field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Return transfer session's log file
+      tags:
+      - Transfers
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  fetch_transfer_session_log \\\n  transfer_session_id='vm5docscpanelcopya20140224163412sylG' \\\n  logfile='master.log'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/fetch_transfer_session_log?api.version=1&transfer_session_id=vm5docscpanelcopya20140224163412sylG&logfile=master.log
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11.44'
+  /get_transfer_session_state:
+    get:
+      description: 'This function retrieves the state of a transfer session.
+
+
+        **Note:**
+
+
+        For more information about how this function works with other functions in the transfer and restore process, read our Guide to Transfer and Restore API Functions documentation.'
+      operationId: Transfers-get_transfer_session_state
+      parameters:
+      - description: The transfer session's ID.
+        in: query
+        name: transfer_session_id
+        required: true
+        schema:
+          example: exampleservercopya20140206192428NtyW
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      state_name:
+                        description: 'The transfer session''s state.
+
+                          * `TRANSFER_PENDING`
+
+                          * `TRANSFER_INPROGRESS`
+
+                          * `RESTORE_PENDING`
+
+                          * `RESTORE_INPROGRESS`
+
+                          * `RUNNING`
+
+                          * `PAUSED`
+
+                          * `PENDING`
+
+                          * `COMPLETED`
+
+                          * `ABORTED`
+
+                          * `FAILED`'
+                        enum:
+                        - TRANSFER_PENDING
+                        - TRANSFER_INPROGRESS
+                        - RESTORE_PENDING
+                        - RESTORE_INPROGRESS
+                        - RUNNING
+                        - PAUSED
+                        - PENDING
+                        - COMPLETED
+                        - ABORTED
+                        - FAILED
+                        example: TRANSFER_INPROGRESS
+                        type: string
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: get_transfer_session_state
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Return transfer session's status
+      tags:
+      - Transfers
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  get_transfer_session_state \\\n  transfer_session_id='exampleservercopya20140206192428NtyW'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/get_transfer_session_state?api.version=1&transfer_session_id=exampleservercopya20140206192428NtyW
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11.44'
+  /pause_transfer_session:
+    get:
+      description: 'This function pauses an active transfer session.
+
+
+        **Note:**
+
+
+        For more information about how this function works with other functions in the transfer and restore process, read our Guide to Transfer and Restore API Functions documentation.'
+      operationId: Transfers-pause_transfer_session
+      parameters:
+      - description: The transfer session's ID.
+        in: query
+        name: transfer_session_id
+        required: true
+        schema:
+          example: exampleservercopya20140206192428NtyW
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: pause_transfer_session
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK.
+                        type: string
+                      result:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Suspend active transfer session
+      tags:
+      - Transfers
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  pause_transfer_session \\\n  transfer_session_id='exampleservercopya20140206192428NtyW'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/pause_transfer_session?api.version=1&transfer_session_id=exampleservercopya20140206192428NtyW
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11.44'
+  /remote_basic_credential_check:
+    get:
+      description: 'This function checks the SSH credentials on the remote server.
+
+
+        ### Authentication
+
+        There are several methods that you can use to authenticate a transfer session with the remote server.
+
+
+        #### PermitRootLogin=Yes
+
+        The simplest authentication method is to use the `root` user and password. To do this, the `sshd_config` file on the remote server **must** contain the following value: `PermitRootLogin=Yes`
+
+
+        The following table displays the correct parameters and values for this authentication method:
+
+
+        | Parameter | Value |
+
+        |-|-|
+
+        | `user` | `root` |
+
+        | `password` | `root`''s password. |
+
+
+        You can also use the SSH Public Key to authenticate the `root` user. If the SSH Public Key is encrypted, include the SSH Key''s passphrase.
+
+
+        The following table displays the correct parameters and values for this authentication method:
+
+
+        | Parameter | Value if the SSH Key is not encrypted | Value if the SSH Key is encrypted |
+
+        |-|-|-|
+
+        | `user` | `root` | `root` |
+
+        | `sshkey_name` | `root`''s SSH key name. | `root`''s SSH key name. |
+
+        | `sshkey_passphrase` | (none) | `root`''s SSH key passphrase. |
+
+
+        #### PermitRootLogin=No
+
+        Many server administrators do not permit direct root logins on their servers.
+
+        * If the remote server contains `PermitRootLogin=No` in the `sshd_config `file, then you **must** use another user and their password on the remote server, and then escalate to `root`.
+
+        * If the system administrator used WHM''s *Manage Wheel Group Users* interface (*WHM >> Home >> Security Center >> Manage Wheel Group Users*) to grant the user `su` access, then you will need to specify `su` and the `root` password.
+
+        * If the user has `sudo` access, you do **not** need the `root` password.
+
+
+        The following table displays the correct parameters and values for this authentication method:
+
+
+        | Parameter | Value if the user has sudo access | Value if the user has su access |
+
+        |-|-|-|
+
+        | `user` | The user''s username. | The user''s username. |
+
+        | `password` | The user''s password. | The user''s password. |
+
+        | `root_escalation_method` | `sudo` | `su` |
+
+        | `root_password` | (none) | `root`''s password. |
+
+
+        You can also use an SSH Public Key instead of a password to authenticate that user. If the SSH Public Key is encrypted, include the SSH Key''s passphrase.
+
+
+        The following table displays the correct parameters and values for this authentication method:
+
+
+        | Parameter | sudo | su |
+
+        |-|-|-|
+
+        | `user` | The user''s username. | The user''s username. |
+
+        | `sshkey_name` | The user''s SSH key name. | The user''s SSH key name. |
+
+        | `sshkey_passphrase` (If encrypted) | The user''s SSH key passphrase. | The user''s SSH key passphrase. |
+
+        | `root_escalation_method` | `sudo` | `su` |
+
+        | `root_password` | (none) | `root`''s password. |'
+      operationId: SSH-remote_basic_credential_check
+      parameters:
+      - description: The remote server's hostname or IP address.
+        example: 192.168.0.0
+        in: query
+        name: host
+        required: true
+        schema:
+          anyOf:
+          - description: A valid IP address.
+            example: 192.168.0.0
+            format: ipv4
+            type: string
+          - description: A valid domain.
+            example: remote.example.com
+            format: domain
+            type: string
+      - description: The username to use to connect to the remote server.
+        in: query
+        name: user
+        required: true
+        schema:
+          example: root
+          format: username
+          type: string
+      - description: The username's password.
+        in: query
+        name: password
+        required: false
+        schema:
+          example: 123456luggage
+          type: string
+      - description: The remote server's SSH port number.
+        in: query
+        name: port
+        required: false
+        schema:
+          default: 22
+          example: 22
+          maximum: 65535
+          minimum: 1
+          type: integer
+      - description: "The escalation method to use to connect to the remote server.\n* `su`\n* `sudo`\n\n**Note:**\n\n Use this parameter if `PermitRootLogin=No` in the remote server's `sshd_config` file."
+        in: query
+        name: root_escalation_method
+        required: false
+        schema:
+          enum:
+          - su
+          - sudo
+          example: sudo
+          type: string
+      - description: "`root`'s password on the remote server.\n\n**Note:**\n\n Use this parameter if `PermitRootLogin=No` in the remote server's `sshd_config` file and the `root_escalation_method` value is set to `su`."
+        in: query
+        name: root_password
+        required: false
+        schema:
+          example: 123456luggage
+          type: string
+      - description: "The SSH key's name.\n\n**Note:**\n\n SSH keys are available in WHM's *Manage root's SSH Keys* interface (*WHM >> Home >> Security Center >> Manage root’s SSH Keys*)."
+        in: query
+        name: sshkey_name
+        required: false
+        schema:
+          example: FrancisScott
+          type: string
+      - description: "The SSH key's passphrase.\n\n**Note:**\n\n Use this parameter if the SSH Key is encrypted."
+        in: query
+        name: sshkey_passphrase
+        required: false
+        schema:
+          example: kkwtoowoygidsa
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      output:
+                        description: The function call's raw HTML output.
+                        example: 'Basic credential check…
+
+                          Done
+
+                          '
+                        type: string
+                      response:
+                        description: The function call's response.
+                        example: 'basic credential check
+
+                          '
+                        type: string
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: remote_basic_credential_check
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: Success
+                        type: string
+                      result:
+                        description: '* `1` - Success.
+
+                          * `0` - Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Validate remote server's SSH credentials
+      tags:
+      - Transfers
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  remote_basic_credential_check \\\n  host='192.168.0.0' \\\n  user='root'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/remote_basic_credential_check?api.version=1&host=192.168.0.0&user=root
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11.44'
+  /retrieve_transfer_session_remote_analysis:
+    get:
+      description: 'This function analyzes a transfer session.
+
+
+        **Note:**
+
+
+        For more information about how this function works with other functions in the transfer and restore process, read our Guide to Transfer and Restore API Functions documentation.'
+      operationId: Transfers-retrieve_transfer_session_remote_analysis
+      parameters:
+      - description: The transfer session's ID.
+        in: query
+        name: transfer_session_id
+        required: true
+        schema:
+          example: exampleservercopya20140206192428NtyW
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      config:
+                        description: An object containing the transfer configuration options.
+                        properties:
+                          shared_mysql_server:
+                            description: 'Whether the remote and target server share the same MySQL® server.
+
+                              * `1` - The remote and target server share the same MySQL server.
+
+                              * `0` - The remote and target server do **not** share the same MySQL server.'
+                            enum:
+                            - 0
+                            - 1
+                            example: 1
+                            type: integer
+                        type: object
+                      items:
+                        description: An object containing items to transfer.
+                        properties:
+                          accounts:
+                            additionalProperties:
+                              description: Information for each account.
+                              type: string
+                            description: The accounts to transfer.
+                            type: array
+                          packages:
+                            additionalProperties:
+                              description: List of packages and featurelists.
+                              type: string
+                            description: The packages to transfer.
+                            type: array
+                        type: object
+                      local:
+                        description: An object containing the local server's information.
+                        properties:
+                          available_ips:
+                            description: A list of the local server's available IP addresses.
+                            items:
+                              example: 192.168.1.1
+                              oneOf:
+                              - format: ipv4
+                                type: string
+                              - format: ipv6
+                                type: string
+                            type: array
+                          dbs:
+                            description: An object containing the local server's databases and users.
+                            properties:
+                              dbs:
+                                description: An object containing the local server's databases.
+                                properties:
+                                  MYSQL:
+                                    additionalProperties:
+                                      description: "An object containing the database owner.\n\n**Note:**\n\n  The database's name is the key's name."
+                                      properties:
+                                        owner:
+                                          description: Owner of the database.
+                                          type: string
+                                      type: object
+                                    description: An object containing the local server's MySQL databases.
+                                    example:
+                                      user_db1:
+                                        owner: user
+                                      user_db2:
+                                        owner: user
+                                    type: object
+                                  PGSQL:
+                                    additionalProperties:
+                                      description: "An object containing the database owner.\n\n**Note:**\n\n  The database's name is the key's name."
+                                      properties:
+                                        owner:
+                                          description: Owner of the database.
+                                          type: string
+                                      type: object
+                                    description: An object containing the local server's PgSQL databases.
+                                    example:
+                                      user_db1:
+                                        owner: user
+                                      user_db2:
+                                        owner: user
+                                    type: object
+                                type: object
+                              users:
+                                description: An object containing the local server's database users.
+                                properties:
+                                  MYSQL:
+                                    additionalProperties:
+                                      description: "An object containing the database user owner.\n\n**Note:**\n\n  The database user's name is the key's name."
+                                      properties:
+                                        owner:
+                                          description: Owner of the database user.
+                                          type: string
+                                      type: object
+                                    description: An object containing the local server's MySQL users.
+                                    example:
+                                      user_user1:
+                                        owner: user
+                                      user_user2:
+                                        owner: user
+                                    type: object
+                                  PGSQL:
+                                    additionalProperties:
+                                      description: "An object containing the database user owner.\n\n**Note:**\n\n  The database user's name is the key's name."
+                                      properties:
+                                        owner:
+                                          description: Owner of the user.
+                                          type: string
+                                      type: object
+                                    description: An object containing the local server's PgSQL databases users.
+                                    example:
+                                      user_user1:
+                                        owner: user
+                                      user_user2:
+                                        owner: user
+                                    type: object
+                                type: object
+                            type: object
+                          dedicated_ips:
+                            additionalProperties:
+                              description: Domain with a dedicated IP address. The dedicated IP addresses is the key's name.
+                              type: string
+                            description: A list of the local server's dedicated IP addresses.
+                            example:
+                              192.168.1.2: domain.tld
+                            type: object
+                          domains:
+                            description: A list of the local server's domains and owners.
+                            example:
+                              '*': nobody
+                              domain.tld: user
+                          groups:
+                            additionalProperties:
+                              description: The group name is the key's name. Value is **always** `1`.
+                              enum:
+                              - 1
+                              type: integer
+                            description: An object containing the local server's account groups.
+                            example:
+                              bin: 1
+                              nobody: 1
+                            type: object
+                          host:
+                            description: The local server's hostname.
+                            example: hostname.domain.tld
+                            format: domain
+                            type: string
+                          major_version:
+                            description: The local server's major version.
+                            example: '11.90'
+                            type: string
+                          roundcube_dbtype:
+                            description: The database type Roundcube uses on the local server.
+                            enum:
+                            - sqlite
+                            - mysql
+                            example: sqlite
+                            type: string
+                          users:
+                            additionalProperties:
+                              description: The user's name is the key's name. Value is **always** `1`.
+                              enum:
+                              - 1
+                              type: integer
+                            description: An object containing the local server's account users.
+                            example:
+                              nobody: 1
+                              root: 1
+                            type: object
+                          version:
+                            description: The local server's version of cPanel.
+                            example: 11.90.0.6
+                            format: cPanel version
+                            type: string
+                        type: object
+                      modules:
+                        additionalProperties:
+                          description: "An object containing the module.\n\n**Note:**\n\n  The module name is the key's name."
+                          properties:
+                            analysis:
+                              additionalProperties:
+                                description: Module version and other information when applicable. Key name will be either `Local` or `Remote`, followed by the module information type.
+                                type: string
+                              description: Module information from both servers.
+                              type: object
+                            name:
+                              description: The name of the module.
+                              type: string
+                          type: object
+                        description: An list of objects containing the module infromation of both servers.
+                        example:
+                          Backups:
+                            analysis:
+                              Local Backups Version: 11.90.0.6
+                              Remote Backups Version: 11.88.0.7
+                            name: Backups
+                          MySQL:
+                            analysis:
+                              Local Type: MySQL
+                              Local Version: '5.7'
+                              Remote Type: MariaDB
+                              Remote Version: '10.3'
+                            name: Database Server
+                        type: object
+                      options:
+                        description: An object containing transfer session options.
+                        properties:
+                          skip_reseller_privs:
+                            default: 0
+                            description: 'Whether reseller privileges will be set to transfer by default.
+
+                              * `0` - Reseller privileges will **not** be set to transfer by default.
+
+                              * `1` - Reseller privileges will be set to transfer by default.'
+                            enum:
+                            - 0
+                            - 1
+                            type: integer
+                          unrestricted:
+                            default: 1
+                            description: 'Whether the transfer session will use [Restriced Restore](https://go.cpanel.net/insecurerestoreaccount).
+
+                              * `0` - Transfer session will use Restriced Restore.
+
+                              * `1` _ Transfer session will **not** use Restirced Restore.'
+                            enum:
+                            - 0
+                            - 1
+                            type: integer
+                        type: object
+                      remote:
+                        description: An object containing the remote server's information.
+                        properties:
+                          conflicts:
+                            description: Remote server data load error message.
+                            type: object
+                          cpversion:
+                            description: Remote server internal version.
+                            example: '11.64'
+                            type: string
+                          dbs:
+                            description: An object containing the remote server's databases and users.
+                            properties:
+                              dbs:
+                                description: An object containing the remote server's databases.
+                                properties:
+                                  MYSQL:
+                                    additionalProperties:
+                                      description: "An object containing the database owner.\n\n**Note:**\n\n  The database's name is the key's name."
+                                      properties:
+                                        owner:
+                                          description: Owner of the database.
+                                          type: string
+                                      type: object
+                                    description: An object containing the remote server's MySQL databases.
+                                    example:
+                                      user_db1:
+                                        owner: user
+                                      user_db2:
+                                        owner: user
+                                    type: object
+                                  PGSQL:
+                                    additionalProperties:
+                                      description: "An object containing the database owner.\n\n**Note:**\n\n  The database's name is the key's name."
+                                      properties:
+                                        owner:
+                                          description: Owner of the database.
+                                          type: string
+                                      type: object
+                                    description: An object containing the remote server's PgSQL databases.
+                                    example:
+                                      user_db1:
+                                        owner: user
+                                      user_db2:
+                                        owner: user
+                                    type: object
+                                type: object
+                              users:
+                                description: An object containing the remote server's database users.
+                                properties:
+                                  MYSQL:
+                                    additionalProperties:
+                                      description: "An object containing the database user owner.\n\n**Note:**\n\n  The database user's name is the key's name."
+                                      properties:
+                                        owner:
+                                          description: Owner of the database user.
+                                          type: string
+                                      type: object
+                                    description: An object containing the remote server's MySQL users.
+                                    example:
+                                      user_user1:
+                                        owner: user
+                                      user_user2:
+                                        owner: user
+                                    type: object
+                                  PGSQL:
+                                    additionalProperties:
+                                      description: "An object containing the database user owner.\n\n**Note:**\n\n  The database user's name is the key's name."
+                                      properties:
+                                        owner:
+                                          description: Owner of the user.
+                                          type: string
+                                      type: object
+                                    description: An object containing the remote server's PgSQL databases users.
+                                    example:
+                                      user_user1:
+                                        owner: user
+                                      user_user2:
+                                        owner: user
+                                    type: object
+                                type: object
+                            type: object
+                          has_disk_used:
+                            description: "Whether the remote server can transmit disk usage information to the target server.\n* `1` - Remote server can transmit disk usage information.\n* `0` - Remote server **cannot** transmit disk usage information.\n\n**Note:**\n\n  cPanel & WHM servers have this ability by default."
+                            enum:
+                            - 0
+                            - 1
+                            example: 1
+                            type: integer
+                          has_files_used:
+                            description: "Whether the remote server can transmit file usage information to the target server.\n* `1` - Remote server can transmit file usage information.\n* `0` - Remote server **cannot** transmit file usage information.\n\n**Note:**\n\n  cPanel & WHM servers have this ability by default."
+                            enum:
+                            - 0
+                            - 1
+                            example: 1
+                            type: integer
+                          has_owners:
+                            description: 'Whether the remote server can transmit owner information to the target server.
+
+                              * `1` — Remote server can transmit owner information.
+
+                              * `0` — Remote server **cannot** transfer owner information, and the transfer tool will assume that root owns all accounts.'
+                            enum:
+                            - 0
+                            - 1
+                            example: 1
+                            type: integer
+                          has_package_extensions:
+                            description: 'Whether the remote server has package extensions.
+
+                              * `1` - Remote server has package extensions.
+
+                              * `0` - Remote server does **not** have package extensions.'
+                            enum:
+                            - 0
+                            - 1
+                            example: 1
+                            type: integer
+                          has_xfertool:
+                            description: 'Whether the remote server has the transfer tool.
+
+                              * `1` - Remote server has the transfer tool.
+
+                              * `0` - Remote server does **not** have the transfer tool.'
+                            enum:
+                            - 0
+                            - 1
+                            example: 1
+                            type: integer
+                          host:
+                            description: The remote server's IP address.
+                            example: 192.168.1.1
+                            format: ipv4
+                            type: string
+                          hostname:
+                            description: The local server's hostname.
+                            example: hostname.domain.tld
+                            format: domain
+                            type: string
+                          linked_nodes:
+                            description: An array containing the remote server's linked cPanel server nodes, if any exist.
+                            items:
+                              properties:
+                                alias:
+                                  description: The remote server's linked cPanel server node alias.
+                                  example: mailnode
+                                  type: string
+                                enabled_services:
+                                  description: Enabled services on the linked node.
+                                  example:
+                                  - exim
+                                  - imap
+                                  items:
+                                    type: string
+                                  type: array
+                                hostname:
+                                  description: The remote server's linked cPanel server node hostname.
+                                  example: remotemailnode.example.com
+                                  format: domain
+                                  type: string
+                                last_check:
+                                  description: Last time linked node was checked.
+                                  example: 1600126907
+                                  format: unix_timestamp
+                                  type: integer
+                                system_settings:
+                                  additionalProperties:
+                                    additionalProperties:
+                                      description: "Server role system setting.\n* `0` - System setting is **not** enabled.\n* `1` - System setting is enabled.\n\n**Note:**\n\n  The system setting's name is the key's name."
+                                      enum:
+                                      - 0
+                                      - 1
+                                      type: integer
+                                    description: "An object containing the server role.\n\n**Note:**\n\n  The server role's name is the key's name."
+                                    type: object
+                                  description: An object containing server role system settings.
+                                  example:
+                                    Mail:
+                                      globalspamassassin: 0
+                                  type: object
+                                tls_verified:
+                                  description: 'Whether the connection to the server node is using TLS verification.
+
+                                    * `0` - Server node connection is **note** using TLS verification.
+
+                                    * `1` - Server node connection is using TLS verification.'
+                                  enum:
+                                  - 0
+                                  - 1
+                                  example: 1
+                                  type: integer
+                                username:
+                                  description: The username the server node link uses.
+                                  example: root
+                                  type: string
+                                version:
+                                  description: The server node's software version number.
+                                  example: 11.90.0.6
+                                  format: cPanel version
+                                  type: string
+                                worker_capabilities:
+                                  additionalProperties:
+                                    description: "An object containing the server role.\n\n**Note:**\n\n  The server role's name is the key's name."
+                                    type: object
+                                  description: An object containing a group of services required for the remote server's linked cPanel server node to perform a specific task.
+                                  example:
+                                    Mail: {}
+                                  type: object
+                              type: object
+                            type: array
+                          major_version:
+                            description: The remote server's major version.
+                            example: '11.90'
+                            type: string
+                          resellers:
+                            additionalProperties:
+                              description: The reseller's username is the key's name. Value is **always** `1`.
+                              enum:
+                              - 1
+                              type: integer
+                            description: "The remote servers reseller accounts that own one or more accounts.\n\n**Note:**\n\n  This won't return a value if the `root` user is the only user that owns accounts."
+                            example:
+                              resell2: 1
+                              reseller: 1
+                              root: 1
+                            type: object
+                          roundcube_dbtype:
+                            description: The database type Roundcube uses on the remote server.
+                            enum:
+                            - sqlite
+                            - mysql
+                            example: sqlite
+                            type: string
+                          server_type:
+                            description: 'The remote server''s type.
+
+                              * An internal cPanel type ID dependent on cPanel version.
+
+                              * `Plesk`
+
+                              * `Ensim`'
+                            example: WHM1164
+                            type: string
+                          supports_live_transfers:
+                            description: 'Whether the remote server supports the Live Transfers feature in WHM''s Transfer Tool  interface (WHM >> Home >> Transfers >> Transfer Tool).
+
+                              * `1` — Supported.
+
+                              * `0` — **Not** supported.'
+                            enum:
+                            - 0
+                            - 1
+                            example: 1
+                            type: integer
+                          version:
+                            description: The remote server's software version number.
+                            example: 11.90.0.6
+                            format: cPanel version
+                            type: string
+                        type: object
+                      transfer_session_id:
+                        description: The transfer session's ID.
+                        example: exampleservercopya20140206192428NtyW
+                        type: string
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: retrieve_transfer_session_remote_analysis
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` - Success.
+
+                          * `0` - Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Return transfer session's information
+      tags:
+      - Transfers
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  retrieve_transfer_session_remote_analysis \\\n  transfer_session_id='exampleservercopya20140206192428NtyW'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/retrieve_transfer_session_remote_analysis?api.version=1&transfer_session_id=exampleservercopya20140206192428NtyW
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11.44'
+  /start_transfer_session:
+    get:
+      description: 'This function starts or restarts a transfer session.
+
+
+        **Note:**
+
+
+        For more information about how this function works with other functions in the transfer and restore process, read our Guide to Transfer and Restore API Functions documentation.'
+      operationId: Transfers-start_transfer_session
+      parameters:
+      - description: The transfer session's ID.
+        in: query
+        name: transfer_session_id
+        required: true
+        schema:
+          example: exampleservercopya20140206192428NtyW
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      pid:
+                        description: The transfer session's process ID.
+                        example: 90210
+                        minimum: 1
+                        type: integer
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: start_transfer_session
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is 0. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` - Success
+
+                          * `0` - Failed: Check the reason field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Start or restart transfer session
+      tags:
+      - Transfers
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  start_transfer_session \\\n  transfer_session_id='exampleservercopya20140206192428NtyW'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/start_transfer_session?api.version=1&transfer_session_id=exampleservercopya20140206192428NtyW
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11.44'
+  /transfer_module_schema:
+    get:
+      description: 'This function retrieves a transfer module''s key structure.
+
+
+        **Note:**
+
+
+        For more information about how this function works with other functions in the transfer and restore process, read our Guide to Transfer and Restore API Functions documentation.'
+      operationId: Transfers-transfer_module_schema
+      parameters:
+      - description: 'The transfer module''s name.
+
+
+          * `AccountLocal`
+
+          * `AccountRemoteRoot`
+
+          * `AccountRemoteUser`
+
+          * `FeaturesListRemoteRoot`
+
+          * `LegacyAccountBackup`
+
+          * `PackageRemoteRoot`'
+        in: query
+        name: module
+        required: true
+        schema:
+          enum:
+          - AccountLocal
+          - AccountRemoteRoot
+          - AccountRemoteUser
+          - FeaturesListRemoteRoot
+          - LegacyAccountBackup
+          - PackageRemoteRoot
+          example: AccountRemoteRoot
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      schema:
+                        description: An object containing information about the schema's keys.
+                        properties:
+                          keys:
+                            additionalProperties:
+                              description: 'An object containing the key''s information.
+
+
+                                **Note:**
+
+
+                                The key''s name is the return''s name.'
+                              properties:
+                                def:
+                                  description: 'The first value is the parameter''s type and length:
+
+
+                                    * `int`
+
+                                    * `char`
+
+                                    * `bigint`
+
+                                    * `text`
+
+
+                                    The second value is the default prepended by the word `DEFAULT`.'
+                                  example: char(255) DEFAULT NULL
+                                  type: string
+                              type: object
+                            description: An object containing the schema's keys.
+                            example:
+                              copypoint:
+                                def: text
+                              cpmovefile:
+                                def: text
+                              customip:
+                                def: char(255) DEFAULT NULL
+                              detected_remote_user:
+                                def: char(255) DEFAULT NULL
+                              disabled:
+                                def: text
+                              domain:
+                                def: char(255) DEFAULT NULL
+                              files:
+                                def: BIGINT UNSIGNED DEFAULT 1
+                              force:
+                                def: int(1) DEFAULT 0
+                              ip:
+                                def: int(1) DEFAULT 0
+                              live_transfer:
+                                def: int(1) DEFAULT 0
+                              localuser:
+                                def: char(255) DEFAULT NULL
+                              mail_location:
+                                def: char(255) DEFAULT NULL
+                              overwrite_all_dbs:
+                                def: int(1) DEFAULT 0
+                              overwrite_all_dbusers:
+                                def: int(1) DEFAULT 0
+                              overwrite_sameowner_dbs:
+                                def: int(1) DEFAULT 0
+                              overwrite_sameowner_dbusers:
+                                def: int(1) DEFAULT 0
+                              overwrite_with_delete:
+                                def: int(1) DEFAULT 0
+                              prerequisite_user:
+                                def: char(255) DEFAULT NULL
+                              priority:
+                                def: int(1) DEFAULT 255
+                              replaceip:
+                                def: char(255) DEFAULT NULL
+                              reseller:
+                                def: int(1) DEFAULT 0
+                              shared_mysql_server:
+                                def: int(1) DEFAULT 0
+                              size:
+                                def: BIGINT UNSIGNED DEFAULT 1
+                              skipaccount:
+                                def: int(1) DEFAULT 0
+                              skipacctdb:
+                                def: int(1) DEFAULT 0
+                              skipbwdata:
+                                def: int(1) DEFAULT 0
+                              skipemail:
+                                def: int(1) DEFAULT 0
+                              skiphomedir:
+                                def: int(1) DEFAULT 0
+                              skipres:
+                                def: int(1) DEFAULT 0
+                              skipsubdomains:
+                                def: int(1) DEFAULT 0
+                              user:
+                                def: char(255) DEFAULT NULL
+                              xferpoint:
+                                def: int(1) DEFAULT 0
+                            type: object
+                          primary:
+                            description: The schema's primary key.
+                            example:
+                            - user
+                            items:
+                              type: string
+                            type: array
+                          required:
+                            description: A list of schema's required keys.
+                            example:
+                            - user
+                            - localuser
+                            items:
+                              type: string
+                            type: array
+                        type: object
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: transfer_module_schema
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is 0. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` - Success
+
+                          * `0` - Failed. Check the reason field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Return a transfer module's schema
+      tags:
+      - Transfers
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  transfer_module_schema \\\n  module='AccountRemoteRoot'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/transfer_module_schema?api.version=1&module=AccountRemoteRoot
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: cPanel 11.44
+  /validate_system_user:
+    get:
+      description: 'This function validates a system user for use on the target server.
+
+
+        **Note:**
+
+
+        For more information about how this function works with other functions in the transfer and restore process, read our Guide to Transfer and Restore API Functions documentation.'
+      operationId: Sys-validate_system_user
+      parameters:
+      - description: The system username.
+        in: query
+        name: user
+        required: true
+        schema:
+          example: username
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      exists:
+                        description: 'Whether the username exists on the server.
+
+                          * `1` — Exists.
+
+                          * `0` — Does **not** exist.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      reserved:
+                        description: 'Whether the username is reserved.
+
+                          * `1` — Reserved.
+
+                          * `0` — **Not** reserved.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      valid_for_new:
+                        description: 'Whether the system can use the username to create a new account.
+
+                          * `1` — Usable.
+
+                          * `0` — Unusable.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      valid_for_transfer:
+                        description: 'Whether the username is valid for a transferred account, but not a new account.
+
+                          * `1` — Valid for transfer, but **not** a new account.
+
+                          * `0` — Invalid.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: validate_system_user
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the reason field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Validate username availability on target server
+      tags:
+      - Transfers
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  validate_system_user \\\n  user='username'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/validate_system_user?api.version=1&user=username
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11.44'
+components:
+  schemas:
+    Transfers_EnqueueTransferItem_Base:
+      properties:
+        module:
+          description: 'The transfer system module.
+
+
+            * `LegacyAccountBackup` — This module restores legacy-account backup files.
+
+            * `FeatureListRemoteRoot` — This module transfers the feature list from the remote server.
+
+            * `PackageRemoteRoot` — This module transfers the package settings.
+
+            * `AccountLocal` — This module restores backup files.
+
+            * `AccountRemoteRoot` — This module uses the `root` credentials to transfer account settings that are not a part of a package.
+
+            * `AccountRemoteUser` — This module uses the account''s user credentials to transfer account settings that are not a part of a package.
+
+
+            **Note:**
+
+
+            * The `module` parameter determines which additional parameters to use with the function.
+
+            * You **must** perform each module action as a separate step.
+
+
+            When you call this function, you **must** include the additional parameters for the desired transfer system module. Select a module from the menu to view its required additional parameters:'
+          example: AccountRemoteRoot
+          type: string
+        size:
+          default: 1
+          description: 'The size of the content to transfer, in bytes.
+
+            The restore system uses this value to determine the best filesystem
+
+            partition for the restored account’s home directory. For best
+
+            results, give as accurate of a value as possible.'
+          example: 133698
+          minimum: 1
+          type: integer
+        transfer_session_id:
+          description: The transfer session's ID.
+          example: vm5docscpanelcopya20140211211719FxjU
+          type: string
+      required:
+      - transfer_session_id
+      - module
+      type: object
+    schemas-Transfers_EnqueueTransferItem_Type:
+      anyOf:
+      - $ref: '#/components/schemas/Transfers_EnqueueTransferItem_Type_AccountLocal_or_AccountRemoteRoot'
+      - $ref: '#/components/schemas/Transfers_EnqueueTransferItem_Type_AccountRemoteRoot'
+      - $ref: '#/components/schemas/Transfers_EnqueueTransferItem_Type_Account_Base'
+      - $ref: '#/components/schemas/Transfers_EnqueueTransferItem_Type_FeatureListRemoteRoot'
+      - $ref: '#/components/schemas/Transfers_EnqueueTransferItem_Type_LegacyAccountBackup'
+      - $ref: '#/components/schemas/Transfers_EnqueueTransferItem_Type_PackageRemoteRoot'
+      discriminator:
+        mapping:
+          AccountLocal: '#/components/schemas/Transfers_EnqueueTransferItem_Type_AccountLocal_or_AccountRemoteRoot'
+          AccountRemoteRoot: '#/components/schemas/Transfers_EnqueueTransferItem_Type_AccountRemoteRoot'
+          AccountRemoteUser: '#/components/schemas/Transfers_EnqueueTransferItem_Type_Account_Base'
+          FeatureListRemoteRoot: '#/components/schemas/Transfers_EnqueueTransferItem_Type_FeatureListRemoteRoot'
+          LegacyAccountBackup: '#/components/schemas/Transfers_EnqueueTransferItem_Type_LegacyAccountBackup'
+          PackageRemoteRoot: '#/components/schemas/Transfers_EnqueueTransferItem_Type_PackageRemoteRoot'
+        propertyName: module
+    Transfers_EnqueueTransferItem_Type_PackageRemoteRoot:
+      allOf:
+      - $ref: '#/components/schemas/Transfers_EnqueueTransferItem_Base'
+      - properties:
+          package:
+            description: The package's name.
+            example: user_package
+            type: string
+        required:
+        - package
+        type: object
+    Transfers_EnqueueTransferItem_Type_AccountLocal_or_AccountRemoteRoot:
+      allOf:
+      - $ref: '#/components/schemas/Transfers_EnqueueTransferItem_Type_Account_Base'
+      - properties:
+          force:
+            description: 'Whether to overwrite an account with an identical username.
+
+
+              * `1` — Overwrite the account.
+
+              * `0` — Do **not** overwrite the account.
+
+
+              This parameter performs the following actions:
+
+
+              * Restores the cPanel account on the destination server.
+
+              * Overwrites all account settings, data, and databases.
+
+              * Ignores errors and warnings for naming conflicts.
+
+
+              **Note:**
+
+
+              * The values you enter for the `user` and `localuser` parameters **must** match.
+
+              * You cannot use this parameter if you called the WHM API 1 `create_remote_root_transfer_session` function with the `unrestricted_restore` parameter set to `1`.'
+            enum:
+            - 0
+            - 1
+            example: 1
+            type: integer
+        type: object
+    Transfers_EnqueueTransferItem_Type_AccountRemoteRoot:
+      allOf:
+      - $ref: '#/components/schemas/Transfers_EnqueueTransferItem_Type_AccountLocal_or_AccountRemoteRoot'
+      - properties:
+          live_transfer:
+            default: 0
+            description: 'Whether to use the [*Live Transfer*](https://go.cpanel.net/livetransfers) feature.
+
+
+              * `1` — Use.
+
+              * `0` — Do **not** use.'
+            enum:
+            - 0
+            - 1
+            example: 1
+            type: integer
+          xferpoint:
+            description: 'Whether to use the [*Express Transfer*](https://go.cpanel.net/livetransfer) feature.
+
+
+              * `1` — Use.
+
+              * `0` — Do **not** use.'
+            enum:
+            - 0
+            - 1
+            example: 1
+            type: integer
+    Transfers_EnqueueTransferItem_Type_LegacyAccountBackup:
+      allOf:
+      - $ref: '#/components/schemas/Transfers_EnqueueTransferItem_Base'
+      - properties:
+          mysql_dbs_to_restore:
+            description: 'A comma-separated list of MySQL databases to restore, which will overwrite those databases on the account.
+
+
+              **Note:**
+
+
+              The default behavior is to select and overwrite all databases.
+
+
+              **Warning:**
+
+
+              The _Restricted Restore_ feature does not allow an account to overwrite data that it does not own. If the transfer session''s `unrestricted_restore` parameter has a value of `0`, this parameter is ignored.'
+            example: msdb1,msdb2,msdb3
+            type: string
+          overwrite_all_dbs:
+            description: 'Whether to allow the system to overwrite all of the account''s databases with the databases in the backup file.
+
+
+              * `1` — Overwrite.
+
+              * `0` — Do **not** overwrite.
+
+
+              **Note:**
+
+
+              You may use only **one** of the following parameters:
+
+
+              * `overwrite_all_dbs`
+
+              * `overwrite_sameowner_dbs`
+
+              * Both the `mysql_dbs_to_restore` and `pgsql_dbs_to_restore` parameters.
+
+
+              If you do not use any of these parameters, the system will restore all of the databases on the account, but will **not** overwrite any of them.
+
+
+              **Warning:**
+
+
+              The _Restricted Restore_ feature does not allow an account to overwrite data that it does not own. If the transfer session''s `unrestricted_restore` parameter has a value of `0`, the `overwrite_all_dbs` parameter will automatically change to a value of `0` and the `overwrite_sameowner_dbs` parameter will change to a value of `1`. This prevents the restore system from overwriting databases that the account does not own.'
+            enum:
+            - 0
+            - 1
+            type: integer
+          overwrite_sameowner_dbs:
+            description: 'Whether to allow the system to overwrite the account''s existing databases with the databases in the backup file.
+
+
+              * `1` — Overwrite.
+
+              * `0` — Do **not** overwrite.'
+            enum:
+            - 0
+            - 1
+            type: integer
+          overwrite_sameowner_dbusers:
+            description: 'Whether to allow the system to overwrite the account''s existing database users with the database users in the backup file.
+
+
+              * `1` — Overwrite.
+
+              * `0` — Do **not** overwrite.'
+            enum:
+            - 0
+            - 1
+            type: integer
+          pgsql_dbs_to_restore:
+            description: 'A comma-separated list of PostgreSQL® databases to restore, which will overwrite those databases on the account.
+
+
+              **Note:**
+
+
+              The default behavior is to select and overwrite all databases.
+
+
+              **Warning:**
+
+
+              The _Restricted Restore_ feature does not allow an account to overwrite data that it does not own. If the transfer session''s `unrestricted_restore` parameter has a value of `0`, this parameter is ignored.'
+            example: pgdb1,pgdb2,pgdb3
+            type: string
+          restoreall:
+            description: 'Whether to recreate the account on the target server.
+
+
+              * `1` — Recreate.
+
+              * `0` — Do **not** recreate.'
+            enum:
+            - 0
+            - 1
+            type: integer
+          restorebwdata:
+            description: 'Whether to restore bandwidth data.
+
+
+              * `1` — Restore.
+
+              * `0` — Do **not** restore.'
+            enum:
+            - 0
+            - 1
+            type: integer
+          restoreip:
+            description: 'Whether to assign the account''s dedicated IP address that is stored in the backup file.
+
+
+              * `1` — Assign.
+
+              * `0` — Do **not** assign.'
+            enum:
+            - 0
+            - 1
+            type: integer
+          restoremail:
+            description: 'Whether to restore the account''s mail data.
+
+
+              * `1` — Restore.
+
+              * `0` — Do **not** restore.'
+            enum:
+            - 0
+            - 1
+            type: integer
+          restoremysql:
+            description: 'Whether to restore MySQL® database data.
+
+
+              * `1` — Restore.
+
+              * `0` — Do **not** restore.'
+            enum:
+            - 0
+            - 1
+            type: integer
+          restoresubs:
+            description: 'Whether to restore the account''s subdomains.
+
+
+              * `1` — Restore.
+
+              * `0` — Do **not** restore.'
+            enum:
+            - 0
+            - 1
+            type: integer
+          restoretype:
+            description: 'The backup type to restore.
+
+
+              * `monthly`
+
+              * `weekly`
+
+              * `daily`'
+            enum:
+            - monthly
+            - weekly
+            - daily
+            example: daily
+            type: string
+          unrestricted_restore:
+            description: 'Whether to bypass the *Restricted Restore* system.
+
+
+              * `1` — Bypass.
+
+              * `0` — Do **not** bypass.'
+            enum:
+            - 0
+            - 1
+            type: integer
+          user:
+            description: The account's username.
+            example: user
+            format: username
+            type: string
+        required:
+        - user
+        - restoretype
+        type: object
+    Transfers_EnqueueTransferItem_Type_FeatureListRemoteRoot:
+      allOf:
+      - $ref: '#/components/schemas/Transfers_EnqueueTransferItem_Base'
+      - properties:
+          featurelist:
+            description: The feature list's name.
+            example: user_features
+            type: string
+        required:
+        - featurelist
+        type: object
+    Transfers_EnqueueTransferItem_Type_Account_Base:
+      allOf:
+      - $ref: '#/components/schemas/Transfers_EnqueueTransferItem_Base'
+      - properties:
+          customip:
+            description: 'The custom IP address to assign to the transferred account.
+
+
+              **Note:**
+
+
+              This parameter requires that the `ip` parameter has a value of `1`.'
+            example: 192.168.0.1
+            type: string
+          detected_remote_user:
+            description: The user account name that the remote server returns when you query the user account.
+            example: user
+            type: string
+          domain:
+            description: The domain name.
+            example: example.com
+            format: domain
+            type: string
+          ip:
+            description: 'Whether to assign a dedicated IP address to the transferred account.
+
+
+              * `1` — Assign a dedicated IP address.
+
+              * `0` — Do **not** assign a dedicated IP address.
+
+
+              **Note:**
+
+
+              If no dedicated IP address exists, the system assigns the account to a shared IP address.'
+            enum:
+            - 0
+            - 1
+            example: 1
+            type: integer
+          localuser:
+            description: The local account's username.
+            example: localuser
+            format: username
+            type: string
+          mail_location:
+            default: .existing
+            description: "The server on which the account's email will reside after it completes the transfer.\n\n* `.local` — The local server.\n* `.existing` — Use the location defined in the account's backup data.\n* The alias (friendly name) of a remote [cPanel & WHM linked server node.](https://go.cpanel.net/whmdocsLinkServerNodes). For example, the `example-alias` for the `servernode.example.com` domain.\n\n**Note:**\n\nThe system will use the `.local` option if:\n  * The system cannot use the cPanel & WHM linked server node when you call the `.existing` option.\n  * The cPanel & WHM linked server node's alias (friendly name) is invalid."
+            example: .local
+            oneOf:
+            - enum:
+              - .local
+              - .existing
+              type: string
+            - description: A remote cPanel & WHM linked server node's alias (friendly name).
+              type: string
+          overwrite_sameowner_dbs:
+            description: 'Whether to allow the system to overwrite the account''s existing databases with the databases in the backup file.
+
+
+              * `1` — Overwrite.
+
+              * `0` — Do **not** overwrite.'
+            enum:
+            - 0
+            - 1
+            example: 1
+            type: integer
+          overwrite_sameowner_dbusers:
+            description: 'Whether to allow the system to overwrite the account''s existing database users with the database users in the backup file.
+
+
+              * `1` — Overwrite.
+
+              * `0` — Do **not** overwrite.'
+            enum:
+            - 0
+            - 1
+            example: 1
+            type: integer
+          overwrite_with_delete:
+            description: 'Whether to replace and delete **all** directories and files on the destination server.
+
+
+              * `1` — Overwrite.
+
+              * `0` — Do **not** overwrite.
+
+
+              **Warning:**
+
+
+              If you use this parameter, the system deletes **every** directory and file on the destination server. The system does **not** delete the directories and files from the source server.'
+            enum:
+            - 0
+            - 1
+            example: 1
+            type: integer
+          replaceip:
+            description: 'The lines in the domain''s zonefile to replace with the new IP address.
+
+
+              * `all` — Replace all of the matching `A` record addresses in the zone file with the new IP address, including custom `A` records.
+
+              * `basic` — Replace **only** the cPanel-managed `A` records for this IP address. This includes the main domain and any [service subdomains](https://go.cpanel.net/ServiceProxySubdomains).'
+            enum:
+            - all
+            - basic
+            example: all
+            type: string
+          reseller:
+            description: 'Whether to make the account a reseller.
+
+
+              * `1` — Make the account a reseller account.
+
+              * `0` — Do **not** make the account a reseller account.'
+            enum:
+            - 0
+            - 1
+            example: 1
+            type: integer
+          shared_mysql_server:
+            description: 'Whether one of the following conditions is true:
+
+
+              * The target and remote servers share the same remote MySQL server.
+
+              * The target server is the remote MySQL server for the remote server.
+
+              * The remote server is the remote MySQL server for the target server.
+
+
+              Value:
+
+
+              * `1` — One is true.
+
+              * `0` — None are true.'
+            enum:
+            - 0
+            - 1
+            example: 1
+            type: integer
+          skipaccount:
+            description: 'Whether to skip the recreation of the account.
+
+
+              * `1` — Skip.
+
+              * `0` — Restore.
+
+
+              **Note:**
+
+
+              * The values you enter for the `user` and `localuser` parameters **must** match.
+
+              * This parameter is similar to the `force` parameter, but performs none of the account creation steps.'
+            enum:
+            - 0
+            - 1
+            example: 1
+            type: integer
+          skipacctdb:
+            description: 'Whether to skip the transfer of the account''s databases.
+
+
+              * `1` — Skip.
+
+              * `0` — Restore.'
+            enum:
+            - 0
+            - 1
+            example: 1
+            type: integer
+          skipbwdata:
+            description: 'Whether to skip the transfer of the account''s bandwidth data.
+
+
+              * `1` — Skip.
+
+              * `0` — Restore.'
+            enum:
+            - 0
+            - 1
+            example: 1
+            type: integer
+          skiphomedir:
+            description: 'Whether to skip the contents of the home directory.
+
+
+              * `1` — Skip.
+
+              * `0` — Restore.'
+            enum:
+            - 0
+            - 1
+            example: 1
+            type: integer
+          skipres:
+            description: 'Whether to skip restoration of the account''s reseller permissions.
+
+
+              * `1` — Skip.
+
+              * `0` — Restore.'
+            enum:
+            - 0
+            - 1
+            example: 1
+            type: integer
+          user:
+            description: The account to transfer.
+            example: user
+            format: username
+            type: string
+        required:
+        - user
+        - localuser
+        type: object
+  securitySchemes:
+    BasicAuth:
+      scheme: basic
+      type: http
+externalDocs:
+  url: https://cpanel.net/developers/
+x-tagGroups:
+- name: Account Restoration
+  tags:
+  - Restore Account
+  - Restore Queue Management
+  - Restore Queue Reporting
+- name: Accounts
+  tags:
+  - Account Creation
+  - Account Enhancements
+  - Account Management
+  - Bandwidth and Disk Quotas
+  - Domain Information
+  - Passwords
+  - Styles
+  - Suspensions
+- name: API Development Tools
+  tags:
+  - API Execution
+  - API Statistics
+  - API Token Management
+  - Applications
+  - Session
+- name: Authentication
+  tags:
+  - Authentication Providers
+  - External Authentication
+  - Login URL
+  - SSH Keys and Connections
+  - Two-Factor Authentication
+- name: Backups
+  tags:
+  - Backup Destination
+  - Backup or Restore
+  - Backup Settings
+  - Legacy Migration
+- name: Commerce Integration
+  tags:
+  - Market Integration
+  - Sitejet
+- name: cPanel Market
+  tags:
+  - Product Management
+  - Provider Management
+- name: cPanel Support Tickets
+  tags:
+  - Support Access
+  - Ticket Management
+- name: Customizations
+  tags:
+  - Brand
+  - Customizations
+- name: Databases
+  tags:
+  - Manage MySQL Server
+  - MySQL Databases
+  - PostgreSQL Databases
+  - Remote MySQL Databases
+- name: DNS
+  tags:
+  - DNS Cluster Settings
+  - DNS Security
+  - DNS Zones
+  - Domain Management
+  - Domain Management
+  - Resolvers
+  - Service Records
+- name: Hosting Plans
+  tags:
+  - Feature Access
+  - Feature Lists
+  - Hosting Plan Extensions
+  - Hosting Plans
+- name: InProductSurvey
+  tags:
+  - InProductSurvey
+- name: Integrations
+  tags:
+  - API Authentication
+  - Links
+  - Scripts Hooks
+- name: IP Address Management
+  tags:
+  - IPv4 Address Settings
+  - IPv6 Address Settings
+  - Network Address Translation
+- name: Login Security (cPHulk)
+  tags:
+  - Management
+  - Reporting
+  - Settings
+- name: Logs
+  tags:
+  - Web Log Retention
+- name: Mail
+  tags:
+  - cPanel Account Mail Management
+  - Mail DNS Settings
+  - Mail Server Settings
+  - Spam Management
+  - Spam Protection (Greylisting)
+- name: Monitoring
+  tags:
+  - 360 Monitoring
+- name: NGINX Manager
+  tags:
+  - NGINX Manager
+- name: Resellers
+  tags:
+  - Account Enhancement Limit
+  - Account Limits
+  - Account Permissions
+  - Account Settings
+  - Reseller Account Management
+- name: Security
+  tags:
+  - WHM Access
+- name: Server Administration
+  tags:
+  - Configuration Clusters
+  - Configurations
+  - Connected Applications
+  - Connections
+  - cPanel Analytics
+  - License Management
+  - Notifications
+  - Plugin-Based Features
+  - Security
+  - Server Nodes
+  - Server Profiles
+  - Services
+  - System Information
+  - Updates
+- name: SSL Certificates
+  tags:
+  - Auto-Generated Certificates
+  - cPanel Account Settings
+  - SSL Server Settings
+- name: System Package Management
+  tags:
+  - Install or Uninstall Package
+  - List Package Information
+  - Package Manager Settings
+- name: Transfers
+  tags:
+  - cPanel Account Transfer
+  - Transfer Configuration
+  - Transfer Monitoring
+- name: UserData
+  tags:
+  - UserData
+- name: Web Server Configuration
+  tags:
+  - EasyApache Settings
+  - PHP
+  - PHP-FPM
+- name: Web Server Security (ModSecurity)
+  tags:
+  - Rule Settings
+  - Rule Vendor Settings
+  - Server Settings

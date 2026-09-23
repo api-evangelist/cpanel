@@ -1,0 +1,954 @@
+openapi: 3.2.0
+info:
+  contact:
+    email: cs@cpanel.net
+    name: WebPros International, LLC
+    url: https://cpanel.net/support/
+  description: UAPI accesses the cPanel interface's features. Use this API to access and modify cPanel account data and settings.
+  license:
+    name: cPanel License
+    url: https://cpanel.net/legal-notices/
+  termsOfService: https://cpanel.net/legal-notices/
+  title: cPanel U Stats API
+  version: 11.137.9999.106
+  x-api-evangelist-provenance: 'Harvested verbatim from cPanel''s developer portal on 2026-09-05 via the MCP tool get-full-api-description at https://api.docs.cpanel.net/mcp. ONE mechanical change was made before storage: example values containing PEM private-key or certificate blocks, and AWS-access-key-shaped example strings, were replaced with REDACTED_* placeholders so the file can be stored in a public git repository without tripping secret scanning. No path, operation, parameter, schema or description was altered, added or removed.'
+servers:
+- description: A server running cPanel.
+  url: https://{host}:{port}/execute
+  variables:
+    host:
+      default: cpanel-server.tld
+      description: The hostname of a server running cPanel.
+    port:
+      default: '2083'
+      description: The cPanel port.
+security:
+- BasicAuth: []
+tags:
+- description: The Stats module for UAPI.
+  name: Stats
+paths:
+  /Stats/get_bandwidth:
+    get:
+      x-readonly: true
+      description: 'This function retrieves a list of bandwidth records for the domains on a cPanel account.
+
+
+        **Note:**
+
+
+        This function also returns the bandwidth use of a distributed cPanel account.
+
+
+        **Warning:**
+
+
+        This function requires the _Bandwidth Stats_ feature. To enable this feature, use WHM''s _Feature Manager_
+
+        interface (_WHM >> Home >> Packages >> Feature Manager_).'
+      operationId: Stats-get_bandwidth
+      parameters:
+      - description: 'The timezone in which to report the data, in [Olson tz format](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones).
+
+
+          **Note:**
+
+
+          This parameter defaults to the server''s timezone.'
+        in: query
+        name: timezone
+        required: false
+        schema:
+          example: America/Chicago
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  apiversion:
+                    description: The version of the API.
+                    example: 3
+                    type: integer
+                  func:
+                    description: The name of the method called.
+                    example: get_bandwidth
+                    type: string
+                  module:
+                    description: The name of the module called.
+                    example: Stats
+                    type: string
+                  result:
+                    properties:
+                      data:
+                        items:
+                          properties:
+                            bytes:
+                              description: The domain's bandwidth usage, in bytes.
+                              example: 74845
+                              minimum: 0
+                              type: integer
+                            domain:
+                              description: 'The domain for which to display bandwidth statistics.
+
+
+                                **Note:**
+
+
+                                The function only returns this value if the `protocol` return''s value is `http`.'
+                              example: example.com
+                              format: domain
+                              type: string
+                            month_start:
+                              description: The beginning of the report window.
+                              example: 1561957200
+                              format: unix_timestamp
+                              type: integer
+                            protocol:
+                              description: "The protocol for which to provide data.\n  * `http`\n  * `imap`\n  * `smtp`\n  * `pop3`\n  * `ftp`"
+                              enum:
+                              - http
+                              - imap
+                              - smtp
+                              - pop3
+                              - ftp
+                              example: imap
+                              type: string
+                          type: object
+                        type: array
+                      errors:
+                        description: List of errors if the API failed.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      messages:
+                        description: List of messages generated by the API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      metadata:
+                        properties:
+                          transformed:
+                            description: Post-processing may have transformed the data.
+                            enum:
+                            - 1
+                            example: 1
+                            type: integer
+                      status:
+                        description: '- 1 - Success
+
+                          - 0 - Failed: Check the errors field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      warnings:
+                        description: List of warnings generated by the API. Warnings describe non-critical failures or other problematic conditions noted while running a API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                    type: object
+                type: object
+          description: HTTP Request was successful.
+      summary: Return bandwidth statistics for all domains
+      tags:
+      - Stats
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "uapi --output=jsonpretty \\\n  --user=username \\\n  Stats \\\n  get_bandwidth\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2083/cpsess##########/execute/Stats/get_bandwidth
+      - label: LiveAPI Perl
+        lang: Perl
+        source: "#--------------------------------------------------------------------------------------\n# Instructions:\n#--------------------------------------------------------------------------------------\n# <theme-name> is the theme assigned to cPanel account.\n# 1) cd /usr/local/cpanel/base/frontend/<theme_name>\n# 2) mkdir api_examples\n# 3) cd api_examples\n# 4) create a file Stats_get_bandwidth.live.pl and put this code into that file.\n# 5) In your browser login to a cPanel account.\n# 6) Manually change the url from: .../frontend/<theme_name>/\n#    to .../frontend/<theme_name>/api_examples/Stats_get_bandwidth.live.pl\n#--------------------------------------------------------------------------------------\n\nuse strict;\n\nuse Cpanel::LiveAPI ();\n\nmy $cpanel = Cpanel::LiveAPI->new(); # Connect to cPanel - only do this once.\n\n# Print the header\nprint \"Content-type: text/plain\\r\\n\\r\\n\";\n\n# Call the API\nmy $response = $cpanel->uapi(\n    q/Stats/,\n    q/get_bandwidth/\n);\n\n# Handle the response\nif ($response->{cpanelresult}{result}{status}) {\n    my $data = $response->{cpanelresult}{result}{data};\n    foreach my $item (@{$data}) {\n        # Do something with the $item\n    }\n\n    # So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    # Report errors:\n    print to_json($response->{cpanelresult}{result}{errors});\n}\n\n# Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n#--------------------------------------------------------------------------------------\n# Helper function to convert a perl object to html printable json\n#--------------------------------------------------------------------------------------\nsub to_json {\n    require JSON;\n    my $str = JSON->new->pretty->encode($_[0]);\n    return $str;\n}\n"
+      - label: LiveAPI PHP
+        lang: PHP
+        source: "<?php\n//--------------------------------------------------------------------------------------\n// Instructions:\n//--------------------------------------------------------------------------------------\n// <theme-name> is the theme assigned to cPanel account.\n// 1) cd /usr/local/cpanel/base/frontend/<theme_name>\n// 2) mkdir api_examples\n// 3) cd api_examples\n// 4) create a file Stats_get_bandwidth.live.php and put this code into that file.\n// 5) In your browser login to a cPanel account.\n// 6) Manually change the url from: .../frontend/<theme_name>/\n//    to .../frontend/<theme_name>/api_examples/Stats_get_bandwidth.live.php\n//--------------------------------------------------------------------------------------\n\n// Instantiate the CPANEL object.\nrequire_once \"/usr/local/cpanel/php/cpanel.php\";\n\n// Print the header\nheader('Content-Type: text/plain');\n\n// Connect to cPanel - only do this once.\n$cpanel = new CPANEL();\n\n// Call the API\n$response = $cpanel->uapi(\n    'Stats',\n    'get_bandwidth'\n);\n\n// Handle the response\nif ($response['cpanelresult']['result']['status']) {\n    $data = $response['cpanelresult']['result']['data'];\n    foreach ($data as $item) {\n        // Do something with the $item\n    }\n\n    // So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    // Report errors:\n    print to_json($response['cpanelresult']['result']['errors']);\n}\n\n// Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n//--------------------------------------------------------------------------------------\n// Helper function to convert a PHP value to html printable json\n//--------------------------------------------------------------------------------------\nfunction to_json($data) {\n    return json_encode($data, JSON_PRETTY_PRINT);\n}"
+      x-cpanel-api-version: UAPI
+      x-cpanel-available-version: cPanel 84
+  /Stats/get_site_errors:
+    get:
+      x-readonly: true
+      description: This function returns entries from a domain's error log.
+      operationId: Stats-get_site_errors
+      parameters:
+      - description: The domain for which to return error log entries.
+        in: query
+        name: domain
+        required: true
+        schema:
+          example: example.com
+          format: domain
+          type: string
+      - description: 'The [Apache log file](https://go.cpanel.net/cpanellogfiles) to query.
+
+          This parameter defaults to error.
+
+
+          * `error` - The `/var/log/apache2/error_log` file.
+
+          * `suexec` - The `/var/log/apache2/suexec_log` file.'
+        in: query
+        name: log
+        required: false
+        schema:
+          enum:
+          - error
+          - suexec
+          example: suexec
+          type: string
+      - description: The number of lines to retrieve from the error log.
+        in: query
+        name: maxlines
+        required: false
+        schema:
+          default: 300
+          example: 250
+          maximum: 5000
+          minimum: 1
+          type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  apiversion:
+                    description: The version of the API.
+                    example: 3
+                    type: integer
+                  func:
+                    description: The name of the method called.
+                    example: get_site_errors
+                    type: string
+                  module:
+                    description: The name of the module called.
+                    example: Stats
+                    type: string
+                  result:
+                    properties:
+                      data:
+                        items:
+                          properties:
+                            date:
+                              description: The date that the system recorded the error.
+                              example: 1234576704
+                              format: unix_timestamp
+                              type: integer
+                            entry:
+                              description: The error log entry.
+                              example: '[Fri Feb 13 19:58:24.420593 2009] [core:error] [pid 29228:tid 47876185720577] (13)Permission denied: [client 10.0.0.2:62908] AH00132: file permissions deny server access: /home/user/public_html/index.html'
+                              type: string
+                          type: object
+                        type: array
+                      errors:
+                        description: List of errors if the API failed.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      messages:
+                        description: List of messages generated by the API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      metadata:
+                        properties:
+                          transformed:
+                            description: Post-processing may have transformed the data.
+                            enum:
+                            - 1
+                            example: 1
+                            type: integer
+                      status:
+                        description: '* `1` - Success
+
+                          * `0` - Failed. Check the errors field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      warnings:
+                        description: 'List of warnings generated by the API. Warnings
+
+                          describe non-critical failures or other problematic conditions
+
+                          noted while running a API.'
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                    type: object
+                type: object
+          description: HTTP Request was successful.
+      summary: Return specified domain access log
+      tags:
+      - Stats
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "uapi --output=jsonpretty \\\n  --user=username \\\n  Stats \\\n  get_site_errors \\\n  domain='example.com'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2083/cpsess##########/execute/Stats/get_site_errors?domain=example.com
+      - label: LiveAPI Perl
+        lang: Perl
+        source: "#--------------------------------------------------------------------------------------\n# Instructions:\n#--------------------------------------------------------------------------------------\n# <theme-name> is the theme assigned to cPanel account.\n# 1) cd /usr/local/cpanel/base/frontend/<theme_name>\n# 2) mkdir api_examples\n# 3) cd api_examples\n# 4) create a file Stats_get_site_errors.live.pl and put this code into that file.\n# 5) In your browser login to a cPanel account.\n# 6) Manually change the url from: .../frontend/<theme_name>/\n#    to .../frontend/<theme_name>/api_examples/Stats_get_site_errors.live.pl\n#--------------------------------------------------------------------------------------\n\nuse strict;\n\nuse Cpanel::LiveAPI ();\n\nmy $cpanel = Cpanel::LiveAPI->new(); # Connect to cPanel - only do this once.\n\n# Print the header\nprint \"Content-type: text/plain\\r\\n\\r\\n\";\n\n# Call the API\nmy $response = $cpanel->uapi(\n    q/Stats/,\n    q/get_site_errors/,\n    {\n        'domain' => 'example.com',\n    }\n);\n\n# Handle the response\nif ($response->{cpanelresult}{result}{status}) {\n    my $data = $response->{cpanelresult}{result}{data};\n    foreach my $item (@{$data}) {\n        # Do something with the $item\n    }\n\n    # So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    # Report errors:\n    print to_json($response->{cpanelresult}{result}{errors});\n}\n\n# Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n#--------------------------------------------------------------------------------------\n# Helper function to convert a perl object to html printable json\n#--------------------------------------------------------------------------------------\nsub to_json {\n    require JSON;\n    my $str = JSON->new->pretty->encode($_[0]);\n    return $str;\n}\n"
+      - label: LiveAPI PHP
+        lang: PHP
+        source: "<?php\n//--------------------------------------------------------------------------------------\n// Instructions:\n//--------------------------------------------------------------------------------------\n// <theme-name> is the theme assigned to cPanel account.\n// 1) cd /usr/local/cpanel/base/frontend/<theme_name>\n// 2) mkdir api_examples\n// 3) cd api_examples\n// 4) create a file Stats_get_site_errors.live.php and put this code into that file.\n// 5) In your browser login to a cPanel account.\n// 6) Manually change the url from: .../frontend/<theme_name>/\n//    to .../frontend/<theme_name>/api_examples/Stats_get_site_errors.live.php\n//--------------------------------------------------------------------------------------\n\n// Instantiate the CPANEL object.\nrequire_once \"/usr/local/cpanel/php/cpanel.php\";\n\n// Print the header\nheader('Content-Type: text/plain');\n\n// Connect to cPanel - only do this once.\n$cpanel = new CPANEL();\n\n// Call the API\n$response = $cpanel->uapi(\n    'Stats',\n    'get_site_errors',\n    array (\n        'domain' => 'example.com',\n    )\n);\n\n// Handle the response\nif ($response['cpanelresult']['result']['status']) {\n    $data = $response['cpanelresult']['result']['data'];\n    foreach ($data as $item) {\n        // Do something with the $item\n    }\n\n    // So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    // Report errors:\n    print to_json($response['cpanelresult']['result']['errors']);\n}\n\n// Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n//--------------------------------------------------------------------------------------\n// Helper function to convert a PHP value to html printable json\n//--------------------------------------------------------------------------------------\nfunction to_json($data) {\n    return json_encode($data, JSON_PRETTY_PRINT);\n}"
+      x-cpanel-api-version: UAPI
+      x-cpanel-available-version: cPanel 84
+  /Stats/get_stats_daily:
+    get:
+      x-readonly: true
+      description: This function returns the daily AwStats statistics for a domain.
+      operationId: Stats-get_stats_daily
+      parameters:
+      - description: The domain to retrieve statistics for. Must be owned by the current cPanel user.
+        in: query
+        name: domain
+        required: true
+        schema:
+          example: example.com
+          format: domain
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                stats_by_domain:
+                  summary: Object containing daily stats for the domain
+                  value:
+                    result:
+                      data:
+                        domain: example.com
+                        stats:
+                          Thu Feb 01 2024 00:00:00 GMT+0000 (Coordinated Universal Time):
+                            bandwidth: 81110
+                            hits: 6
+                            pages: 6
+                            visits: 5
+                          Fri Feb 02 2024 00:00:00 GMT+0000 (Coordinated Universal Time):
+                            bandwidth: 888296
+                            hits: 43
+                            pages: 14
+                            visits: 7
+              schema:
+                properties:
+                  apiversion:
+                    description: The version of the API.
+                    example: 3
+                    type: integer
+                  func:
+                    description: The name of the method called.
+                    example: get_stats_daily
+                    type: string
+                  module:
+                    description: The name of the module called.
+                    example: Stats
+                    type: string
+                  result:
+                    properties:
+                      data:
+                        properties:
+                          domain:
+                            description: 'The domain associated with the returned daily stats.
+
+                              '
+                            example: example.com
+                            type: string
+                          stats:
+                            additionalProperties:
+                              properties:
+                                bandwidth:
+                                  description: The bandwidth used on this day (in bytes).
+                                  example: 81110
+                                  type: integer
+                                hits:
+                                  description: The number of hits recorded on this day.
+                                  example: 6
+                                  type: integer
+                                pages:
+                                  description: The number of pages viewed on this day.
+                                  example: 6
+                                  type: integer
+                                visits:
+                                  description: The number of visits recorded on this day.
+                                  example: 5
+                                  type: integer
+                              type: object
+                            description: 'A map of date strings (YYYY-MM-DD) to daily statistics.
+
+                              Up to 45 days of history are returned. Gaps between the
+
+                              first available stat and yesterday are filled with zeros.
+
+                              '
+                            example:
+                              Thu Feb 01 2024 00:00:00 GMT+0000 (Coordinated Universal Time):
+                                bandwidth: 81110
+                                hits: 6
+                                pages: 6
+                                visits: 5
+                              Fri Feb 02 2024 00:00:00 GMT+0000 (Coordinated Universal Time):
+                                bandwidth: 888296
+                                hits: 43
+                                pages: 14
+                                visits: 7
+                            type: object
+                        type: object
+                      errors:
+                        description: List of errors if the API failed.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      messages:
+                        description: List of messages generated by the API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      metadata:
+                        properties: {}
+                      status:
+                        description: '* `1` - Success.
+
+                          * `0` - Failed. Check the `errors` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      warnings:
+                        description: List of warnings generated by the API. Warnings describe non-critical failures or other problematic conditions noted while running a API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                    type: object
+                type: object
+          description: HTTP Request was successful.
+      summary: Return daily AwStats statistics for a domain
+      tags:
+      - Stats
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "uapi --output=jsonpretty \\\n  --user=username \\\n  Stats \\\n  get_stats_daily \\\n  domain='example.com'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2083/cpsess##########/execute/Stats/get_stats_daily?domain=example.com
+      - label: LiveAPI Perl
+        lang: Perl
+        source: "#--------------------------------------------------------------------------------------\n# Instructions:\n#--------------------------------------------------------------------------------------\n# <theme-name> is the theme assigned to cPanel account.\n# 1) cd /usr/local/cpanel/base/frontend/<theme_name>\n# 2) mkdir api_examples\n# 3) cd api_examples\n# 4) create a file Stats_get_stats_daily.live.pl and put this code into that file.\n# 5) In your browser login to a cPanel account.\n# 6) Manually change the url from: .../frontend/<theme_name>/\n#    to .../frontend/<theme_name>/api_examples/Stats_get_stats_daily.live.pl\n#--------------------------------------------------------------------------------------\n\nuse strict;\n\nuse Cpanel::LiveAPI ();\n\nmy $cpanel = Cpanel::LiveAPI->new(); # Connect to cPanel - only do this once.\n\n# Print the header\nprint \"Content-type: text/plain\\r\\n\\r\\n\";\n\n# Call the API\nmy $response = $cpanel->uapi(\n    q/Stats/,\n    q/get_stats_daily/,\n    {\n        'domain' => 'example.com',\n    }\n);\n\n# Handle the response\nif ($response->{cpanelresult}{result}{status}) {\n    my $data = $response->{cpanelresult}{result}{data};\n    # Do something with the $data\n    # So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    # Report errors:\n    print to_json($response->{cpanelresult}{result}{errors});\n}\n\n# Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n#--------------------------------------------------------------------------------------\n# Helper function to convert a perl object to html printable json\n#--------------------------------------------------------------------------------------\nsub to_json {\n    require JSON;\n    my $str = JSON->new->pretty->encode($_[0]);\n    return $str;\n}\n"
+      - label: LiveAPI PHP
+        lang: PHP
+        source: "<?php\n//--------------------------------------------------------------------------------------\n// Instructions:\n//--------------------------------------------------------------------------------------\n// <theme-name> is the theme assigned to cPanel account.\n// 1) cd /usr/local/cpanel/base/frontend/<theme_name>\n// 2) mkdir api_examples\n// 3) cd api_examples\n// 4) create a file Stats_get_stats_daily.live.php and put this code into that file.\n// 5) In your browser login to a cPanel account.\n// 6) Manually change the url from: .../frontend/<theme_name>/\n//    to .../frontend/<theme_name>/api_examples/Stats_get_stats_daily.live.php\n//--------------------------------------------------------------------------------------\n\n// Instantiate the CPANEL object.\nrequire_once \"/usr/local/cpanel/php/cpanel.php\";\n\n// Print the header\nheader('Content-Type: text/plain');\n\n// Connect to cPanel - only do this once.\n$cpanel = new CPANEL();\n\n// Call the API\n$response = $cpanel->uapi(\n    'Stats',\n    'get_stats_daily',\n    array(\n        'domain' => 'example.com',\n    )\n);\n\n// Handle the response\nif ($response['cpanelresult']['result']['status']) {\n    $data = $response['cpanelresult']['result']['data'];\n    // Do something with the $data\n    // So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    // Report errors:\n    print to_json($response['cpanelresult']['result']['errors']);\n}\n\n// Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n//--------------------------------------------------------------------------------------\n// Helper function to convert a PHP value to html printable json\n//--------------------------------------------------------------------------------------\nfunction to_json($data) {\n    return json_encode($data, JSON_PRETTY_PRINT);\n}\n"
+      x-cpanel-api-version: UAPI
+      x-cpanel-available-version: cPanel 132
+  /Stats/list_sites:
+    get:
+      x-readonly: true
+      description: This function displays the Analog statistics for the domains on a cPanel account.
+      operationId: Stats-list_sites
+      parameters:
+      - description: 'The statistics engine.
+
+          * `webalizer`
+
+          * `analog`'
+        in: query
+        name: engine
+        required: true
+        schema:
+          enum:
+          - webalizer
+          - analog
+          example: webalizer
+          type: string
+      - description: "The web traffic type.\n * `http`\n * `ftp`"
+        in: query
+        name: traffic
+        required: false
+        schema:
+          default: http
+          enum:
+          - http
+          - ftp
+          example: http
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  apiversion:
+                    description: The version of the API.
+                    example: 3
+                    type: integer
+                  func:
+                    description: The name of the method called.
+                    example: list_sites
+                    type: string
+                  module:
+                    description: The name of the module called.
+                    example: Stats
+                    type: string
+                  result:
+                    properties:
+                      data:
+                        items:
+                          properties:
+                            all_domains:
+                              description: 'Whether the statistics file''s filepath is for all the domains on a cPanel account.
+
+                                * `1` - All domains.
+
+                                * `0` - An individual domain.'
+                              enum:
+                              - 0
+                              - 1
+                              example: 1
+                              type: integer
+                            domain:
+                              description: The domain for which to display statistics.
+                              example: example.com
+                              format: domain
+                              type: string
+                            path:
+                              description: The filepath to the statistics file.
+                              example: /tmp/user/webalizer/index.html
+                              format: path
+                              type: string
+                            ssl:
+                              description: 'Whether the function generates statistics from SSL requests.
+
+                                * `1` - Generates statistics for SSL requests.
+
+                                * `0` - Generates statistics for non-SSL requests.'
+                              enum:
+                              - 0
+                              - 1
+                              example: 1
+                              type: integer
+                          type: object
+                        type: array
+                      errors:
+                        description: List of errors if the API failed.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      messages:
+                        description: List of messages generated by the API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      metadata:
+                        properties: {}
+                      status:
+                        description: '- 1 - Success
+
+                          - 0 - Failed: Check the errors field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      warnings:
+                        description: List of warnings generated by the API. Warnings describe non-critical failures or other problematic conditions noted while running a API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                    type: object
+                type: object
+          description: HTTP Request was successful.
+      summary: Return Analog statistics for all domains
+      tags:
+      - Stats
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "uapi --output=jsonpretty \\\n  --user=username \\\n  Stats \\\n  list_sites \\\n  engine='webalizer'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2083/cpsess##########/execute/Stats/list_sites?engine=webalizer
+      - label: LiveAPI Perl
+        lang: Perl
+        source: "#--------------------------------------------------------------------------------------\n# Instructions:\n#--------------------------------------------------------------------------------------\n# <theme-name> is the theme assigned to cPanel account.\n# 1) cd /usr/local/cpanel/base/frontend/<theme_name>\n# 2) mkdir api_examples\n# 3) cd api_examples\n# 4) create a file Stats_list_sites.live.pl and put this code into that file.\n# 5) In your browser login to a cPanel account.\n# 6) Manually change the url from: .../frontend/<theme_name>/\n#    to .../frontend/<theme_name>/api_examples/Stats_list_sites.live.pl\n#--------------------------------------------------------------------------------------\n\nuse strict;\n\nuse Cpanel::LiveAPI ();\n\nmy $cpanel = Cpanel::LiveAPI->new(); # Connect to cPanel - only do this once.\n\n# Print the header\nprint \"Content-type: text/plain\\r\\n\\r\\n\";\n\n# Call the API\nmy $response = $cpanel->uapi(\n    q/Stats/,\n    q/list_sites/,\n    {\n        'engine' => 'webalizer',\n    }\n);\n\n# Handle the response\nif ($response->{cpanelresult}{result}{status}) {\n    my $data = $response->{cpanelresult}{result}{data};\n    foreach my $item (@{$data}) {\n        # Do something with the $item\n    }\n\n    # So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    # Report errors:\n    print to_json($response->{cpanelresult}{result}{errors});\n}\n\n# Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n#--------------------------------------------------------------------------------------\n# Helper function to convert a perl object to html printable json\n#--------------------------------------------------------------------------------------\nsub to_json {\n    require JSON;\n    my $str = JSON->new->pretty->encode($_[0]);\n    return $str;\n}\n"
+      - label: LiveAPI PHP
+        lang: PHP
+        source: "<?php\n//--------------------------------------------------------------------------------------\n// Instructions:\n//--------------------------------------------------------------------------------------\n// <theme-name> is the theme assigned to cPanel account.\n// 1) cd /usr/local/cpanel/base/frontend/<theme_name>\n// 2) mkdir api_examples\n// 3) cd api_examples\n// 4) create a file Stats_list_sites.live.php and put this code into that file.\n// 5) In your browser login to a cPanel account.\n// 6) Manually change the url from: .../frontend/<theme_name>/\n//    to .../frontend/<theme_name>/api_examples/Stats_list_sites.live.php\n//--------------------------------------------------------------------------------------\n\n// Instantiate the CPANEL object.\nrequire_once \"/usr/local/cpanel/php/cpanel.php\";\n\n// Print the header\nheader('Content-Type: text/plain');\n\n// Connect to cPanel - only do this once.\n$cpanel = new CPANEL();\n\n// Call the API\n$response = $cpanel->uapi(\n    'Stats',\n    'list_sites',\n    array (\n        'engine' => 'webalizer',\n    )\n);\n\n// Handle the response\nif ($response['cpanelresult']['result']['status']) {\n    $data = $response['cpanelresult']['result']['data'];\n    foreach ($data as $item) {\n        // Do something with the $item\n    }\n\n    // So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    // Report errors:\n    print to_json($response['cpanelresult']['result']['errors']);\n}\n\n// Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n//--------------------------------------------------------------------------------------\n// Helper function to convert a PHP value to html printable json\n//--------------------------------------------------------------------------------------\nfunction to_json($data) {\n    return json_encode($data, JSON_PRETTY_PRINT);\n}"
+      x-cpanel-api-version: UAPI
+      x-cpanel-available-version: cPanel 84
+  /Stats/list_stats_by_domain:
+    get:
+      x-readonly: true
+      description: This function returns a domain's Analog statistics.
+      operationId: Stats-list_stats_by_domain
+      parameters:
+      - description: The domain from which to retrieve statistics.
+        in: query
+        name: domain
+        required: true
+        schema:
+          example: example.com
+          format: domain
+          type: string
+      - description: The statistics engine. `analog` is the only possible value.
+        in: query
+        name: engine
+        required: true
+        schema:
+          enum:
+          - analog
+          example: analog
+          type: string
+      - description: "Whether to return statistics from SSL requests.\n  * `1` - Return statistics for SSL requests.\n  * `0` - Return statistics for non-SSL requests."
+        in: query
+        name: ssl
+        required: false
+        schema:
+          default: 1
+          enum:
+          - 0
+          - 1
+          example: 1
+          type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  apiversion:
+                    description: The version of the API.
+                    example: 3
+                    type: integer
+                  func:
+                    description: The name of the method called.
+                    example: list_stats_by_domain
+                    type: string
+                  module:
+                    description: The name of the module called.
+                    example: Stats
+                    type: string
+                  result:
+                    properties:
+                      data:
+                        items:
+                          properties:
+                            date:
+                              description: The current date and time.
+                              example: 1565795929
+                              format: unix_timestamp
+                              type: integer
+                            url:
+                              description: The URL of the file from which the system generates statistics reports.
+                              example: tmp/cptest/analog/8.html.com
+                              type: string
+                          type: object
+                        type: array
+                      errors:
+                        description: List of errors if the API failed.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      messages:
+                        description: List of messages generated by the API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      metadata:
+                        properties: {}
+                      status:
+                        description: '* `1` - Success.
+
+                          * `0` - Failed. Check the `errors` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      warnings:
+                        description: List of warnings generated by the API. Warnings describe non-critical failures or other problematic conditions noted while running a API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                    type: object
+                type: object
+          description: HTTP Request was successful.
+      summary: Return Analog statistics for specified domain
+      tags:
+      - Stats
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "uapi --output=jsonpretty \\\n  --user=username \\\n  Stats \\\n  list_stats_by_domain \\\n  engine='analog' \\\n  domain='example.com'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2083/cpsess##########/execute/Stats/list_stats_by_domain?engine=analog&domain=example.com
+      - label: LiveAPI Perl
+        lang: Perl
+        source: "#--------------------------------------------------------------------------------------\n# Instructions:\n#--------------------------------------------------------------------------------------\n# <theme-name> is the theme assigned to cPanel account.\n# 1) cd /usr/local/cpanel/base/frontend/<theme_name>\n# 2) mkdir api_examples\n# 3) cd api_examples\n# 4) create a file Stats_list_stats_by_domain.live.pl and put this code into that file.\n# 5) In your browser login to a cPanel account.\n# 6) Manually change the url from: .../frontend/<theme_name>/\n#    to .../frontend/<theme_name>/api_examples/Stats_list_stats_by_domain.live.pl\n#--------------------------------------------------------------------------------------\n\nuse strict;\n\nuse Cpanel::LiveAPI ();\n\nmy $cpanel = Cpanel::LiveAPI->new(); # Connect to cPanel - only do this once.\n\n# Print the header\nprint \"Content-type: text/plain\\r\\n\\r\\n\";\n\n# Call the API\nmy $response = $cpanel->uapi(\n    q/Stats/,\n    q/list_stats_by_domain/,\n    {\n        'engine' => 'analog',\n        'domain' => 'example.com',\n    }\n);\n\n# Handle the response\nif ($response->{cpanelresult}{result}{status}) {\n    my $data = $response->{cpanelresult}{result}{data};\n    foreach my $item (@{$data}) {\n        # Do something with the $item\n    }\n\n    # So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    # Report errors:\n    print to_json($response->{cpanelresult}{result}{errors});\n}\n\n# Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n#--------------------------------------------------------------------------------------\n# Helper function to convert a perl object to html printable json\n#--------------------------------------------------------------------------------------\nsub to_json {\n    require JSON;\n    my $str = JSON->new->pretty->encode($_[0]);\n    return $str;\n}\n"
+      - label: LiveAPI PHP
+        lang: PHP
+        source: "<?php\n//--------------------------------------------------------------------------------------\n// Instructions:\n//--------------------------------------------------------------------------------------\n// <theme-name> is the theme assigned to cPanel account.\n// 1) cd /usr/local/cpanel/base/frontend/<theme_name>\n// 2) mkdir api_examples\n// 3) cd api_examples\n// 4) create a file Stats_list_stats_by_domain.live.php and put this code into that file.\n// 5) In your browser login to a cPanel account.\n// 6) Manually change the url from: .../frontend/<theme_name>/\n//    to .../frontend/<theme_name>/api_examples/Stats_list_stats_by_domain.live.php\n//--------------------------------------------------------------------------------------\n\n// Instantiate the CPANEL object.\nrequire_once \"/usr/local/cpanel/php/cpanel.php\";\n\n// Print the header\nheader('Content-Type: text/plain');\n\n// Connect to cPanel - only do this once.\n$cpanel = new CPANEL();\n\n// Call the API\n$response = $cpanel->uapi(\n    'Stats',\n    'list_stats_by_domain',\n    array (\n        'engine' => 'analog',\n        'domain' => 'example.com',\n    )\n);\n\n// Handle the response\nif ($response['cpanelresult']['result']['status']) {\n    $data = $response['cpanelresult']['result']['data'];\n    foreach ($data as $item) {\n        // Do something with the $item\n    }\n\n    // So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    // Report errors:\n    print to_json($response['cpanelresult']['result']['errors']);\n}\n\n// Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n//--------------------------------------------------------------------------------------\n// Helper function to convert a PHP value to html printable json\n//--------------------------------------------------------------------------------------\nfunction to_json($data) {\n    return json_encode($data, JSON_PRETTY_PRINT);\n}"
+      x-cpanel-api-version: UAPI
+      x-cpanel-available-version: cPanel 84
+components:
+  securitySchemes:
+    BasicAuth:
+      scheme: basic
+      type: http
+externalDocs:
+  url: https://cpanel.net/developers/
+x-tagGroups:
+- name: API Development Tools
+  tags:
+  - API Token Management
+  - Batch
+  - SSE Task Management
+  - URL Parsing
+- name: Authentication
+  tags:
+  - External Authentication
+  - Two-Factor Settings
+- name: Backup Information
+  tags:
+  - BackupInfo
+  - BackupInfo Status
+- name: Block Ip Addresses
+  tags:
+  - Block IP
+- name: Commerce Integration
+  tags:
+  - Market Integration
+  - SSL Certificates
+- name: Contact Information
+  tags:
+  - Contact Information
+- name: cPanel Account
+  tags:
+  - Account Enhancements
+  - Account Information
+  - Account Management
+  - AuditLog
+  - Contact Information
+  - cPanel Features
+  - Disk Quotas
+  - DomainRecommendations
+  - Personalization
+  - Resource Usage and Statistics
+  - Subaccount Management
+  - Team Roles
+  - Team Users
+- name: cPanel Account Backups
+  tags:
+  - Backup
+  - File Restoration
+- name: cPanel Plugin Framework
+  tags:
+  - Formbricks
+  - Plugins
+- name: cPanel Theme Management
+  tags:
+  - Application Information
+  - Brand Management
+  - Branding Files
+  - Browser Cache Management
+  - Language
+  - Theme Settings
+- name: Directory Management
+  tags:
+  - Directory Indexes
+  - Directory Privacy
+  - Directory Protection
+- name: DNS
+  tags:
+  - DNS
+  - DNS Information
+  - DNS Security
+  - Dynamic DNS
+  - Email DNS Settings
+  - ZoneEdit
+- name: Domain
+  tags:
+  - Domain
+- name: Domain Management
+  tags:
+  - AddonDomain
+  - Direct Link Protection (Hotlink)
+  - Domain
+  - Domain Information
+  - Domain Redirection
+  - DomainLookup
+  - Park
+  - SubDomain
+  - Virtual Host Information
+- name: Domains
+  tags:
+  - Subdomains
+- name: Email
+  tags:
+  - Email Accounts
+  - Email Filtering
+  - Email Forwarding
+  - Email Server Information
+  - Email Suspensions
+  - Mail Server Information
+  - Mailbox Management
+  - Mailing Lists
+  - Signing and Encryption (GnuPG Keys)
+  - Spam Filtering (Greylisting)
+  - Spam Management
+  - Spam Prevention (BoxTrapper)
+  - Webmail Applications
+  - Webmail Sessions
+- name: Extract Information
+  tags:
+  - ExtractInfo
+  - ExtractInfo Status
+- name: File Manager
+  tags:
+  - Trash
+- name: Files
+  tags:
+  - FTP Accounts
+  - FTP Server Settings
+  - Image Tools
+  - Jodit
+  - Manage Files
+  - Manage Files
+  - WebDisk Settings
+- name: GIT Management
+  tags:
+  - Deployment Settings
+  - Repository Management
+- name: InProductSurvey
+  tags:
+  - InProductSurvey
+- name: MySQL and MariaDB
+  tags:
+  - Database Information
+  - Database Management
+  - Remote Databases
+  - User Management
+- name: Notifications
+  tags:
+  - Pushbullet
+- name: Optional Applications
+  tags:
+  - Antivirus Protection (ClamAV)
+  - Calendar and Contacts (DAV)
+  - Calendar and Contacts Server
+  - WordPress Manager Backups
+- name: PostgreSQL
+  tags:
+  - PostgreSQL Database Management
+  - PostgreSQL User Management
+- name: Retrieve bandwidth information
+  tags:
+  - Bandwidth
+- name: Security
+  tags:
+  - Known SSH Hosts Management
+  - Login Information
+- name: Server Information
+  tags:
+  - cPanel Server Information
+  - Notifications
+  - Password Strength
+  - SSH
+  - WebPros MCP
+  - WebProsMCP
+- name: ServiceProxy
+  tags:
+  - ServiceProxy
+- name: Site Quality Monitoring
+  tags:
+  - SiteQuality
+- name: SSL Certificates
+  tags:
+  - Auto-generated SSL Certificates
+  - cPanel Account SSL Management
+  - SNI Email Settings
+  - SSL Certificate Management
+  - Verify Domain Ownership
+- name: Statistics
+  tags:
+  - Domain Statistics
+  - Weblog Settings
+- name: UserData
+  tags:
+  - UserData
+- name: Web Server Configuration
+  tags:
+  - EA4
+  - EasyApache Settings
+  - PHP
+- name: Web Server Management
+  tags:
+  - Application Manager
+  - ModSecurity
+  - NginxCaching
+  - PHP Settings
+  - Web Apps
+- name: Website Configuration
+  tags:
+  - Handler Management
+  - Logs
+  - Mime Type Management
+  - Nova
+  - Site Information
+  - Site Installation
+  - Sitejet
+  - WPX

@@ -1,0 +1,1468 @@
+openapi: 3.2.0
+info:
+  contact:
+    email: cs@cpanel.net
+    name: WebPros International, LLC
+    url: https://cpanel.net/support/
+  description: WHM API.
+  license:
+    name: cPanel License
+    url: https://cpanel.net/legal-notices/
+  termsOfService: https://cpanel.net/legal-notices/
+  title: WHM Domain Information API
+  version: 11.137.9999.106
+  x-api-evangelist-provenance: 'Harvested verbatim from cPanel''s developer portal on 2026-09-05 via the MCP tool get-full-api-description at https://api.docs.cpanel.net/mcp. ONE mechanical change was made before storage: example values containing PEM private-key or certificate blocks, and AWS-access-key-shaped example strings, were replaced with REDACTED_* placeholders so the file can be stored in a public git repository without tripping secret scanning. No path, operation, parameter, schema or description was altered, added or removed.'
+servers:
+- description: A server running WHM.
+  url: https://{host}:{port}/json-api
+  variables:
+    host:
+      default: whm-server.tld
+      description: The hostname of a server running WHM.
+    port:
+      default: '2087'
+      description: The WHM port.
+security:
+- BasicAuth: []
+tags:
+- description: Accounts / Domain Domain Information
+  name: Domain Information
+paths:
+  /convert_addon_fetch_conversion_details:
+    get:
+      description: 'This function returns the details of a conversion from an addon
+
+        domain to an account. Use WHM API 1''s `convert_addon_domain_to_account`
+
+        to start a conversion.
+
+
+        **Important:**
+
+
+        When you disable the
+
+        Web Server role,
+
+        the system **disables** this function.'
+      operationId: ConvertAddon-convert_addon_fetch_conversion_details
+      parameters:
+      - description: The conversion's job identification number.
+        in: query
+        name: job_id
+        required: true
+        schema:
+          example: 2
+          minimum: 1
+          type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      domain:
+                        description: The addon domain you converted into a cPanel account.
+                        example: cptestaddon175.tld
+                        format: domain
+                        type: string
+                      job_end_time:
+                        description: A date that indicates when the convertion ended.
+                        example: 1462216653
+                        format: unix_timestamp
+                        type: integer
+                      job_id:
+                        description: The conversion's job identification number.
+                        example: 2
+                        minimum: 1
+                        type: integer
+                      job_start_time:
+                        description: A date that indicates when the conversion started.
+                        example: 1462465001
+                        format: unix_timestamp
+                        type: integer
+                      job_status:
+                        description: 'The status of the conversion process.
+
+
+                          * `INPROGRESS` — The conversion process is in progress.
+
+                          * `QUEUED` — The system queued the conversion job.
+
+                          * `SKIPPED` — The system skipped at least one step in the conversion process.
+
+                          * `FAILED` — At least one step in the conversion process failed.
+
+                          * `DONE` — The conversion process finished successfully.'
+                        enum:
+                        - INPROGRESS
+                        - QUEUED
+                        - SKIPPED
+                        - FAILED
+                        - DONE
+                        example: DONE
+                        type: string
+                      source_acct:
+                        description: The source cPanel user account that you converted into an account.
+                        example: cptest
+                        format: username
+                        type: string
+                      steps:
+                        description: An array of objects containing the steps taken by the conversion process.
+                        example:
+                        - end_time: 1462465001
+                          start_time: 1462465001
+                          status: DONE
+                          step_name: Saving email forwarder data
+                          warnings: ''
+                        - end_time: 1462465001
+                          start_time: 1462465001
+                          status: DONE
+                          step_name: Saving custom DNS records
+                          warnings: ''
+                        - end_time: 1462465001
+                          start_time: 1462465001
+                          status: DONE
+                          step_name: Saving installed SSL Certificate
+                          warnings: ''
+                        - end_time: 1462465001
+                          start_time: 1462465001
+                          status: DONE
+                          step_name: Saving EasyApache 4 configuration
+                          warnings: ''
+                        - end_time: 1462465009
+                          start_time: 1462465001
+                          status: DONE
+                          step_name: Removing Addon Domain
+                          warnings: ''
+                        - end_time: 1462465014
+                          start_time: 1462465009
+                          status: DONE
+                          step_name: Creating new cPanel account
+                          warnings: ''
+                        - end_time: 1462465015
+                          start_time: 1462465014
+                          status: DONE
+                          step_name: Restoring custom DNS records
+                          warnings: ''
+                        - end_time: 1462465016
+                          start_time: 1462465015
+                          status: DONE
+                          step_name: Copying Custom VirtualHost Includes
+                          warnings: ''
+                        - end_time: 1462465016
+                          start_time: 1462465016
+                          status: DONE
+                          step_name: Copying document root content
+                          warnings: '/usr/bin/gtar: ./shadow: Cannot open: Permission denied\n/usr/bin/gtar: Exiting with failure status due to previous errors'
+                        - end_time: 1462465016
+                          start_time: 1462465016
+                          status: DONE
+                          step_name: Setting the proper permissions on document root
+                          warnings: ''
+                        - end_time: 1462465017
+                          start_time: 1462465016
+                          status: DONE
+                          step_name: Copying email accounts
+                          warnings: ''
+                        - end_time: 1462465017
+                          start_time: 1462465017
+                          status: DONE
+                          step_name: Restoring email forwarders
+                          warnings: ''
+                        - end_time: 1462465017
+                          start_time: 1462465017
+                          status: DONE
+                          step_name: Copying Autoresponders
+                          warnings: ''
+                        - end_time: 1462465017
+                          start_time: 1462465017
+                          status: DONE
+                          step_name: Copying webmail data
+                          warnings: ''
+                        - end_time: 1462465017
+                          start_time: 1462465017
+                          status: DONE
+                          step_name: Restoring installed SSL Certificate
+                          warnings: ''
+                        - end_time: 1462465017
+                          start_time: 1462465017
+                          status: DONE
+                          step_name: Restoring EasyApache 4 configuration
+                          warnings: ''
+                        items:
+                          properties:
+                            end_time:
+                              description: The date when the step ended.
+                              format: unix_timestamp
+                              type: integer
+                            start_time:
+                              description: The date when the step started.
+                              format: unix_timestamp
+                              type: integer
+                            status:
+                              description: 'The status of the conversion step.
+
+
+                                * `DONE` — The step is finished.
+
+                                * `IN PROGRESS` — The step is in progress.
+
+                                * `FAILED` — The step failed.'
+                              enum:
+                              - DONE
+                              - IN PROGRESS
+                              - FAILED
+                              type: string
+                            step_name:
+                              description: A step of the conversion process.
+                              type: string
+                            warnings:
+                              description: The warning message for the step that describes a potential problem, if any exist.
+                              type: string
+                          type: object
+                        type: array
+                      target_acct:
+                        description: The destination cPanel user account for the conversion.
+                        example: user2
+                        type: string
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: convert_addon_fetch_conversion_details
+                        type: string
+                      reason:
+                        description: The reason the function failed when the `metadata.result` field is `0`. This field may include a success message when the function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 1
+                        - 0
+                        example: 1
+                        type: integer
+                      version:
+                        description: The API version of the function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Return additional domain conversion details
+      tags:
+      - Domain Information
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  convert_addon_fetch_conversion_details \\\n  job_id='2'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/convert_addon_fetch_conversion_details?api.version=1&job_id=2
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '58'
+  /convert_addon_fetch_domain_details:
+    get:
+      description: 'This function retrieves domain data for an addon domain.
+
+
+        **Important:**
+
+
+        When you disable the
+
+        Web Server role,
+
+        the system **disables** this function.'
+      operationId: ConvertAddon-convert_addon_fetch_domain_details
+      parameters:
+      - description: The addon domain for which to retrieve details.
+        in: query
+        name: domain
+        required: true
+        schema:
+          example: example.com
+          format: domain
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      docroot:
+                        description: The absolute file path of the addon domain.
+                        example: /home/exampleparent/public_html/example.com
+                        type: string
+                      has_dedicated_ip:
+                        description: 'Whether the domain uses a dedicated IP address.
+
+
+                          * `1` — The domain uses a dedicated IP address.
+
+                          * `0` — The domain does **not** use a dedicated IP address.'
+                        enum:
+                        - 1
+                        - 0
+                        example: 0
+                        type: integer
+                      has_ssl_cert_installed:
+                        description: 'Whether an SSL certificate secures the domain.
+
+
+                          * `1` — An SSL certificate secures the domain.
+
+                          * `0` — An SSL certificate does **not** secure the domain.'
+                        enum:
+                        - 1
+                        - 0
+                        example: 0
+                        type: integer
+                      ip:
+                        description: The domain's IP address.
+                        example: 192.0.2.0
+                        format: ipv4
+                        type: string
+                      is_sni_supported:
+                        description: 'Whether the domain supports Server Name Indication (SNI).
+
+
+                          * `1` — The domain supports SNI.
+
+                          * `0` — The domain does **not** support SNI.'
+                        enum:
+                        - 1
+                        - 0
+                        example: 0
+                        type: integer
+                      number_of_autoresponders:
+                        description: The number of the domain's autoresponders.
+                        example: 0
+                        minimum: 0
+                        type: integer
+                      number_of_domain_forwarders:
+                        description: The number of the domain's domain forwarders.
+                        example: 1
+                        minimum: 0
+                        type: integer
+                      number_of_email_accounts:
+                        description: The number of the domain's email accounts.
+                        example: 2
+                        minimum: 0
+                        type: integer
+                      number_of_email_forwarders:
+                        description: The number of the domain's email forwarders.
+                        example: 1
+                        minimum: 0
+                        type: integer
+                      owner:
+                        description: The addon domain owner's cPanel account username.
+                        example: username
+                        format: username
+                        type: string
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        example: convert_addon_fetch_domain_details
+                        type: string
+                      reason:
+                        description: The reason the function failed when the `metadata.result` field is `0`. This field may include a success message when the function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 1
+                        - 0
+                        example: 1
+                        type: integer
+                      version:
+                        description: The API version of the function.
+                        example: 1
+                        type: integer
+                    type: object
+                type: object
+          description: HTTP Request was successful.
+      summary: Return additional domain data
+      tags:
+      - Domain Information
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  convert_addon_fetch_domain_details \\\n  domain='example.com'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/convert_addon_fetch_domain_details?api.version=1&domain=example.com
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '56'
+  /convert_addon_get_conversion_status:
+    get:
+      description: 'This function returns the status of the convert addon domain to
+
+        account process for specified conversion jobs. For data about the conversion
+
+        status of all jobs, use the WHM API 1 `convert_addon_fetch_conversion_details`
+
+        function.
+
+
+        **Important:**
+
+
+        When you disable the
+
+        Web Server role,
+
+        the system **disables** this function.'
+      operationId: ConvertAddon-convert_addon_get_conversion_status
+      parameters:
+      - description: 'The conversion''s job identification number.
+
+
+          **Note:**
+
+
+          To list entries for multiple conversion jobs, increment the parameter name. For example: `job_id-0`, `job_id-1`, and `job_id-2`.'
+        examples:
+          multiple:
+            summary: Get the status for multiple conversion jobs.
+            value: job_id-1=10&job_id-2=33&job_id-3=15
+          single:
+            summary: Get status for a single conversion job.
+            value: 10
+        in: query
+        name: job_id
+        required: true
+        schema:
+          minimum: 1
+          type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    additionalProperties:
+                      description: 'The converion job''s identification number.
+
+
+                        **Note:**
+
+
+                        The property name is the identification number of the requested job.'
+                      properties:
+                        job_end_time:
+                          description: The time when the convert addon domain to account process ended.
+                          format: unix_timestamp
+                          type: integer
+                        job_id:
+                          description: 'The conversion''s job identification number.
+
+
+                            **Note:**
+
+
+                            The system stores this numeric value as a string.'
+                          minimum: 1
+                          pattern: '[1-9]+'
+                          type: string
+                        job_status:
+                          description: 'The status of the conversion process.
+
+
+                            * `DONE` — The conversion finished successfully.
+
+                            * `IN PROGRESS` — The conversion is running.
+
+                            * `FAILED` — The converion failed for some reason.'
+                          enum:
+                          - DONE
+                          - IN PROGRESS
+                          - FAILED
+                          type: string
+                        source_acct:
+                          description: The addon domain to convert into a cPanel account.
+                          type: string
+                      type: object
+                    description: An object that contains details about the conversion job's status.
+                    example:
+                      '1':
+                        job_end_time: 1462383658
+                        job_id: '1'
+                        job_status: DONE
+                        source_acct: user1
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: convert_addon_get_conversion_status
+                        type: string
+                      reason:
+                        description: The reason the function failed when the `metadata.result` field is `0`. This field may include a success message when the function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 1
+                        - 0
+                        example: 1
+                        type: integer
+                      version:
+                        description: The API version of the function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Return conversion status for additional domain
+      tags:
+      - Domain Information
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  convert_addon_get_conversion_status \\\n  job_id='10'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/convert_addon_get_conversion_status?api.version=1&job_id=10
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '58'
+  /convert_addon_initiate_conversion:
+    get:
+      description: 'This function initiates the conversion process for an addon domain
+
+        into a cPanel account.
+
+
+        **Note:**
+
+
+        For information about the data that the system migrates when you convert an
+
+        addon domain, read our
+
+        Addon Domain Conversion List documentation.
+
+
+        **Important:**
+
+
+        When you disable the Web Server role,
+
+        the system **disables** this function.'
+      operationId: ConvertAddon-convert_addon_initiate_conversion
+      parameters:
+      - description: The addon domain to convert into an account's main domain.
+        in: query
+        name: domain
+        required: true
+        schema:
+          example: example.com
+          format: domain
+          type: string
+      - description: The username for a specified account.
+        in: query
+        name: username
+        required: true
+        schema:
+          example: username
+          format: username
+          type: string
+      - description: 'Copy a MySQL® database from the source account to the new account with a new
+
+          database name.
+
+
+          This parameter''s format consists of `copymysqldb`, a hyphen, and the name of
+
+          the existing database. For example, `copymysqldb-olddatabase`.
+
+
+          If you do **not** specify this parameter, the system does **not** copy any MySQL
+
+          databases to the new account.'
+        examples:
+          multiple:
+            summary: Copy multiple databases.
+            value: copymysqldb-olddatabase1=newdatabase1 copymysqldb-olddatabase2=newdatabase2
+          single:
+            summary: Copy a single database.
+            value: newdatabase
+        in: query
+        name: copymysqldb-*
+        required: false
+        schema:
+          type: string
+      - description: 'Move the specified MySQL database from the source account to the new account.
+
+
+          If you do **not** specify this parameter, the system does **not** move any MySQL
+
+          databases to the new account.
+
+
+          **Note:**
+
+
+          To move multiple databases, increment the parameter name. For example, `movemysqldb-1`,
+
+          `movemysqldb-2`, and `movemysqldb-3`.'
+        examples:
+          multiple:
+            summary: Move multiple databases.
+            value: movemysqldb-1=exampledb1 movemysqldb-2=exampledb2 movemysqluser-3=exampledb3
+          single:
+            summary: Move a single database.
+            value: exampledb
+        in: query
+        name: movemysqldb
+        required: false
+        schema:
+          type: string
+      - description: 'Move the specified MySQL database user from the source account into the new
+
+          MySQL database account.
+
+
+          If you do **not** specify this parameter, the system does **not** move any MySQL
+
+          database users to the new account.
+
+
+          **Note:**
+
+
+          To move multiple database users, increment the parameter name. For example, `movemysqluser-1`,
+
+          `movemysqluser-2`, and `movemysqluser-3`.'
+        examples:
+          multiple:
+            summary: Move multiple database users.
+            value: movemysqluser-1=dbuser1 movemysqluser-2=dbuser2 movemysqluser-3=dbuser3
+          single:
+            summary: Move a single database user.
+            value: dbuser1
+        in: query
+        name: movemysqluser
+        required: false
+        schema:
+          type: string
+      - description: The hosting package that you want to assign to the new account.
+        in: query
+        name: pkgname
+        required: false
+        schema:
+          default: default
+          example: mycustompkg
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties: {}
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: convert_addon_initiate_conversion
+                        type: string
+                      reason:
+                        description: The reason the function failed when the `metadata.result` field is `0`. This field may include a success message when the function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 1
+                        - 0
+                        example: 1
+                        type: integer
+                      version:
+                        description: The API version of the function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Start additional domain conversion
+      tags:
+      - Domain Information
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  convert_addon_initiate_conversion \\\n  username='username' \\\n  domain='example.com'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/convert_addon_initiate_conversion?api.version=1&username=username&domain=example.com
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '56'
+  /convert_addon_list_addon_domains:
+    get:
+      description: 'This function returns a list of addon domains that belong to the current user.
+
+
+        **Important:**
+
+        When you disable the Web Server role, the system **disables** this function.'
+      operationId: ConvertAddon-convert_addon_list_addon_domains
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    additionalProperties:
+                      description: 'An object containing the domain''s data.
+
+
+                        **Note:**
+
+                        The domain''s name is the return''s name.'
+                      properties:
+                        docroot:
+                          description: The document root for the addon domain.
+                          example: /home/exampleparent/public_html/example.com
+                          type: string
+                        domain_type:
+                          description: The domain's type.
+                          example: addon
+                          type: string
+                        ip:
+                          description: The domain's IPv4 address.
+                          example: 192.0.2.0
+                          format: ipv4
+                          type: string
+                        ipv6:
+                          description: The domain's IPv6 address.
+                          example: 2001:db8:a0b:12f0::1
+                          format: ipv6
+                          type: string
+                        owner:
+                          description: The domain's owner.
+                          example: exampleparent
+                          format: username
+                          type: string
+                        reseller:
+                          description: The domain's reseller.
+                          example: exampleparent
+                          format: username
+                          type: string
+                        subdomain:
+                          description: The domain's subdomain.
+                          example: example.exampleparent.com
+                          format: domain
+                          type: string
+                    example:
+                      example.com:
+                        docroot: /home/exampleparent/public_html/example.com
+                        domain_type: addon
+                        ip: 192.0.2.0
+                        owner: root
+                        subdomain: example.exampleparent.com
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: convert_addon_list_addon_domains
+                        type: string
+                      reason:
+                        description: The reason the function failed when the `metadata.result` field is 0. This field may include a success message when the function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '- `1` - Success.
+
+                          - `0` - Failed. Check the reason field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The API version of the function.
+                        example: 1
+                        type: integer
+          description: HTTP Request was successful.
+      summary: Return current user's additional domains
+      tags:
+      - Domain Information
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  convert_addon_list_addon_domains\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/convert_addon_list_addon_domains?api.version=1
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '56'
+  /convert_addon_list_conversions:
+    get:
+      description: 'This function returns a list of addon domains undergoing conversion
+
+        into cPanel accounts.
+
+
+        **Important:**
+
+
+        When you disable the Web Server role, the system **disables** this function.'
+      operationId: ConvertAddon-convert_addon_list_conversions
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      conversions:
+                        description: List of conversions from an addon domain to an independent cPanel account.
+                        items:
+                          properties:
+                            domain:
+                              description: The addon domain to convert into a cPanel account.
+                              example: example.com
+                              format: domain
+                              type: string
+                            end_time:
+                              description: A date in Unix time format that indicates when the process ended.
+                              example: 1462216653
+                              format: unix_timestamp
+                              type: integer
+                            job_id:
+                              description: The conversion's job number.
+                              example: 1
+                              minimum: 0
+                              type: integer
+                            source_acct:
+                              description: The cPanel account username that owned the domain at the time of conversion.
+                              example: example
+                              format: username
+                              type: string
+                            start_time:
+                              description: A date in Unix time format that indicates when the process started.
+                              example: 1462216639
+                              format: unix_timestamp
+                              type: integer
+                            status:
+                              description: 'The status of the conversion process.
+
+                                * `DONE` — The conversion is finished.
+
+                                * `IN PROGRESS` — The conversion is in progress.
+
+                                * `FAILED` — The conversion failed.'
+                              enum:
+                              - DONE
+                              - IN PROGRESS
+                              - FAILED
+                              example: DONE
+                              type: string
+                            target_acct:
+                              description: The destination user account for the conversion.
+                              example: example2
+                              format: username
+                              type: string
+                          type: object
+                        type: array
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: convert_addon_list_conversions
+                        type: string
+                      reason:
+                        description: The reason the function failed when the `metadata.result` field is `0`. This field may include a success message when the function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* 1 — Success.
+
+                          * 0 — Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The API version of the function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Return additional domains conversion queue
+      tags:
+      - Domain Information
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  convert_addon_list_conversions\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/convert_addon_list_conversions?api.version=1
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '58'
+  /domainuserdata:
+    get:
+      description: This function retrieves domain data.
+      operationId: Accounts-domainuserdata
+      parameters:
+      - description: The account's main domain.
+        in: query
+        name: domain
+        required: true
+        schema:
+          example: example.com
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      userdata:
+                        description: The domain information.
+                        properties:
+                          customlog:
+                            description: A list of objects of Apache log information.
+                            items:
+                              properties:
+                                format:
+                                  description: The custom log's format. A valid Apache log format.
+                                  example: combined
+                                  type: string
+                                target:
+                                  description: An Apache custom log's location. The absolute path to the log file.
+                                  example: /usr/local/apache/domlogs/example.com
+                                  type: string
+                              type: object
+                            type: array
+                          documentroot:
+                            description: The path to the domain's document root. A valid filepath.
+                            example: /home/username/public_html
+                            type: string
+                          group:
+                            description: The account's group name. A valid group name.
+                            example: reseller_username
+                            type: string
+                          hascgi:
+                            description: 'Whether CGI is enabled for the account.
+
+                              - 1  Enabled.
+
+                              - 0  Disabled.'
+                            enum:
+                            - 0
+                            - 1
+                            example: 1
+                            type: integer
+                          homedir:
+                            description: The path to the domain's home directory. The absolute path to the domain's home directory.
+                            example: /home/username
+                            type: string
+                          ip:
+                            description: The domain's IP address. A valid IP address.
+                            example: 10.0.0.1
+                            type: string
+                          owner:
+                            description: The WHM user who owns the cPanel account. A valid WHM username.
+                            example: root
+                            type: string
+                          phpopenbasedirprotect:
+                            description: 'Whether the PHP open_basedir tweak is enabled.
+
+                              - 1  Enabled.
+
+                              - 0  Disabled.'
+                            enum:
+                            - 0
+                            - 1
+                            example: 1
+                            type: integer
+                          port:
+                            description: Apache's port to access the domain. A valid port number.
+                            example: 80
+                            type: integer
+                          scriptalias:
+                            description: an object containing Apache ScriptAlias information.
+                            items:
+                              properties:
+                                path:
+                                  description: The path to Apache's CGI scripts. The url alias redirects to this location. A valid URL or absolute file path.
+                                  example: /home/user/public_html/cgi-bin/
+                                  type: string
+                                url:
+                                  description: The alias URL. This URL redirects to the path URL. A valid URL or file path.
+                                  example: /cgi-bin/
+                                  type: string
+                              type: object
+                            type: array
+                          serveradmin:
+                            description: The account owner's contact email address. A valid email address.
+                            example: owner@example.com
+                            type: string
+                          serveralias:
+                            description: The domain's aliases. A space-separated list of domain aliases.
+                            example: parkeddomain.com www.parkeddomain.com seconddomain.com
+                            type: string
+                          servername:
+                            description: The main domain on the domain's account. A valid domain name.
+                            example: example.com
+                            type: string
+                          usecanonicalname:
+                            description: 'The domain''s setting for canonical names (CNAMEs).
+
+                              - On
+
+                              - Off'
+                            example: 'Off'
+                            type: string
+                          user:
+                            description: The cPanel account username. A valid cPanel username.
+                            example: user
+                            type: string
+                          userdirprotect:
+                            description: 'The domain''s setting for the Apache mod_userdir Tweak.
+
+                              - On
+
+                              - Off'
+                            example: 'Off'
+                            type: string
+                        type: object
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: domainuserdata
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is 0. This field may display a success message when a function succeeds.
+                        example: Obtained userdata.
+                        type: string
+                      result:
+                        description: '- 1 - Success
+
+                          - 0 - Failed: Check the reason field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Return domain user information
+      tags:
+      - Domain Information
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  domainuserdata \\\n  domain='example.com'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/domainuserdata?api.version=1&domain=example.com
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11.32'
+  /get_domain_info:
+    get:
+      description: This function returns information about each domain on the server.
+      operationId: Accounts-get_domain_info
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      domains:
+                        description: "array of objects representing the domain's data.\n\n**Note:**\n\n This return only includes domains that you manually created. This does not include service subdomain (proxy subdomains) or automatically-created domains."
+                        items:
+                          properties:
+                            docroot:
+                              description: The document root for the addon domain. An absolute file path.
+                              example: /home/user1/public_html/example.com
+                              type: string
+                            domain:
+                              description: The account's main domain. A valid domain.
+                              example: example.com
+                              type: string
+                            domain_type:
+                              description: The domain's type.
+                              example: addon
+                              type: string
+                            ipv4:
+                              description: The domain's IPv4 address. A valid IPv4 address.
+                              example: 192.0.2.255
+                              type: string
+                            ipv4_ssl:
+                              description: The domain's secure IPv4 address. A valid IPv4 address.
+                              example: 192.0.2.255
+                              type: string
+                            ipv6:
+                              description: 'The domain''s IPv6 address.
+
+                                * A valid IPv6 address.
+
+                                * `null` An IPv6 address does not exist for this domain.'
+                              example: 2001:DB8:g1m:0N3y::1
+                              type:
+                              - string
+                              - 'null'
+                            ipv6_is_dedicated:
+                              description: 'The domain possesses an IPv6 address.
+
+                                * `1` An IPv6 address exists for this domain.
+
+                                * `0` An IPv6 address does not exist for this domain.'
+                              enum:
+                              - 0
+                              - 1
+                              example: 1
+                              type: integer
+                            modsecurity_enabled:
+                              description: 'Whether ModSecurity is enabled on the server.
+
+                                * `1` ModSecurity is enabled.
+
+                                * `0` ModSecurity is not enabled.'
+                              enum:
+                              - 0
+                              - 1
+                              example: 1
+                              type: integer
+                            parent_domain:
+                              description: The parent domain. A valid domain name.
+                              example: example.com
+                              type: string
+                            php_version:
+                              description: The installed PHP versions.
+                              example: ea-php54
+                              type: string
+                            port:
+                              description: The server's port number.
+                              example: 80
+                              type: integer
+                            port_ssl:
+                              description: The server's secure port number.
+                              example: 443
+                              type: integer
+                            user:
+                              description: The account username. A cPanel account or reseller username on the server.
+                              example: username
+                              type: string
+                            user_owner:
+                              description: The domain's owner.
+                              example: user1
+                              type: string
+                          type: object
+                        type: array
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: get_domain_info
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` Success
+
+                          * `0` Failed: Check the reason field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Return all domains information
+      tags:
+      - Domain Information
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  get_domain_info\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/get_domain_info?api.version=1
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '70'
+  /getdomainowner:
+    get:
+      description: This function lists the owner of a domain.
+      operationId: Accounts-getdomainowner
+      parameters:
+      - description: A domain on the system that is owned by the user calling this function.
+        in: query
+        name: domain
+        required: true
+        schema:
+          example: example.com
+          format: domain
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      user:
+                        description: 'The user who owns the domain.
+
+
+                          **Note:**
+
+
+                          This value returns `null` if the user calling the function does not own the account for the domain **or** the domain does not exist on the server.'
+                        example: username
+                        format: username
+                        type:
+                        - string
+                        - 'null'
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: getdomainowner
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '- 1 - Success
+
+                          - 0 - Failed: Check the reason field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Return domain owner
+      tags:
+      - Domain Information
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  getdomainowner \\\n  domain='example.com'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/getdomainowner?api.version=1&domain=example.com
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '78'
+components:
+  securitySchemes:
+    BasicAuth:
+      scheme: basic
+      type: http
+externalDocs:
+  url: https://cpanel.net/developers/
+x-tagGroups:
+- name: Account Restoration
+  tags:
+  - Restore Account
+  - Restore Queue Management
+  - Restore Queue Reporting
+- name: Accounts
+  tags:
+  - Account Creation
+  - Account Enhancements
+  - Account Management
+  - Bandwidth and Disk Quotas
+  - Domain Information
+  - Passwords
+  - Styles
+  - Suspensions
+- name: API Development Tools
+  tags:
+  - API Execution
+  - API Statistics
+  - API Token Management
+  - Applications
+  - Session
+- name: Authentication
+  tags:
+  - Authentication Providers
+  - External Authentication
+  - Login URL
+  - SSH Keys and Connections
+  - Two-Factor Authentication
+- name: Backups
+  tags:
+  - Backup Destination
+  - Backup or Restore
+  - Backup Settings
+  - Legacy Migration
+- name: Commerce Integration
+  tags:
+  - Market Integration
+  - Sitejet
+- name: cPanel Market
+  tags:
+  - Product Management
+  - Provider Management
+- name: cPanel Support Tickets
+  tags:
+  - Support Access
+  - Ticket Management
+- name: Customizations
+  tags:
+  - Brand
+  - Customizations
+- name: Databases
+  tags:
+  - Manage MySQL Server
+  - MySQL Databases
+  - PostgreSQL Databases
+  - Remote MySQL Databases
+- name: DNS
+  tags:
+  - DNS Cluster Settings
+  - DNS Security
+  - DNS Zones
+  - Domain Management
+  - Domain Management
+  - Resolvers
+  - Service Records
+- name: Hosting Plans
+  tags:
+  - Feature Access
+  - Feature Lists
+  - Hosting Plan Extensions
+  - Hosting Plans
+- name: InProductSurvey
+  tags:
+  - InProductSurvey
+- name: Integrations
+  tags:
+  - API Authentication
+  - Links
+  - Scripts Hooks
+- name: IP Address Management
+  tags:
+  - IPv4 Address Settings
+  - IPv6 Address Settings
+  - Network Address Translation
+- name: Login Security (cPHulk)
+  tags:
+  - Management
+  - Reporting
+  - Settings
+- name: Logs
+  tags:
+  - Web Log Retention
+- name: Mail
+  tags:
+  - cPanel Account Mail Management
+  - Mail DNS Settings
+  - Mail Server Settings
+  - Spam Management
+  - Spam Protection (Greylisting)
+- name: Monitoring
+  tags:
+  - 360 Monitoring
+- name: NGINX Manager
+  tags:
+  - NGINX Manager
+- name: Resellers
+  tags:
+  - Account Enhancement Limit
+  - Account Limits
+  - Account Permissions
+  - Account Settings
+  - Reseller Account Management
+- name: Security
+  tags:
+  - WHM Access
+- name: Server Administration
+  tags:
+  - Configuration Clusters
+  - Configurations
+  - Connected Applications
+  - Connections
+  - cPanel Analytics
+  - License Management
+  - Notifications
+  - Plugin-Based Features
+  - Security
+  - Server Nodes
+  - Server Profiles
+  - Services
+  - System Information
+  - Updates
+- name: SSL Certificates
+  tags:
+  - Auto-Generated Certificates
+  - cPanel Account Settings
+  - SSL Server Settings
+- name: System Package Management
+  tags:
+  - Install or Uninstall Package
+  - List Package Information
+  - Package Manager Settings
+- name: Transfers
+  tags:
+  - cPanel Account Transfer
+  - Transfer Configuration
+  - Transfer Monitoring
+- name: UserData
+  tags:
+  - UserData
+- name: Web Server Configuration
+  tags:
+  - EasyApache Settings
+  - PHP
+  - PHP-FPM
+- name: Web Server Security (ModSecurity)
+  tags:
+  - Rule Settings
+  - Rule Vendor Settings
+  - Server Settings

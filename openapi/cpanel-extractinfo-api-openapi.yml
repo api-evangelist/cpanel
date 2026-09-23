@@ -1,0 +1,460 @@
+openapi: 3.2.0
+info:
+  contact:
+    email: cs@cpanel.net
+    name: WebPros International, LLC
+    url: https://cpanel.net/support/
+  description: UAPI accesses the cPanel interface's features. Use this API to access and modify cPanel account data and settings.
+  license:
+    name: cPanel License
+    url: https://cpanel.net/legal-notices/
+  termsOfService: https://cpanel.net/legal-notices/
+  title: cPanel U Extract Info API
+  version: 11.137.9999.106
+  x-api-evangelist-provenance: 'Harvested verbatim from cPanel''s developer portal on 2026-09-05 via the MCP tool get-full-api-description at https://api.docs.cpanel.net/mcp. ONE mechanical change was made before storage: example values containing PEM private-key or certificate blocks, and AWS-access-key-shaped example strings, were replaced with REDACTED_* placeholders so the file can be stored in a public git repository without tripping secret scanning. No path, operation, parameter, schema or description was altered, added or removed.'
+servers:
+- description: A server running cPanel.
+  url: https://{host}:{port}/execute
+  variables:
+    host:
+      default: cpanel-server.tld
+      description: The hostname of a server running cPanel.
+    port:
+      default: '2083'
+      description: The cPanel port.
+security:
+- BasicAuth: []
+tags:
+- description: The ExtractInfo module for UAPI.
+  name: ExtractInfo
+paths:
+  /ExtractInfo/finish:
+    get:
+      description: Clears the run-state marker written by ExtractInfo.start. After finish, progress reports state 'none'. Idempotent - succeeds whether or not a marker exists. Call after Fileman.fileop op=extract completes (success or failure).
+      operationId: finish
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  apiversion:
+                    example: 3
+                    type: integer
+                  func:
+                    example: finish
+                    type: string
+                  module:
+                    example: ExtractInfo
+                    type: string
+                  result:
+                    properties:
+                      data:
+                        properties:
+                          cleared:
+                            description: Always true on success.
+                            example: true
+                            type: boolean
+                        type: object
+                      errors:
+                        items:
+                          type: string
+                        type: array
+                      messages:
+                        items:
+                          type: string
+                        type: array
+                      status:
+                        example: 1
+                        type: integer
+                      warnings:
+                        items:
+                          type: string
+                        type: array
+                    type: object
+                type: object
+          description: HTTP Request was successful.
+      summary: Clear the current user's extract run-state marker
+      tags:
+      - ExtractInfo
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "uapi --output=jsonpretty \\\n  --user=username \\\n  ExtractInfo \\\n  finish\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2083/cpsess##########/execute/ExtractInfo/finish
+      x-cpanel-api-version: UAPI
+      x-cpanel-available-version: 136
+      x-cpanel-plugin: ExtractInfo
+  /ExtractInfo/progress:
+    get:
+      description: Returns telemetry for an in-progress archive extraction started via ExtractInfo.start. currentBytes is how much the destination directory has grown since the start baseline; totalBytes is the uncompressed archive size recorded at start, exact for archives under 4 GiB and a best-effort estimate for larger ones (the gzip trailer stores the uncompressed size modulo 2**32, so it wraps at 4 GiB). totalBytesEstimated reports which of those two cases applies. percent is derived from currentBytes and totalBytes and clamped to 99; it is approximate whenever totalBytesEstimated is true. Degrades to zeros when no run is active. Read-only and safe to poll.
+      operationId: progress
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  apiversion:
+                    example: 3
+                    type: integer
+                  func:
+                    example: progress
+                    type: string
+                  module:
+                    example: ExtractInfo
+                    type: string
+                  result:
+                    properties:
+                      data:
+                        properties:
+                          currentBytes:
+                            description: Bytes the destination directory has grown by since the start baseline. Never negative.
+                            example: 104857600
+                            type: integer
+                          elapsedSeconds:
+                            description: Seconds since the run started. 0 when not running.
+                            example: 42
+                            type: integer
+                          percent:
+                            description: Completion percent (0-99), derived from currentBytes / totalBytes and clamped to 99 until finish is called. Approximate whenever totalBytesEstimated is 1; even when the total is exact the destination-directory delta can carry noise.
+                            example: 33.3
+                            type: number
+                          startedAtEpoch:
+                            description: Start epoch recorded by start. Null when not running.
+                            example: 1750636800
+                            type:
+                            - integer
+                            - 'null'
+                          state:
+                            description: Current run state. 'inprogress' while a run is active and within the timeout, 'timeout' once it has run past the timeout ceiling, or 'none' when nothing is running (including after finish).
+                            enum:
+                            - inprogress
+                            - timeout
+                            - none
+                            example: inprogress
+                            type: string
+                          totalBytes:
+                            description: The uncompressed archive size recorded at start. Exact for archives under 4 GiB; a best-effort estimate for archives of 4 GiB or more, because the gzip trailer stores the uncompressed size modulo 2**32. See totalBytesEstimated.
+                            example: 314572800
+                            type: integer
+                          totalBytesEstimated:
+                            description: 1 when totalBytes is an estimate (the gzip trailer wrapped because the archive is 4 GiB or larger), 0 when totalBytes is exact.
+                            example: 0
+                            type: integer
+                        type: object
+                      errors:
+                        items:
+                          type: string
+                        type: array
+                      messages:
+                        items:
+                          type: string
+                        type: array
+                      status:
+                        example: 1
+                        type: integer
+                      warnings:
+                        items:
+                          type: string
+                        type: array
+                    type: object
+                type: object
+          description: HTTP Request was successful.
+      summary: Get progress for the current user's running archive extraction
+      tags:
+      - ExtractInfo
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "uapi --output=jsonpretty \\\n  --user=username \\\n  ExtractInfo \\\n  progress\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2083/cpsess##########/execute/ExtractInfo/progress
+      x-cpanel-api-version: UAPI
+      x-cpanel-available-version: 136
+      x-cpanel-plugin: ExtractInfo
+  /ExtractInfo/start:
+    get:
+      description: Begins tracking an extract run for the given archive and destination directory (both must resolve within the current user's home directory). Computes the exact uncompressed byte size of the archive and snapshots the destination directory's current disk usage as a baseline, then writes a run-state marker. Returns immediately; no extraction happens in this function. Call before Fileman.fileop op=extract.
+      operationId: start
+      parameters:
+      - description: Path to the backup archive being extracted. Must resolve within the current user's home directory.
+        in: query
+        name: archive
+        required: true
+        schema:
+          type: string
+      - description: Destination directory the archive is being extracted into. Must resolve within the current user's home directory.
+        in: query
+        name: directory
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  apiversion:
+                    example: 3
+                    type: integer
+                  func:
+                    example: start
+                    type: string
+                  module:
+                    example: ExtractInfo
+                    type: string
+                  result:
+                    properties:
+                      data:
+                        properties:
+                          started:
+                            description: Always true on success.
+                            example: true
+                            type: boolean
+                        type: object
+                      errors:
+                        items:
+                          type: string
+                        type: array
+                      messages:
+                        items:
+                          type: string
+                        type: array
+                      status:
+                        example: 1
+                        type: integer
+                      warnings:
+                        items:
+                          type: string
+                        type: array
+                    type: object
+                type: object
+          description: HTTP Request was successful.
+      summary: Begin tracking progress for an extract run
+      tags:
+      - ExtractInfo
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "uapi --output=jsonpretty \\\n  --user=username \\\n  ExtractInfo \\\n  start \\\n  archive=backup-11.128.0.6_2026-06-23_user.tar.gz \\\n  directory=public_html\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2083/cpsess##########/execute/ExtractInfo/start
+      x-cpanel-api-version: UAPI
+      x-cpanel-available-version: 136
+      x-cpanel-plugin: ExtractInfo
+components:
+  securitySchemes:
+    BasicAuth:
+      scheme: basic
+      type: http
+externalDocs:
+  url: https://cpanel.net/developers/
+x-tagGroups:
+- name: API Development Tools
+  tags:
+  - API Token Management
+  - Batch
+  - SSE Task Management
+  - URL Parsing
+- name: Authentication
+  tags:
+  - External Authentication
+  - Two-Factor Settings
+- name: Backup Information
+  tags:
+  - BackupInfo
+  - BackupInfo Status
+- name: Block Ip Addresses
+  tags:
+  - Block IP
+- name: Commerce Integration
+  tags:
+  - Market Integration
+  - SSL Certificates
+- name: Contact Information
+  tags:
+  - Contact Information
+- name: cPanel Account
+  tags:
+  - Account Enhancements
+  - Account Information
+  - Account Management
+  - AuditLog
+  - Contact Information
+  - cPanel Features
+  - Disk Quotas
+  - DomainRecommendations
+  - Personalization
+  - Resource Usage and Statistics
+  - Subaccount Management
+  - Team Roles
+  - Team Users
+- name: cPanel Account Backups
+  tags:
+  - Backup
+  - File Restoration
+- name: cPanel Plugin Framework
+  tags:
+  - Formbricks
+  - Plugins
+- name: cPanel Theme Management
+  tags:
+  - Application Information
+  - Brand Management
+  - Branding Files
+  - Browser Cache Management
+  - Language
+  - Theme Settings
+- name: Directory Management
+  tags:
+  - Directory Indexes
+  - Directory Privacy
+  - Directory Protection
+- name: DNS
+  tags:
+  - DNS
+  - DNS Information
+  - DNS Security
+  - Dynamic DNS
+  - Email DNS Settings
+  - ZoneEdit
+- name: Domain
+  tags:
+  - Domain
+- name: Domain Management
+  tags:
+  - AddonDomain
+  - Direct Link Protection (Hotlink)
+  - Domain
+  - Domain Information
+  - Domain Redirection
+  - DomainLookup
+  - Park
+  - SubDomain
+  - Virtual Host Information
+- name: Domains
+  tags:
+  - Subdomains
+- name: Email
+  tags:
+  - Email Accounts
+  - Email Filtering
+  - Email Forwarding
+  - Email Server Information
+  - Email Suspensions
+  - Mail Server Information
+  - Mailbox Management
+  - Mailing Lists
+  - Signing and Encryption (GnuPG Keys)
+  - Spam Filtering (Greylisting)
+  - Spam Management
+  - Spam Prevention (BoxTrapper)
+  - Webmail Applications
+  - Webmail Sessions
+- name: Extract Information
+  tags:
+  - ExtractInfo
+  - ExtractInfo Status
+- name: File Manager
+  tags:
+  - Trash
+- name: Files
+  tags:
+  - FTP Accounts
+  - FTP Server Settings
+  - Image Tools
+  - Jodit
+  - Manage Files
+  - Manage Files
+  - WebDisk Settings
+- name: GIT Management
+  tags:
+  - Deployment Settings
+  - Repository Management
+- name: InProductSurvey
+  tags:
+  - InProductSurvey
+- name: MySQL and MariaDB
+  tags:
+  - Database Information
+  - Database Management
+  - Remote Databases
+  - User Management
+- name: Notifications
+  tags:
+  - Pushbullet
+- name: Optional Applications
+  tags:
+  - Antivirus Protection (ClamAV)
+  - Calendar and Contacts (DAV)
+  - Calendar and Contacts Server
+  - WordPress Manager Backups
+- name: PostgreSQL
+  tags:
+  - PostgreSQL Database Management
+  - PostgreSQL User Management
+- name: Retrieve bandwidth information
+  tags:
+  - Bandwidth
+- name: Security
+  tags:
+  - Known SSH Hosts Management
+  - Login Information
+- name: Server Information
+  tags:
+  - cPanel Server Information
+  - Notifications
+  - Password Strength
+  - SSH
+  - WebPros MCP
+  - WebProsMCP
+- name: ServiceProxy
+  tags:
+  - ServiceProxy
+- name: Site Quality Monitoring
+  tags:
+  - SiteQuality
+- name: SSL Certificates
+  tags:
+  - Auto-generated SSL Certificates
+  - cPanel Account SSL Management
+  - SNI Email Settings
+  - SSL Certificate Management
+  - Verify Domain Ownership
+- name: Statistics
+  tags:
+  - Domain Statistics
+  - Weblog Settings
+- name: UserData
+  tags:
+  - UserData
+- name: Web Server Configuration
+  tags:
+  - EA4
+  - EasyApache Settings
+  - PHP
+- name: Web Server Management
+  tags:
+  - Application Manager
+  - ModSecurity
+  - NginxCaching
+  - PHP Settings
+  - Web Apps
+- name: Website Configuration
+  tags:
+  - Handler Management
+  - Logs
+  - Mime Type Management
+  - Nova
+  - Site Information
+  - Site Installation
+  - Sitejet
+  - WPX

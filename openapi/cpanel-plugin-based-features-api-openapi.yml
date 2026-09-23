@@ -1,0 +1,461 @@
+openapi: 3.2.0
+info:
+  contact:
+    email: cs@cpanel.net
+    name: WebPros International, LLC
+    url: https://cpanel.net/support/
+  description: WHM API.
+  license:
+    name: cPanel License
+    url: https://cpanel.net/legal-notices/
+  termsOfService: https://cpanel.net/legal-notices/
+  title: WHM Plugin-Based Features API
+  version: 11.137.9999.106
+  x-api-evangelist-provenance: 'Harvested verbatim from cPanel''s developer portal on 2026-09-05 via the MCP tool get-full-api-description at https://api.docs.cpanel.net/mcp. ONE mechanical change was made before storage: example values containing PEM private-key or certificate blocks, and AWS-access-key-shaped example strings, were replaced with REDACTED_* placeholders so the file can be stored in a public git repository without tripping secret scanning. No path, operation, parameter, schema or description was altered, added or removed.'
+servers:
+- description: A server running WHM.
+  url: https://{host}:{port}/json-api
+  variables:
+    host:
+      default: whm-server.tld
+      description: The hostname of a server running WHM.
+    port:
+      default: '2087'
+      description: The WHM port.
+security:
+- BasicAuth: []
+tags:
+- description: The plugin-based features module for WHM API 1.
+  name: Plugin-Based Features
+paths:
+  /EcosystemFeatures/is_ready:
+    get:
+      description: This function checks if a plugin-based feature is installed and ready for use on the server.
+      operationId: is_ready
+      parameters:
+      - description: The plugin-based feature's name in the local `/var/cpanel/plugins/` directory.
+        in: query
+        name: plugin
+        required: true
+        schema:
+          example: cpanel-monitoring-plugin
+          type: string
+      - description: 'A filter that allows you to show plugin-based features for a specific interface.
+
+          * `Whostmgr` - A WHM plugin-based feature.
+
+          * `Cpanel` - A cPanel plugin-based feature.'
+        in: query
+        name: namespace
+        required: false
+        schema:
+          default: Whostmgr
+          enum:
+          - Whostmgr
+          - Cpanel
+          example: Cpanel
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      ready:
+                        description: 'Whether the plugin-based feature is installed and ready.
+
+                          * `1` - Installed and ready for use.
+
+                          * `0` - Not installed or not ready for use.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: is_ready
+                        type: string
+                      namespace:
+                        description: The namespace used in the API call.
+                        example: EcosystemFeatures
+                        type: string
+                      reason:
+                        description: 'The reason the API function failed when the `metadata.result`
+
+                          field is `0`. This field may display a success message when
+
+                          a function succeeds.'
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` - Success.
+
+                          * `0` - Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Check if a plugin feature is ready for use
+      tags:
+      - Plugin-Based Features
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  EcosystemFeatures/is_ready \\\n  plugin='cpanel-nova-plugin' \\\n  namespace='Cpanel'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/EcosystemFeatures/is_ready?api.version=1&plugin=cpanel-nova-plugin&namespace=Cpanel
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11.132'
+  /EcosystemFeatures/local_disable:
+    get:
+      description: 'This function allows you to locally disable a plugin-based feature.
+
+        Only WHM users with `root`-level privileges can run this function.'
+      operationId: local_disable
+      parameters:
+      - description: 'The plugin-based feature''s name in the local `/var/cpanel/plugins/` directory.
+
+
+          **Important:**
+
+          You can **only** use this function to disable the following features:
+
+
+          *  <a href="https://go.cpanel.net/plugins-server-monitoring" target="_blank">Server Monitoring (Powered by 360 Monitoring)</a>.
+
+          *  WebPros AI Application Builder for cPanel.'
+        in: query
+        name: plugin
+        required: true
+        schema:
+          type: string
+          enum:
+          - cpanel-monitoring-plugin
+          - cpanel-nova-plugin
+          example: cpanel-monitoring-plugin
+      - description: 'A filter that allows you to show plugin-based features for a specific interface.
+
+          * `Whostmgr` - A WHM plugin-based feature.
+
+          * `Cpanel` - A cPanel plugin-based feature.'
+        in: query
+        name: namespace
+        required: false
+        schema:
+          default: Whostmgr
+          type: string
+          enum:
+          - Whostmgr
+          example: Whostmgr
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: local_disable
+                        type: string
+                      reason:
+                        description: 'The reason the API function failed when the `metadata.result`
+
+                          field is `0`. This field may display a success message when
+
+                          a function succeeds.'
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` - Success.
+
+                          * `0` - Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Disable feature locally
+      tags:
+      - Plugin-Based Features
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  EcosystemFeatures/local_disable \\\n  plugin='cpanel-monitoring-plugin'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/EcosystemFeatures/local_disable?api.version=1&plugin=cpanel-monitoring-plugin
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11.118'
+  /EcosystemFeatures/local_enable:
+    get:
+      description: 'This function allows you to locally enable a plugin-based feature.
+
+        Only WHM users with `root`-level privileges can run this function.'
+      operationId: local_enable
+      parameters:
+      - description: 'The plugin-based feature''s name in the local `/var/cpanel/plugins/` directory.
+
+
+          **Important:**
+
+          You can **only** use this function to enable the following features:
+
+
+          *  <a href="https://go.cpanel.net/plugins-server-monitoring" target="_blank">Server Monitoring (Powered by 360 Monitoring)</a>.
+
+          *  WebPros AI Application Builder for cPanel.'
+        in: query
+        name: plugin
+        required: true
+        schema:
+          type: string
+          enum:
+          - cpanel-monitoring-plugin
+          - cpanel-nova-plugin
+          example: cpanel-monitoring-plugin
+      - description: "A filter that allows you to show plugin-based features for a specific interface.\n  * `Whostmgr` - A WHM plugin-based feature.\n  * `Cpanel` - A cPanel plugin-based feature."
+        in: query
+        name: namespace
+        required: false
+        schema:
+          default: Whostmgr
+          type: string
+          enum:
+          - Whostmgr
+          example: Whostmgr
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: local_enable
+                        type: string
+                      reason:
+                        description: 'The reason the API function failed when the `metadata.result`
+
+                          field is `0`. This field may display a success message when
+
+                          a function succeeds.'
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` - Success.
+
+                          * `0` - Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Enable feature locally
+      tags:
+      - Plugin-Based Features
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  EcosystemFeatures/local_enable \\\n  plugin='cpanel-monitoring-plugin'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/EcosystemFeatures/local_enable?api.version=1&plugin=cpanel-monitoring-plugin
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11.118'
+components:
+  securitySchemes:
+    BasicAuth:
+      scheme: basic
+      type: http
+externalDocs:
+  url: https://cpanel.net/developers/
+x-tagGroups:
+- name: Account Restoration
+  tags:
+  - Restore Account
+  - Restore Queue Management
+  - Restore Queue Reporting
+- name: Accounts
+  tags:
+  - Account Creation
+  - Account Enhancements
+  - Account Management
+  - Bandwidth and Disk Quotas
+  - Domain Information
+  - Passwords
+  - Styles
+  - Suspensions
+- name: API Development Tools
+  tags:
+  - API Execution
+  - API Statistics
+  - API Token Management
+  - Applications
+  - Session
+- name: Authentication
+  tags:
+  - Authentication Providers
+  - External Authentication
+  - Login URL
+  - SSH Keys and Connections
+  - Two-Factor Authentication
+- name: Backups
+  tags:
+  - Backup Destination
+  - Backup or Restore
+  - Backup Settings
+  - Legacy Migration
+- name: Commerce Integration
+  tags:
+  - Market Integration
+  - Sitejet
+- name: cPanel Market
+  tags:
+  - Product Management
+  - Provider Management
+- name: cPanel Support Tickets
+  tags:
+  - Support Access
+  - Ticket Management
+- name: Customizations
+  tags:
+  - Brand
+  - Customizations
+- name: Databases
+  tags:
+  - Manage MySQL Server
+  - MySQL Databases
+  - PostgreSQL Databases
+  - Remote MySQL Databases
+- name: DNS
+  tags:
+  - DNS Cluster Settings
+  - DNS Security
+  - DNS Zones
+  - Domain Management
+  - Domain Management
+  - Resolvers
+  - Service Records
+- name: Hosting Plans
+  tags:
+  - Feature Access
+  - Feature Lists
+  - Hosting Plan Extensions
+  - Hosting Plans
+- name: InProductSurvey
+  tags:
+  - InProductSurvey
+- name: Integrations
+  tags:
+  - API Authentication
+  - Links
+  - Scripts Hooks
+- name: IP Address Management
+  tags:
+  - IPv4 Address Settings
+  - IPv6 Address Settings
+  - Network Address Translation
+- name: Login Security (cPHulk)
+  tags:
+  - Management
+  - Reporting
+  - Settings
+- name: Logs
+  tags:
+  - Web Log Retention
+- name: Mail
+  tags:
+  - cPanel Account Mail Management
+  - Mail DNS Settings
+  - Mail Server Settings
+  - Spam Management
+  - Spam Protection (Greylisting)
+- name: Monitoring
+  tags:
+  - 360 Monitoring
+- name: NGINX Manager
+  tags:
+  - NGINX Manager
+- name: Resellers
+  tags:
+  - Account Enhancement Limit
+  - Account Limits
+  - Account Permissions
+  - Account Settings
+  - Reseller Account Management
+- name: Security
+  tags:
+  - WHM Access
+- name: Server Administration
+  tags:
+  - Configuration Clusters
+  - Configurations
+  - Connected Applications
+  - Connections
+  - cPanel Analytics
+  - License Management
+  - Notifications
+  - Plugin-Based Features
+  - Security
+  - Server Nodes
+  - Server Profiles
+  - Services
+  - System Information
+  - Updates
+- name: SSL Certificates
+  tags:
+  - Auto-Generated Certificates
+  - cPanel Account Settings
+  - SSL Server Settings
+- name: System Package Management
+  tags:
+  - Install or Uninstall Package
+  - List Package Information
+  - Package Manager Settings
+- name: Transfers
+  tags:
+  - cPanel Account Transfer
+  - Transfer Configuration
+  - Transfer Monitoring
+- name: UserData
+  tags:
+  - UserData
+- name: Web Server Configuration
+  tags:
+  - EasyApache Settings
+  - PHP
+  - PHP-FPM
+- name: Web Server Security (ModSecurity)
+  tags:
+  - Rule Settings
+  - Rule Vendor Settings
+  - Server Settings

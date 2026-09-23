@@ -1,0 +1,2189 @@
+openapi: 3.2.0
+info:
+  contact:
+    email: cs@cpanel.net
+    name: WebPros International, LLC
+    url: https://cpanel.net/support/
+  description: WHM API.
+  license:
+    name: cPanel License
+    url: https://cpanel.net/legal-notices/
+  termsOfService: https://cpanel.net/legal-notices/
+  title: WHM Account Restoration API
+  version: 11.137.9999.106
+  x-api-evangelist-provenance: 'Harvested verbatim from cPanel''s developer portal on 2026-09-05 via the MCP tool get-full-api-description at https://api.docs.cpanel.net/mcp. ONE mechanical change was made before storage: example values containing PEM private-key or certificate blocks, and AWS-access-key-shaped example strings, were replaced with REDACTED_* placeholders so the file can be stored in a public git repository without tripping secret scanning. No path, operation, parameter, schema or description was altered, added or removed.'
+servers:
+- description: A server running WHM.
+  url: https://{host}:{port}/json-api
+  variables:
+    host:
+      default: whm-server.tld
+      description: The hostname of a server running WHM.
+    port:
+      default: '2087'
+      description: The WHM port.
+security:
+- BasicAuth: []
+tags:
+- description: The Account Restoration module for WHM API 1.
+  name: Account Restoration
+paths:
+  /restore_modules_summary:
+    get:
+      description: This function lists backup modules and their descriptions.
+      operationId: Transfers-restore_modules_summary
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    example:
+                      modules:
+                      - module: APITokens
+                        restricted_available: 1
+                        summary:
+                        - The APITokens module restores the API tokens for an account.
+                      - module: Account
+                        restricted_available: 1
+                        restricted_summary:
+                        - Force mode is not available in restricted mode.
+                        summary:
+                        - This creates the cPanel account and system user.
+                      - module: AuthnLinks
+                        restricted_available: 1
+                        summary:
+                        - This restores the account’s external authentication links.
+                      - module: AutoSSL
+                        restricted_available: 1
+                        summary:
+                        - This restores AutoSSL settings.
+                      - module: BackupConfig
+                        restricted_available: 1
+                        summary:
+                        - This installs the backup configuration based on the target system’s defaults.
+                      - module: BandwidthData
+                        restricted_available: 1
+                        summary:
+                        - This restores the bandwidth data.
+                      - module: CpUser
+                        restricted_available: 1
+                        restricted_summary:
+                        - The system discards configuration data that is unknown or that the system cannot validate.
+                        summary:
+                        - This restores the cPanel account’s configuration data.
+                      - module: Cron
+                        restricted_available: 1
+                        summary:
+                        - This restores crontab entries.
+                      - module: CustomLocale
+                        restricted_available: 0
+                        summary:
+                        - This restores custom locales.
+                      - module: DKIM
+                        restricted_available: 1
+                        summary:
+                        - This restores DKIM (DomainKeys Identified Mail) keys and updates records for the current server.
+                      - module: DNSAuthority
+                        restricted_available: 1
+                        summary:
+                        - This module reports whether this system is authoritative for each of the new accounts’ DNS (Domain Name System) zones.
+                      - module: DNSSEC
+                        restricted_available: 1
+                        summary:
+                        - This module restores the DNSSEC keys for an account.
+                      - module: DigestShadow
+                        restricted_available: 1
+                        summary:
+                        - This restores password data for digest authentication.
+                      - module: Domains
+                        restricted_available: 1
+                        restricted_summary:
+                        - The system will restore subdomains, parked domains, and addon domains if they pass the server’s domain creation rules. If the server rejects the restoration of an addon domain, it will still create a subdomain associated with that addon domain.
+                        summary:
+                        - This restores subdomains, parked domains, and addon domains.
+                      - module: FeatureList
+                        restricted_available: 1
+                        summary:
+                        - This restores the account’s feature list setting.
+                      - module: FileProtect
+                        restricted_available: 1
+                        summary:
+                        - This configures the account for cPanel FileProtect.
+                      - module: Ftp
+                        restricted_available: 1
+                        summary:
+                        - This restores FTP (File Transfer Protocol) accounts.
+                      - module: Homedir
+                        restricted_available: 1
+                        restricted_summary:
+                        - If the home directory does not already exist, the system will not create it.
+                        summary:
+                        - This restores the home directory’s contents.
+                      - module: Htaccess
+                        restricted_available: 1
+                        summary:
+                        - This repairs EasyApache4 and removes legacy Frontpage entries from .htaccess.
+                      - module: IPAddress
+                        restricted_available: 1
+                        summary:
+                        - This sets up a dedicated IP address.
+                      - module: Integration
+                        restricted_available: 0
+                        summary:
+                        - 'Implementor Error: The summary for this module is missing.'
+                      - module: LinkedNodes
+                        restricted_available: 1
+                        summary:
+                        - This module handles the linked node setup.
+                      - module: LinkedNodesSubarchives
+                        restricted_available: 1
+                        summary:
+                        - This module restores linked-node configurations when the archive contains linked node data.
+                      - module: LocalConfig
+                        restricted_available: 1
+                        summary:
+                        - This module updates the local user’s configuration.
+                      - module: Logs
+                        restricted_available: 1
+                        summary:
+                        - This restores service access logs.
+                      - module: Mail
+                        restricted_available: 1
+                        summary:
+                        - This resets email quotas to safe values and restores email aliases, filters and mail items.
+                      - module: MailFix
+                        restricted_available: 1
+                        summary:
+                        - This repairs mail permissions and upgrades the system to the latest storage methods.
+                      - module: MailLimits
+                        restricted_available: 1
+                        summary:
+                        - This restores any holds or suspensions on outgoing messages for a user’s email accounts.
+                      - module: MailRouting
+                        restricted_available: 1
+                        summary:
+                        - This updates MX (Mail eXchange) records.
+                      - module: MailSync
+                        restricted_available: 1
+                        summary:
+                        - This copies any new mail to the local server that the remote account received during the transfer.
+                      - module: Mailman
+                        restricted_available: 1
+                        summary:
+                        - This restores mailing lists.
+                      - module: ManualMX
+                        restricted_available: 1
+                        summary:
+                        - This configures the source server’s manual MX entries to send mail to the destination server.
+                      - module: Mysql
+                        restricted_available: 1
+                        summary:
+                        - This restores MariaDB/MySQL databases, users, and grants.
+                      - module: MysqlRemoteNotes
+                        restricted_available: 1
+                        summary:
+                        - The MysqlRemoteNotes module restores the Remote MySQL comments for an account.
+                      - module: NobodyFiles
+                        restricted_available: 1
+                        summary:
+                        - This restores ownership of files previously owned by the “nobody” user in the home directory.
+                      - module: OldHomedirs
+                        notes:
+                        - Symbolic links for former home directories ensure that applications with hard-coded paths continue to work when transferred between servers.
+                        restricted_available: 0
+                        summary:
+                        - This creates symbolic links to former home directory paths.
+                      - module: Package
+                        notes:
+                        - If the target server does not have the package that the user has been assigned, the system will use the account’s properties to recreate the package.
+                        restricted_available: 0
+                        summary:
+                        - This recreates account packages.
+                      - module: Password
+                        restricted_available: 1
+                        summary:
+                        - This restores the encrypted system password.
+                      - module: PostRestoreActions
+                        notes:
+                        - This module updates system databases and name server IP address lists, restarts services, unblocks dynamic content, and runs custom post-restoration scripts.
+                        restricted_available: 1
+                        summary:
+                        - This runs post-restoration actions and cleanups.
+                      - module: Postgres
+                        restricted_available: 0
+                        restricted_summary:
+                        - PostgreSQL version “8.4” or later is required to restore databases in restricted mode.
+                        summary:
+                        - This restores PostgreSQL databases, users, and grants.
+                      - module: PreRestoreActions
+                        notes:
+                        - This module temporarily lifts the account’s quota and runs custom pre-restoration scripts.
+                        restricted_available: 1
+                        summary:
+                        - This performs pre-restoration actions and cleanups.
+                      - module: ProxySubdomains
+                        notes:
+                        - This module ensures that service subdomains such as “cpanel”, “cpcalendars”, and “cpcontacts” are configured properly.
+                        restricted_available: 1
+                        summary:
+                        - This restores service subdomains.
+                      - module: PublicContact
+                        restricted_available: 1
+                        summary:
+                        - This restores the account’s public contact data.
+                      - module: PublicHtmlSymlinks
+                        notes:
+                        - Symbolic links for former web root directories ensure that applications with hard-coded paths will continue to work when transferred between servers.
+                        restricted_available: 1
+                        restricted_summary:
+                        - The system does not recreate symbolic links outside of the account’s home directory in restricted mode.
+                        summary:
+                        - This creates symbolic links to former web root directory paths.
+                      - module: PublishZones
+                        restricted_available: 1
+                        summary:
+                        - This module ensures all zones have been synced out and reloaded across the DNS (Domain Name System) cluster.
+                      - module: Quota
+                        restricted_available: 1
+                        summary:
+                        - This restores the account’s data storage quota.
+                      - module: Reseller
+                        notes:
+                        - This restores all of the privileges the account previously had. This includes the “all” privilege, which is equivalent to root access.
+                        restricted_available: 0
+                        summary:
+                        - This restores reseller privileges.
+                      - module: ResyncHomedir
+                        restricted_available: 1
+                        restricted_summary:
+                        - If the home directory does not already exist, the system will not create it.
+                        summary:
+                        - This module will resynchronize the home directory from the source server. The module preserves any changes that occurred during the transfer.
+                      - module: Roundcube
+                        restricted_available: 1
+                        summary:
+                        - This restores Roundcube configuration and preferences.
+                      - module: SPF
+                        restricted_available: 1
+                        summary:
+                        - This restores SPF (Sender Policy Framework) records and updates them for the target server.
+                      - module: SSL
+                        restricted_available: 1
+                        summary:
+                        - This restores SSL (Secure Sockets Layer) keys, certificates, and virtual host entries.
+                      - module: ServiceProxy
+                        restricted_available: 1
+                        summary:
+                        - This module sets up applicable service proxying to the destination servers.
+                      - module: Shell
+                        restricted_available: 1
+                        restricted_summary:
+                        - In restricted mode, the system will set any account that requests a shell other than “noshell” or “jailshell” to use “jailshell”.
+                        summary:
+                        - This restores the account’s shell.
+                      - module: SpamAssassin
+                        restricted_available: 0
+                        summary:
+                        - This module will disable SpamAssassin for the restored user if they had it enabled at the source.
+                      - module: Subaccount
+                        restricted_available: 0
+                        summary:
+                        - 'Implementor Error: The summary for this module is missing.'
+                      - module: Suspend
+                        restricted_available: 1
+                        restricted_summary:
+                        - The system will not restore the suspension reason or old shell for the account and instead will use a default.
+                        summary:
+                        - This module will suspend the restored user if they were suspended at the source.
+                      - module: Unsuspend
+                        restricted_available: 1
+                        summary:
+                        - This unsuspends .htaccess files.
+                      - module: VhostIncludes
+                        restricted_available: 0
+                        summary:
+                        - This restores custom virtual host includes.
+                      - module: Vhosts
+                        restricted_available: 1
+                        summary:
+                        - This module installs the web server configuration and restarts the web server.
+                      - module: WebCalls
+                        restricted_available: 1
+                        summary:
+                        - This module restores the account’s web call data.
+                      - module: WebDiskHomedir
+                        restricted_available: 1
+                        summary:
+                        - This rewrites web disk home directories to the correct location on the new server.
+                      - module: ZoneFile
+                        restricted_available: 1
+                        summary:
+                        - This restores custom DNS (Domain Name System) Zone entries.
+                      - module: userdata
+                        restricted_available: 1
+                        restricted_summary:
+                        - Restricted Restore does not restore the entire userdata file; instead, the system will create a new one and copy in certain information. Customizations to the userdata file in the archive will not be in the newly-created userdata file.
+                        summary:
+                        - This restores website configuration (userdata).
+                    properties:
+                      modules:
+                        description: An array of objects containing information about backup configuration modules.
+                        items:
+                          properties:
+                            module:
+                              description: The module's name.
+                              type: string
+                            notes:
+                              description: Notes about the module, if any exist.
+                              items:
+                                type: string
+                              type: array
+                            restricted_available:
+                              description: 'Whether the module is available under a
+
+                                [restricted restore](https://go.cpanel.net/whmdocsTransferorRestoreacPanelAccount#restricted-restore).
+
+
+                                * `1` — The module is available under a restricted restore.
+
+                                * `0` — The module is **not** available under a restricted restore.'
+                              enum:
+                              - 1
+                              - 0
+                              type: integer
+                            restricted_summary:
+                              description: A description of the module's behavior when the transfer uses a restricted restore.
+                              items:
+                                type: string
+                              type: array
+                            summary:
+                              description: A description of the module's behavior when the transfer does **not** use a restricted restore.
+                              items:
+                                type: string
+                              type: array
+                          type: object
+                        type: array
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: restore_modules_summary
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 1
+                        - 0
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Return backup modules list
+      tags:
+      - Account Restoration
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  restore_modules_summary\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/restore_modules_summary?api.version=1
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11.50'
+  /restore_queue_activate:
+    get:
+      description: This function activates the restore queue. This triggers a process that restores all queued accounts.
+      operationId: Backup-restore_queue_activate
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: restore_queue_activate
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: Restore queue processing initiated
+                        type: string
+                      result:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Start restoration
+      tags:
+      - Account Restoration
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  restore_queue_activate\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/restore_queue_activate?api.version=1
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11.38'
+  /restore_queue_add_task:
+    get:
+      description: This function restores a user's cPanel account from a backup file.
+      operationId: Backup-restore_queue_add_task
+      parameters:
+      - description: The date of the backup to use, in `YYYY-MM-DD` format.
+        in: query
+        name: restore_point
+        required: true
+        schema:
+          example: '2019-10-21T00:00:00.000Z'
+          type: string
+      - description: The cPanel account's username.
+        in: query
+        name: user
+        required: true
+        schema:
+          example: username
+          type: string
+      - description: 'The destination''s identification string.
+
+
+          * `local` — The local directory.
+
+          * The destination ID string''s value.'
+        in: query
+        name: destid
+        required: false
+        schema:
+          default: local
+          example: LmTZCUpqqLSPH8AO7pVtIeNK
+          type: string
+      - description: 'Whether to assign the account a dedicated IP address.
+
+
+          * `1` — Assign a dedicated IP address.
+
+          * `0` — Use the shared IP address.'
+        in: query
+        name: give_ip
+        required: false
+        schema:
+          default: 0
+          enum:
+          - 0
+          - 1
+          example: 1
+          type: integer
+      - description: 'Whether to restore the account''s email configuration.
+
+
+          * `1` — Restore.
+
+          * `0` — Do **not** restore.'
+        in: query
+        name: mail_config
+        required: false
+        schema:
+          default: 0
+          enum:
+          - 0
+          - 1
+          example: 1
+          type: integer
+      - description: 'Whether to restore the account''s MySQL® databases.
+
+
+          * `1` — Restore.
+
+          * `0` — Do **not** restore.'
+        in: query
+        name: mysql
+        required: false
+        schema:
+          default: 0
+          enum:
+          - 0
+          - 1
+          example: 1
+          type: integer
+      - description: 'Whether to restore the account''s subdomains.
+
+
+          * `1` — Restore.
+
+          * `0` — Do **not** restore.'
+        in: query
+        name: subdomains
+        required: false
+        schema:
+          default: 0
+          enum:
+          - 0
+          - 1
+          example: 1
+          type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      queue_id:
+                        description: The process's internal task queue ID.
+                        example: 3b99QG5fp99tdL5
+                        type: string
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: restore_queue_add_task
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Restore user account from backup
+      tags:
+      - Account Restoration
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  restore_queue_add_task \\\n  user='username' \\\n  restore_point='2019-10-21T00:00:00.000Z'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/restore_queue_add_task?api.version=1&user=username&restore_point=2019-10-21T00%3a00%3a00.000Z
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11.38'
+  /restore_queue_clear_all_completed_tasks:
+    get:
+      description: This function removes successfully completed tasks from the restoration queue.
+      operationId: Backup-restore_queue_clear_all_completed_tasks
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: restore_queue_clear_all_completed_tasks
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Remove all completed restoration tasks
+      tags:
+      - Account Restoration
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  restore_queue_clear_all_completed_tasks\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/restore_queue_clear_all_completed_tasks?api.version=1
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11.38'
+  /restore_queue_clear_all_failed_tasks:
+    get:
+      description: This function removes any failed tasks from the restoration queue.
+      operationId: Backup-restore_queue_clear_all_failed_tasks
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: restore_queue_clear_all_failed_tasks
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Remove all failed restoration tasks
+      tags:
+      - Account Restoration
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  restore_queue_clear_all_failed_tasks\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/restore_queue_clear_all_failed_tasks?api.version=1
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11.38'
+  /restore_queue_clear_all_pending_tasks:
+    get:
+      description: This function removes any pending tasks from the restoration queue.
+      operationId: Backup-restore_queue_clear_all_pending_tasks
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: restore_queue_clear_all_pending_tasks
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Remove all pending restoration tasks
+      tags:
+      - Account Restoration
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  restore_queue_clear_all_pending_tasks\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/restore_queue_clear_all_pending_tasks?api.version=1
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11.38'
+  /restore_queue_clear_all_tasks:
+    get:
+      description: This function removes all tasks from the restoration queue.
+      operationId: Backup-restore_queue_clear_all_tasks
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: restore_queue_clear_all_tasks
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Remove all restoration tasks
+      tags:
+      - Account Restoration
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  restore_queue_clear_all_tasks\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/restore_queue_clear_all_tasks?api.version=1
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11.38'
+  /restore_queue_clear_completed_task:
+    get:
+      description: This function removes a single completed task from the restoration queue.
+      operationId: Backup-restore_queue_clear_completed_task
+      parameters:
+      - description: When the restoration queue started the restoration.
+        in: query
+        name: start_time
+        required: true
+        schema:
+          example: 1396065600
+          format: unix_timestamp
+          type: integer
+      - description: The cPanel account's username.
+        in: query
+        name: user
+        required: true
+        schema:
+          example: username
+          format: username
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: restore_queue_clear_completed_task
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Remove completed restoration task
+      tags:
+      - Account Restoration
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  restore_queue_clear_completed_task \\\n  user='username' \\\n  start_time='1396065600'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/restore_queue_clear_completed_task?api.version=1&user=username&start_time=1396065600
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11.38'
+  /restore_queue_clear_pending_task:
+    get:
+      description: This function removes a single pending task from the restoration queue.
+      operationId: Backup-restore_queue_clear_pending_task
+      parameters:
+      - description: The cPanel account's username.
+        in: query
+        name: user
+        required: true
+        schema:
+          example: username
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: restore_queue_clear_pending_task
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Remove pending restoration task
+      tags:
+      - Account Restoration
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  restore_queue_clear_pending_task \\\n  user='username'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/restore_queue_clear_pending_task?api.version=1&user=username
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11.38'
+  /restore_queue_is_active:
+    get:
+      description: This function checks whether the system's restoration queue is actively processing tasks.
+      operationId: Backup-restore_queue_is_active
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      is_active:
+                        description: 'Whether the restoration queue is actively processing tasks.
+
+
+                          * `1` — Currently active.
+
+                          * `0` — **Not** currently active.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: restore_queue_is_active
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Validate restoration queue is active
+      tags:
+      - Account Restoration
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  restore_queue_is_active\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/restore_queue_is_active?api.version=1
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11.38'
+  /restore_queue_list_active:
+    get:
+      description: This function lists the tasks that the restoration queue is actively processing.
+      operationId: Backup-restore_queue_list_active
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      restore_job:
+                        description: An array of objects that contain information about an active task in the restoration queue.
+                        items:
+                          properties:
+                            options:
+                              description: A list of information about an active task in the restoration queue.
+                              properties:
+                                destid:
+                                  description: The backup location from which to restore the data.
+                                  example: local
+                                  type: string
+                                give_ip:
+                                  description: 'Whether the task will assign the account a dedicated IP address.
+
+
+                                    * `1` — Assign.
+
+                                    * `0` — Will **not** assign.'
+                                  enum:
+                                  - 0
+                                  - 1
+                                  example: 1
+                                  type: integer
+                                mail_config:
+                                  description: 'Whether the function will restore the account''s email configuration.
+
+
+                                    * `1` — Restore.
+
+                                    * `0` — Will **not** restore.'
+                                  enum:
+                                  - 0
+                                  - 1
+                                  example: 1
+                                  type: integer
+                                mysql:
+                                  description: 'Whether the task will restore the account''s MySQL® databases.
+
+
+                                    * `1` — Restore.
+
+                                    * `0` — Will **not** restore.'
+                                  enum:
+                                  - 0
+                                  - 1
+                                  example: 1
+                                  type: integer
+                                subdomains:
+                                  description: 'Whether the function will restore the account''s subdomains.
+
+
+                                    * `1` — Restore.
+
+                                    * `0` — Will **not** restore.'
+                                  enum:
+                                  - 0
+                                  - 1
+                                  example: 1
+                                  type: integer
+                              type: object
+                            restore_point:
+                              description: The date of the backup that the task will use, in `YYYY-MM-DD` format.
+                              example: '2019-10-21T00:00:00.000Z'
+                              format: ISO-8601 Date
+                              type: string
+                            user:
+                              description: The cPanel account's username.
+                              example: username
+                              type: string
+                          type: object
+                        type: array
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: restore_queue_list_active
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Return active restoration tasks list
+      tags:
+      - Account Restoration
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  restore_queue_list_active\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/restore_queue_list_active?api.version=1
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11.38'
+  /restore_queue_list_completed:
+    get:
+      description: 'This function lists the restoration queue''s completed tasks.
+
+
+        **Important:**
+
+
+        This function''s output varies dramatically. The `/usr/local/cpanel/bin/backup_restore_manager` script run with the `list_finished` option determines this output..
+
+
+        **Note:**
+
+
+        On servers that run CentOS 7, you may see a `named` warning about the absence of SPF resource records on DNS.
+
+        * This warning is **not** relevant on CentOS 7 servers, because RFC 7208 deprecated SPF records. CentOS 7 servers use TXT records instead of SPF records.
+
+        * Red Hat 7.1 and CentOS 7.1 both contain `bind-9.9.4-23.el7`, which is an updated version of BIND that complies with RFC 7208. To resolve this issue, update your operating system to a version that contains the updated version of BIND. For more information, read the Red Hat Bugzilla case about SPF record errors.'
+      operationId: Backup-restore_queue_list_completed
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                restore_queue_add_task_function:
+                  description: A task that the restore_queue_add_task function added.
+                  value:
+                    data:
+                      restore_job:
+                      - restore_job:
+                          options:
+                            destid: local
+                            give_ip: 0
+                            mail_config: 0
+                            mysql: 0
+                            subdomains: 0
+                          restore_point: '2020-03-29T00:00:00.000Z'
+                          user: mrfrog
+                        status_info:
+                          altered_items: null
+                          dangerous_items: null
+                          finished: '1586188203'
+                          log: warning
+                          restore_logfile: item-RESTORE_AccountLocal_mrfrog
+                          result: 2
+                          skipped_items: null
+                          started: '1586188078'
+                          status: 2
+                          statusmsg: warning
+                          transfer_session_id: userbackup20200406154758JqBa
+                          warnings: null
+                    metadata:
+                      command: restore_queue_list_completed
+                      reason: OK
+                      result: 1
+                      version: 1
+                restorepkg:
+                  description: A task that the /scripts/restorepkg script added.
+                  value:
+                    data:
+                      restore_job:
+                      - restore_job:
+                          options:
+                            give_ip: 0
+                            mail_config: 1
+                            mysql: 1
+                            subdomains: 1
+                          restore_point: YYYY-MM-DD
+                          user: example
+                        status_info:
+                          finished: '1355840823'
+                          log: "Extracting Domain....Done\n Done\n\n Restoring cpanel user config file    Done\n\n Restoring reseller packages and features (if any)\n     Restoring reseller privs (if any)\n     Restoring Locale Setting\n     Restoring SSL keys and Certificates    Done\n\n     Restoring frontpage (if installed)    Done\n\n     Restoring access logs....     Done\n\n     Restoring domain keys....     Done\n\n     Restoring MySQL databases....     Database \"cptmpdb_azri8qf8_0KuzT3yEH7JFeeSi\" dropped Done\n Successful creation of roundcube cp_schema_version table\nInitial run through schema migration: from '0.2b' to '0.8.4'\nPlease ignore non-fatal warnings, such as duplicate keys, columns, indexes, or tables already existing. \nSuccessfully saved version 0.8.4 to cp_schema_version table\nDBD::mysql::st execute failed: Table 'cptmpdb_azri8qf8_7WIKvg175f2M02yn.users' doesn't exist at /usr/local/cpanel/Cpanel/Email/RoundCube/DBI.pm line 503,  line 1. DBD::mysql::st execute failed: Table 'cptmpdb_azri8qf8_7WIKvg175f2M02yn.users' doesn't exist at /usr/local/cpanel/Cpanel/Email/RoundCube/DBI.pm line 503,  line 1. Transfer failed from temp database to Roundcube database.\n Done\n Done\n     Restoring MySQL privs    Done\n\n    Reloading MySQL    Done\n\nRestoring PostgreSQL databases.... ERROR:  role \"azri8qf8\" already exists      Restoring PostgreSQL privs     Done\n\n     Restoring Mailman lists    Done\n\n     Restoring Mailman Archives    Done\n\n      Restoring shell    Current shell /usr/local/cpanel/bin/noshell is up to date. Done\n\n     Restoring password    Password for azri8qf8 has been changed Done\n\n     Restoring proftpd file    Done\n\n     Resyncing FTP Passwords    Updating ftp passwords for azri8qf8Ftp password files updated.Ftp vhost passwords syncedDone\n\n     Linking old home directories\n     Parsing Domain Databases    ...Subdomains......ParkedDomains......AddonDomains... \\n     Restoring Domains\n\n     Restoring Bandwidth Data    Done\n     Restoring Counter Data \\n     Restoring Homedir....    Done\n\n     Doing fileprotect conversion\n     Restoring nobody owned files    Done\n\n     Restoring Mail files    Done\n \\n     Restoring userdata....     Done\n\n     Restoring custom virtualhost templates....\n     Converting email to cPanel 5+ (if needed)    Done\n\n     Cleaning up filters (if needed)    vfilter converter v3.0Updating vfilter files to latest format.Running for azri8qf8 only (force=0) (has_spam_acl=0)Processing azri8qf8......DoneDone\n \\n     Fixing mail permissions    Done\n\n     Restoring crontab    Done\n         Converting to maildir if needed    Done\n         Restoring Dns Zones    Restoring zone: 28-ps1n25d.test.db Zone updates: 28-ps1n25d.test\n     Adding missing subdomain DNS entries (if needed) \\n     Update Proxy subomains    Adding proxy subdomains for domain 28-ps1n25d.test.28-ps1n25d.test                    [28-ps1n25d.test, 10.215.215.229, no changes needed]Done\n\n     Updating SPF Records    Done\n\n     Restoring quota    Done\n \\n\n     Update mail routing    LOCAL MAIL EXCHANGER: This server will serve as a primary mail exchanger for 28-ps1n25d.test's mail.: This configuration has been manually selected. Done\n\n     Rebuilding Apache Conf    Built /usr/local/apache/conf/httpd.conf OK\n     Restore Complete    Account Restore Complete Unlocking password for user azri8qf8.passwd: Success.\n"
+                          result: 1
+                          started: '1355840811'
+                      - restore_job:
+                          options:
+                            give_ip: 1
+                            mail_config: 0
+                            mysql: 1
+                            subdomains: 0
+                          restore_point: YYYY-MM-DD
+                          user: bcow
+                        status_info:
+                          finished: '1355840823'
+                          log: ''
+                          result: 0
+                          started: '1355840823'
+                    metadata:
+                      command: restore_queue_list_completed
+                      reason: OK
+                      result: 1
+                      version: 1
+              schema:
+                properties:
+                  data:
+                    properties:
+                      restore_job:
+                        description: An array of objects that contain information about a completed task in the restoration queue.
+                        items:
+                          properties:
+                            restore_job:
+                              description: An object that contains the task's settings.
+                              properties:
+                                options:
+                                  description: An object that contains information about the task's options.
+                                  properties:
+                                    destid:
+                                      description: 'The destination''s identification string.
+
+                                        * `local` — The local directory.
+
+                                        * The destination ID string''s value.'
+                                      example: LmTZCUpqqLSPH8AO7pVtIeNK
+                                      type: string
+                                    give_ip:
+                                      description: 'Whether the task assigned the account a dedicated IP address.
+
+                                        * `1` - Assigned.
+
+                                        * `0` - Did **not** assign.'
+                                      enum:
+                                      - 0
+                                      - 1
+                                      example: 1
+                                      type: integer
+                                    mail_config:
+                                      description: 'Whether the function restored the account''s email configuration.
+
+                                        * `1` - Restored.
+
+                                        * `0` - Did **not** restore.'
+                                      enum:
+                                      - 0
+                                      - 1
+                                      example: 1
+                                      type: integer
+                                    mysql:
+                                      description: 'Whether the task restored the account''s MySQL® databases.
+
+                                        * `1` - Restored.
+
+                                        * `0` - Did **not** restore.'
+                                      enum:
+                                      - 0
+                                      - 1
+                                      example: 1
+                                      type: integer
+                                    subdomains:
+                                      description: 'Whether the function restored the account''s subdomains.
+
+                                        * `1` - Restored.
+
+                                        * `0` - Did **not** restore.'
+                                      enum:
+                                      - 0
+                                      - 1
+                                      example: 1
+                                      type: integer
+                                  type: object
+                                restore_point:
+                                  description: The date of the backup that the task used.
+                                  example: '2015-10-21T00:00:00.000Z'
+                                  format: ISO-8601 Date
+                                  type: string
+                                user:
+                                  description: The cPanel account's username.
+                                  example: username
+                                  format: username
+                                  type: string
+                              type: object
+                            status_info:
+                              description: An object that contains information about the task's status.
+                              properties:
+                                altered_items:
+                                  description: The number of items that the restoration process changed.
+                                  example: 1
+                                  type:
+                                  - integer
+                                  - 'null'
+                                dangerous_items:
+                                  description: The number of items in the restoration process that may cause problems on the account.
+                                  example: 1
+                                  type:
+                                  - integer
+                                  - 'null'
+                                finished:
+                                  description: The time that the restoration process completed this task.
+                                  example: '1355840823'
+                                  format: unix_timestamp
+                                  type: string
+                                log:
+                                  description: The task's log information.
+                                  example: 'Extracting Domain....Done Done Restoring cpanel user config file Done Restoring reseller packages and features (if any) Restoring reseller privs (if any) Restoring Locale Setting Restoring SSL keys and Certificates Done Restoring frontpage (if installed) Done Restoring access logs.... Done Restoring domain keys.... Done Restoring MySQL databases.... Database "cptmpdb_azri8qf8_0KuzT3yEH7JFeeSi" dropped Done Successful creation of roundcube cp_schema_version table Initial run through schema migration: from ''0.2b'' to ''0.8.4'' Please ignore non-fatal warnings, such as duplicate keys, columns, indexes, or tables already existing. Successfully saved version 0.8.4 to cp_schema_version table DBD::mysql::st execute failed: Table ''cptmpdb_azri8qf8_7WIKvg175f2M02yn.users'' doesn''t exist at /usr/local/cpanel/Cpanel/Email/RoundCube/DBI.pm line 503, line 1. DBD::mysql::st execute failed: Table ''cptmpdb_azri8qf8_7WIKvg175f2M02yn.users'' doesn''t exist at /usr/local/cpanel/Cpanel/Email/RoundCube/DBI.pm line 503, line 1. Transfer failed from temp database to Roundcube database. Done Done Restoring MySQL privs Done Reloading MySQL Done Restoring PostgreSQL databases.... ERROR: role "azri8qf8" already exists Restoring PostgreSQL privs Done Restoring Mailman lists Done Restoring Mailman Archives Done Restoring shell Current shell /usr/local/cpanel/bin/noshell is up to date. Done Restoring password Password for azri8qf8 has been changed Done Restoring proftpd file Done Resyncing FTP Passwords Updating ftp passwords for azri8qf8Ftp password files updated.Ftp vhost passwords syncedDone Linking old home directories Parsing Domain Databases ...Subdomains......ParkedDomains......AddonDomains... Restoring Domains Restoring Bandwidth Data Done Restoring Counter Data Restoring Homedir.... Done Doing fileprotect conversion Restoring nobody owned files Done Restoring Mail files Done Restoring userdata.... Done Restoring custom virtualhost templates.... Converting email to cPanel 5+ (if needed) Done Cleaning up filters (if needed) vfilter converter v3.0Updating vfilter files to latest format.Running for azri8qf8 only (force=0) (has_spam_acl=0)Processing azri8qf8......DoneDone Fixing mail permissions Done Restoring crontab Done Converting to maildir if needed Done Restoring Dns Zones Restoring zone: 28-ps1n25d.test.db Zone updates: 28-ps1n25d.test Adding missing subdomain DNS entries (if needed) Update Proxy subomains Adding proxy subdomains for domain 28-ps1n25d.test.28-ps1n25d.test [28-ps1n25d.test, 10.215.215.229, no changes needed]Done Updating SPF Records Done Restoring quota Done Update mail routing LOCAL MAIL EXCHANGER: This server will serve as a primary mail exchanger for 28-ps1n25d.test''s mail.: This configuration has been manually selected. Done Rebuilding Apache Conf Built /usr/local/apache/conf/httpd.conf OK Restore Complete Account Restore Complete Unlocking password for user azri8qf8.passwd: Success.'
+                                  type: string
+                                restore_logfile:
+                                  description: The restoration log file's name.
+                                  example: item-RESTORE_AccountLocal_example
+                                  type: string
+                                result:
+                                  description: 'Whether the task completed successfully.
+
+                                    * `1` - Success.
+
+                                    * `0` - Failure.
+
+                                    * `2` - Warning.'
+                                  enum:
+                                  - 0
+                                  - 1
+                                  - 2
+                                  example: 1
+                                  type: integer
+                                skipped_items:
+                                  description: The number of items that the restoration process skipped.
+                                  example: 1
+                                  type:
+                                  - integer
+                                  - 'null'
+                                started:
+                                  description: The restoration process's start time for this task.
+                                  example: '1355840811'
+                                  format: unix_timestamp
+                                  type: string
+                                transfer_session_id:
+                                  description: The restoration transfer session's ID.
+                                  example: userbackup20200406154758JqBa
+                                  type: string
+                                warnings:
+                                  description: Any warnings about the restoration process.
+                                  example: null
+                                  items:
+                                    type: string
+                                  type:
+                                  - array
+                                  - 'null'
+                              type: object
+                          type: object
+                        type: array
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: restore_queue_list_completed
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` - Success.
+
+                          * `0` - Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Return completed restoration tasks list
+      tags:
+      - Account Restoration
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  restore_queue_list_completed\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/restore_queue_list_completed?api.version=1
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11.38'
+  /restore_queue_list_pending:
+    get:
+      description: This function lists the tasks that the restoration queue has not yet processed.
+      operationId: Backup-restore_queue_list_pending
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      restore_job:
+                        description: An array of objects that contain information about a pending task in the restoration queue.
+                        items:
+                          properties:
+                            options:
+                              description: A list of information about the options for a pending task in the restoration queue.
+                              properties:
+                                destid:
+                                  description: 'The destination''s identification string.
+
+
+                                    * `local` — The local directory.
+
+                                    * The destination ID string''s value.'
+                                  example: LmTZCUpqqLSPH8AO7pVtIeNK
+                                  type: string
+                                give_ip:
+                                  description: 'Whether the task will assign the account a dedicated IP address.
+
+
+                                    * `1` — Assign.
+
+                                    * `0` — Will **not** assign.'
+                                  enum:
+                                  - 0
+                                  - 1
+                                  example: 1
+                                  type: integer
+                                mail_config:
+                                  description: 'Whether the function will restore the account''s email configuration.
+
+
+                                    * `1` — Restore.
+
+                                    * `0` — Will **not** restore.'
+                                  enum:
+                                  - 0
+                                  - 1
+                                  example: 1
+                                  type: integer
+                                mysql:
+                                  description: 'Whether the task will restore the account''s MySQL® databases.
+
+
+                                    * `1` — Restore.
+
+                                    * `0` — Will **not** restore.'
+                                  enum:
+                                  - 0
+                                  - 1
+                                  example: 1
+                                  type: integer
+                                subdomains:
+                                  description: 'Whether the function will restore the account''s subdomains.
+
+
+                                    * `1` — Restore.
+
+                                    * `0` — Will **not** restore.'
+                                  enum:
+                                  - 0
+                                  - 1
+                                  example: 1
+                                  type: integer
+                              type: object
+                            restore_point:
+                              description: The date of the backup that the task will use, in `YYYY-MM-DD` format.
+                              example: '2015-10-21T00:00:00.000Z'
+                              format: ISO-8601 Date
+                              type: string
+                            user:
+                              description: The cPanel account's username.
+                              example: username
+                              type: string
+                          type: object
+                        type: array
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: restore_queue_list_pending
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Return pending restoration tasks list
+      tags:
+      - Account Restoration
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  restore_queue_list_pending\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/restore_queue_list_pending?api.version=1
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11.38'
+  /restore_queue_state:
+    get:
+      description: This function lists the tasks in the restoration queue.
+      operationId: Backup-restore_queue_state
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    example:
+                      active:
+                      - options:
+                          give_ip: 1
+                          mail_config: 1
+                          mysql: 1
+                          subdomains: 1
+                        restore_point: '2019-10-21T00:00:00.000Z'
+                        user: username
+                      completed:
+                      - options:
+                          give_ip: 1
+                          mail_config: 0
+                          mysql: 1
+                          subdomains: 0
+                        restore_point: '2019-10-22T00:00:00.000Z'
+                        user: username
+                      is_active: 1
+                      pending:
+                      - options:
+                          give_ip: 0
+                          mail_config: 1
+                          mysql: 0
+                          subdomains: 1
+                        restore_point: '2019-10-23T00:00:00.000Z'
+                        user: username
+                    properties:
+                      active:
+                        description: An array of objects containing restoration queue items that the system is actively processing.
+                        items:
+                          $ref: '#/components/schemas/restorePoint'
+                        type: array
+                      completed:
+                        description: An array of objects containing restoration queue items that the system has already processed.
+                        items:
+                          $ref: '#/components/schemas/restorePoint'
+                        type: array
+                      is_active:
+                        description: 'Whether the restoration queue is actively processing a task.
+
+
+                          * `1` — The restoration queue is processing a task.
+
+                          * `0` — The restoration queue is **not** processing a task.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 0
+                        type: integer
+                      pending:
+                        description: An array of objects containing restoration queue items that the system will process next.
+                        items:
+                          $ref: '#/components/schemas/restorePoint'
+                        type: array
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: restore_queue_state
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Return restoration tasks list
+      tags:
+      - Account Restoration
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  restore_queue_state\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/restore_queue_state?api.version=1
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11.38'
+  /restoreaccount:
+    get:
+      description: 'This function restores an account backup. You can use this function to restore daily,
+
+        weekly, or monthly backups.
+
+
+        **Important:**
+
+
+        * When you call this function, you **must** include at least one of
+
+        the `all`, `mail`, `subs`, or `mysql` parameters.
+
+
+        * On servers with a custom `Whostmgr::Transfers` module, the function may not return XML
+
+        output. To properly return XML output, the `Whostmgr::Transfers` module **must** allow
+
+        the system to use the `Cpanel::Demultiplexer` module to capture output.
+
+
+        **Note:**
+
+
+        On servers that run CentOS 7, you may see a `named` warning about the absence of SPF
+
+        resource records on DNS.
+
+
+        * This warning is not relevant on CentOS 7 servers, because
+
+        RFC 7208 deprecated SPF records.
+
+        CentOS 7 servers use `TXT` records instead of `SPF` records.
+
+
+        * Red Hat 7.1 and CentOS 7.1 both contain `bind-9.9.4-23.el7`, which is an updated
+
+        version of BIND that complies with RFC 7208. To resolve this issue, update your
+
+        operating system to a version that contains the updated version of BIND. For more
+
+        information, read the
+
+        Red Hat Bugzilla case about SPF record errors.'
+      operationId: Backup-restoreaccount
+      parameters:
+      - description: 'The type of backup to restore. The function restores the most recent backup of
+
+          the type that you specify:
+
+
+          * `monthly`
+
+          * `weekly`
+
+          * `daily`'
+        in: query
+        name: type
+        required: true
+        schema:
+          enum:
+          - monthly
+          - weekly
+          - daily
+          example: monthly
+          type: string
+      - description: The account's username.
+        in: query
+        name: user
+        required: true
+        schema:
+          example: username
+          type: string
+      - description: 'Whether to create the account before restoration.
+
+
+          * `1` — Create and then restore the account. If you select this value and the
+
+          account already exists, the function will fail.
+
+          * `0` — Restore **only**.'
+        in: query
+        name: all
+        required: false
+        schema:
+          enum:
+          - 0
+          - 1
+          example: 1
+          type: integer
+      - description: 'Whether to assign a dedicated IP address to the restored account.
+
+
+          * `1` — Assign a dedicated IP address.
+
+          * `0` — Use the shared IP address.'
+        in: query
+        name: ip
+        required: false
+        schema:
+          enum:
+          - 0
+          - 1
+          example: 1
+          type: integer
+      - description: 'Whether to restore account-level filters (vfilters) and forwarders
+
+          (valiases).
+
+
+          * `1` — Restore.
+
+          * `0` — Do **not** restore.'
+        in: query
+        name: mail
+        required: false
+        schema:
+          enum:
+          - 0
+          - 1
+          example: 1
+          type: integer
+      - description: 'Whether to restore the account''s MySQL® databases.
+
+
+          * `1` — Restore.
+
+          * `0` — Do **not** restore.'
+        in: query
+        name: mysql
+        required: false
+        schema:
+          enum:
+          - 0
+          - 1
+          example: 1
+          type: integer
+      - description: 'Whether to restore the account''s subdomains.
+
+
+          * `1` — Restore.
+
+          * `0` — Do **not** restore.'
+        in: query
+        name: subs
+        required: false
+        schema:
+          enum:
+          - 0
+          - 1
+          example: 1
+          type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: restoreaccount
+                        type: string
+                      output:
+                        properties:
+                          raw:
+                            description: An output message that may contain long HTML.
+                            example: 'Extracting tarball...................
+
+                              Done<br />
+
+                              Extracting Domain....Done<br />
+
+                              Done<br />
+
+                              <br /><br />Restoring cpanel user config fileDone<br />
+
+                              <br />Restoring reseller privs (if any)<br />Restoring Locale Setting<br />Restoring SSL keys and CertificatesDone<br />
+
+                              <br />Restoring frontpage (if installed)Done<br />
+
+                              <br />Restoring access logs....
+
+                              Done<br />
+
+                              <br /><br />Restoring domain keys....
+
+                              Done<br />
+
+                              <br /><br />Restoring DB MAP File....
+
+                              Done<br />
+
+                              <br /><br /><span class="b2">Restoring PostgreSQL databases....</span>
+
+                              Restoring PostgreSQL privs<!--
+
+                              -->
+
+                              Done<br />
+
+                              <br />Restoring Mailman listsDone<br />
+
+                              <br />Restoring Mailman ArchivesDone<br />
+
+                              <br />Restoring shell<blockquote><pre>Current shell /bin/bash is up to date.
+
+                              </pre></blockquote>Done<br />
+
+                              <br />Restoring password<blockquote><pre></pre></blockquote>Done<br />
+
+                              <br />Restoring proftpd fileDone<br />
+
+                              <br />Resyncing FTP Passwords<blockquote><pre>Updating ftp passwords for userFtp password files updated.Ftp vhost passwords synced</pre></blockquote>Done<br />
+
+                              <br />Linking old home directories<br />Parsing Domain Databases...ParkedDomains......AddonDomains...<br />Restoring Domains<br />
+
+                              <br />Restoring Bandwidth DataDone
+
+                              <br />Restoring Counter Data<pre></pre><br />Restoring Homedir....<blockquote><pre></pre></blockquote>Done<br />
+
+                              <br />Doing fileprotect conversion<br />Restoring nobody owned filesDone<br />
+
+                              <br />Restoring Mail filesDone<br />
+
+                              <br />Restoring userdata....
+
+                              Done<br />
+
+                              <br /><br />Restoring custom virtualhost templates....
+
+                              Converting email to cPanel 5+ (if needed)<blockquote><pre></pre></blockquote>Done<br />
+
+                              <br />Cleaning up filters (if needed)<blockquote><pre>vfilter converter v3.0Updating vfilter files to latest format.Running for user only (force=0) (has_spam_acl=1)Processing user......Done</pre></blockquote>Done<br />
+
+                              <br />Fixing mail permissions<blockquote><pre></pre></blockquote>Done<br />
+
+                              <br />Restoring crontabDone<br />
+
+                              Converting to maildir if needed<blockquote><pre></pre></blockquote>Done<br />
+
+                              Restoring Dns Zones<blockquote><pre>Restoring zone: user.com.db
+
+                              </pre></blockquote><br />Adding missing subdomain DNS entries (if needed)<pre></pre><br />Update Proxy subomains<blockquote><pre>Adding proxy subdomains for domain example.com.Records Installed</pre></blockquote>Done<br />
+
+                              <br />Updating SPF Records<blockquote><pre></pre></blockquote>Done<br />
+
+                              <br />Restoring quota<blockquote><pre></pre></blockquote>Done<br />
+
+                              <br /><br />Update mail routing<blockquote><pre>LOCAL MAIL EXCHANGER: This server will serve as a primary mail exchanger for example.com''s mail.: This configuration has been manually selected.
+
+                              </pre></blockquote>Done<br />
+
+                              <br />Rebuilding Apache Conf<br />Restore CompleteAccount Restore Complete
+
+                              Unlocking password for user user.passwd: Success.<br />'
+                            type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Restore account backup
+      tags:
+      - Account Restoration
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  restoreaccount \\\n  user='username' \\\n  type='monthly'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/restoreaccount?api.version=1&user=username&type=monthly
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11.28'
+  /verify_new_username_for_restore:
+    get:
+      description: This function checks for username conflicts during account restoration. If the function detects a username conflict, it outputs an error message in the `reason` return.
+      operationId: NameConflict-verify_new_username_for_restore
+      parameters:
+      - description: The cPanel account that you wish to transfer to the server.
+        in: query
+        name: user
+        required: true
+        schema:
+          example: username
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: verify_new_username_for_restore
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '- `1` — Success.
+
+                          - `0` - Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Validate username during restoration
+      tags:
+      - Account Restoration
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  verify_new_username_for_restore \\\n  user='username'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/verify_new_username_for_restore?api.version=1&user=username
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '58'
+components:
+  schemas:
+    restorePoint:
+      properties:
+        options:
+          properties:
+            give_ip:
+              description: 'Whether the restoration process will assign a dedicated IP address
+
+                to the account.
+
+
+                * `1` — Will assign.
+
+                * `0` — Will **not** assign.'
+              enum:
+              - 1
+              - 0
+              example: 1
+              type: integer
+            mail_config:
+              description: 'Whether the restoration process will restore the account''s email
+
+                configuration.
+
+
+                * `1` — Will restore.
+
+                * `0` — Will **not** restore.'
+              enum:
+              - 1
+              - 0
+              example: 1
+              type: integer
+            mysql:
+              description: 'Whether the restoration process will restore the account''s MySQL®
+
+                databases.
+
+
+                * `1` — Will restore.
+
+                * `0` — Will **not** restore.'
+              enum:
+              - 1
+              - 0
+              example: 1
+              type: integer
+            subdomains:
+              description: 'Whether the restoration process will restore the account''s subdomains.
+
+
+                * `1` — Will restore.
+
+                * `0` — Will **not** restore.'
+              enum:
+              - 1
+              - 0
+              example: 1
+              type: integer
+          type: object
+        restore_point:
+          description: The date of the backup file.
+          example: '2019-10-21T00:00:00.000Z'
+          format: ISO-8601 Date
+          type: string
+        user:
+          description: The cPanel account's username.
+          example: username
+          format: username
+          type: string
+  securitySchemes:
+    BasicAuth:
+      scheme: basic
+      type: http
+externalDocs:
+  url: https://cpanel.net/developers/
+x-tagGroups:
+- name: Account Restoration
+  tags:
+  - Restore Account
+  - Restore Queue Management
+  - Restore Queue Reporting
+- name: Accounts
+  tags:
+  - Account Creation
+  - Account Enhancements
+  - Account Management
+  - Bandwidth and Disk Quotas
+  - Domain Information
+  - Passwords
+  - Styles
+  - Suspensions
+- name: API Development Tools
+  tags:
+  - API Execution
+  - API Statistics
+  - API Token Management
+  - Applications
+  - Session
+- name: Authentication
+  tags:
+  - Authentication Providers
+  - External Authentication
+  - Login URL
+  - SSH Keys and Connections
+  - Two-Factor Authentication
+- name: Backups
+  tags:
+  - Backup Destination
+  - Backup or Restore
+  - Backup Settings
+  - Legacy Migration
+- name: Commerce Integration
+  tags:
+  - Market Integration
+  - Sitejet
+- name: cPanel Market
+  tags:
+  - Product Management
+  - Provider Management
+- name: cPanel Support Tickets
+  tags:
+  - Support Access
+  - Ticket Management
+- name: Customizations
+  tags:
+  - Brand
+  - Customizations
+- name: Databases
+  tags:
+  - Manage MySQL Server
+  - MySQL Databases
+  - PostgreSQL Databases
+  - Remote MySQL Databases
+- name: DNS
+  tags:
+  - DNS Cluster Settings
+  - DNS Security
+  - DNS Zones
+  - Domain Management
+  - Domain Management
+  - Resolvers
+  - Service Records
+- name: Hosting Plans
+  tags:
+  - Feature Access
+  - Feature Lists
+  - Hosting Plan Extensions
+  - Hosting Plans
+- name: InProductSurvey
+  tags:
+  - InProductSurvey
+- name: Integrations
+  tags:
+  - API Authentication
+  - Links
+  - Scripts Hooks
+- name: IP Address Management
+  tags:
+  - IPv4 Address Settings
+  - IPv6 Address Settings
+  - Network Address Translation
+- name: Login Security (cPHulk)
+  tags:
+  - Management
+  - Reporting
+  - Settings
+- name: Logs
+  tags:
+  - Web Log Retention
+- name: Mail
+  tags:
+  - cPanel Account Mail Management
+  - Mail DNS Settings
+  - Mail Server Settings
+  - Spam Management
+  - Spam Protection (Greylisting)
+- name: Monitoring
+  tags:
+  - 360 Monitoring
+- name: NGINX Manager
+  tags:
+  - NGINX Manager
+- name: Resellers
+  tags:
+  - Account Enhancement Limit
+  - Account Limits
+  - Account Permissions
+  - Account Settings
+  - Reseller Account Management
+- name: Security
+  tags:
+  - WHM Access
+- name: Server Administration
+  tags:
+  - Configuration Clusters
+  - Configurations
+  - Connected Applications
+  - Connections
+  - cPanel Analytics
+  - License Management
+  - Notifications
+  - Plugin-Based Features
+  - Security
+  - Server Nodes
+  - Server Profiles
+  - Services
+  - System Information
+  - Updates
+- name: SSL Certificates
+  tags:
+  - Auto-Generated Certificates
+  - cPanel Account Settings
+  - SSL Server Settings
+- name: System Package Management
+  tags:
+  - Install or Uninstall Package
+  - List Package Information
+  - Package Manager Settings
+- name: Transfers
+  tags:
+  - cPanel Account Transfer
+  - Transfer Configuration
+  - Transfer Monitoring
+- name: UserData
+  tags:
+  - UserData
+- name: Web Server Configuration
+  tags:
+  - EasyApache Settings
+  - PHP
+  - PHP-FPM
+- name: Web Server Security (ModSecurity)
+  tags:
+  - Rule Settings
+  - Rule Vendor Settings
+  - Server Settings

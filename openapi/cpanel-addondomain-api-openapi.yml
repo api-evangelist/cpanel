@@ -1,0 +1,698 @@
+openapi: 3.2.0
+info:
+  contact:
+    email: cs@cpanel.net
+    name: WebPros International, LLC
+    url: https://cpanel.net/support/
+  description: UAPI accesses the cPanel interface's features. Use this API to access and modify cPanel account data and settings.
+  license:
+    name: cPanel License
+    url: https://cpanel.net/legal-notices/
+  termsOfService: https://cpanel.net/legal-notices/
+  title: cPanel U Addon Domain API
+  version: 11.137.9999.106
+  x-api-evangelist-provenance: 'Harvested verbatim from cPanel''s developer portal on 2026-09-05 via the MCP tool get-full-api-description at https://api.docs.cpanel.net/mcp. ONE mechanical change was made before storage: example values containing PEM private-key or certificate blocks, and AWS-access-key-shaped example strings, were replaced with REDACTED_* placeholders so the file can be stored in a public git repository without tripping secret scanning. No path, operation, parameter, schema or description was altered, added or removed.'
+servers:
+- description: A server running cPanel.
+  url: https://{host}:{port}/execute
+  variables:
+    host:
+      default: cpanel-server.tld
+      description: The hostname of a server running cPanel.
+    port:
+      default: '2083'
+      description: The cPanel port.
+security:
+- BasicAuth: []
+tags:
+- description: The AddonDomain module for UAPI.
+  name: AddonDomain
+paths:
+  /AddonDomain/addaddondomain:
+    get:
+      description: 'This function creates an addon domain on the cPanel account. It creates a
+
+        subdomain of the account''s primary domain and then parks the new domain on
+
+        that subdomain.
+
+
+        **Important:**
+
+
+        - The account''s primary domain may **not** be a subdomain of the addon
+
+        domain that you create.
+
+        - You cannot create a wildcard addon domain.
+
+        - If the subdomain already exists on the account, the system reuses it
+
+        rather than failing.
+
+        - If the park step fails, the system removes the subdomain it created, so
+
+        that a failed call does not leave a partial addon domain behind.
+
+        - The system also creates an FTP
+
+        account for the addon domain, which counts against the account''s FTP
+
+        account limit.
+
+
+        When you disable the Web Server role,
+
+        the system **disables** this function.'
+      operationId: AddonDomain-addaddondomain
+      parameters:
+      - description: The addon domain to create.
+        in: query
+        name: newdomain
+        required: true
+        schema:
+          example: addon.com
+          format: domain
+          type: string
+      - description: The label of the subdomain to create on the account's primary domain and park the addon domain on. This value may **not** contain an asterisk (`*`).
+        in: query
+        name: subdomain
+        required: true
+        schema:
+          example: addon
+          type: string
+      - description: 'The addon domain''s document root, given as a directory path relative to the account''s home directory.
+
+
+          This value defaults to the subdomain label beneath the account''s `public_html` directory.'
+        in: query
+        name: dir
+        required: false
+        schema:
+          example: /public_html/addon
+          format: path
+          type: string
+      - description: 'Whether to remove the dot (`.`) characters from the `subdomain` value.
+
+          * `1` - Remove dots from the subdomain label.
+
+          * `0` - Do **not** remove dots from the subdomain label.'
+        in: query
+        name: disallowdot
+        required: false
+        schema:
+          default: 0
+          enum:
+          - 0
+          - 1
+          example: 1
+          type: integer
+      - description: 'Whether to create the addon domain even when the domain fails the system''s name, [DNS](https://go.cpanel.net/dnsrecords) and registration checks. When you pass this parameter, the system overwrites an existing DNS zone for the domain.
+
+
+          The system still refuses to create a domain that another account owns.
+
+          * `1` - Skip the checks and overwrite an existing zone.
+
+          * `0` - Enforce the checks.'
+        in: query
+        name: force
+        required: false
+        schema:
+          default: 0
+          enum:
+          - 0
+          - 1
+          example: 1
+          type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    description: The created addon domain.
+                    properties:
+                      domain:
+                        description: The addon domain that the system created.
+                        example: addon.com
+                        format: domain
+                        type: string
+                    type: object
+                  errors:
+                    items:
+                      type: string
+                    type:
+                    - array
+                    - 'null'
+                  messages:
+                    items:
+                      type: string
+                    type:
+                    - array
+                    - 'null'
+                  metadata:
+                    properties:
+                      transformed:
+                        type: integer
+                    type: object
+                  status:
+                    description: '* `1` — Success.
+
+                      * `0` — Failed. Check the `errors` field for more details.'
+                    enum:
+                    - 0
+                    - 1
+                    example: 1
+                    type: integer
+                  warnings:
+                    items:
+                      type: string
+                    type:
+                    - array
+                    - 'null'
+                type: object
+          description: HTTP Request was successful.
+      summary: Create an addon domain
+      tags:
+      - AddonDomain
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "uapi --output=jsonpretty \\\n  --user=username \\\n  AddonDomain \\\n  addaddondomain \\\n  newdomain='addon.com' \\\n  subdomain='addon'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2083/cpsess##########/execute/AddonDomain/addaddondomain?newdomain=addon.com&subdomain=addon
+      - label: LiveAPI Perl
+        lang: Perl
+        source: "#--------------------------------------------------------------------------------------\n# Instructions:\n#--------------------------------------------------------------------------------------\n# <theme-name> is the theme assigned to cPanel account, where theme-name represents\n# jupiter.\n# 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n# 2) mkdir api_examples\n# 3) cd api_examples\n# 4) create a file AddonDomain_addaddondomain.live.pl and put this code into that file.\n# 5) In your browser login to a cPanel account.\n# 6) Manually change the url from: .../frontend/<theme-name>/\n#    to .../frontend/<theme-name>/api_examples/AddonDomain_addaddondomain.live.pl\n#--------------------------------------------------------------------------------------\n\nuse strict;\n\nuse Cpanel::LiveAPI ();\n\nmy $cpanel = Cpanel::LiveAPI->new(); # Connect to cPanel - only do this once.\n\n# Print the header\nprint \"Content-type: text/plain\\r\\n\\r\\n\";\n\n# Call the API\nmy $response = $cpanel->uapi(\n    q/AddonDomain/,\n    q/addaddondomain/,\n    {\n        'newdomain' => 'addon.com',\n        'subdomain' => 'addon',\n    }\n);\n\n# Handle the response\nif ($response->{cpanelresult}{result}{status}) {\n    my $data = $response->{cpanelresult}{result}{data};\n    # Do something with the $data\n    # So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    # Report errors:\n    print to_json($response->{cpanelresult}{result}{errors});\n}\n\n# Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n#--------------------------------------------------------------------------------------\n# Helper function to convert a perl object to html printable json\n#--------------------------------------------------------------------------------------\nsub to_json {\n    require JSON;\n    my $str = JSON->new->pretty->encode($_[0]);\n    return $str;\n}\n"
+      - label: LiveAPI PHP
+        lang: PHP
+        source: "<?php\n//--------------------------------------------------------------------------------------\n// Instructions:\n//--------------------------------------------------------------------------------------\n// <theme-name> is the theme assigned to cPanel account, where theme-name represents\n// jupiter.\n// 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n// 2) mkdir api_examples\n// 3) cd api_examples\n// 4) create a file AddonDomain_addaddondomain.live.php and put this code into that file.\n// 5) In your browser login to a cPanel account.\n// 6) Manually change the url from: .../frontend/<theme-name>/\n//    to .../frontend/<theme-name>/api_examples/AddonDomain_addaddondomain.live.php\n//--------------------------------------------------------------------------------------\n\n// Instantiate the CPANEL object.\nrequire_once \"/usr/local/cpanel/php/cpanel.php\";\n\n// Print the header\nheader('Content-Type: text/plain');\n\n// Connect to cPanel - only do this once.\n$cpanel = new CPANEL();\n\n// Call the API\n$response = $cpanel->uapi(\n    'AddonDomain',\n    'addaddondomain',\n    array (\n        'newdomain' => 'addon.com',\n        'subdomain' => 'addon',\n    )\n);\n\n// Handle the response\nif ($response['cpanelresult']['result']['status']) {\n    $data = $response['cpanelresult']['result']['data'];\n    // Do something with the $data\n    // So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    // Report errors:\n    print to_json($response['cpanelresult']['result']['errors']);\n}\n\n// Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n//--------------------------------------------------------------------------------------\n// Helper function to convert a PHP value to html printable json\n//--------------------------------------------------------------------------------------\nfunction to_json($data) {\n    return json_encode($data, JSON_PRETTY_PRINT);\n}\n"
+      x-cpanel-api-version: UAPI
+      x-cpanel-available-version: cPanel 138
+      x-readonly: false
+  /AddonDomain/deladdondomain:
+    get:
+      description: 'This function removes an addon domain from the cPanel account. It unparks
+
+        the addon domain and then removes the subdomain that the domain was parked
+
+        on.
+
+
+        **Important:**
+
+
+        - The `domain` and `subdomain` values must match each other. If the
+
+        subdomain does not correspond to the addon domain, the function fails.
+
+        - If other domains are still parked on the subdomain, the system unparks
+
+        the addon domain but leaves the subdomain in place, and says so in the
+
+        `messages` field.
+
+        - This function does **not** remove the addon domain''s document root or
+
+        the files in it.
+
+
+        When you disable the Web Server role,
+
+        the system **disables** this function.'
+      operationId: AddonDomain-deladdondomain
+      parameters:
+      - description: The addon domain to remove.
+        in: query
+        name: domain
+        required: true
+        schema:
+          example: addon.com
+          format: domain
+          type: string
+      - description: The subdomain that the addon domain is parked on, given in the underscore-separated `subdomain_rootdomain` form that the `AddonDomain::listaddondomains` function returns in its `domainkey` field.
+        in: query
+        name: subdomain
+        required: true
+        schema:
+          example: addon_example.com
+          type: string
+      - description: 'Whether to remove the dot (`.`) characters from the subdomain label when the system removes the subdomain.
+
+          * `1` - Remove dots from the subdomain label.
+
+          * `0` - Do **not** remove dots from the subdomain label.'
+        in: query
+        name: disallowdot
+        required: false
+        schema:
+          default: 0
+          enum:
+          - 0
+          - 1
+          example: 1
+          type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    description: This function does not return data. Check the `status` field for the outcome, and the `messages` and `errors` fields for detail.
+                  errors:
+                    items:
+                      type: string
+                    type:
+                    - array
+                    - 'null'
+                  messages:
+                    items:
+                      type: string
+                    type:
+                    - array
+                    - 'null'
+                  metadata:
+                    properties:
+                      transformed:
+                        type: integer
+                    type: object
+                  status:
+                    description: '* `1` — Success.
+
+                      * `0` — Failed. Check the `errors` field for more details.'
+                    enum:
+                    - 0
+                    - 1
+                    example: 1
+                    type: integer
+                  warnings:
+                    items:
+                      type: string
+                    type:
+                    - array
+                    - 'null'
+                type: object
+          description: HTTP Request was successful.
+      summary: Remove an addon domain
+      tags:
+      - AddonDomain
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "uapi --output=jsonpretty \\\n  --user=username \\\n  AddonDomain \\\n  deladdondomain \\\n  domain='addon.com' \\\n  subdomain='addon_example.com'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2083/cpsess##########/execute/AddonDomain/deladdondomain?domain=addon.com&subdomain=addon_example.com
+      - label: LiveAPI Perl
+        lang: Perl
+        source: "#--------------------------------------------------------------------------------------\n# Instructions:\n#--------------------------------------------------------------------------------------\n# <theme-name> is the theme assigned to cPanel account, where theme-name represents\n# jupiter.\n# 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n# 2) mkdir api_examples\n# 3) cd api_examples\n# 4) create a file AddonDomain_deladdondomain.live.pl and put this code into that file.\n# 5) In your browser login to a cPanel account.\n# 6) Manually change the url from: .../frontend/<theme-name>/\n#    to .../frontend/<theme-name>/api_examples/AddonDomain_deladdondomain.live.pl\n#--------------------------------------------------------------------------------------\n\nuse strict;\n\nuse Cpanel::LiveAPI ();\n\nmy $cpanel = Cpanel::LiveAPI->new(); # Connect to cPanel - only do this once.\n\n# Print the header\nprint \"Content-type: text/plain\\r\\n\\r\\n\";\n\n# Call the API\nmy $response = $cpanel->uapi(\n    q/AddonDomain/,\n    q/deladdondomain/,\n    {\n        'domain' => 'addon.com',\n        'subdomain' => 'addon_example.com',\n    }\n);\n\n# Handle the response\nif ($response->{cpanelresult}{result}{status}) {\n    my $data = $response->{cpanelresult}{result}{data};\n    # Do something with the $data\n    # So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    # Report errors:\n    print to_json($response->{cpanelresult}{result}{errors});\n}\n\n# Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n#--------------------------------------------------------------------------------------\n# Helper function to convert a perl object to html printable json\n#--------------------------------------------------------------------------------------\nsub to_json {\n    require JSON;\n    my $str = JSON->new->pretty->encode($_[0]);\n    return $str;\n}\n"
+      - label: LiveAPI PHP
+        lang: PHP
+        source: "<?php\n//--------------------------------------------------------------------------------------\n// Instructions:\n//--------------------------------------------------------------------------------------\n// <theme-name> is the theme assigned to cPanel account, where theme-name represents\n// jupiter.\n// 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n// 2) mkdir api_examples\n// 3) cd api_examples\n// 4) create a file AddonDomain_deladdondomain.live.php and put this code into that file.\n// 5) In your browser login to a cPanel account.\n// 6) Manually change the url from: .../frontend/<theme-name>/\n//    to .../frontend/<theme-name>/api_examples/AddonDomain_deladdondomain.live.php\n//--------------------------------------------------------------------------------------\n\n// Instantiate the CPANEL object.\nrequire_once \"/usr/local/cpanel/php/cpanel.php\";\n\n// Print the header\nheader('Content-Type: text/plain');\n\n// Connect to cPanel - only do this once.\n$cpanel = new CPANEL();\n\n// Call the API\n$response = $cpanel->uapi(\n    'AddonDomain',\n    'deladdondomain',\n    array (\n        'domain' => 'addon.com',\n        'subdomain' => 'addon_example.com',\n    )\n);\n\n// Handle the response\nif ($response['cpanelresult']['result']['status']) {\n    $data = $response['cpanelresult']['result']['data'];\n    // Do something with the $data\n    // So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    // Report errors:\n    print to_json($response['cpanelresult']['result']['errors']);\n}\n\n// Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n//--------------------------------------------------------------------------------------\n// Helper function to convert a PHP value to html printable json\n//--------------------------------------------------------------------------------------\nfunction to_json($data) {\n    return json_encode($data, JSON_PRETTY_PRINT);\n}\n"
+      x-cpanel-api-version: UAPI
+      x-cpanel-available-version: cPanel 138
+      x-readonly: false
+  /AddonDomain/listaddondomains:
+    get:
+      description: 'This function lists the cPanel account''s addon domains: the domains that
+
+        are parked on a subdomain of the account''s primary domain, rather than on
+
+        the primary domain itself.
+
+
+        **Note:**
+
+
+        Use the `Park::listparkeddomains` function for the domains parked on the
+
+        primary domain.'
+      operationId: AddonDomain-listaddondomains
+      parameters:
+      - description: A Perl regular expression. The system returns only the addon domains whose name matches this pattern, case-insensitively.
+        in: query
+        name: regex
+        required: false
+        schema:
+          example: addon[.]com$
+          type: string
+      - description: 'Whether to include the `can_https_redirect` and `is_https_redirecting` fields in each entry.
+
+          * `1` - Include the HTTPS redirect status.
+
+          * `0` - Omit the HTTPS redirect status.'
+        in: query
+        name: return_https_redirect_status
+        required: false
+        schema:
+          default: 0
+          enum:
+          - 0
+          - 1
+          example: 1
+          type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    description: One entry for each addon domain on the account, sorted by domain name.
+                    items:
+                      properties:
+                        basedir:
+                          description: The addon domain's document root, relative to the account's home directory.
+                          example: public_html/addon
+                          type: string
+                        can_https_redirect:
+                          description: 'Whether the system can redirect the addon domain to `HTTPS`. The system only returns this field when you pass the `return_https_redirect_status` parameter.
+
+                            * `1` - The system can redirect the addon domain.
+
+                            * `0` - The system cannot redirect the addon domain.'
+                          enum:
+                          - 0
+                          - 1
+                          example: 1
+                          type: integer
+                        dir:
+                          description: The absolute path to the addon domain's document root.
+                          example: /home/username/public_html/addon
+                          format: path
+                          type: string
+                        domain:
+                          description: The addon domain.
+                          example: addon.com
+                          format: domain
+                          type: string
+                        domainkey:
+                          description: The subdomain that the addon domain is parked on, in the underscore-separated `subdomain_rootdomain` form. Pass this value as the `subdomain` parameter of the `AddonDomain::deladdondomain` function.
+                          example: addon_example.com
+                          type: string
+                        fullsubdomain:
+                          description: The fully qualified name of the subdomain that the addon domain is parked on.
+                          example: addon.example.com
+                          format: domain
+                          type: string
+                        is_https_redirecting:
+                          description: 'Whether the system currently redirects the addon domain to `HTTPS`. The system only returns this field when you pass the `return_https_redirect_status` parameter.
+
+                            * `1` - The system redirects the addon domain.
+
+                            * `0` - The system does **not** redirect the addon domain.'
+                          enum:
+                          - 0
+                          - 1
+                          example: 0
+                          type: integer
+                        reldir:
+                          description: The addon domain's document root, relative to the account's home directory and prefixed with `home:`.
+                          example: home:public_html/addon
+                          type: string
+                        rootdomain:
+                          description: The domain that the addon domain's subdomain belongs to.
+                          example: example.com
+                          format: domain
+                          type: string
+                        status:
+                          description: The addon domain's rewrite status, or the URL that it redirects to.
+                          example: ''
+                          type: string
+                        subdomain:
+                          description: The label of the subdomain that the addon domain is parked on, without the root domain.
+                          example: addon
+                          type: string
+                        web_subdomain_aliases:
+                          description: The built-in service subdomain aliases, for example `www`, that the system serves for the addon domain.
+                          items:
+                            format: domain
+                            type: string
+                          type: array
+                      type: object
+                    type: array
+                  errors:
+                    items:
+                      type: string
+                    type:
+                    - array
+                    - 'null'
+                  messages:
+                    items:
+                      type: string
+                    type:
+                    - array
+                    - 'null'
+                  metadata:
+                    properties:
+                      transformed:
+                        type: integer
+                    type: object
+                  status:
+                    description: '* `1` — Success.
+
+                      * `0` — Failed. Check the `errors` field for more details.'
+                    enum:
+                    - 0
+                    - 1
+                    example: 1
+                    type: integer
+                  warnings:
+                    items:
+                      type: string
+                    type:
+                    - array
+                    - 'null'
+                type: object
+          description: HTTP Request was successful.
+      summary: List the addon domains
+      tags:
+      - AddonDomain
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "uapi --output=jsonpretty \\\n  --user=username \\\n  AddonDomain \\\n  listaddondomains\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2083/cpsess##########/execute/AddonDomain/listaddondomains
+      - label: LiveAPI Perl
+        lang: Perl
+        source: "#--------------------------------------------------------------------------------------\n# Instructions:\n#--------------------------------------------------------------------------------------\n# <theme-name> is the theme assigned to cPanel account, where theme-name represents\n# jupiter.\n# 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n# 2) mkdir api_examples\n# 3) cd api_examples\n# 4) create a file AddonDomain_listaddondomains.live.pl and put this code into that file.\n# 5) In your browser login to a cPanel account.\n# 6) Manually change the url from: .../frontend/<theme-name>/\n#    to .../frontend/<theme-name>/api_examples/AddonDomain_listaddondomains.live.pl\n#--------------------------------------------------------------------------------------\n\nuse strict;\n\nuse Cpanel::LiveAPI ();\n\nmy $cpanel = Cpanel::LiveAPI->new(); # Connect to cPanel - only do this once.\n\n# Print the header\nprint \"Content-type: text/plain\\r\\n\\r\\n\";\n\n# Call the API\nmy $response = $cpanel->uapi(\n    q/AddonDomain/,\n    q/listaddondomains/\n);\n\n# Handle the response\nif ($response->{cpanelresult}{result}{status}) {\n    my $data = $response->{cpanelresult}{result}{data};\n    # Do something with the $data\n    # So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    # Report errors:\n    print to_json($response->{cpanelresult}{result}{errors});\n}\n\n# Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n#--------------------------------------------------------------------------------------\n# Helper function to convert a perl object to html printable json\n#--------------------------------------------------------------------------------------\nsub to_json {\n    require JSON;\n    my $str = JSON->new->pretty->encode($_[0]);\n    return $str;\n}\n"
+      - label: LiveAPI PHP
+        lang: PHP
+        source: "<?php\n//--------------------------------------------------------------------------------------\n// Instructions:\n//--------------------------------------------------------------------------------------\n// <theme-name> is the theme assigned to cPanel account, where theme-name represents\n// jupiter.\n// 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n// 2) mkdir api_examples\n// 3) cd api_examples\n// 4) create a file AddonDomain_listaddondomains.live.php and put this code into that file.\n// 5) In your browser login to a cPanel account.\n// 6) Manually change the url from: .../frontend/<theme-name>/\n//    to .../frontend/<theme-name>/api_examples/AddonDomain_listaddondomains.live.php\n//--------------------------------------------------------------------------------------\n\n// Instantiate the CPANEL object.\nrequire_once \"/usr/local/cpanel/php/cpanel.php\";\n\n// Print the header\nheader('Content-Type: text/plain');\n\n// Connect to cPanel - only do this once.\n$cpanel = new CPANEL();\n\n// Call the API\n$response = $cpanel->uapi(\n    'AddonDomain',\n    'listaddondomains'\n);\n\n// Handle the response\nif ($response['cpanelresult']['result']['status']) {\n    $data = $response['cpanelresult']['result']['data'];\n    // Do something with the $data\n    // So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    // Report errors:\n    print to_json($response['cpanelresult']['result']['errors']);\n}\n\n// Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n//--------------------------------------------------------------------------------------\n// Helper function to convert a PHP value to html printable json\n//--------------------------------------------------------------------------------------\nfunction to_json($data) {\n    return json_encode($data, JSON_PRETTY_PRINT);\n}\n"
+      x-cpanel-api-version: UAPI
+      x-cpanel-available-version: cPanel 138
+      x-readonly: true
+components:
+  securitySchemes:
+    BasicAuth:
+      scheme: basic
+      type: http
+externalDocs:
+  url: https://cpanel.net/developers/
+x-tagGroups:
+- name: API Development Tools
+  tags:
+  - API Token Management
+  - Batch
+  - SSE Task Management
+  - URL Parsing
+- name: Authentication
+  tags:
+  - External Authentication
+  - Two-Factor Settings
+- name: Backup Information
+  tags:
+  - BackupInfo
+  - BackupInfo Status
+- name: Block Ip Addresses
+  tags:
+  - Block IP
+- name: Commerce Integration
+  tags:
+  - Market Integration
+  - SSL Certificates
+- name: Contact Information
+  tags:
+  - Contact Information
+- name: cPanel Account
+  tags:
+  - Account Enhancements
+  - Account Information
+  - Account Management
+  - AuditLog
+  - Contact Information
+  - cPanel Features
+  - Disk Quotas
+  - DomainRecommendations
+  - Personalization
+  - Resource Usage and Statistics
+  - Subaccount Management
+  - Team Roles
+  - Team Users
+- name: cPanel Account Backups
+  tags:
+  - Backup
+  - File Restoration
+- name: cPanel Plugin Framework
+  tags:
+  - Formbricks
+  - Plugins
+- name: cPanel Theme Management
+  tags:
+  - Application Information
+  - Brand Management
+  - Branding Files
+  - Browser Cache Management
+  - Language
+  - Theme Settings
+- name: Directory Management
+  tags:
+  - Directory Indexes
+  - Directory Privacy
+  - Directory Protection
+- name: DNS
+  tags:
+  - DNS
+  - DNS Information
+  - DNS Security
+  - Dynamic DNS
+  - Email DNS Settings
+  - ZoneEdit
+- name: Domain
+  tags:
+  - Domain
+- name: Domain Management
+  tags:
+  - AddonDomain
+  - Direct Link Protection (Hotlink)
+  - Domain
+  - Domain Information
+  - Domain Redirection
+  - DomainLookup
+  - Park
+  - SubDomain
+  - Virtual Host Information
+- name: Domains
+  tags:
+  - Subdomains
+- name: Email
+  tags:
+  - Email Accounts
+  - Email Filtering
+  - Email Forwarding
+  - Email Server Information
+  - Email Suspensions
+  - Mail Server Information
+  - Mailbox Management
+  - Mailing Lists
+  - Signing and Encryption (GnuPG Keys)
+  - Spam Filtering (Greylisting)
+  - Spam Management
+  - Spam Prevention (BoxTrapper)
+  - Webmail Applications
+  - Webmail Sessions
+- name: Extract Information
+  tags:
+  - ExtractInfo
+  - ExtractInfo Status
+- name: File Manager
+  tags:
+  - Trash
+- name: Files
+  tags:
+  - FTP Accounts
+  - FTP Server Settings
+  - Image Tools
+  - Jodit
+  - Manage Files
+  - Manage Files
+  - WebDisk Settings
+- name: GIT Management
+  tags:
+  - Deployment Settings
+  - Repository Management
+- name: InProductSurvey
+  tags:
+  - InProductSurvey
+- name: MySQL and MariaDB
+  tags:
+  - Database Information
+  - Database Management
+  - Remote Databases
+  - User Management
+- name: Notifications
+  tags:
+  - Pushbullet
+- name: Optional Applications
+  tags:
+  - Antivirus Protection (ClamAV)
+  - Calendar and Contacts (DAV)
+  - Calendar and Contacts Server
+  - WordPress Manager Backups
+- name: PostgreSQL
+  tags:
+  - PostgreSQL Database Management
+  - PostgreSQL User Management
+- name: Retrieve bandwidth information
+  tags:
+  - Bandwidth
+- name: Security
+  tags:
+  - Known SSH Hosts Management
+  - Login Information
+- name: Server Information
+  tags:
+  - cPanel Server Information
+  - Notifications
+  - Password Strength
+  - SSH
+  - WebPros MCP
+  - WebProsMCP
+- name: ServiceProxy
+  tags:
+  - ServiceProxy
+- name: Site Quality Monitoring
+  tags:
+  - SiteQuality
+- name: SSL Certificates
+  tags:
+  - Auto-generated SSL Certificates
+  - cPanel Account SSL Management
+  - SNI Email Settings
+  - SSL Certificate Management
+  - Verify Domain Ownership
+- name: Statistics
+  tags:
+  - Domain Statistics
+  - Weblog Settings
+- name: UserData
+  tags:
+  - UserData
+- name: Web Server Configuration
+  tags:
+  - EA4
+  - EasyApache Settings
+  - PHP
+- name: Web Server Management
+  tags:
+  - Application Manager
+  - ModSecurity
+  - NginxCaching
+  - PHP Settings
+  - Web Apps
+- name: Website Configuration
+  tags:
+  - Handler Management
+  - Logs
+  - Mime Type Management
+  - Nova
+  - Site Information
+  - Site Installation
+  - Sitejet
+  - WPX

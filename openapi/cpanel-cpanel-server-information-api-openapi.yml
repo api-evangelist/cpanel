@@ -1,0 +1,1106 @@
+openapi: 3.2.0
+info:
+  contact:
+    email: cs@cpanel.net
+    name: WebPros International, LLC
+    url: https://cpanel.net/support/
+  description: UAPI accesses the cPanel interface's features. Use this API to access and modify cPanel account data and settings.
+  license:
+    name: cPanel License
+    url: https://cpanel.net/legal-notices/
+  termsOfService: https://cpanel.net/legal-notices/
+  title: cPanel U cPanel Server Information API
+  version: 11.137.9999.106
+  x-api-evangelist-provenance: 'Harvested verbatim from cPanel''s developer portal on 2026-09-05 via the MCP tool get-full-api-description at https://api.docs.cpanel.net/mcp. ONE mechanical change was made before storage: example values containing PEM private-key or certificate blocks, and AWS-access-key-shaped example strings, were replaced with REDACTED_* placeholders so the file can be stored in a public git repository without tripping secret scanning. No path, operation, parameter, schema or description was altered, added or removed.'
+servers:
+- description: A server running cPanel.
+  url: https://{host}:{port}/execute
+  variables:
+    host:
+      default: cpanel-server.tld
+      description: The hostname of a server running cPanel.
+    port:
+      default: '2083'
+      description: The cPanel port.
+security:
+- BasicAuth: []
+tags:
+- description: Server Information / cPanel Server Information
+  name: cPanel Server Information
+paths:
+  /Variables/get_server_information:
+    get:
+      x-readonly: true
+      description: This function retrieves the configuration settings for the cPanel & WHM server on which an account exists. This is useful, for example, to verify which applications and functionality are available on the account.
+      operationId: Variables-get_server_information
+      parameters:
+      - description: "The server configuration settings to return.\n\n<details>\n<summary>Click to view information about the available server configuration settings.</summary>\n\n* `default_theme` - The cPanel interface's default theme.\n* `email_filter_storage_directory` - The location of the Exim email filter storage directory.\n* `allow_park_subdomain_on_hostname` - Whether the system allows users to park subdomains of the server's hostname.\n* `allow_remote_domains` - Whether the system allows users to create addon domains or aliases that resolve to other servers.\n* `allow_unregistered_domains` - Whether the system allows users to add domains they didn't register with a domain name registrar.\n* `apache_port` - The IP address or IP address with a firewall port number that Apache® uses to listen for requests and serve web pages over an unsecured connection.\n* `apache_ssl_port` - The port or IP address that Apache uses to listen for requests and serve web pages over a secure connection.\n* `api_shell` - Whether the user can access cPanel's [*API Shell*](https://go.cpanel.net/cpaneldocsAPIShell) interface (*cPanel >> Home >> Advanced >> API Shell*).\n* `awstats_browser_update` - Whether the user can update their [AWStats](http://awstats.sourceforge.net/) software.\n* `awstats_reverse_dns` - Whether the AWStats statistical analysis software interprets visitors' domain names as IP addresses.\n* `cpanel_root_directory` - The cPanel `root` directory.\n* `database_prefix_required` - Whether the account requires database prefixing.\n* `display_cpanel_doclinks` - Whether the system displays links to cPanel feature documentation in the cPanel interface.\n* `dnsadmin_app` - The application that processes DNS management requests.\n* `empty_trash_days` - The minimum age of files that the system will automatically purge from `.trash` folders in user home directories.\n* `enable_file_protect` - Whether [EasyApache 4's *FileProtect* option](https://go.cpanel.net/EasyApache4FileprotectOption) is enabled.\n* `file_upload_maximum_bytes` - The maximum file size, in megabytes (MB), that a user can upload to a server.\n* `file_upload_must_leave_bytes` - The minimum filesystem quota that the system requires after a file uploads to a server.\n* `file_usage` - Whether file usage information displays in the cPanel *Home* interface's statistics bar.\n* `ftp_server` - The FTP server.\n* `htaccess_check_recurse` - The maximum number of directories deep to look for `.htaccess` files when you change the PHP handler.\n* `invite_sub` - Whether cPanel account users can send invitations to new Subaccount users via cPanel's [*User Manager*](https://go.cpanel.net/cpaneldocsUserManager) interface (*cPanel >> Home >> Preferences >> User Manager*).\n* `ipv6_listen` - Whether the `cpsrvd` daemon and other cPanel & WHM services listen on IPv6.\n* `local_nameserver_type` - The DNS nameserver's type.\n* `logout_redirect_url` - The logout redirection URL.\n* `mailbox_storage_format` - The mailbox storage format for new accounts.\n* `mail_server` - The mailserver type.\n* `minimum_password_strength` - The minimum strength for cPanel account passwords. \n* `minimum_password_strength_mysql` - The minimum strength for MySQL® or MariaDB® passwords.\n* `mysql_host` - The MySQL or MariaDB hostname or IP address.\n* `mysql_version` - The MySQL or MariaDB version.\n* `php_maximum_execution_time` - The number of seconds that a PHP script can run before the system terminates it.\n* `php_post_maximum_size` - The maximum size, in megabytes (MB), of a POST request.\n* `php_system_default_version` - The system's default version of PHP.\n* `php_upload_maximum_filesize` - The maximum file size, in megabytes (MB), that a PHP script may upload.\n* `php_loader` - The PHP loaders through which the system executes internal PHP scripts.\n* `php_open_basedir_home` - Whether PHP `open_basedir` protection is enabled on the server.\n* `phpmyadmin_disable_search_info_schema` - Whether the user can search for the phpMyAdmin information schema.\n* `docroots_in_public_html_only` - Whether the system restricts users from creating addon domains and subdomains outside of their `public_html` directory.\n* `require_ssl` - Whether the system requires passwords and other sensitive information use SSL encryption.\n* `allow_reset_password` - Whether cPanel's [*Reset Password*](https://go.cpanel.net/resetsubaccountpass) feature is enabled for the account.\n* `allow_reset_password_for_subaccounts` - Whether cPanel's [*Reset Password*](https://go.cpanel.net/resetsubaccountpass) feature is enabled for subaccounts on the account.\n* `disable_analog` - Whether users can access the [*Analog Stats*](https://go.cpanel.net/cpaneldocsAnalogStats) interface (*cPanel >> Home >> Metrics >> Analog Stats*).\n* `skip_apache_clients_optimizer` - Whether the Apache Client Optimizer is enabled.\n* `disable_awstats` - Whether the [AWStats](http://awstats.sourceforge.net/) software is enabled.\n* `skip_mailbox_warnings_check` - Whether mailbox usage warnings are enabled.\n* `disable_boxtrapper` - Whether [*BoxTrapper*](https://go.cpanel.net/cpaneldocsBoxTrapper) is enabled.\n* `skip_bandwidth_limit_check` - Whether the system automatically suspends HTTP service for accounts that exceed their bandwidth limit.\n* `disable_mailman` - Whether Mailman mailing lists are enabled.\n* `disable_roundcube` - Whether [Roundcube webmail](https://roundcube.net/) is enabled.\n* `disable_spamassassin` - Whether the Apache SpamAssassin™ spam filter is enabled.\n* `disable_spambox` - Whether Apache SpamAssassin's spam box feature is enabled.\n* `disable_webalizer` - Whether the [Webalizer](https://docs.cpanel.net/cpanel/metrics/webalizer/) statistics program is enabled.\n* `ssl_default_key_type` - The default SSL/TLS encryption algorithm used by the system.\n* `use_information_schema` - Whether the system uses the MySQL® `INFORMATION_SCHEMA` view. This view includes disk usage by all MySQL tables in the disk usage totals.\n* `use_mail_for_mailman_url` - Whether the system prefixes Mailman URLs with the `mail` prefix. For example, `http://mail.domain.com/mailman`.\n* `is_mod_userdir_enabled` - Whether the [Apache `mod_userdir` Tweak](https://go.cpanel.net/whmdocsApachemod_userdirTweak) is enabled.\n* `version` - The system's Linux® kernel version.\n</details>\n\n**Note:**\n\n* If you don't use this parameter, this function returns **all** of the server's configuration settings.\n* To retrieve multiple variables, increment this parameter. For example, `name-1=variable`, `name-2=variable`, `name-3=variable`."
+        examples:
+          multiple:
+            summary: Get multiple configuration settings.
+            value: name=allow_park_subdomain_on_hostname&name=allow_remote_domains&name=allow_reset_password
+          single:
+            summary: Get a single configuration setting.
+            value: allow_park_subdomain_on_hostname
+        in: query
+        name: name
+        required: false
+        schema:
+          enum:
+          - default_theme
+          - email_filter_storage_directory
+          - allow_park_subdomain_on_hostname
+          - allow_remote_domains
+          - allow_unregistered_domains
+          - apache_port
+          - apache_ssl_port
+          - api_shell
+          - awstats_browser_update
+          - awstats_reverse_dns
+          - cpanel_root_directory
+          - database_prefix_required
+          - display_cpanel_doclinks
+          - dnsadmin_app
+          - empty_trash_days
+          - enable_file_protect
+          - file_upload_maximum_bytes
+          - file_upload_must_leave_bytes
+          - file_usage
+          - ftp_server
+          - htaccess_check_recurse
+          - invite_sub
+          - ipv6_listen
+          - local_nameserver_type
+          - logout_redirect_url
+          - mailbox_storage_format
+          - mail_server
+          - minimum_password_strength
+          - minimum_password_strength_mysql
+          - mysql_host
+          - mysql_version
+          - php_maximum_execution_time
+          - php_post_maximum_size
+          - php_system_default_version
+          - php_upload_maximum_filesize
+          - php_loader
+          - php_open_basedir_home
+          - phpmyadmin_disable_search_info_schema
+          - docroots_in_public_html_only
+          - require_ssl
+          - allow_reset_password
+          - allow_reset_password_for_subaccounts
+          - disable_analog
+          - skip_apache_clients_optimizer
+          - disable_awstats
+          - skip_mailbox_warnings_check
+          - disable_boxtrapper
+          - skip_bandwidth_limit_check
+          - disable_mailman
+          - disable_roundcube
+          - disable_spamassassin
+          - disable_spambox
+          - disable_webalizer
+          - ssl_default_key_type
+          - use_information_schema
+          - use_mail_for_mailman_url
+          - is_mod_userdir_enabled
+          - version
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  apiversion:
+                    description: The version of the API.
+                    example: 3
+                    type: integer
+                  func:
+                    description: The name of the method called.
+                    example: get_server_information
+                    type: string
+                  module:
+                    description: The name of the module called.
+                    example: Variables
+                    type: string
+                  result:
+                    properties:
+                      data:
+                        properties:
+                          allow_park_subdomain_on_hostname:
+                            description: 'Whether the system allows users to park subdomains of the server''s hostname.
+
+
+                              * `1` - Allows.
+
+                              * `0` - Doesn''t allow.'
+                            enum:
+                            - 1
+                            - 0
+                            example: 0
+                            type:
+                            - integer
+                            - 'null'
+                          allow_remote_domains:
+                            description: 'Whether the system allows users to create addon domains or aliases that resolve to other servers.
+
+
+                              * `1` - Allows.
+
+                              * `0` - Doesn''t allow.'
+                            enum:
+                            - 1
+                            - 0
+                            example: 1
+                            type:
+                            - integer
+                            - 'null'
+                          allow_reset_password:
+                            description: 'Whether cPanel''s [*Reset Password*](https://go.cpanel.net/resetsubaccountpass) feature is enabled for the account.
+
+
+                              * `1` - *Reset Password* feature enabled.
+
+                              * `0` - *Reset Password* feature not enabled.'
+                            enum:
+                            - 1
+                            - 0
+                            example: 1
+                            type:
+                            - integer
+                            - 'null'
+                          allow_reset_password_for_subaccounts:
+                            description: 'Whether cPanel''s [*Reset Password*](https://go.cpanel.net/resetsubaccountpass) feature is enabled for subaccounts on the account.
+
+
+                              * `1` - *Reset Password* feature enabled.
+
+                              * `0` - *Reset Password* feature not enabled.'
+                            enum:
+                            - 1
+                            - 0
+                            example: 1
+                            type:
+                            - integer
+                            - 'null'
+                          allow_unregistered_domains:
+                            description: 'Whether the system allows users to add domains they didn''t register with a domain name registrar.
+
+
+                              * `1` - Allows.
+
+                              * `0` - Doesn''t allow.'
+                            enum:
+                            - 1
+                            - 0
+                            example: 1
+                            type:
+                            - integer
+                            - 'null'
+                          apache_port:
+                            description: The IP address or IP address with a firewall port number that Apache uses to listen for requests and serve web pages over an unsecured connection.
+                            example: 192.0.2.0:80
+                            type:
+                            - string
+                            - 'null'
+                          apache_ssl_port:
+                            description: The IP address or IP address with a firewall port number that Apache uses to listen for requests and serve web pages over a secure connection.
+                            example: 192.0.2.0:443
+                            type:
+                            - string
+                            - 'null'
+                          api_shell:
+                            description: 'Whether the user can access cPanel''s [*API Shell*](https://go.cpanel.net/cpaneldocsAPIShell) interface (*cPanel >> Home >> Advanced >> API Shell*).
+
+
+                              * `1` - Can access.
+
+                              * `0` - Can''t access.'
+                            enum:
+                            - 1
+                            - 0
+                            example: 0
+                            type:
+                            - integer
+                            - 'null'
+                          awstats_browser_update:
+                            description: 'Whether the user can update their [AWStats](http://awstats.sourceforge.net/) software.
+
+
+                              * `1` - Can update.
+
+                              * `0` - Can''t update.'
+                            enum:
+                            - 1
+                            - 0
+                            example: 0
+                            type:
+                            - integer
+                            - 'null'
+                          awstats_reverse_dns:
+                            description: 'Whether the AWStats statistical analysis software interprets visitors'' domain names as IP addresses.
+
+
+                              * `1` - Interprets visitors'' domain names as IP addresses.
+
+                              * `0` - Doesn''t interpret visitors'' domain names as IP addresses.'
+                            enum:
+                            - 1
+                            - 0
+                            example: 0
+                            type:
+                            - integer
+                            - 'null'
+                          cpanel_root_directory:
+                            description: The cPanel `root` directory.
+                            example: /usr/local/cpanel
+                            format: path
+                            type:
+                            - string
+                            - 'null'
+                          database_prefix_required:
+                            description: 'Whether the account requires database prefixing.
+
+
+                              * `1` - Requires database prefixing.
+
+                              * `0` - Doesn''t require database prefixing.'
+                            enum:
+                            - 1
+                            - 0
+                            example: 1
+                            type:
+                            - integer
+                            - 'null'
+                          default_theme:
+                            description: The cPanel interface's default theme.
+                            example: jupiter
+                            type:
+                            - string
+                            - 'null'
+                          disable_analog:
+                            description: 'Whether users can access the [*Analog Stats*](https://go.cpanel.net/cpaneldocsAnalogStats) interface (*cPanel >> Home >> Metrics >> Analog Stats*).
+
+
+                              * `1` - Enabled.
+
+                              * `0` - Not enabled.'
+                            enum:
+                            - 1
+                            - 0
+                            example: 0
+                            type:
+                            - integer
+                            - 'null'
+                          disable_awstats:
+                            description: 'Whether the [AWStats](http://awstats.sourceforge.net/) software is enabled.
+
+
+                              * `1` - Enabled.
+
+                              * `0` - Not enabled.'
+                            enum:
+                            - 1
+                            - 0
+                            example: 0
+                            type:
+                            - integer
+                            - 'null'
+                          disable_boxtrapper:
+                            description: 'Whether [*BoxTrapper*](https://go.cpanel.net/cpaneldocsBoxTrapper) is enabled.
+
+
+                              * `1` - Enabled.
+
+                              * `0` - Not enabled.'
+                            enum:
+                            - 1
+                            - 0
+                            example: 0
+                            type:
+                            - integer
+                            - 'null'
+                          disable_mailman:
+                            description: 'Whether Mailman mailing lists are enabled.
+
+
+                              * `1` - Enabled.
+
+                              * `0` - Not enabled.'
+                            enum:
+                            - 1
+                            - 0
+                            example: 0
+                            type:
+                            - integer
+                            - 'null'
+                          disable_roundcube:
+                            description: 'Whether [Roundcube webmail](https://roundcube.net/) is enabled.
+
+
+                              * `1` - Enabled.
+
+                              * `0` - Not enabled.'
+                            enum:
+                            - 1
+                            - 0
+                            example: 0
+                            type:
+                            - integer
+                            - 'null'
+                          disable_spamassassin:
+                            description: 'Whether the Apache SpamAssassin spam filter is enabled.
+
+
+                              * `1` - Enabled.
+
+                              * `0` - Not enabled.'
+                            enum:
+                            - 1
+                            - 0
+                            example: 0
+                            type:
+                            - integer
+                            - 'null'
+                          disable_spambox:
+                            description: 'Whether Apache SpamAssassin''s spam box feature is enabled.
+
+
+                              * `1` - Enabled.
+
+                              * `0` - Not enabled.'
+                            enum:
+                            - 1
+                            - 0
+                            example: 0
+                            type:
+                            - integer
+                            - 'null'
+                          disable_webalizer:
+                            description: 'Whether the [Webalizer](http://www.webalizer.org/) statistics program is enabled.
+
+
+                              * `1` - Enabled.
+
+                              * `0` - Not enabled.'
+                            enum:
+                            - 1
+                            - 0
+                            example: 0
+                            type:
+                            - integer
+                            - 'null'
+                          display_cpanel_doclinks:
+                            description: 'Whether the system displays links to cPanel feature documentation in the cPanel interface.
+
+
+                              * `1` - Displays documentation links.
+
+                              * `0` - Doesn''t display documentation links.'
+                            enum:
+                            - 1
+                            - 0
+                            example: 0
+                            type:
+                            - integer
+                            - 'null'
+                          dnsadmin_app:
+                            description: 'The application that processes DNS management requests.
+
+
+                              * The value is an application''s file path, relative to the user''s home directory.
+
+                              * `dnsadmin`
+
+                              * `auto-detect SSL`'
+                            example: dnsadmin
+                            type:
+                            - string
+                            - 'null'
+                            anyOf:
+                            - description: The application's file path, relative to the user's home directory.
+                              type: string
+                            - enum:
+                              - dnsadmin
+                              - auto-detect SSL
+                              type: string
+                          docroots_in_public_html_only:
+                            description: 'Whether the system restricts users from creating addon domains and subdomains outside of their `public_html` directory.
+
+
+                              * `1` - Restricts users from creating addon domains and subdomains outside of their `public_html` directory.
+
+                              * `0` - Allows users to creating addon domains and subdomains outside of their `public_html` directory.'
+                            enum:
+                            - 1
+                            - 0
+                            example: 1
+                            type:
+                            - integer
+                            - 'null'
+                          email_filter_storage_directory:
+                            description: The location of the Exim email filter storage directory.
+                            example: /etc/vfilters
+                            format: path
+                            type:
+                            - string
+                            - 'null'
+                          empty_trash_days:
+                            description: The minimum age of files that the system will automatically purge from `.trash` folders in user home directories.
+                            example: disabled
+                            type:
+                            - string
+                            - 'null'
+                          enable_file_protect:
+                            description: 'Whether [EasyApache 4''s *FileProtect* option](https://go.cpanel.net/EasyApache4FileprotectOption) is enabled.
+
+
+                              * `1` - Enabled.
+
+                              * `0` - Not enabled.'
+                            enum:
+                            - 1
+                            - 0
+                            example: 1
+                            type:
+                            - integer
+                            - 'null'
+                          file_upload_maximum_bytes:
+                            description: The maximum file size, in megabytes (MB), that a user can upload to a server.
+                            example: null
+                            maximum: 10240
+                            minimum: 1
+                            type:
+                            - integer
+                            - 'null'
+                          file_upload_must_leave_bytes:
+                            description: The minimum filesystem quota that the system requires after a file uploads to a server.
+                            example: 5
+                            minimum: 1
+                            type:
+                            - integer
+                            - 'null'
+                          file_usage:
+                            description: 'Whether file usage information displays in the cPanel *Home* interface''s statistics bar.
+
+
+                              * `1` - Displays file usage information.
+
+                              * `0` - Doesn''t display file usage information.'
+                            enum:
+                            - 1
+                            - 0
+                            example: 0
+                            type:
+                            - integer
+                            - 'null'
+                          ftp_server:
+                            description: 'The FTP server.
+
+
+                              * `pure-ftpd` - The Pure-FTPD server.
+
+                              * `proftpd` - The ProFTPD FTP server.
+
+                              * `disabled` - FTP has been disabled on this server.'
+                            enum:
+                            - pure-ftpd
+                            - proftpd
+                            - disabled
+                            example: disabled
+                            type:
+                            - string
+                            - 'null'
+                          htaccess_check_recurse:
+                            description: The maximum number of directories deep to look for `.htaccess` files when you change the PHP handler.
+                            example: 2
+                            minimum: 0
+                            type:
+                            - integer
+                            - 'null'
+                          invite_sub:
+                            description: 'Whether cPanel account users can send invitations to new Subaccount users via cPanel''s [*User Manager*](https://go.cpanel.net/cpaneldocsUserManager) interface (*cPanel >> Home >> Preferences >> User Manager*).
+
+
+                              * `1` - Can send invitations.
+
+                              * `0` - Can''t send invitations.'
+                            enum:
+                            - 1
+                            - 0
+                            example: 1
+                            type:
+                            - integer
+                            - 'null'
+                          ipv6_listen:
+                            description: 'Whether the `cpsrvd` daemon and other cPanel & WHM services listen on IPv6.
+
+
+                              * `1` - Listen on IPv6.
+
+                              * `0` - Don''t listen on IPv6.'
+                            enum:
+                            - 1
+                            - 0
+                            example: 0
+                            type:
+                            - integer
+                            - 'null'
+                          is_mod_userdir_enabled:
+                            description: 'Whether the [Apache `mod_userdir` Tweak](https://go.cpanel.net/whmdocsApachemod_userdirTweak) is enabled.
+
+
+                              * `1` - Enabled.
+
+                              * `0` - Not enabled.'
+                            enum:
+                            - 1
+                            - 0
+                            example: 1
+                            type:
+                            - integer
+                            - 'null'
+                          local_nameserver_type:
+                            description: 'The DNS nameserver''s type.
+
+
+                              * `powerdns` - The PowerDNS nameserver.
+
+                              * `bind` - The bind nameserver.
+
+                              * `disabled` - Nameserver''s have been disabled on this server.'
+                            enum:
+                            - powerdns
+                            - bind
+                            - disabled
+                            example: powerdns
+                            type:
+                            - string
+                            - 'null'
+                          logout_redirect_url:
+                            description: The logout redirection URL.
+                            example: https://cpanel.net
+                            format: url
+                            type:
+                            - string
+                            - 'null'
+                          mail_server:
+                            description: 'The mailserver type.
+
+
+                              * `dovecot` - The Dovecot mailserver.
+
+                              * `disabled` - The mailserver is disabled on this system.'
+                            enum:
+                            - dovecot
+                            - disabled
+                            example: dovecot
+                            type:
+                            - string
+                            - 'null'
+                          mailbox_storage_format:
+                            description: 'The mailbox storage format for new accounts.
+
+
+                              * `mdbox` - The mdbox storage format.
+
+                              * `maildir` - The maildir storage format.'
+                            enum:
+                            - mdbox
+                            - maildir
+                            example: maildir
+                            type:
+                            - string
+                            - 'null'
+                          minimum_password_strength:
+                            description: The minimum strength for cPanel account passwords.
+                            example: 65
+                            maximum: 100
+                            minimum: 0
+                            type:
+                            - integer
+                            - 'null'
+                          minimum_password_strength_mysql:
+                            description: The minimum strength for MySQL or MariaDB passwords.
+                            example: 65
+                            maximum: 100
+                            minimum: 0
+                            type:
+                            - integer
+                            - 'null'
+                          mysql_host:
+                            description: The MySQL or MariaDB hostname or IP address.
+                            example: localhost
+                            type:
+                            - string
+                            - 'null'
+                            oneOf:
+                            - format: domain
+                              type: string
+                            - format: ipv4
+                              type: string
+                          mysql_version:
+                            description: The MySQL or MariaDB version.
+                            example: '5.7'
+                            type:
+                            - string
+                            - 'null'
+                          php_loader:
+                            description: 'The PHP loaders through which the system executes internal PHP scripts.
+
+
+                              * `ioncube` - The ionCube PHP loader.
+
+                              * `sourceguardian` - The SourceGuardian PHP loader.
+
+                              * `ioncube,sourceguardian` - Both the ionCube and SourceGuardian PHP loaders are in use.
+
+                              * An emtpy string - PHP loader is not in use.'
+                            enum:
+                            - ''
+                            - ioncube
+                            - sourceguardian
+                            - ioncube,sourceguardian
+                            example: ioncube
+                            type:
+                            - string
+                            - 'null'
+                          php_maximum_execution_time:
+                            description: The number of seconds that a PHP script can run before the system terminates it.
+                            example: 90
+                            minimum: 90
+                            type:
+                            - integer
+                            - 'null'
+                          php_open_basedir_home:
+                            description: 'Whether PHP `open_basedir` protection is enabled on the server.
+
+
+                              * `1` - Enabled.
+
+                              * `0` - Not enabled.
+
+
+                              **Important:**
+
+
+                              We removed WHM''s *PHP open_basedir Tweak* interface (*WHM >> Home >> Security Center >> PHP open_basedir Tweak*)'
+                            enum:
+                            - 1
+                            - 0
+                            example: 0
+                            type:
+                            - integer
+                            - 'null'
+                          php_post_maximum_size:
+                            description: The maximum size, in megabytes (MB), of a POST request.
+                            example: 55
+                            maximum: 2047
+                            minimum: 55
+                            type:
+                            - integer
+                            - 'null'
+                          php_system_default_version:
+                            description: The system's default version of PHP.
+                            example: ea-php73
+                            type:
+                            - string
+                            - 'null'
+                          php_upload_maximum_filesize:
+                            description: The maximum file size, in megabytes (MB), that a PHP script may upload.
+                            example: 50
+                            maximum: 2047
+                            minimum: 50
+                            type:
+                            - integer
+                            - 'null'
+                          phpmyadmin_disable_search_info_schema:
+                            description: 'Whether the user can search for the phpMyAdmin information schema.
+
+
+                              * `1` - Searches are enabled.
+
+                              * `0` - Searches are **not** enabled.'
+                            enum:
+                            - 1
+                            - 0
+                            example: 0
+                            type:
+                            - integer
+                            - 'null'
+                          require_ssl:
+                            description: 'Whether the system requires passwords and other sensitive information use SSL encryption.
+
+
+                              * `1` - Requires SSL.
+
+                              * `0` - Doesn''t require SSL.'
+                            enum:
+                            - 1
+                            - 0
+                            example: 1
+                            type:
+                            - integer
+                            - 'null'
+                          skip_apache_clients_optimizer:
+                            description: 'Whether the Apache Client Optimizer is enabled.
+
+
+                              * `1` - Enabled.
+
+                              * `0` - Not enabled.'
+                            enum:
+                            - 1
+                            - 0
+                            example: 0
+                            type:
+                            - integer
+                            - 'null'
+                          skip_bandwidth_limit_check:
+                            description: 'Whether the system automatically suspends HTTP service for accounts that exceed their bandwidth limit.
+
+
+                              * `1` - Suspends HTTP service.
+
+                              * `0` - Doesn''t suspend HTTP service.'
+                            enum:
+                            - 1
+                            - 0
+                            example: 0
+                            type:
+                            - integer
+                            - 'null'
+                          skip_mailbox_warnings_check:
+                            description: 'Whether mailbox usage warnings are enabled.
+
+
+                              * `1` - Enabled.
+
+                              * `0` - Not enabled.'
+                            enum:
+                            - 1
+                            - 0
+                            example: 1
+                            type:
+                            - integer
+                            - 'null'
+                          ssl_default_key_type:
+                            description: 'The default SSL/TLS encryption algorithm used by the system.
+
+
+                              * `rsa-2048` - The rsa-2048 encryption algorithm.
+
+                              * `ecdsa-secp384r1` - The ecdsa-secp384r1 encryption algorithm.
+
+                              * `ecdsa-prime256v1` - The ecdsa-prime256v1 encryption algorithm.
+
+                              * `rsa-4096` - The rsa-4096 encryption algorithm.'
+                            enum:
+                            - rsa-2048
+                            - ecdsa-secp384r1
+                            - ecdsa-prime256v1
+                            - rsa-4096
+                            example: rsa-2048
+                            type:
+                            - string
+                            - 'null'
+                          use_information_schema:
+                            description: 'Whether the system uses the MySQL `INFORMATION_SCHEMA` view. This view includes disk usage by all MySQL tables in the disk usage totals.
+
+
+                              * `1` - Uses MySQL''s `INFORMATION_SCHEMA` view.
+
+                              * `0` - Doesn''t use MySQL''s `INFORMATION_SCHEMA` view.'
+                            enum:
+                            - 1
+                            - 0
+                            example: 1
+                            type:
+                            - integer
+                            - 'null'
+                          use_mail_for_mailman_url:
+                            description: 'Whether the system prefixes Mailman URLs with mail. For example, `http://mail.domain.com/mailman`.
+
+
+                              * `1` - Prefixes Mailman URLs with the `mail.` prefix.
+
+                              * `0` - Doesn''t prefix Mailman URLs with the `mail.` prefix.'
+                            enum:
+                            - 1
+                            - 0
+                            example: 0
+                            type:
+                            - integer
+                            - 'null'
+                          version:
+                            description: The system's Linux Kernel version.
+                            example: '3.4'
+                            type:
+                            - string
+                            - 'null'
+                        type: object
+                      errors:
+                        description: List of errors if the API failed.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      messages:
+                        description: List of messages generated by the API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      metadata:
+                        properties: {}
+                      status:
+                        description: '- 1 - Success
+
+                          - 0 - Failed: Check the errors field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      warnings:
+                        description: List of warnings generated by the API. Warnings describe non-critical failures or other problematic conditions noted while running a API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                    type: object
+                type: object
+          description: HTTP Request was successful.
+      summary: Return server's configuration settings
+      tags:
+      - cPanel Server Information
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "uapi --output=jsonpretty \\\n  --user=username \\\n  Variables \\\n  get_server_information\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2083/cpsess##########/execute/Variables/get_server_information
+      - label: LiveAPI Perl
+        lang: Perl
+        source: "#--------------------------------------------------------------------------------------\n# Instructions:\n#--------------------------------------------------------------------------------------\n# <theme-name> is the theme assigned to cPanel account.\n# 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n# 2) mkdir api_examples\n# 3) cd api_examples\n# 4) create a file Variables_get_server_information.live.pl and put this code into that file.\n# 5) In your browser login to a cPanel account.\n# 6) Manually change the url from: .../frontend/<theme-name>/\n#    to .../frontend/<theme-name>/api_examples/Variables_get_server_information.live.pl\n#--------------------------------------------------------------------------------------\n\nuse strict;\n\nuse Cpanel::LiveAPI ();\n\nmy $cpanel = Cpanel::LiveAPI->new(); # Connect to cPanel - only do this once.\n\n# Print the header\nprint \"Content-type: text/plain\\r\\n\\r\\n\";\n\n# Call the API\nmy $response = $cpanel->uapi(\n    q/Variables/,\n    q/get_server_information/\n);\n\n# Handle the response\nif ($response->{cpanelresult}{result}{status}) {\n    my $data = $response->{cpanelresult}{result}{data};\n    # Do something with the $data\n    # So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    # Report errors:\n    print to_json($response->{cpanelresult}{result}{errors});\n}\n\n# Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n#--------------------------------------------------------------------------------------\n# Helper function to convert a perl object to html printable json\n#--------------------------------------------------------------------------------------\nsub to_json {\n    require JSON;\n    my $str = JSON->new->pretty->encode($_[0]);\n    return $str;\n}\n"
+      - label: LiveAPI PHP
+        lang: PHP
+        source: "<?php\n//--------------------------------------------------------------------------------------\n// Instructions:\n//--------------------------------------------------------------------------------------\n// <theme-name> is the theme assigned to cPanel account.\n// 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n// 2) mkdir api_examples\n// 3) cd api_examples\n// 4) create a file Variables_get_server_information.live.php and put this code into that file.\n// 5) In your browser login to a cPanel account.\n// 6) Manually change the url from: .../frontend/<theme-name>/\n//    to .../frontend/<theme-name>/api_examples/Variables_get_server_information.live.php\n//--------------------------------------------------------------------------------------\n\n// Instantiate the CPANEL object.\nrequire_once \"/usr/local/cpanel/php/cpanel.php\";\n\n// Print the header\nheader('Content-Type: text/plain');\n\n// Connect to cPanel - only do this once.\n$cpanel = new CPANEL();\n\n// Call the API\n$response = $cpanel->uapi(\n    'Variables',\n    'get_server_information'\n);\n\n// Handle the response\nif ($response['cpanelresult']['result']['status']) {\n    $data = $response['cpanelresult']['result']['data'];\n    // Do something with the $data\n    // So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    // Report errors:\n    print to_json($response['cpanelresult']['result']['errors']);\n}\n\n// Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n//--------------------------------------------------------------------------------------\n// Helper function to convert a PHP value to html printable json\n//--------------------------------------------------------------------------------------\nfunction to_json($data) {\n    return json_encode($data, JSON_PRETTY_PRINT);\n}"
+      x-cpanel-api-version: UAPI
+      x-cpanel-available-version: cPanel 86
+components:
+  securitySchemes:
+    BasicAuth:
+      scheme: basic
+      type: http
+externalDocs:
+  url: https://cpanel.net/developers/
+x-tagGroups:
+- name: API Development Tools
+  tags:
+  - API Token Management
+  - Batch
+  - SSE Task Management
+  - URL Parsing
+- name: Authentication
+  tags:
+  - External Authentication
+  - Two-Factor Settings
+- name: Backup Information
+  tags:
+  - BackupInfo
+  - BackupInfo Status
+- name: Block Ip Addresses
+  tags:
+  - Block IP
+- name: Commerce Integration
+  tags:
+  - Market Integration
+  - SSL Certificates
+- name: Contact Information
+  tags:
+  - Contact Information
+- name: cPanel Account
+  tags:
+  - Account Enhancements
+  - Account Information
+  - Account Management
+  - AuditLog
+  - Contact Information
+  - cPanel Features
+  - Disk Quotas
+  - DomainRecommendations
+  - Personalization
+  - Resource Usage and Statistics
+  - Subaccount Management
+  - Team Roles
+  - Team Users
+- name: cPanel Account Backups
+  tags:
+  - Backup
+  - File Restoration
+- name: cPanel Plugin Framework
+  tags:
+  - Formbricks
+  - Plugins
+- name: cPanel Theme Management
+  tags:
+  - Application Information
+  - Brand Management
+  - Branding Files
+  - Browser Cache Management
+  - Language
+  - Theme Settings
+- name: Directory Management
+  tags:
+  - Directory Indexes
+  - Directory Privacy
+  - Directory Protection
+- name: DNS
+  tags:
+  - DNS
+  - DNS Information
+  - DNS Security
+  - Dynamic DNS
+  - Email DNS Settings
+  - ZoneEdit
+- name: Domain
+  tags:
+  - Domain
+- name: Domain Management
+  tags:
+  - AddonDomain
+  - Direct Link Protection (Hotlink)
+  - Domain
+  - Domain Information
+  - Domain Redirection
+  - DomainLookup
+  - Park
+  - SubDomain
+  - Virtual Host Information
+- name: Domains
+  tags:
+  - Subdomains
+- name: Email
+  tags:
+  - Email Accounts
+  - Email Filtering
+  - Email Forwarding
+  - Email Server Information
+  - Email Suspensions
+  - Mail Server Information
+  - Mailbox Management
+  - Mailing Lists
+  - Signing and Encryption (GnuPG Keys)
+  - Spam Filtering (Greylisting)
+  - Spam Management
+  - Spam Prevention (BoxTrapper)
+  - Webmail Applications
+  - Webmail Sessions
+- name: Extract Information
+  tags:
+  - ExtractInfo
+  - ExtractInfo Status
+- name: File Manager
+  tags:
+  - Trash
+- name: Files
+  tags:
+  - FTP Accounts
+  - FTP Server Settings
+  - Image Tools
+  - Jodit
+  - Manage Files
+  - Manage Files
+  - WebDisk Settings
+- name: GIT Management
+  tags:
+  - Deployment Settings
+  - Repository Management
+- name: InProductSurvey
+  tags:
+  - InProductSurvey
+- name: MySQL and MariaDB
+  tags:
+  - Database Information
+  - Database Management
+  - Remote Databases
+  - User Management
+- name: Notifications
+  tags:
+  - Pushbullet
+- name: Optional Applications
+  tags:
+  - Antivirus Protection (ClamAV)
+  - Calendar and Contacts (DAV)
+  - Calendar and Contacts Server
+  - WordPress Manager Backups
+- name: PostgreSQL
+  tags:
+  - PostgreSQL Database Management
+  - PostgreSQL User Management
+- name: Retrieve bandwidth information
+  tags:
+  - Bandwidth
+- name: Security
+  tags:
+  - Known SSH Hosts Management
+  - Login Information
+- name: Server Information
+  tags:
+  - cPanel Server Information
+  - Notifications
+  - Password Strength
+  - SSH
+  - WebPros MCP
+  - WebProsMCP
+- name: ServiceProxy
+  tags:
+  - ServiceProxy
+- name: Site Quality Monitoring
+  tags:
+  - SiteQuality
+- name: SSL Certificates
+  tags:
+  - Auto-generated SSL Certificates
+  - cPanel Account SSL Management
+  - SNI Email Settings
+  - SSL Certificate Management
+  - Verify Domain Ownership
+- name: Statistics
+  tags:
+  - Domain Statistics
+  - Weblog Settings
+- name: UserData
+  tags:
+  - UserData
+- name: Web Server Configuration
+  tags:
+  - EA4
+  - EasyApache Settings
+  - PHP
+- name: Web Server Management
+  tags:
+  - Application Manager
+  - ModSecurity
+  - NginxCaching
+  - PHP Settings
+  - Web Apps
+- name: Website Configuration
+  tags:
+  - Handler Management
+  - Logs
+  - Mime Type Management
+  - Nova
+  - Site Information
+  - Site Installation
+  - Sitejet
+  - WPX

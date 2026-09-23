@@ -1,0 +1,1103 @@
+openapi: 3.2.0
+info:
+  contact:
+    email: cs@cpanel.net
+    name: WebPros International, LLC
+    url: https://cpanel.net/support/
+  description: WHM API.
+  license:
+    name: cPanel License
+    url: https://cpanel.net/legal-notices/
+  termsOfService: https://cpanel.net/legal-notices/
+  title: WHM PHP FPM API
+  version: 11.137.9999.106
+  x-api-evangelist-provenance: 'Harvested verbatim from cPanel''s developer portal on 2026-09-05 via the MCP tool get-full-api-description at https://api.docs.cpanel.net/mcp. ONE mechanical change was made before storage: example values containing PEM private-key or certificate blocks, and AWS-access-key-shaped example strings, were replaced with REDACTED_* placeholders so the file can be stored in a public git repository without tripping secret scanning. No path, operation, parameter, schema or description was altered, added or removed.'
+servers:
+- description: A server running WHM.
+  url: https://{host}:{port}/json-api
+  variables:
+    host:
+      default: whm-server.tld
+      description: The hostname of a server running WHM.
+    port:
+      default: '2087'
+      description: The WHM port.
+security:
+- BasicAuth: []
+tags:
+- description: Web Server Configuration / PHP-FPM
+  name: PHP-FPM
+paths:
+  /convert_all_domains_to_fpm:
+    get:
+      description: 'This function activates PHP-FPM for any non-PHP-FPM domains on a server.
+
+
+        **Important:**
+
+
+        When you disable the *Web Server* role, the system **disables** this function.
+
+
+        **Warning:**
+
+
+        We **strongly** recommend that you only activate Apache PHP-FPM if your server has at least 2 GB of RAM available, or at least 30 MB of RAM per domain. If you enable PHP-FPM on a server with less than the required RAM, your server may experience severe performance issues.'
+      operationId: PHP-convert_all_domains_to_fpm
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      build_id:
+                        description: The ID of the log file for the conversion process.
+                        example: 1493645268
+                        type: integer
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: convert_all_domains_to_fpm
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is 0. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* 1 - Success
+
+                          * 0 - Failed: Check the reason field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Enable PHP-FPM on all domains
+      tags:
+      - PHP-FPM
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  convert_all_domains_to_fpm\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/convert_all_domains_to_fpm?api.version=1
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '66'
+  /get_fpm_count_and_utilization:
+    get:
+      description: 'This function provides information that will help you to determine
+
+        whether your server can handle the workload if you enable PHP-FPM for all domains.
+
+
+        **Important:**
+
+
+        When you disable the
+
+        Web Server role,
+
+        the system **disables** this function.
+
+
+        **Warning:**
+
+
+        We **strongly** recommend that you only activate Apache PHP-FPM if your server
+
+        has at least 2 GB of RAM available, or at least 30 MB of RAM per domain. If you enable
+
+        PHP-FPM on a server with less than the required RAM, your server may experience severe
+
+        performance issues.'
+      operationId: PHP-get_fpm_count_and_utilization
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      domains_to_be_enabled:
+                        description: The number of domains that you will enable with PHP-FPM when you run the `/scripts/php_fpm_config_convert` script.
+                        example: 2
+                        minimum: 0
+                        type: integer
+                      domains_using_fpm:
+                        description: The number of domains with PHP-FPM enabled.
+                        example: 20
+                        minimum: 0
+                        type: integer
+                      memory_needed:
+                        description: The approximate number of megabytes of memory that your system will require to convert the remaining domains to PHP-FPM.
+                        example: 90000
+                        format: megabytes
+                        minimum: 0
+                        type: integer
+                      number_of_new_fpm_accounts_we_can_handle:
+                        description: The approximate number of domains on which you can enable PHP-FPM without a server overload.
+                        example: 8
+                        minimum: 0
+                        type: integer
+                      show_warning:
+                        description: 'Whether you **may** overload your server when you convert all domains
+
+                          to PHP-FPM.
+
+
+                          * `1` — **High** risk of server overload when you enable PHP-FPM.
+
+                          * `0` — **Low** risk of server overload when you enable PHP-FPM.'
+                        enum:
+                        - 1
+                        - 0
+                        example: 0
+                        type: integer
+                      total_domains:
+                        description: The total number of domains on the server.
+                        example: 22
+                        minimum: 0
+                        type: integer
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: get_fpm_count_and_utilization
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 1
+                        - 0
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Return workload data for PHP-FPM on all domains
+      tags:
+      - PHP-FPM
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  get_fpm_count_and_utilization\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/get_fpm_count_and_utilization?api.version=1
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '66'
+  /is_conversion_in_progress:
+    get:
+      description: 'This function indicates whether the system''s process to convert all of WHM''s accounts to use PHP-FPM is in progress.
+
+
+        **Important:**
+
+
+        When you disable the Web Server role, the system **disables** this function.
+
+
+        **Warning:**
+
+
+        We **strongly** recommend that you only activate Apache PHP-FPM if your server has at least 2 GB of RAM available, or at least 30 MB of RAM per domain. If you enable PHP-FPM on a server with less than the required RAM, your server may experience severe performance issues.'
+      operationId: PHP-is_conversion_in_progress
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      inProgress:
+                        description: 'Whether the system''s process to convert all of WHM''s accounts to use PHP-FPM is in progress.
+
+                          * `1` — In progress.
+
+                          * `0` — **Not** currently in progress.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: is_conversion_in_progress
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Return PHP-FPM conversion status
+      tags:
+      - PHP-FPM
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  is_conversion_in_progress\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/is_conversion_in_progress?api.version=1
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11.72'
+  /php_fpm_config_get:
+    post:
+      description: 'This function retrieves the PHP INI directives and pool options for a system''s or domain''s PHP-FPM configuration.
+
+
+        **Important:**
+
+
+        When you disable the WebServer role, the system **disables** this function.
+
+
+        **Warning:**
+
+
+        We **strongly** recommend that you only activate Apache PHP-FPM if your server has at least 2 GB of RAM available, or at least 30 MB of RAM per domain. If you enable PHP-FPM on a server with less than the required RAM, your server may experience severe performance issues.'
+      operationId: PHP-php_fpm_config_get
+      requestBody:
+        content:
+          application/json:
+            schema:
+              properties:
+                domain:
+                  default: ''
+                  description: 'A blank value or domain name whose PHP-FPM configuration you wish to retrieve.
+
+
+                    * A valid domain that resides on the local server — Retrieves the domain''s PHP-FPM configuration information.
+
+                    * A blank value — Retrieves the system''s PHP-FPM information.'
+                  example: example.com
+                  type: string
+              type: object
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      config:
+                        description: An array of objects that contains the PHP-FPM configuration values.
+                        example:
+                        - base_flag_name: short_open_tag
+                          trinary_admin_value: 1
+                          value: 'on'
+                        - base_flag_name: log_errors
+                          trinary_admin_value: 1
+                          value: 'on'
+                        - base_flag_name: pm_process_idle_timeout
+                          trinary_admin_value: 0
+                          value: '10'
+                        - base_flag_name: error_reporting
+                          trinary_admin_value: 2
+                          value: E_ALL & ~E_NOTICE
+                        - base_flag_name: disable_functions
+                          trinary_admin_value: 1
+                          value: exec,passthru,shell_exec,system
+                        - base_flag_name: error_log
+                          trinary_admin_value: 1
+                          value: '[% homedir %]/logs/[% scrubbed_domain %].php.error.log'
+                        - base_flag_name: pm_max_children
+                          trinary_admin_value: 0
+                          value: '5'
+                        - base_flag_name: pm_max_requests
+                          trinary_admin_value: 0
+                          value: '20'
+                        - base_flag_name: allow_url_fopen
+                          trinary_admin_value: 1
+                          value: 'on'
+                        - base_flag_name: doc_root
+                          trinary_admin_value: 1
+                          value: '[% documentroot %]'
+                        items:
+                          properties:
+                            base_flag_name:
+                              description: 'PHP INI directive or PHP-FPM pool option name.
+
+
+                                **PHP INI directives**
+
+
+                                * `allow_url_fopen` - Treat URLs as files.
+
+                                * `disable_functions` - Lists the functions that the system will disable.
+
+                                * `doc_root` - The PHP pages'' document root.
+
+                                * `error_log` - The error log file.
+
+                                * `error_reporting` - The errors that the system reports on.
+
+                                * `log_errors` - Whether the system will log errors.
+
+                                * `short_open_tag` - Whether the system recognizes code between the <? and ?> tags as a PHP source. Pool options- pm_max_children  The maximum number of process pools that the PHP-FPM Master Process will generate to handle requests.
+
+
+                                **Pool options**
+
+
+                                * `pm_max_children` — The maximum number of process pools that the PHP-FPM Master Process will generate to handle requests.
+
+                                * `pm_max_requests` - The maximum number of requests that the process pools can receive.
+
+                                * `pm_process_idle_timeout` - The amount of time, in seconds, that a pool process will wait for a request.'
+                              example: pm_max_children
+                              type: string
+                            trinary_admin_value:
+                              description: 'Whether the PHP value is a PHP INI directive value (`php_value`), a PHP INI ADMIN value (`php_admin_value`), or a PHP-FPM pool option (`pm_*`).
+
+
+                                * `0` - A PHP-FPM-specific value (pool options).
+
+                                * `1` - A PHP INI ADMIN directive. A cPanel account user **cannot** override this directive.
+
+                                * `2` - A PHP INI directive. A cPanel account user can override this directive.'
+                              enum:
+                              - 0
+                              - 1
+                              - 2
+                              example: 0
+                              type: integer
+                            value:
+                              description: An argument value for `base_flag_name`.
+                              example: '5'
+                              type: string
+                          type: object
+                        type: array
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: php_fpm_config_get
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is 0. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '- 1 - Success
+
+                          - 0 - Failed: Check the reason field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Return PHP-FPM directives and pool options
+      tags:
+      - PHP-FPM
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "echo '{\"domain\":\"example.com\"}' | \\\nwhmapi1 --input=json --output=jsonpretty \\\n  php_fpm_config_get"
+      - label: HTTP Request (Wire Format)
+        lang: HTTP
+        source: 'POST /cpsess##########/json-api/php_fpm_config_get HTTP/1.1
+
+          Host: example.com:2083
+
+          Cookie: ###################################
+
+          Content-Type: application/json
+
+          Content-Length: 42
+
+
+          {"api.version":"1","domain":"example.com"}'
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '78'
+  /php_fpm_config_set:
+    post:
+      description: 'This function configures the PHP INI directives and pool options
+
+        for a system''s or domain''s PHP-FPM configuration.
+
+
+        **Important:**
+
+
+        When you disable the Web Server role, the system **disables** this function.
+
+
+        **Warning:**
+
+
+        We **strongly** recommend that you only activate Apache PHP-FPM if your server has at least 2 GB of RAM available, or
+
+        at least 30 MB of RAM per domain. If you enable PHP-FPM on a server with less than the required RAM, your server may
+
+        experience severe performance issues.'
+      operationId: PHP-php_fpm_config_set
+      requestBody:
+        content:
+          application/json:
+            schema:
+              example:
+                config:
+                - base_flag_name: error_reporting
+                  trinary_admin_value: 1
+                  value: E_ALL & ~E_NOTICE
+                - base_flag_name: pm_max_children
+                  trinary_admin_value: 0
+                  value: '10'
+              properties:
+                config:
+                  description: An array of objects containing the PHP-FPM configuration values to validate or update.
+                  items:
+                    properties:
+                      base_flag_name:
+                        description: 'A PHP INI directive or PHP-FPM pool option name.
+
+
+                          **PHP INI directives**
+
+
+                          * `allow_url_fopen` - The PHP configuration treats URLs as files.
+
+                          * `disable_functions` - Lists the functions that the system will disable.
+
+                          * `doc_root` - The PHP pages'' document root.
+
+                          * `error_log` - The error log file.
+
+                          * `error_reporting` - The errors that the system reports on.
+
+                          * `log_errors` - Whether the system will log errors.
+
+                          * `short_open_tag` - Whether the system recognizes code between the <? and ?> tags as a PHP source.
+
+
+                          **Pool options**
+
+
+                          * `pm_max_children` - The maximum number of process pools that the PHP-FPM Master Process will generate to handle requests.
+
+                          * `pm_max_requests` - The maximum number of requests that the process pools can receive.
+
+                          * `pm_process_idle_timeout` - The amount of time, in seconds, that a pool process will wait for a request.'
+                        type: string
+                      trinary_admin_value:
+                        description: 'Whether the PHP value is a PHP INI directive value (`php_value`), a PHP INI ADMIN value (`php_admin_value`), or a PHP-FPM pool option (`pm_*`).
+
+
+                          * `0` - A PHP-FPM-specific value (pool options).
+
+                          * `1` - A PHP INI ADMIN directive. A cPanel account user **cannot** override this directive.
+
+                          * `2` - A PHP INI directive. A cPanel account user can override this directive.'
+                        enum:
+                        - 0
+                        - 1
+                        - 2
+                        example: 0
+                        type: integer
+                      value:
+                        description: An argument value for `base_flag_name` parameter.
+                        type: string
+                    required:
+                    - base_flag_name
+                    - trinary_admin_value
+                    - value
+                    type: object
+                  type: array
+                domain:
+                  default: ''
+                  description: 'A blank value or domain name whose PHP-FPM configuration you wish
+
+                    to set.'
+                  type: string
+                validate_only:
+                  default: false
+                  description: 'Whether the function request is for validation or to update the settings.
+
+                    * `true` - Only validate the configuration.
+
+                    * `false` - Validate and update the configuration.'
+                  type: boolean
+              required:
+              - config
+              type: object
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: php_fpm_config_set
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is 0. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` - Success
+
+                          * `0` - Failed. Check the reason field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Update PHP-FPM directives and pool options
+      tags:
+      - PHP-FPM
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "echo '{\"config\":[{\"base_flag_name\":\"error_reporting\",\"trinary_admin_value\":\"1\",\"value\":\"E_ALL & ~E_NOTICE\"},{\"base_flag_name\":\"pm_max_children\",\"trinary_admin_value\":\"0\",\"value\":\"10\"}]}' | \\\nwhmapi1 --input=json --output=jsonpretty \\\n  php_fpm_config_set"
+      - label: HTTP Request (Wire Format)
+        lang: HTTP
+        source: 'POST /cpsess##########/json-api/php_fpm_config_set HTTP/1.1
+
+          Host: example.com:2083
+
+          Cookie: ###################################
+
+          Content-Type: application/json
+
+          Content-Length: 197
+
+
+          {"api.version":"1","config":[{"base_flag_name":"error_reporting","trinary_admin_value":"1","value":"E_ALL & ~E_NOTICE"},{"base_flag_name":"pm_max_children","trinary_admin_value":"0","value":"10"}]}'
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '78'
+  /php_get_default_accounts_to_fpm:
+    get:
+      description: 'This function determines whether the system enables PHP-FPM for new domains and accounts.
+
+
+        **Important:**
+
+
+        When you disable the
+
+        Web Server role,
+
+        the system **disables** this function.
+
+
+        **Warning:**
+
+
+        We **strongly** recommend that you only activate Apache PHP-FPM if your server has at
+
+        least 2 GB of RAM available, or at least 30 MB of RAM per domain. If you enable PHP-FPM
+
+        on a server with less than the required RAM, your server may experience severe performance
+
+        issues.'
+      operationId: PHP-php_get_default_accounts_to_fpm
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      default_accounts_to_fpm:
+                        description: 'Whether PHP-FPM is enabled for a server''s new accounts and domains.
+
+                          * `1` — PHP-FPM enabled.
+
+                          * `0` — PHP-FPM disabled.'
+                        enum:
+                        - 1
+                        - 0
+                        example: 0
+                        type: integer
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: php_get_default_accounts_to_fpm
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 1
+                        - 0
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Return PHP-FPM status on new accounts
+      tags:
+      - PHP-FPM
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  php_get_default_accounts_to_fpm\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/php_get_default_accounts_to_fpm?api.version=1
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '66'
+  /php_get_old_fpm_flag:
+    get:
+      description: 'This function determines whether your system runs with a preconfigured PHP-FPM configuration.
+
+
+        **Important:**
+
+
+        When you disable the Web Server role, the system **disables** this function.'
+      operationId: PHP-php_get_old_fpm_flag
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      old_fpm_flag:
+                        description: 'The status of the preconfigured FPM.
+
+                          * `0` — No preconfigured FPM exists.
+
+                          * `1` — Preconfigured FPM exists.
+
+                          * `2` — Preconfiguration dialogue dismissed.'
+                        enum:
+                        - 0
+                        - 1
+                        - 2
+                        example: 2
+                        type: integer
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: php_get_old_fpm_flag
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Return PHP-FPM preconfigured status
+      tags:
+      - PHP-FPM
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  php_get_old_fpm_flag\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/php_get_old_fpm_flag?api.version=1
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '60'
+  /php_set_default_accounts_to_fpm:
+    get:
+      description: 'This function determines whether to enable PHP-FPM on new accounts and domains on a server.
+
+
+        **Important:**
+
+
+        When you disable the Web Server role, the system **disables** this function.
+
+
+        **Warning:**
+
+
+        We **strongly** recommend that you only activate Apache PHP-FPM if your server has at least 2 GB of RAM available, or at least 30 MB of RAM per domain. If you enable PHP-FPM on a server with less than the required RAM, your server may experience severe performance issues.'
+      operationId: PHP-php_set_default_accounts_to_fpm
+      parameters:
+      - description: 'Whether to enable PHP-FPM on all new accounts and domains on
+
+          a server.
+
+          * `1` — Enable PHP-FPM.
+
+          * `0` — Disable PHP-FPM.'
+        in: query
+        name: default_accounts_to_fpm
+        required: true
+        schema:
+          enum:
+          - 0
+          - 1
+          example: 1
+          type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data: {}
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: php_set_default_accounts_to_fpm
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Enable PHP-FPM on new cPanel accounts and domains
+      tags:
+      - PHP-FPM
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  php_set_default_accounts_to_fpm \\\n  default_accounts_to_fpm='1'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/php_set_default_accounts_to_fpm?api.version=1&default_accounts_to_fpm=1
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '66'
+  /php_set_old_fpm_flag:
+    get:
+      description: 'This function creates the `/etc/cpanel/ea4/old_fpm_flag` touch file.
+
+
+        **Note:**
+
+
+        If this touch file exists, the system will **not** display a message that indicates whether your system runs on an outdated PHP-FPM configuration. If you wish to see the message again, delete this touch file.
+
+
+        **Important:**
+
+
+        When you disable the Web Server role, the system **disables** this function.'
+      operationId: PHP-php_set_old_fpm_flag
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      success:
+                        description: 'Whether the operation succeeds.
+
+                          * `1` — Success.
+
+                          * `0` — Failure.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 0
+                        type: integer
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: php_set_old_fpm_flag
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Enable PHP-FPM preconfigured status
+      tags:
+      - PHP-FPM
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  php_set_old_fpm_flag\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/php_set_old_fpm_flag?api.version=1
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '60'
+components:
+  securitySchemes:
+    BasicAuth:
+      scheme: basic
+      type: http
+externalDocs:
+  url: https://cpanel.net/developers/
+x-tagGroups:
+- name: Account Restoration
+  tags:
+  - Restore Account
+  - Restore Queue Management
+  - Restore Queue Reporting
+- name: Accounts
+  tags:
+  - Account Creation
+  - Account Enhancements
+  - Account Management
+  - Bandwidth and Disk Quotas
+  - Domain Information
+  - Passwords
+  - Styles
+  - Suspensions
+- name: API Development Tools
+  tags:
+  - API Execution
+  - API Statistics
+  - API Token Management
+  - Applications
+  - Session
+- name: Authentication
+  tags:
+  - Authentication Providers
+  - External Authentication
+  - Login URL
+  - SSH Keys and Connections
+  - Two-Factor Authentication
+- name: Backups
+  tags:
+  - Backup Destination
+  - Backup or Restore
+  - Backup Settings
+  - Legacy Migration
+- name: Commerce Integration
+  tags:
+  - Market Integration
+  - Sitejet
+- name: cPanel Market
+  tags:
+  - Product Management
+  - Provider Management
+- name: cPanel Support Tickets
+  tags:
+  - Support Access
+  - Ticket Management
+- name: Customizations
+  tags:
+  - Brand
+  - Customizations
+- name: Databases
+  tags:
+  - Manage MySQL Server
+  - MySQL Databases
+  - PostgreSQL Databases
+  - Remote MySQL Databases
+- name: DNS
+  tags:
+  - DNS Cluster Settings
+  - DNS Security
+  - DNS Zones
+  - Domain Management
+  - Domain Management
+  - Resolvers
+  - Service Records
+- name: Hosting Plans
+  tags:
+  - Feature Access
+  - Feature Lists
+  - Hosting Plan Extensions
+  - Hosting Plans
+- name: InProductSurvey
+  tags:
+  - InProductSurvey
+- name: Integrations
+  tags:
+  - API Authentication
+  - Links
+  - Scripts Hooks
+- name: IP Address Management
+  tags:
+  - IPv4 Address Settings
+  - IPv6 Address Settings
+  - Network Address Translation
+- name: Login Security (cPHulk)
+  tags:
+  - Management
+  - Reporting
+  - Settings
+- name: Logs
+  tags:
+  - Web Log Retention
+- name: Mail
+  tags:
+  - cPanel Account Mail Management
+  - Mail DNS Settings
+  - Mail Server Settings
+  - Spam Management
+  - Spam Protection (Greylisting)
+- name: Monitoring
+  tags:
+  - 360 Monitoring
+- name: NGINX Manager
+  tags:
+  - NGINX Manager
+- name: Resellers
+  tags:
+  - Account Enhancement Limit
+  - Account Limits
+  - Account Permissions
+  - Account Settings
+  - Reseller Account Management
+- name: Security
+  tags:
+  - WHM Access
+- name: Server Administration
+  tags:
+  - Configuration Clusters
+  - Configurations
+  - Connected Applications
+  - Connections
+  - cPanel Analytics
+  - License Management
+  - Notifications
+  - Plugin-Based Features
+  - Security
+  - Server Nodes
+  - Server Profiles
+  - Services
+  - System Information
+  - Updates
+- name: SSL Certificates
+  tags:
+  - Auto-Generated Certificates
+  - cPanel Account Settings
+  - SSL Server Settings
+- name: System Package Management
+  tags:
+  - Install or Uninstall Package
+  - List Package Information
+  - Package Manager Settings
+- name: Transfers
+  tags:
+  - cPanel Account Transfer
+  - Transfer Configuration
+  - Transfer Monitoring
+- name: UserData
+  tags:
+  - UserData
+- name: Web Server Configuration
+  tags:
+  - EasyApache Settings
+  - PHP
+  - PHP-FPM
+- name: Web Server Security (ModSecurity)
+  tags:
+  - Rule Settings
+  - Rule Vendor Settings
+  - Server Settings

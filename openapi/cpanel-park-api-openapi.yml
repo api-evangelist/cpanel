@@ -1,0 +1,640 @@
+openapi: 3.2.0
+info:
+  contact:
+    email: cs@cpanel.net
+    name: WebPros International, LLC
+    url: https://cpanel.net/support/
+  description: UAPI accesses the cPanel interface's features. Use this API to access and modify cPanel account data and settings.
+  license:
+    name: cPanel License
+    url: https://cpanel.net/legal-notices/
+  termsOfService: https://cpanel.net/legal-notices/
+  title: cPanel U Park API
+  version: 11.137.9999.106
+  x-api-evangelist-provenance: 'Harvested verbatim from cPanel''s developer portal on 2026-09-05 via the MCP tool get-full-api-description at https://api.docs.cpanel.net/mcp. ONE mechanical change was made before storage: example values containing PEM private-key or certificate blocks, and AWS-access-key-shaped example strings, were replaced with REDACTED_* placeholders so the file can be stored in a public git repository without tripping secret scanning. No path, operation, parameter, schema or description was altered, added or removed.'
+servers:
+- description: A server running cPanel.
+  url: https://{host}:{port}/execute
+  variables:
+    host:
+      default: cpanel-server.tld
+      description: The hostname of a server running cPanel.
+    port:
+      default: '2083'
+      description: The cPanel port.
+security:
+- BasicAuth: []
+tags:
+- description: The Park module for UAPI.
+  name: Park
+paths:
+  /Park/listparkeddomains:
+    get:
+      description: 'This function lists the domains that are parked (aliased) on the cPanel
+
+        account''s primary domain.
+
+
+        **Note:**
+
+
+        This function lists only the domains parked on the primary domain. Use
+
+        the `AddonDomain::listaddondomains` function for the domains parked on a
+
+        subdomain.'
+      operationId: Park-listparkeddomains
+      parameters:
+      - description: A Perl regular expression. The system returns only the parked domains whose name matches this pattern, case-insensitively.
+        in: query
+        name: regex
+        required: false
+        schema:
+          example: example[.]com$
+          type: string
+      - description: 'Whether to include the `can_https_redirect` and `is_https_redirecting` fields in each entry.
+
+          * `1` - Include the HTTPS redirect status.
+
+          * `0` - Omit the HTTPS redirect status.'
+        in: query
+        name: return_https_redirect_status
+        required: false
+        schema:
+          default: 0
+          enum:
+          - 0
+          - 1
+          example: 1
+          type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    description: One entry for each domain parked on the account's primary domain.
+                    items:
+                      properties:
+                        basedir:
+                          description: The domain's document root, relative to the account's home directory.
+                          example: public_html
+                          type: string
+                        can_https_redirect:
+                          description: 'Whether the system can redirect the domain to `HTTPS`. The system only returns this field when you pass the `return_https_redirect_status` parameter.
+
+                            * `1` - The system can redirect the domain.
+
+                            * `0` - The system cannot redirect the domain.'
+                          enum:
+                          - 0
+                          - 1
+                          example: 1
+                          type: integer
+                        dir:
+                          description: The absolute path to the domain's document root.
+                          example: /home/username/public_html
+                          format: path
+                          type: string
+                        domain:
+                          description: The parked domain.
+                          example: alias.example.com
+                          format: domain
+                          type: string
+                        is_https_redirecting:
+                          description: 'Whether the system currently redirects the domain to `HTTPS`. The system only returns this field when you pass the `return_https_redirect_status` parameter.
+
+                            * `1` - The system redirects the domain.
+
+                            * `0` - The system does **not** redirect the domain.'
+                          enum:
+                          - 0
+                          - 1
+                          example: 0
+                          type: integer
+                        reldir:
+                          description: The domain's document root, relative to the account's home directory and prefixed with `home:`.
+                          example: home:public_html
+                          type: string
+                        status:
+                          description: The URL that the domain redirects to, or the domain's rewrite status when it does not redirect.
+                          example: ''
+                          type: string
+                        web_subdomain_aliases:
+                          description: The built-in service subdomain aliases, for example `www`, that the system serves for the parked domain.
+                          items:
+                            format: domain
+                            type: string
+                          type: array
+                      type: object
+                    type: array
+                  errors:
+                    items:
+                      type: string
+                    type:
+                    - array
+                    - 'null'
+                  messages:
+                    items:
+                      type: string
+                    type:
+                    - array
+                    - 'null'
+                  metadata:
+                    properties:
+                      transformed:
+                        type: integer
+                    type: object
+                  status:
+                    description: '* `1` — Success.
+
+                      * `0` — Failed. Check the `errors` field for more details.'
+                    enum:
+                    - 0
+                    - 1
+                    example: 1
+                    type: integer
+                  warnings:
+                    items:
+                      type: string
+                    type:
+                    - array
+                    - 'null'
+                type: object
+          description: HTTP Request was successful.
+      summary: List the parked (aliased) domains
+      tags:
+      - Park
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "uapi --output=jsonpretty \\\n  --user=username \\\n  Park \\\n  listparkeddomains\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2083/cpsess##########/execute/Park/listparkeddomains
+      - label: LiveAPI Perl
+        lang: Perl
+        source: "#--------------------------------------------------------------------------------------\n# Instructions:\n#--------------------------------------------------------------------------------------\n# <theme-name> is the theme assigned to cPanel account, where theme-name represents\n# jupiter.\n# 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n# 2) mkdir api_examples\n# 3) cd api_examples\n# 4) create a file Park_listparkeddomains.live.pl and put this code into that file.\n# 5) In your browser login to a cPanel account.\n# 6) Manually change the url from: .../frontend/<theme-name>/\n#    to .../frontend/<theme-name>/api_examples/Park_listparkeddomains.live.pl\n#--------------------------------------------------------------------------------------\n\nuse strict;\n\nuse Cpanel::LiveAPI ();\n\nmy $cpanel = Cpanel::LiveAPI->new(); # Connect to cPanel - only do this once.\n\n# Print the header\nprint \"Content-type: text/plain\\r\\n\\r\\n\";\n\n# Call the API\nmy $response = $cpanel->uapi(\n    q/Park/,\n    q/listparkeddomains/\n);\n\n# Handle the response\nif ($response->{cpanelresult}{result}{status}) {\n    my $data = $response->{cpanelresult}{result}{data};\n    # Do something with the $data\n    # So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    # Report errors:\n    print to_json($response->{cpanelresult}{result}{errors});\n}\n\n# Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n#--------------------------------------------------------------------------------------\n# Helper function to convert a perl object to html printable json\n#--------------------------------------------------------------------------------------\nsub to_json {\n    require JSON;\n    my $str = JSON->new->pretty->encode($_[0]);\n    return $str;\n}\n"
+      - label: LiveAPI PHP
+        lang: PHP
+        source: "<?php\n//--------------------------------------------------------------------------------------\n// Instructions:\n//--------------------------------------------------------------------------------------\n// <theme-name> is the theme assigned to cPanel account, where theme-name represents\n// jupiter.\n// 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n// 2) mkdir api_examples\n// 3) cd api_examples\n// 4) create a file Park_listparkeddomains.live.php and put this code into that file.\n// 5) In your browser login to a cPanel account.\n// 6) Manually change the url from: .../frontend/<theme-name>/\n//    to .../frontend/<theme-name>/api_examples/Park_listparkeddomains.live.php\n//--------------------------------------------------------------------------------------\n\n// Instantiate the CPANEL object.\nrequire_once \"/usr/local/cpanel/php/cpanel.php\";\n\n// Print the header\nheader('Content-Type: text/plain');\n\n// Connect to cPanel - only do this once.\n$cpanel = new CPANEL();\n\n// Call the API\n$response = $cpanel->uapi(\n    'Park',\n    'listparkeddomains'\n);\n\n// Handle the response\nif ($response['cpanelresult']['result']['status']) {\n    $data = $response['cpanelresult']['result']['data'];\n    // Do something with the $data\n    // So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    // Report errors:\n    print to_json($response['cpanelresult']['result']['errors']);\n}\n\n// Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n//--------------------------------------------------------------------------------------\n// Helper function to convert a PHP value to html printable json\n//--------------------------------------------------------------------------------------\nfunction to_json($data) {\n    return json_encode($data, JSON_PRETTY_PRINT);\n}\n"
+      x-cpanel-api-version: UAPI
+      x-cpanel-available-version: cPanel 138
+      x-readonly: true
+  /Park/park:
+    get:
+      description: 'This function parks (aliases) a domain on the cPanel account, so that the
+
+        domain serves the content of a domain that already exists on the account.
+
+
+        **Important:**
+
+
+        - Without the `topdomain` parameter, the system parks the domain on the
+
+        account''s primary domain.
+
+        - With the `topdomain` parameter, the system parks the domain on a
+
+        subdomain of the primary domain. That arrangement is how an addon
+
+        domain is represented. To create an addon domain and its subdomain in
+
+        one call, use the `AddonDomain::addaddondomain` function instead.
+
+        - The account must have either the *Parked Domains* or the *Addon
+
+        Domains* feature. Parking on the primary domain requires the *Parked
+
+        Domains* feature specifically.
+
+
+        When you disable the Web Server role,
+
+        the system **disables** this function.'
+      operationId: Park-park
+      parameters:
+      - description: The domain to park. The system removes a leading `www.` from this value and converts it to lowercase before it validates the domain.
+        in: query
+        name: domain
+        required: true
+        schema:
+          example: alias.example.com
+          format: domain
+          type: string
+      - description: 'Whether to remove the dot (`.`) characters from the `topdomain` value, rather than only trimming a trailing dot. This parameter has no effect unless you also pass the `topdomain` parameter.
+
+          * `1` - Remove dots from the subdomain label.
+
+          * `0` - Do **not** remove dots from the subdomain label.'
+        in: query
+        name: disallowdot
+        required: false
+        schema:
+          default: 0
+          enum:
+          - 0
+          - 1
+          example: 1
+          type: integer
+      - description: 'Whether to allow the system to overwrite an existing [DNS](https://go.cpanel.net/dnsrecords) zone for the `domain` value.
+
+          * `1` - Overwrite an existing zone.
+
+          * `0` - Fail if a zone already exists.'
+        in: query
+        name: force
+        required: false
+        schema:
+          default: 0
+          enum:
+          - 0
+          - 1
+          example: 1
+          type: integer
+      - description: 'The subdomain label of the account''s primary domain to park the `domain` value on. The system appends the primary domain to this value.
+
+
+          Omit this parameter to park the domain on the primary domain itself.'
+        in: query
+        name: topdomain
+        required: false
+        schema:
+          example: shop
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    description: This function does not return data. Check the `status` field for the outcome, and the `messages` and `errors` fields for detail.
+                  errors:
+                    items:
+                      type: string
+                    type:
+                    - array
+                    - 'null'
+                  messages:
+                    items:
+                      type: string
+                    type:
+                    - array
+                    - 'null'
+                  metadata:
+                    properties:
+                      transformed:
+                        type: integer
+                    type: object
+                  status:
+                    description: '* `1` — Success.
+
+                      * `0` — Failed. Check the `errors` field for more details.'
+                    enum:
+                    - 0
+                    - 1
+                    example: 1
+                    type: integer
+                  warnings:
+                    items:
+                      type: string
+                    type:
+                    - array
+                    - 'null'
+                type: object
+          description: HTTP Request was successful.
+      summary: Park an alias domain on an existing domain
+      tags:
+      - Park
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "uapi --output=jsonpretty \\\n  --user=username \\\n  Park \\\n  park \\\n  domain='alias.example.com'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2083/cpsess##########/execute/Park/park?domain=alias.example.com
+      - label: LiveAPI Perl
+        lang: Perl
+        source: "#--------------------------------------------------------------------------------------\n# Instructions:\n#--------------------------------------------------------------------------------------\n# <theme-name> is the theme assigned to cPanel account, where theme-name represents\n# jupiter.\n# 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n# 2) mkdir api_examples\n# 3) cd api_examples\n# 4) create a file Park_park.live.pl and put this code into that file.\n# 5) In your browser login to a cPanel account.\n# 6) Manually change the url from: .../frontend/<theme-name>/\n#    to .../frontend/<theme-name>/api_examples/Park_park.live.pl\n#--------------------------------------------------------------------------------------\n\nuse strict;\n\nuse Cpanel::LiveAPI ();\n\nmy $cpanel = Cpanel::LiveAPI->new(); # Connect to cPanel - only do this once.\n\n# Print the header\nprint \"Content-type: text/plain\\r\\n\\r\\n\";\n\n# Call the API\nmy $response = $cpanel->uapi(\n    q/Park/,\n    q/park/,\n    {\n        'domain' => 'alias.example.com',\n    }\n);\n\n# Handle the response\nif ($response->{cpanelresult}{result}{status}) {\n    my $data = $response->{cpanelresult}{result}{data};\n    # Do something with the $data\n    # So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    # Report errors:\n    print to_json($response->{cpanelresult}{result}{errors});\n}\n\n# Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n#--------------------------------------------------------------------------------------\n# Helper function to convert a perl object to html printable json\n#--------------------------------------------------------------------------------------\nsub to_json {\n    require JSON;\n    my $str = JSON->new->pretty->encode($_[0]);\n    return $str;\n}\n"
+      - label: LiveAPI PHP
+        lang: PHP
+        source: "<?php\n//--------------------------------------------------------------------------------------\n// Instructions:\n//--------------------------------------------------------------------------------------\n// <theme-name> is the theme assigned to cPanel account, where theme-name represents\n// jupiter.\n// 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n// 2) mkdir api_examples\n// 3) cd api_examples\n// 4) create a file Park_park.live.php and put this code into that file.\n// 5) In your browser login to a cPanel account.\n// 6) Manually change the url from: .../frontend/<theme-name>/\n//    to .../frontend/<theme-name>/api_examples/Park_park.live.php\n//--------------------------------------------------------------------------------------\n\n// Instantiate the CPANEL object.\nrequire_once \"/usr/local/cpanel/php/cpanel.php\";\n\n// Print the header\nheader('Content-Type: text/plain');\n\n// Connect to cPanel - only do this once.\n$cpanel = new CPANEL();\n\n// Call the API\n$response = $cpanel->uapi(\n    'Park',\n    'park',\n    array (\n        'domain' => 'alias.example.com',\n    )\n);\n\n// Handle the response\nif ($response['cpanelresult']['result']['status']) {\n    $data = $response['cpanelresult']['result']['data'];\n    // Do something with the $data\n    // So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    // Report errors:\n    print to_json($response['cpanelresult']['result']['errors']);\n}\n\n// Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n//--------------------------------------------------------------------------------------\n// Helper function to convert a PHP value to html printable json\n//--------------------------------------------------------------------------------------\nfunction to_json($data) {\n    return json_encode($data, JSON_PRETTY_PRINT);\n}\n"
+      x-cpanel-api-version: UAPI
+      x-cpanel-available-version: cPanel 138
+      x-readonly: false
+  /Park/unpark:
+    get:
+      description: 'This function unparks (removes the alias for) a domain on the cPanel
+
+        account.
+
+
+        **Important:**
+
+
+        - This function removes the alias only. It does **not** remove the
+
+        subdomain that an addon domain is parked on. To remove both, use the
+
+        `AddonDomain::deladdondomain` function instead.
+
+        - The account must have either the *Parked Domains* or the *Addon
+
+        Domains* feature.
+
+
+        When you disable the Web Server role,
+
+        the system **disables** this function.'
+      operationId: Park-unpark
+      parameters:
+      - description: The parked domain to remove.
+        in: query
+        name: domain
+        required: true
+        schema:
+          example: alias.example.com
+          format: domain
+          type: string
+      - description: 'The subdomain that the domain is parked on, given in the underscore-separated form that the `AddonDomain::listaddondomains` function returns in its `domainkey` field.
+
+
+          Omit this parameter to let the system determine the subdomain. Pass it only when the domain is parked on a subdomain rather than on the primary domain.'
+        in: query
+        name: subdomain
+        required: false
+        schema:
+          example: shop_example.com
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    description: This function does not return data. Check the `status` field for the outcome, and the `messages` and `errors` fields for detail.
+                  errors:
+                    items:
+                      type: string
+                    type:
+                    - array
+                    - 'null'
+                  messages:
+                    items:
+                      type: string
+                    type:
+                    - array
+                    - 'null'
+                  metadata:
+                    properties:
+                      transformed:
+                        type: integer
+                    type: object
+                  status:
+                    description: '* `1` — Success.
+
+                      * `0` — Failed. Check the `errors` field for more details.'
+                    enum:
+                    - 0
+                    - 1
+                    example: 1
+                    type: integer
+                  warnings:
+                    items:
+                      type: string
+                    type:
+                    - array
+                    - 'null'
+                type: object
+          description: HTTP Request was successful.
+      summary: Remove a parked (aliased) domain
+      tags:
+      - Park
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "uapi --output=jsonpretty \\\n  --user=username \\\n  Park \\\n  unpark \\\n  domain='alias.example.com'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2083/cpsess##########/execute/Park/unpark?domain=alias.example.com
+      - label: LiveAPI Perl
+        lang: Perl
+        source: "#--------------------------------------------------------------------------------------\n# Instructions:\n#--------------------------------------------------------------------------------------\n# <theme-name> is the theme assigned to cPanel account, where theme-name represents\n# jupiter.\n# 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n# 2) mkdir api_examples\n# 3) cd api_examples\n# 4) create a file Park_unpark.live.pl and put this code into that file.\n# 5) In your browser login to a cPanel account.\n# 6) Manually change the url from: .../frontend/<theme-name>/\n#    to .../frontend/<theme-name>/api_examples/Park_unpark.live.pl\n#--------------------------------------------------------------------------------------\n\nuse strict;\n\nuse Cpanel::LiveAPI ();\n\nmy $cpanel = Cpanel::LiveAPI->new(); # Connect to cPanel - only do this once.\n\n# Print the header\nprint \"Content-type: text/plain\\r\\n\\r\\n\";\n\n# Call the API\nmy $response = $cpanel->uapi(\n    q/Park/,\n    q/unpark/,\n    {\n        'domain' => 'alias.example.com',\n    }\n);\n\n# Handle the response\nif ($response->{cpanelresult}{result}{status}) {\n    my $data = $response->{cpanelresult}{result}{data};\n    # Do something with the $data\n    # So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    # Report errors:\n    print to_json($response->{cpanelresult}{result}{errors});\n}\n\n# Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n#--------------------------------------------------------------------------------------\n# Helper function to convert a perl object to html printable json\n#--------------------------------------------------------------------------------------\nsub to_json {\n    require JSON;\n    my $str = JSON->new->pretty->encode($_[0]);\n    return $str;\n}\n"
+      - label: LiveAPI PHP
+        lang: PHP
+        source: "<?php\n//--------------------------------------------------------------------------------------\n// Instructions:\n//--------------------------------------------------------------------------------------\n// <theme-name> is the theme assigned to cPanel account, where theme-name represents\n// jupiter.\n// 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n// 2) mkdir api_examples\n// 3) cd api_examples\n// 4) create a file Park_unpark.live.php and put this code into that file.\n// 5) In your browser login to a cPanel account.\n// 6) Manually change the url from: .../frontend/<theme-name>/\n//    to .../frontend/<theme-name>/api_examples/Park_unpark.live.php\n//--------------------------------------------------------------------------------------\n\n// Instantiate the CPANEL object.\nrequire_once \"/usr/local/cpanel/php/cpanel.php\";\n\n// Print the header\nheader('Content-Type: text/plain');\n\n// Connect to cPanel - only do this once.\n$cpanel = new CPANEL();\n\n// Call the API\n$response = $cpanel->uapi(\n    'Park',\n    'unpark',\n    array (\n        'domain' => 'alias.example.com',\n    )\n);\n\n// Handle the response\nif ($response['cpanelresult']['result']['status']) {\n    $data = $response['cpanelresult']['result']['data'];\n    // Do something with the $data\n    // So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    // Report errors:\n    print to_json($response['cpanelresult']['result']['errors']);\n}\n\n// Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n//--------------------------------------------------------------------------------------\n// Helper function to convert a PHP value to html printable json\n//--------------------------------------------------------------------------------------\nfunction to_json($data) {\n    return json_encode($data, JSON_PRETTY_PRINT);\n}\n"
+      x-cpanel-api-version: UAPI
+      x-cpanel-available-version: cPanel 138
+      x-readonly: false
+components:
+  securitySchemes:
+    BasicAuth:
+      scheme: basic
+      type: http
+externalDocs:
+  url: https://cpanel.net/developers/
+x-tagGroups:
+- name: API Development Tools
+  tags:
+  - API Token Management
+  - Batch
+  - SSE Task Management
+  - URL Parsing
+- name: Authentication
+  tags:
+  - External Authentication
+  - Two-Factor Settings
+- name: Backup Information
+  tags:
+  - BackupInfo
+  - BackupInfo Status
+- name: Block Ip Addresses
+  tags:
+  - Block IP
+- name: Commerce Integration
+  tags:
+  - Market Integration
+  - SSL Certificates
+- name: Contact Information
+  tags:
+  - Contact Information
+- name: cPanel Account
+  tags:
+  - Account Enhancements
+  - Account Information
+  - Account Management
+  - AuditLog
+  - Contact Information
+  - cPanel Features
+  - Disk Quotas
+  - DomainRecommendations
+  - Personalization
+  - Resource Usage and Statistics
+  - Subaccount Management
+  - Team Roles
+  - Team Users
+- name: cPanel Account Backups
+  tags:
+  - Backup
+  - File Restoration
+- name: cPanel Plugin Framework
+  tags:
+  - Formbricks
+  - Plugins
+- name: cPanel Theme Management
+  tags:
+  - Application Information
+  - Brand Management
+  - Branding Files
+  - Browser Cache Management
+  - Language
+  - Theme Settings
+- name: Directory Management
+  tags:
+  - Directory Indexes
+  - Directory Privacy
+  - Directory Protection
+- name: DNS
+  tags:
+  - DNS
+  - DNS Information
+  - DNS Security
+  - Dynamic DNS
+  - Email DNS Settings
+  - ZoneEdit
+- name: Domain
+  tags:
+  - Domain
+- name: Domain Management
+  tags:
+  - AddonDomain
+  - Direct Link Protection (Hotlink)
+  - Domain
+  - Domain Information
+  - Domain Redirection
+  - DomainLookup
+  - Park
+  - SubDomain
+  - Virtual Host Information
+- name: Domains
+  tags:
+  - Subdomains
+- name: Email
+  tags:
+  - Email Accounts
+  - Email Filtering
+  - Email Forwarding
+  - Email Server Information
+  - Email Suspensions
+  - Mail Server Information
+  - Mailbox Management
+  - Mailing Lists
+  - Signing and Encryption (GnuPG Keys)
+  - Spam Filtering (Greylisting)
+  - Spam Management
+  - Spam Prevention (BoxTrapper)
+  - Webmail Applications
+  - Webmail Sessions
+- name: Extract Information
+  tags:
+  - ExtractInfo
+  - ExtractInfo Status
+- name: File Manager
+  tags:
+  - Trash
+- name: Files
+  tags:
+  - FTP Accounts
+  - FTP Server Settings
+  - Image Tools
+  - Jodit
+  - Manage Files
+  - Manage Files
+  - WebDisk Settings
+- name: GIT Management
+  tags:
+  - Deployment Settings
+  - Repository Management
+- name: InProductSurvey
+  tags:
+  - InProductSurvey
+- name: MySQL and MariaDB
+  tags:
+  - Database Information
+  - Database Management
+  - Remote Databases
+  - User Management
+- name: Notifications
+  tags:
+  - Pushbullet
+- name: Optional Applications
+  tags:
+  - Antivirus Protection (ClamAV)
+  - Calendar and Contacts (DAV)
+  - Calendar and Contacts Server
+  - WordPress Manager Backups
+- name: PostgreSQL
+  tags:
+  - PostgreSQL Database Management
+  - PostgreSQL User Management
+- name: Retrieve bandwidth information
+  tags:
+  - Bandwidth
+- name: Security
+  tags:
+  - Known SSH Hosts Management
+  - Login Information
+- name: Server Information
+  tags:
+  - cPanel Server Information
+  - Notifications
+  - Password Strength
+  - SSH
+  - WebPros MCP
+  - WebProsMCP
+- name: ServiceProxy
+  tags:
+  - ServiceProxy
+- name: Site Quality Monitoring
+  tags:
+  - SiteQuality
+- name: SSL Certificates
+  tags:
+  - Auto-generated SSL Certificates
+  - cPanel Account SSL Management
+  - SNI Email Settings
+  - SSL Certificate Management
+  - Verify Domain Ownership
+- name: Statistics
+  tags:
+  - Domain Statistics
+  - Weblog Settings
+- name: UserData
+  tags:
+  - UserData
+- name: Web Server Configuration
+  tags:
+  - EA4
+  - EasyApache Settings
+  - PHP
+- name: Web Server Management
+  tags:
+  - Application Manager
+  - ModSecurity
+  - NginxCaching
+  - PHP Settings
+  - Web Apps
+- name: Website Configuration
+  tags:
+  - Handler Management
+  - Logs
+  - Mime Type Management
+  - Nova
+  - Site Information
+  - Site Installation
+  - Sitejet
+  - WPX

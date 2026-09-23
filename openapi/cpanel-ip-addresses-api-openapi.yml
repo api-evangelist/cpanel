@@ -1,0 +1,1686 @@
+openapi: 3.2.0
+info:
+  contact:
+    email: cs@cpanel.net
+    name: WebPros International, LLC
+    url: https://cpanel.net/support/
+  description: WHM API.
+  license:
+    name: cPanel License
+    url: https://cpanel.net/legal-notices/
+  termsOfService: https://cpanel.net/legal-notices/
+  title: WHM IP Addresses API
+  version: 11.137.9999.106
+  x-api-evangelist-provenance: 'Harvested verbatim from cPanel''s developer portal on 2026-09-05 via the MCP tool get-full-api-description at https://api.docs.cpanel.net/mcp. ONE mechanical change was made before storage: example values containing PEM private-key or certificate blocks, and AWS-access-key-shaped example strings, were replaced with REDACTED_* placeholders so the file can be stored in a public git repository without tripping secret scanning. No path, operation, parameter, schema or description was altered, added or removed.'
+servers:
+- description: A server running WHM.
+  url: https://{host}:{port}/json-api
+  variables:
+    host:
+      default: whm-server.tld
+      description: The hostname of a server running WHM.
+    port:
+      default: '2087'
+      description: The WHM port.
+security:
+- BasicAuth: []
+tags:
+- description: The IP Addresses module for WHM API 1.
+  name: IP Addresses
+paths:
+  /addips:
+    get:
+      description: 'This function adds an IPv4 address or addresses to the server.
+
+        When you add an IP address, the system attempts to add an alias of that IP
+
+        address to the main network interface. This process rebuilds the IP address
+
+        pool, which resides in the `/etc/ipaddrpool` file. The system stores IP addresses
+
+        within the `/etc/ips` file. The `ipaliases` service activates those IP addresses
+
+        when the server starts.'
+      operationId: Ips-addips
+      parameters:
+      - description: 'The IPv4 address or address range
+
+          in [Class C CIDR format](http://en.wikipedia.org/wiki/Classless_Inter-Domain_Routing).'
+        examples:
+          ipv4:
+            summary: IPv4 address
+            value: 192.168.0.0
+          ipv4range:
+            summary: IPv4 address range
+            value: 192.168.0.20/28
+        in: query
+        name: ips
+        required: true
+        schema:
+          type: string
+      - description: 'The IPv4 address'' netmask.
+
+
+          **Note:**
+
+
+          If the `ips` parameter is in Class C CIDR format,
+
+          the range mask **must** be a value from `24` through `30`.'
+        in: query
+        name: netmask
+        required: true
+        schema:
+          example: 255.255.255.0
+          format: ipv4
+          type: string
+      - description: 'An IPv4 address or comma-delimited list of IPv4 addresses to exclude.
+
+
+          **Note:**
+
+
+          If you do not specify a value,
+
+          the function does not exclude any IPv4 addresses.'
+        examples:
+          multiple:
+            summary: Multiple IP addresses.
+            value: excludes=192.0.20.0,192.0.20.1
+          single:
+            summary: A single IP address.
+            value: 192.0.20.0
+        explode: false
+        in: query
+        name: excludes
+        required: false
+        schema:
+          type: string
+        style: form
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: addips
+                        type: string
+                      output:
+                        properties:
+                          messages:
+                            description: A list of messages returned from the function.
+                            items:
+                              example: eth0:cp1 is now up. 192.168.0.20/255.255.255.0 broadcast 192.168.0.255 has been added.
+                              type: string
+                            type: array
+                        type: object
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is 0. This field may display a success message when a function succeeds.
+                        example: Success
+                        type: string
+                      result:
+                        description: '* `1` - Success
+
+                          * `0` - Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Add IP addresses
+      tags:
+      - IP Addresses
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  addips \\\n  ips='192.168.0.0' \\\n  netmask='255.255.255.0'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/addips?api.version=1&ips=192.168.0.0&netmask=255.255.255.0
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11'
+  /delip:
+    get:
+      description: This function removes an IP address from the server.
+      operationId: Ips-delip
+      parameters:
+      - description: The IPv4 address.
+        in: query
+        name: ip
+        required: true
+        schema:
+          example: 10.1.1.1
+          format: ipv4
+          type: string
+      - description: The network alias to which the IPv4 address is bound.
+        in: query
+        name: ethernetdev
+        required: false
+        schema:
+          default: ''
+          example: eth0
+          type:
+          - string
+          - 'null'
+      - description: 'Whether to remove the IP address if the ethernet interface is down.
+
+          * `1` — Do **not** remove the IP address.
+
+          * `0` — Remove the IP address.'
+        in: query
+        name: skipifshutdown
+        required: false
+        schema:
+          default: 0
+          enum:
+          - 0
+          - 1
+          example: 1
+          type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: delip
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: eth0:cp2 is now down, 10.1.1.1 has been removed
+                        type: string
+                      result:
+                        description: '* `1` — Success
+
+                          * `0` — Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Remove IP address
+      tags:
+      - IP Addresses
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  delip \\\n  ip='10.1.1.1'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/delip?api.version=1&ip=10.1.1.1
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11'
+  /get_public_ip:
+    get:
+      description: 'This function returns the public IP address for a specified public or private IP address. You can use this function to determine the system''s main public IP address, especially for systems that use a 1:1 NAT configuration.
+
+        * cPanel & WHM uses the main public IP address to perform many different functions. For example, the system uses this IP address to verify the server''s license status with WebPros International, LLC.
+
+        * System administrators can configure the main public IP address in WHM''s Basic WebHost Manager Setup interface (_Home >> Server Configuration >> Basic WebHost Manager Setup_).'
+      operationId: Ips-get_public_ip
+      parameters:
+      - description: A valid public or private IP address to query.
+        in: query
+        name: ip
+        required: true
+        schema:
+          example: 192.0.2.0
+          format: ipv4
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      public_ip:
+                        description: The public IP address.
+                        example: 192.0.2.0
+                        format: ipv4
+                        type: string
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: get_public_ip
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Return public IP address of private IP address
+      tags:
+      - IP Addresses
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  get_public_ip \\\n  ip='192.0.2.0'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/get_public_ip?api.version=1&ip=192.0.2.0
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '62'
+  /get_shared_ip:
+    get:
+      description: This function retrieves the IP address that an account shares with the accounts that it owns.
+      operationId: Ips-get_shared_ip
+      parameters:
+      - description: 'The WHM user''s username.
+
+
+          **Note:**
+
+
+          This parameter defaults to the currently-authenticated user.'
+        in: query
+        name: user
+        required: false
+        schema:
+          example: example
+          format: username
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      ip:
+                        description: "The IP address that the WHM user shares.\n\n**Note:**\n\n If the user does **not** have a shared IP address, the function returns the tilde ( `~` ) character."
+                        example: 192.168.0.1
+                        type: string
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: get_shared_ip
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Return shared IP address
+      tags:
+      - IP Addresses
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  get_shared_ip\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/get_shared_ip?api.version=1
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '62'
+  /ipv6_disable_account:
+    get:
+      description: 'This function removes the IPv6 address from an account.
+
+
+        **Notes:**
+
+
+        - When you disable IPv6 on an account, the system unbinds that IPv6 address from your server and the account loses the address. If you enable IPv6 on that account again, the system assigns it a different IPv6 address.
+
+        - For all of cPanel & WHM''s features to function properly on IPv6, the `cpsrvd` daemon **must** listen on IPv6 addresses. To enable this functionality, select On for the *Listen on IPv6 Addresses* setting in the *System* section of WHM''s Tweak Settings interface (*WHM >> Home >> Server Configuration >> Tweak Settings*).
+
+
+        **Important:**
+
+
+        When you disable the Web Server role, the system **disables** this function.'
+      operationId: IPv6-ipv6_disable_account
+      parameters:
+      - description: A comma delimited list of account names.
+        in: query
+        name: user
+        required: true
+        schema:
+          example: user1,user2,user3
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      fail_cnt:
+                        description: 'The number of accounts that failed to disable IPv6.
+
+
+                          **Note**
+
+
+                          The function only returns this value if any failures exist.'
+                        example: 0
+                        minimum: 0
+                        type: integer
+                      failures:
+                        description: 'List of accounts where IPv6 disable failed
+
+
+                          **Note**
+
+
+                          The function only returns this value if any failures exist.'
+                        items:
+                          properties:
+                            name:
+                              description: The name of the account where IPv6 disable failed
+                              example: user1
+                              format: username
+                              type: string
+                            reason:
+                              description: The reason for the IPv6 disable failure
+                              example: The “user1” account does not exist.
+                          type: object
+                        type: array
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: ipv6_disable_account
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is 0. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` - Success.
+
+                          * `0` - Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Remove IPv6 address range from account
+      tags:
+      - IP Addresses
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  ipv6_disable_account \\\n  user='user1,user2,user3'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/ipv6_disable_account?api.version=1&user=user1%2cuser2%2cuser3
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11.40'
+  /ipv6_enable_account:
+    get:
+      description: 'This function assigns an IPv6 address to one or more accounts.
+
+
+        **Note:**
+
+
+        You **must** perform at least one of the following actions before you call this function:
+
+        * Use WHM''s *IPv6 Ranges* interface (*WHM >> Home >> IP Functions >> IPv6 Ranges*) or WHM API 1''s `ipv6_range_add` function to add one or more IPv6 address ranges for use as dedicated IPv6 addresses.
+
+        * Use WHM''s *Basic WebHost Manager Setup* interface (*WHM >> Home >> Server Configuration >> Basic WebHost Manager Setup*) or modify the `/etc/wwwacct.conf` file to add a shared IPv6 address to the server.
+
+        * For all of cPanel & WHM''s features to function properly on IPv6, the `cpsrvd` daemon **must** listen on IPv6 addresses. To enable this functionality, select *On* for the *Listen on IPv6 Addresses* setting in the *System* section of WHM''s *Tweak Settings* interface (*WHM >> Home >> Server Configuration >> Tweak Settings*).
+
+
+        **Important:**
+
+
+        When you disable the Web Server role, the system **disables** this function.'
+      operationId: IPv6-ipv6_enable_account
+      parameters:
+      - description: 'The IPv6 address range''s name.
+
+
+          **Note:**
+
+
+          The range name `SHARED` will assign the server''s shared IPv6 address to the account(s).'
+        in: query
+        name: range
+        required: true
+        schema:
+          example: Hosting_IPv6_Block
+          type: string
+      - description: A comma-delimited list of account names.
+        in: query
+        name: user
+        required: true
+        schema:
+          example: user1,user2,user3
+          format: username
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    example:
+                      fail_cnt: 2
+                      failures:
+                        brain: The “brain” account does not exist.
+                        pinky: The “pinky” account does not exist.
+                      ipv6:
+                        chewie: 2001:0db8:1a34:56cf:0000:0000:0000:0000
+                        cptest: 2001:0db8:1a34:56cf:0000:0000:0000:0001
+                        domain1: 2001:0db8:1a34:56cf:0000:0000:0000:0002
+                    properties:
+                      fail_cnt:
+                        description: The number of accounts that failed to enable IPv6.
+                        example: 0
+                        minimum: 0
+                        type: integer
+                      failures:
+                        additionalProperties:
+                          description: 'The account and the reason why IPv6 enable failed.
+
+
+                            **Note:**
+
+
+                            The function uses the account name as the return''s name.'
+                          example: Failed to enable IPv6
+                          type: string
+                        description: List of accounts where IPv6 enable failed.
+                        type: object
+                      ipv6:
+                        additionalProperties:
+                          description: 'The account and the IPv6 address assigned to the account.
+
+
+                            **Note:**
+
+
+                            The function uses the account name as the return''s name.'
+                          type: string
+                        description: The IPv6 addresses that the system assigned to each account.
+                        type: object
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: ipv6_enable_account
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is 0. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` - Success
+
+                          * `0` - Failed: Check the reason field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Add IPv6 address range to accounts
+      tags:
+      - IP Addresses
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  ipv6_enable_account \\\n  user='user1,user2,user3' \\\n  range='Hosting_IPv6_Block'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/ipv6_enable_account?api.version=1&user=user1%2cuser2%2cuser3&range=Hosting_IPv6_Block
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11.40'
+  /ipv6_range_add:
+    get:
+      description: 'This function adds a range of IPv6 addresses to the server.
+
+
+        **Notes:**
+
+
+        - This function **cannot** modify the server''s shared IPv6 address. To update that address, modify the /etc/wwwacct.conf file, or use WHM''s *Basic WebHost Manager Setup* interface (*Home >> Server Configuration >> Basic WebHost Manager Setup*).
+
+        - For all of cPanel & WHM''s features to function properly on IPv6, the `cpsrvd` daemon **must** listen on IPv6 addresses. To enable this functionality, select *On* for the *Listen on IPv6 Addresses* setting in the *System* section of WHM''s *Tweak Settings* interface (*WHM >> Home >> Server Configuration >> Tweak Settings*).
+
+
+        **Important:**
+
+
+        When you disable the Web Server role, the system **disables** this function.'
+      operationId: IPv6-ipv6_range_add
+      parameters:
+      - description: 'The IPv6 address range''s name.
+
+
+          **Note:**
+
+
+          You **cannot** use SHARED as a range''s name.
+
+          It is reserved for the server''s shared IPv6 address.'
+        in: query
+        name: name
+        required: true
+        schema:
+          example: ExampleRange
+          type: string
+      - description: 'The IPv6 address range and network portion
+
+          in [CIDR format](http://en.wikipedia.org/wiki/Classless_Inter-Domain_Routing).'
+        in: query
+        name: range
+        required: true
+        schema:
+          example: 2001:db8:66ac:cafe::/64
+          type: string
+      - description: 'Whether the IPv6 address range is available.
+
+
+          **Note**
+
+
+          * `1` - Available.
+
+          * `0` - Reserved.'
+        in: query
+        name: enabled
+        required: false
+        schema:
+          default: 1
+          enum:
+          - 0
+          - 1
+          example: 1
+          type: integer
+      - description: A note for the IPv6 address range.
+        in: query
+        name: note
+        required: false
+        schema:
+          default: null
+          example: Initial IPv6 address pool
+          type:
+          - string
+          - 'null'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: ipv6_range_add
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is 0. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` - Success
+
+                          * `0` - Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Add IPv6 address range
+      tags:
+      - IP Addresses
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  ipv6_range_add \\\n  range='2001:db8:66ac:cafe::/64' \\\n  name='ExampleRange'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/ipv6_range_add?api.version=1&range=2001%3adb8%3a66ac%3acafe%3a%3a%2f64&name=ExampleRange
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11.40'
+  /ipv6_range_edit:
+    get:
+      description: 'This function changes an IPv6 address range''s name and/or note.
+
+
+        **Notes:**
+
+
+        - This function **cannot** modify the server''s shared IPv6 address. To update that address, modify the /etc/wwwacct.conf file, or use WHM''s *Basic WebHost Manager Setup* interface (*Home >> Server Configuration >> Basic WebHost Manager Setup*).
+
+        - For all of cPanel & WHM''s features to function properly on IPv6, the `cpsrvd` daemon **must** listen on IPv6 addresses. To enable this functionality, select *On* for the *Listen on IPv6 Addresses* setting in the *System* section of WHM''s *Tweak Settings* interface (*WHM >> Home >> Server Configuration >> Tweak Settings*).
+
+
+        **Important:**
+
+
+        When you disable the Web Server role, the system **disables** this function.'
+      operationId: IPv6-ipv6_range_edit
+      parameters:
+      - description: 'The IPv6 address range''s current name.
+
+
+          **Note:**
+
+
+          You **cannot** edit the range named SHARED.'
+        in: query
+        name: name
+        required: true
+        schema:
+          example: ExampleRange
+          type: string
+      - description: 'The IPv6 address range''s new name.
+
+
+          **Note:**
+
+
+          * If not supplied the range keeps its old name.
+
+          * You **cannot** change range name to SHARED.'
+        in: query
+        name: new_name
+        required: false
+        schema:
+          default: null
+          example: AnotherRange
+          type: string
+      - description: 'The IPv6 address range''s new note.
+
+
+          **Note:**
+
+
+          If you don''t specify this parameter, the function will not change the range''s note.'
+        in: query
+        name: note
+        required: false
+        schema:
+          default: null
+          example: This is an update to the note.
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: ipv6_range_edit
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is 0. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` - Success
+
+                          * `0` - Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Update IPv6 address range name or note
+      tags:
+      - IP Addresses
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  ipv6_range_edit \\\n  name='ExampleRange'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/ipv6_range_edit?api.version=1&name=ExampleRange
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11.40'
+  /ipv6_range_list:
+    get:
+      description: 'This function lists available IPv6 address ranges.
+
+
+        **Note:**
+
+
+        For all of cPanel & WHM''s features to function properly on IPv6, the `cpsrvd` daemon **must** listen on IPv6 addresses. To enable this functionality, select *On* for the *Listen on IPv6 Addresses* setting in the *System* section of WHM''s *Tweak Settings* interface (*WHM >> Home >> Server Configuration >> Tweak Settings*).
+
+
+        **Important:**
+
+
+        When you disable the Web Server role, the system **disables** this function.'
+      operationId: IPv6-ipv6_range_list
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      range:
+                        description: An array of the IPv6 address ranges.
+                        items:
+                          properties:
+                            CIDR:
+                              description: The IPv6 address range, in CIDR format.
+                              example: 2001:db8:100:6::/64
+                              type: string
+                            enabled:
+                              description: 'Whether the IPv6 address range is available.
+
+                                * `1`  Available.
+
+                                * `0`  Reserved.'
+                              enum:
+                              - 0
+                              - 1
+                              example: 1
+                              type: integer
+                            first:
+                              description: The first IPv6 address in the range.
+                              example: 2001:db8:0100:0006:0000:0000:0000:0000
+                              format: ipv6
+                              type: string
+                            last:
+                              description: The last IPv6 address in the range.
+                              example: 2001:db8:0100:0006:ffff:ffff:ffff:ffff
+                              format: ipv6
+                              type: string
+                            mostrecent:
+                              description: The most recently assigned address from the IPv6 address range.
+                              example: 2001:db8:0100:0006:0000:0000:0002:00ce
+                              format: ipv6
+                              type: string
+                            name:
+                              description: 'The IPv6 address range''s name.
+
+
+                                **Note:**
+
+
+                                `SHARED` represents the server''s main IPv6 address.'
+                              example: test_range
+                              type: string
+                            note:
+                              description: The IPv6 address range's note.
+                              example: This is used for development.
+                              type: string
+                            owner:
+                              description: The user who owns the IPv6 address range.
+                              example: root
+                              format: username
+                              type: string
+                            range_users:
+                              description: The user or users who use addresses in the IPv6 address range.
+                              items:
+                                example: user1
+                                format: username
+                                type: string
+                              type: array
+                            reclaimed:
+                              description: IPv6 addresses within the range which have become available.
+                              items:
+                                example: 2001:db8:0100:0006:0000:0000:0000:0002
+                                format: ipv6
+                                type: string
+                              type: array
+                          type: object
+                        type: array
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: ipv6_range_list
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is 0. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` - Success
+
+                          * `0` - Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Return available IPv6 address ranges
+      tags:
+      - IP Addresses
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  ipv6_range_list\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/ipv6_range_list?api.version=1
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11.40'
+  /ipv6_range_remove:
+    get:
+      description: 'This function removes an IPv6 address range from the server.
+
+
+        **Note:**
+
+
+        * This function **cannot** modify the server''s shared IPv6 address. To update that address, modify the `/etc/wwwacct.conf` file, or use WHM''s _Basic WebHost Manager Setup_ interface (_Home >> Server Configuration >> Basic WebHost Manager Setup_).
+
+        * For all of cPanel & WHM''s features to function properly on IPv6, the `cpsrvd` daemon **must** listen on IPv6 addresses. To enable this functionality, select _On_ for the _Listen on IPv6 Addresses_ setting in the _System_ section of WHM''s _Tweak Settings_ interface (_WHM >> Home >> Server Configuration >> Tweak Settings_).
+
+
+        **Important:**
+
+
+        When you disable the Web Server role, the system **disables** this function.'
+      operationId: IPv6-ipv6_range_remove
+      parameters:
+      - description: The IPv6 address range's name.
+        in: query
+        name: name
+        required: true
+        schema:
+          example: Range1
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: ipv6_range_remove
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` — Success
+
+                          * `0` — Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Remove IPv6 address range
+      tags:
+      - IP Addresses
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  ipv6_range_remove \\\n  name='Range1'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/ipv6_range_remove?api.version=1&name=Range1
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11.40'
+  /ipv6_range_usage:
+    get:
+      description: 'This function retrieves usage information for IPv6 addresses in an IPv6 range.
+
+
+        **Note:**
+
+
+        For all of cPanel & WHM''s features to function properly on IPv6, the `cpsrvd` daemon **must** listen on IPv6 addresses. To enable this functionality, select *On* for the *Listen on IPv6 Addresses* setting in the *System* section of WHM''s *Tweak Settings* interface (*WHM >> Home >> Server Configuration >> Tweak Settings*).
+
+
+        **Important:**
+
+
+        When you disable the Web Server role, the system **disables** this function.'
+      operationId: IPv6-ipv6_range_usage
+      parameters:
+      - description: The IPv6 address range's name.
+        in: query
+        name: name
+        required: true
+        schema:
+          example: TestRange
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      usage:
+                        description: The IPv6 address range's information.
+                        properties:
+                          forbidden:
+                            description: The number of reserved IPv6 addresses.
+                            example: 65536
+                            minimum: 0
+                            type: integer
+                          free:
+                            description: The number of available IPv6 addresses.
+                            example: 1000000
+                            minimum: 0
+                            type: integer
+                          used:
+                            description: The number of assigned IPv6 addresses.
+                            example: 20
+                            minimum: 0
+                            type: integer
+                        type: object
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: ipv6_range_usage
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is 0. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` - Success
+
+                          * `0` - Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Return IPv6 address usage
+      tags:
+      - IP Addresses
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  ipv6_range_usage \\\n  name='TestRange'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/ipv6_range_usage?api.version=1&name=TestRange
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11.40'
+  /listips:
+    get:
+      description: This function lists a server's IP addresses.
+      operationId: Ips-listips
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      ip:
+                        description: An array of objects that contain IP address information.
+                        items:
+                          properties:
+                            active:
+                              description: 'Whether the IP address is active.
+
+                                * `1` — Active.
+
+                                * `0` — Inactive.'
+                              enum:
+                              - 0
+                              - 1
+                              example: 1
+                              type: integer
+                            dedicated:
+                              description: 'Whether the IP address is dedicated.
+
+                                * `1` — Dedicated.
+
+                                * `0` — Shared.'
+                              enum:
+                              - 0
+                              - 1
+                              example: 0
+                              type: integer
+                            if:
+                              description: The IP address' network interface.
+                              example: eth0
+                              type: string
+                            ip:
+                              description: The IP address.
+                              example: 192.168.0.20
+                              format: ipv4
+                              type: string
+                            mainaddr:
+                              description: 'Whether the IP address is the server''s main IP address.
+
+                                * `1` — Main IP address.
+
+                                * `0` — **Not** the main IP address.'
+                              enum:
+                              - 0
+                              - 1
+                              example: 0
+                              type: integer
+                            netmask:
+                              description: The IP address' netmask.
+                              example: 255.255.0.0
+                              format: ipv4
+                              type: string
+                            network:
+                              description: The IP address' network value.
+                              example: 192.168.0.0
+                              format: ipv4
+                              type: string
+                            public_ip:
+                              description: The public IP for the IP address.
+                              example: 10.1.32.177
+                              format: ipv4
+                              type: string
+                            removable:
+                              description: 'Whether the IP address can be removed.
+
+                                * `1` — Removable.
+
+                                * `0` — **Not** removable.'
+                              enum:
+                              - 0
+                              - 1
+                              example: 0
+                              type: integer
+                            used:
+                              description: 'Whether the IP address is in use.
+
+                                * `1` — In use.
+
+                                * `0` — **Not** in use.'
+                              enum:
+                              - 0
+                              - 1
+                              example: 1
+                              type: integer
+                          type: object
+                        type: array
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: listips
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Return server's IP addresses
+      tags:
+      - IP Addresses
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  listips\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/listips?api.version=1
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11'
+  /listipv6s:
+    get:
+      description: This function lists the IPv6 addresses bound to a server’s network interfaces.
+      operationId: Ips-listipv6s
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      ip:
+                        description: An array of objects that contain IPv6 address information.
+                        items:
+                          properties:
+                            ip:
+                              description: The IPv6 address.
+                              example: 2001:0db8:0:0:1:0:0:1
+                              format: ipv6
+                              type: string
+                        type: array
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: listipv6s
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Return server's IPv6 addresses
+      tags:
+      - IP Addresses
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  listipv6s\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/listipv6s?api.version=1
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11'
+  /nat_checkip:
+    get:
+      description: This function validates a public IP address on a NAT-configured server.
+      operationId: NAT-nat_checkip
+      parameters:
+      - description: The local IPv4 address.
+        in: query
+        name: ip
+        required: true
+        schema:
+          example: 192.168.4.10
+          format: ipv4
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      checked_ip:
+                        description: The local IPv4 address.
+                        example: 192.168.4.10
+                        format: ipv4
+                        type: string
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: nat_checkip
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` — Success
+
+                          * `0` — Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Validate public IP address for NAT
+      tags:
+      - IP Addresses
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  nat_checkip \\\n  ip='192.168.4.10'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/nat_checkip?api.version=1&ip=192.168.4.10
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11.40'
+  /nat_set_public_ip:
+    get:
+      description: This function pairs a local IP address with a public IP address on NAT-configured servers.
+      operationId: NAT-nat_set_public_ip
+      parameters:
+      - description: The local IPv4 address.
+        in: query
+        name: local_ip
+        required: true
+        schema:
+          example: 192.168.4.10
+          format: ipv4
+          type: string
+      - description: The public IPv4 address.
+        in: query
+        name: public_ip
+        required: true
+        schema:
+          example: 10.5.3.33
+          format: ipv4
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: nat_set_public_ip
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` — Success
+
+                          * `0` — Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Register NAT IP address to public IP address
+      tags:
+      - IP Addresses
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  nat_set_public_ip \\\n  local_ip='192.168.4.10' \\\n  public_ip='10.5.3.33'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/nat_set_public_ip?api.version=1&local_ip=192.168.4.10&public_ip=10.5.3.33
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11.40'
+  /setsiteip:
+    get:
+      description: This function changes a site's or account's IP address.
+      operationId: Accounts-setsiteip
+      parameters:
+      - description: The site's or user's IPv4 address.
+        in: query
+        name: ip
+        required: true
+        schema:
+          example: 192.168.4.10
+          format: ipv4
+          type: string
+      - description: 'The domain''s name.
+
+
+          **Note:**
+
+
+          You **must** use either the `user` parameter or `domain` parameter.'
+        in: query
+        name: domain
+        schema:
+          example: example.com
+          format: domain
+          type: string
+      - description: 'The user''s username.
+
+
+          **Note:**
+
+
+          You **must** use either the `user` parameter or `domain` parameter.'
+        in: query
+        name: user
+        schema:
+          example: username
+          format: username
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: setsiteip
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` — Success
+
+                          * `0` — Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Update domain or cPanel account IP address
+      tags:
+      - IP Addresses
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  setsiteip \\\n  ip='192.168.4.10'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/setsiteip?api.version=1&ip=192.168.4.10
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11'
+components:
+  securitySchemes:
+    BasicAuth:
+      scheme: basic
+      type: http
+externalDocs:
+  url: https://cpanel.net/developers/
+x-tagGroups:
+- name: Account Restoration
+  tags:
+  - Restore Account
+  - Restore Queue Management
+  - Restore Queue Reporting
+- name: Accounts
+  tags:
+  - Account Creation
+  - Account Enhancements
+  - Account Management
+  - Bandwidth and Disk Quotas
+  - Domain Information
+  - Passwords
+  - Styles
+  - Suspensions
+- name: API Development Tools
+  tags:
+  - API Execution
+  - API Statistics
+  - API Token Management
+  - Applications
+  - Session
+- name: Authentication
+  tags:
+  - Authentication Providers
+  - External Authentication
+  - Login URL
+  - SSH Keys and Connections
+  - Two-Factor Authentication
+- name: Backups
+  tags:
+  - Backup Destination
+  - Backup or Restore
+  - Backup Settings
+  - Legacy Migration
+- name: Commerce Integration
+  tags:
+  - Market Integration
+  - Sitejet
+- name: cPanel Market
+  tags:
+  - Product Management
+  - Provider Management
+- name: cPanel Support Tickets
+  tags:
+  - Support Access
+  - Ticket Management
+- name: Customizations
+  tags:
+  - Brand
+  - Customizations
+- name: Databases
+  tags:
+  - Manage MySQL Server
+  - MySQL Databases
+  - PostgreSQL Databases
+  - Remote MySQL Databases
+- name: DNS
+  tags:
+  - DNS Cluster Settings
+  - DNS Security
+  - DNS Zones
+  - Domain Management
+  - Domain Management
+  - Resolvers
+  - Service Records
+- name: Hosting Plans
+  tags:
+  - Feature Access
+  - Feature Lists
+  - Hosting Plan Extensions
+  - Hosting Plans
+- name: InProductSurvey
+  tags:
+  - InProductSurvey
+- name: Integrations
+  tags:
+  - API Authentication
+  - Links
+  - Scripts Hooks
+- name: IP Address Management
+  tags:
+  - IPv4 Address Settings
+  - IPv6 Address Settings
+  - Network Address Translation
+- name: Login Security (cPHulk)
+  tags:
+  - Management
+  - Reporting
+  - Settings
+- name: Logs
+  tags:
+  - Web Log Retention
+- name: Mail
+  tags:
+  - cPanel Account Mail Management
+  - Mail DNS Settings
+  - Mail Server Settings
+  - Spam Management
+  - Spam Protection (Greylisting)
+- name: Monitoring
+  tags:
+  - 360 Monitoring
+- name: NGINX Manager
+  tags:
+  - NGINX Manager
+- name: Resellers
+  tags:
+  - Account Enhancement Limit
+  - Account Limits
+  - Account Permissions
+  - Account Settings
+  - Reseller Account Management
+- name: Security
+  tags:
+  - WHM Access
+- name: Server Administration
+  tags:
+  - Configuration Clusters
+  - Configurations
+  - Connected Applications
+  - Connections
+  - cPanel Analytics
+  - License Management
+  - Notifications
+  - Plugin-Based Features
+  - Security
+  - Server Nodes
+  - Server Profiles
+  - Services
+  - System Information
+  - Updates
+- name: SSL Certificates
+  tags:
+  - Auto-Generated Certificates
+  - cPanel Account Settings
+  - SSL Server Settings
+- name: System Package Management
+  tags:
+  - Install or Uninstall Package
+  - List Package Information
+  - Package Manager Settings
+- name: Transfers
+  tags:
+  - cPanel Account Transfer
+  - Transfer Configuration
+  - Transfer Monitoring
+- name: UserData
+  tags:
+  - UserData
+- name: Web Server Configuration
+  tags:
+  - EasyApache Settings
+  - PHP
+  - PHP-FPM
+- name: Web Server Security (ModSecurity)
+  tags:
+  - Rule Settings
+  - Rule Vendor Settings
+  - Server Settings

@@ -1,0 +1,2112 @@
+openapi: 3.2.0
+info:
+  contact:
+    email: cs@cpanel.net
+    name: WebPros International, LLC
+    url: https://cpanel.net/support/
+  description: WHM API.
+  license:
+    name: cPanel License
+    url: https://cpanel.net/legal-notices/
+  termsOfService: https://cpanel.net/legal-notices/
+  title: WHM Support Tickets API
+  version: 11.137.9999.106
+  x-api-evangelist-provenance: 'Harvested verbatim from cPanel''s developer portal on 2026-09-05 via the MCP tool get-full-api-description at https://api.docs.cpanel.net/mcp. ONE mechanical change was made before storage: example values containing PEM private-key or certificate blocks, and AWS-access-key-shaped example strings, were replaced with REDACTED_* placeholders so the file can be stored in a public git repository without tripping secret scanning. No path, operation, parameter, schema or description was altered, added or removed.'
+servers:
+- description: A server running WHM.
+  url: https://{host}:{port}/json-api
+  variables:
+    host:
+      default: whm-server.tld
+      description: The hostname of a server running WHM.
+    port:
+      default: '2087'
+      description: The WHM port.
+security:
+- BasicAuth: []
+tags:
+- description: The Support Tickets module for WHM API 1.
+  name: Support Tickets
+paths:
+  /ticket_create_stub_ticket:
+    get:
+      description: 'This function creates a stub ticket. The system uses the stub ticket
+
+        to create a cPanel support ticket.
+
+
+        **Note:**
+
+
+        This function is **not** available through the command line. You **must** call
+
+        it as a request body.'
+      operationId: TicketSupport-ticket_create_stub_ticket
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      secure_id:
+                        description: The support ticket's secure ID token.
+                        example: rofh411bv8
+                        type: string
+                      ticket_id:
+                        description: The support ticket number that other functions can look up.
+                        example: 7648492
+                        minimum: 1
+                        type: integer
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: ticket_create_stub_ticket
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Create initial Support ticket request
+      tags:
+      - Support Tickets
+      x-codeSamples:
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/ticket_create_stub_ticket?api.version=1
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '60'
+      x-cpanel-cli-support: false
+  /ticket_get_support_agreement:
+    get:
+      description: 'This function retrieves the WebPros International, LLC Technical Support Agreement text
+
+        and metadata about the user''s agreement status from the
+
+        cPanel Customer Portal.
+
+
+        **Note:**
+
+        * This function is **not** available through the command line. You **must** call it
+
+        as a request body.
+
+        * To use this function, you **must** set up a cPanelID token in your current session.
+
+        For more information, read our
+
+        cPanelID
+
+        documentation.'
+      operationId: TicketSupport-ticket_get_support_agreement
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      accepted:
+                        description: 'Whether the user associated with the OAuth token has already accepted this
+
+                          version of the agreement.
+
+
+                          * `1` — Accepted.
+
+                          * `0` — **Not** accepted.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 0
+                        type: integer
+                      accepted_date:
+                        description: 'The [Unix timestamp](https://en.wikipedia.org/wiki/Unix_time)
+
+                          at which the user associated with the OAuth token accepted the
+
+                          Technical Support Agreement.
+
+
+                          * A valid Unix timestamp.
+
+                          * `null` — Never accepted.'
+                        example: 1566000000
+                        format: unix_timestamp
+                        type:
+                        - integer
+                        - 'null'
+                      accepted_date_human:
+                        description: 'The human-readable date at which the user associated with the OAuth token
+
+                          accepted the Technical Support Agreement.
+
+
+                          * A human-readable date, in `MM/DD/YY` format.
+
+                          * `null` — Never accepted.'
+                        example: 8/17/19
+                        type:
+                        - string
+                        - 'null'
+                      body:
+                        description: 'The full Technical Support Agreement.
+
+
+                          **Note:**
+
+
+                          This returned value may contain HTML.'
+                        example: '<p>IMPORTANT: THIS TECHNICAL SUPPORT AGREEMENT ... at the end of AGREEMENT'
+                        type: string
+                      create_date:
+                        description: The creation or publication Unix timestamp of the Technical Support Agreement's current version.
+                        example: 1564790400
+                        format: unix_timestamp
+                        type: integer
+                      create_date_human:
+                        description: The human-readable date at which the current version of the Technical Support Agreement was created or published, in `MM/DD/YY` format.
+                        example: 8/3/19
+                        type: string
+                      download_url:
+                        description: The URL at which the end-user may download the support agreement.
+                        example: https://www.cpanel.net/legal/techagreement_download.cgi
+                        format: url
+                        type: string
+                      title:
+                        description: The Technical Support Agreement's title.
+                        example: Technical Support Agreement
+                        type: string
+                      version:
+                        description: The Technical Support Agreement's version.
+                        example: 2019-04.v01.TSUPPORT
+                        type: string
+                      view_url:
+                        description: The URL at which the end-user may view the Technical Support Agreement agreement as a standalone HTML document.
+                        example: http://cpanel.com/technical-support-agreements.html
+                        format: url
+                        type: string
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: ticket_get_support_agreement
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Import Technical Support Agreement text
+      tags:
+      - Support Tickets
+      x-codeSamples:
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/ticket_get_support_agreement?api.version=1
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '60'
+      x-cpanel-cli-support: false
+  /ticket_get_support_info:
+    get:
+      description: 'This function retrieves the license holder''s support-related information.
+
+
+        **Note:**
+
+
+        * This function is **not** available through the command line. You **must** call
+
+        it as a request body.
+
+        * To use this function, you **must** set up a cPanelID token in your current session.
+
+        For more information, read our
+
+        cPanelID
+
+        documentation.'
+      operationId: TicketSupport-ticket_get_support_info
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      arch:
+                        description: The server's CPU architecture retrieved at the last license check.
+                        example: x86_64
+                        type: string
+                      arch_supported:
+                        description: 'Whether cPanel Support provides assistance with the server''s CPU architecture.
+
+
+                          * `1` — Yes.
+
+                          * `0` — No.
+
+                          * `-1` — Unknown architecture.'
+                        enum:
+                        - 1
+                        - 0
+                        - -1
+                        example: 1
+                        type: integer
+                      company_id:
+                        description: A number that represents the company with the licensed IP address.
+                        example: 7
+                        minimum: 1
+                        type: integer
+                      company_name:
+                        description: The company name associated with the submitted IP address.
+                        example: Example, L.L.C.
+                        type: string
+                      distro:
+                        description: The server's operating system retrieved during the last license check.
+                        example: centos enterprise 6.8
+                        type: string
+                      distro_supported:
+                        description: 'Whether cPanel Technical Support provides assistance for the server''s
+
+                          operating system.
+
+
+                          * `1` — Yes.
+
+                          * `0` — No.
+
+                          * `-1` — Unknown OS.'
+                        enum:
+                        - 1
+                        - 0
+                        - -1
+                        example: 1
+                        type: integer
+                      gets_direct_support:
+                        description: 'Whether the IP address owner''s primary support is WebPros International LLC.
+
+
+                          * `1` — Receives initial support from WebPros International, LLC.
+
+                          * `0` — Receives initial support from a partner.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 0
+                        type: integer
+                      has_company_info:
+                        description: 'Whether the response contains the company information associated with
+
+                          the licensed IP address.
+
+
+                          * `1` — Contains company info.
+
+                          * `0` — Does **not** contain company info.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 0
+                        type: integer
+                      has_compatibility_info:
+                        description: 'Whether the response contains the server''s compatibility information.
+
+
+                          * `1` — Contains compatibility info.
+
+                          * `0` — Does **not** contain compatibility info.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      hostname:
+                        description: The hostname or IP address of the server, as recorded in the license database.
+                        example: server.example.com
+                        type: string
+                      ip:
+                        description: The license provider's IP address.
+                        example: 192.168.0.1
+                        format: ipv4
+                        type: string
+                      logo_url:
+                        description: The optional URL to the company's brand image file on the partner website.
+                        example: http://example.com/assets/ourlogo.png
+                        format: url
+                        type: string
+                      pub_support_contact:
+                        description: The URL to the company's general support resources, if available.
+                        example: http://documentation.example.com/
+                        format: url
+                        type: string
+                      pub_tech_contact:
+                        description: 'The optional URL to the company''s technical support resources.
+
+
+                          **Note:**
+
+
+                          If the `pub_tech_contact` return does not contain a value, the system
+
+                          will use the `pub_support_contact` return''s value.'
+                        example: https://support.example.com/
+                        format: url
+                        type: string
+                      tech_contact_email:
+                        description: The contact email address for the company's technical support.
+                        example: support@example.com
+                        format: email
+                        type: string
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: ticket_get_support_info
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Import customer information from Customer Portal
+      tags:
+      - Support Tickets
+      x-codeSamples:
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/ticket_get_support_info?api.version=1
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: 78.0.6
+      x-cpanel-cli-support: false
+  /ticket_grant:
+    get:
+      description: 'This function installs an SSH key from the
+
+        cPanel Customer Portal.
+
+
+        **Note:**
+
+
+        This function is **not** available through the command line. You **must** call
+
+        it as a request body.'
+      operationId: TicketSupport-ticket_grant
+      parameters:
+      - description: The support ticket's secure ID token.
+        in: query
+        name: secure_id
+        required: true
+        schema:
+          example: rofh411bv8
+          type: string
+      - description: The server's support ticket ID number.
+        in: query
+        name: server_num
+        required: true
+        schema:
+          example: 1
+          minimum: 1
+          type: integer
+      - description: The support ticket's ID number.
+        in: query
+        name: ticket_id
+        required: true
+        schema:
+          example: 999999999
+          minimum: 1
+          type: integer
+      - description: The username for incoming SSH connections before they escalate to the `root` user. If you do **not** specify a value, the function retrieves the user from the support ticket.
+        in: query
+        name: ssh_username
+        required: false
+        schema:
+          example: username
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      auth_status:
+                        description: The installation status.
+                        example: AUTHED
+                        type: string
+                      auth_time:
+                        description: When the system authorized access.
+                        example: 1477338450
+                        format: unix_timestamp
+                        type: integer
+                      chain_status:
+                        description: 'The status of the
+
+                          [`iptables`](https://netfilter.org/projects/iptables/index.html)
+
+                          whitelist entries.
+
+
+                          * `ACTIVE` — The system added the appropriate `iptables` whitelist
+
+                          entries or they already existed.
+
+                          * `INACTIVE` — The `iptables` whitelist entries were successfully
+
+                          removed or were already deleted.
+
+                          * `ERR_SETUP` — The system failed to add the `iptables` whitelist
+
+                          entries.
+
+                          * `ERR_UNSETUP` — The system failed to remove the `iptables` whitelist
+
+                          entries.
+
+                          * `ERR_UNKNOWN` — An unknown error occurred.'
+                        enum:
+                        - ACTIVE
+                        - INACTIVE
+                        - ERR_SETUP
+                        - ERR_UNSETUP
+                        - ERR_UNKNOWN
+                        example: ACTIVE
+                        type: string
+                      csf_wl_status:
+                        description: 'The status of the
+
+                          [ConfigServer Security & Firewall (CSF)](https://www.configserver.com/)
+
+                          whitelist entries.
+
+
+                          * `ACTIVE` — The system added the appropriate CSF whitelist entries or they
+
+                          already existed.
+
+                          * `INACTIVE` — The CSF whitelist entries were successfully removed or they
+
+                          were already deleted.
+
+                          * `ERR_SETUP` — The system failed to add the CSF whitelist entries.
+
+                          * `ERR_UNSETUP` — The system failed to remove the CSF whitelist entries.
+
+                          * `ERR_UNKNOWN` — An unknown error occurred.
+
+
+                          **Note:**
+
+
+                          If CSF does not exist on the server, the function will **not**
+
+                          display this return.'
+                        enum:
+                        - ACTIVE
+                        - INACTIVE
+                        - ERR_SETUP
+                        - ERR_UNSETUP
+                        - ERR_UNKNOWN
+                        example: ACTIVE
+                        type: string
+                      host_access_wl_status:
+                        description: 'The status of the `/etc/hosts.allow` file''s whitelist entries.
+
+
+                          * `ACTIVE` — The system added the appropriate `/etc/hosts.allow` file whitelist
+
+                          entries or they already existed.
+
+                          * `INACTIVE` — The `/etc/hosts.allow` file whitelist entries were successfully
+
+                          removed or they were already deleted.
+
+                          * `ERR_SETUP` — The system failed to add the `/etc/hosts.allow` file whitelist
+
+                          entries.
+
+                          * `ERR_UNSETUP` — The system failed to remove the `/etc/hosts.allow` file
+
+                          whitelist entries.
+
+                          * `ERR_UNKNOWN` — An unknown error occurred. '
+                        enum:
+                        - ACTIVE
+                        - INACTIVE
+                        - ERR_SETUP
+                        - ERR_UNSETUP
+                        - ERR_UNKNOWN
+                        example: ACTIVE
+                        type: string
+                      hulk_wl_status:
+                        description: 'The status of the
+
+                          [cPHulk](https://docs.cpanel.net/whm/security-center/cphulk-brute-force-protection/)
+
+                          whitelist entries.
+
+
+                          * `ACTIVE` — The system added the appropriate cPHulk whitelist entries or they
+
+                          already existed.
+
+                          * `INACTIVE` — The cPHulk whitelist entries were successfully removed or they
+
+                          were already deleted.
+
+                          * `ERR_SETUP` — The system failed to add the cPHulk whitelist entries.
+
+                          * `ERR_UNSETUP` — The system failed to remove the cPHulk whitelist entries.
+
+                          * `ERR_UNKNOWN` — An unknown error occurred.'
+                        enum:
+                        - ACTIVE
+                        - INACTIVE
+                        - ERR_SETUP
+                        - ERR_UNSETUP
+                        - ERR_UNKNOWN
+                        example: ACTIVE
+                        type: string
+                      non_fatals:
+                        description: 'Any non-fatal errors.
+
+
+                          * `ticket_system_log_entry` — The function could not record the grant
+
+                          operation in the ticket.
+
+                          * `audit_log` — The function could not record the grant operation in the
+
+                          local audit log.
+
+
+                          **Note:**
+
+
+                          The system stores the local audit log in the
+
+                          `/var/cpanel/logs/supportauth/audit.log`
+
+                          file.'
+                        example: []
+                        items:
+                          enum:
+                          - ticket_system_log_entry
+                          - audit_log
+                          type: string
+                        type: array
+                      server_name:
+                        description: 'The server''s human-readable description from the
+
+                          [cPanel Customer Portal](https://tickets.cpanel.net/).'
+                        example: example
+                        type: string
+                      server_num:
+                        description: The server's ID number.
+                        example: 1
+                        minimum: 1
+                        type: integer
+                      ssh_username:
+                        description: The username for incoming SSH connections before they escalate the `root` user.
+                        example: username
+                        type: string
+                      ticket_id:
+                        description: The support ticket's ID number.
+                        example: 999999999
+                        minimum: 1
+                        type: integer
+                      ticket_status:
+                        description: 'The support ticket''s status.
+
+
+                          * `OPEN`
+
+                          * `CLOSED`
+
+                          * `UNKNOWN`'
+                        enum:
+                        - OPEN
+                        - CLOSED
+                        - UNKNOWN
+                        example: OPEN
+                        type: string
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: ticket_grant
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Create Support SSH key
+      tags:
+      - Support Tickets
+      x-codeSamples:
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/ticket_grant?api.version=1&ticket_id=999999999&secure_id=rofh411bv8&server_num=1
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11.44'
+      x-cpanel-cli-support: false
+  /ticket_list:
+    get:
+      description: 'This function lists all active and open support tickets from the
+
+        cPanel Customer Portal.
+
+
+        **Note:**
+
+
+        This function is **not** available through the command line. You **must** call
+
+        it as a request body.'
+      operationId: TicketSupport-ticket_list
+      parameters:
+      - description: The server's ID number.
+        in: query
+        name: server_num
+        required: true
+        schema:
+          example: 2
+          minimum: 1
+          type: integer
+      - description: The ticket's ID number.
+        in: query
+        name: ticket_id
+        required: true
+        schema:
+          example: 999999999
+          minimum: 1
+          type: integer
+      - description: The username for incoming SSH connections before they escalate to the `root` user. If you do not specify a value, the function will select the user from the ticket.
+        in: query
+        name: ssh_username
+        required: false
+        schema:
+          example: username
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      auths:
+                        description: An array of objects containing the ticket authorization information.
+                        items:
+                          properties:
+                            servers:
+                              description: An array of objects containing the server information.
+                              items:
+                                properties:
+                                  auth_status:
+                                    description: 'The installation status.
+
+
+                                      * `AUTHED`
+
+                                      * `NOT_AUTHED`
+
+                                      * `EXPIRED`'
+                                    enum:
+                                    - AUTHED
+                                    - NOT_AUTHED
+                                    - EXPIRED
+                                    example: AUTHED
+                                    type: string
+                                  auth_time:
+                                    description: 'When the grant happened, in
+
+                                      [Unix time format](http://en.wikipedia.org/wiki/Unix_time).'
+                                    example: 1400603208
+                                    format: unit_timestamp
+                                    type: integer
+                                  server_name:
+                                    description: 'The server''s human-readable description, from the
+
+                                      [cPanel Customer Portal](https://tickets.cpanel.net/).'
+                                    example: My Server
+                                    type: string
+                                  server_num:
+                                    description: The server's ID number.
+                                    example: 2
+                                    minimum: 1
+                                    type: integer
+                                  ssh:
+                                    description: The server's IP address and port number for SSH connections.
+                                    example: 10.11.12.13:22
+                                    type: string
+                                  ssh_username:
+                                    description: The username for incoming SSH connections before they escalate to the `root` user.
+                                    example: username
+                                    type: string
+                                  whm_ip:
+                                    description: The server's IP address for WHM connections.
+                                    example: 10.11.12.13
+                                    type: string
+                                type: object
+                            ticket_id:
+                              description: The ticket's ID number.
+                              example: 999999999
+                              minimum: 1
+                              type: integer
+                            ticket_status:
+                              description: 'The ticket''s status.
+
+
+                                * `OPEN`
+
+                                * `CLOSED`
+
+                                * `UNKNOWN`'
+                              enum:
+                              - OPEN
+                              - CLOSED
+                              - UNKNOWN
+                              example: OPEN
+                              type: string
+                            ticket_subject:
+                              description: The ticket's subject line.
+                              example: Example ticket
+                              type: string
+                          type: object
+                      non_fatals:
+                        description: 'Any non-fatal errors.
+
+
+                          * `ticket_system_log_entry` — The function could not record the grant
+
+                          operation in the ticket.
+
+                          * `audit_log` — The function could not record the grant operation in the
+
+                          local audit log.
+
+
+                          **Note:**
+
+
+                          The system stores the local audit log in the
+
+                          `/var/cpanel/logs/supportauth/audit.log` file.'
+                        example: []
+                        items:
+                          type: string
+                        type: array
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: ticket_list
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Return Support ticket status
+      tags:
+      - Support Tickets
+      x-codeSamples:
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/ticket_list?api.version=1&ticket_id=999999999&server_num=2
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11.44'
+      x-cpanel-cli-support: false
+  /ticket_remove_closed:
+    get:
+      description: 'This function removes cPanel Support''s SSH keys and removes closed
+
+        support tickets. You can view closed support tickets in WHM''s
+
+        *Grant cPanel Support Access*
+
+        interface (*WHM >> Home >> Support >> Grant cPanel Support Access*).
+
+
+        **Note:**
+
+
+        This function is **not** available through the command line. You **must** call
+
+        it as a request body.'
+      operationId: TicketSupport-ticket_remove_closed
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      chain_status:
+                        description: 'The status of the `iptables` whitelist entries.
+
+
+                          * `ACTIVE` — The system added the appropriate `iptables` whitelist entries,
+
+                          or they already existed.
+
+                          * `INACTIVE` — The system successfully removed the `iptables` whitelist
+
+                          entries, or they did not exist.
+
+                          * `ERR_SETUP` — The system failed to add the `iptables` whitelist entries.
+
+                          * `ERR_UNSETUP` — The system failed to remove the `iptables` whitelist entries.
+
+                          * `ERR_UNKNOWN` — An unknown error occurred.'
+                        enum:
+                        - ACTIVE
+                        - INACTIVE
+                        - ERR_SETUP
+                        - ERR_UNSETUP
+                        - ERR_UNKNOWN
+                        example: ACTIVE
+                        type: string
+                      csf_wl_status:
+                        description: 'The status of the
+
+                          [ConfigServer Security & Firewall (CSF)](https://www.configserver.com/)
+
+                          whitelist entries.
+
+
+                          * `ACTIVE` — The system added the appropriate CSF whitelist entries or they
+
+                          already existed.
+
+                          * `INACTIVE` — The CSF whitelist entries were successfully removed or they
+
+                          were already deleted.
+
+                          * `ERR_SETUP` — The system failed to add the CSF whitelist entries.
+
+                          * `ERR_UNSETUP` — The system failed to remove the CSF whitelist entries.
+
+                          * `ERR_UNKNOWN` — An unknown error occurred.
+
+
+                          **Note:**
+
+
+                          If CSF does not exist on the server, the function will **not**
+
+                          display this return.'
+                        enum:
+                        - ACTIVE
+                        - INACTIVE
+                        - ERR_SETUP
+                        - ERR_UNSETUP
+                        - ERR_UNKNOWN
+                        example: ACTIVE
+                        type: string
+                      host_access_wl_status:
+                        description: 'The status of the `/etc/hosts.allow` file''s whitelist entries.
+
+
+                          * `ACTIVE` — The system added the appropriate `/etc/hosts.allow` file whitelist
+
+                          entries or they already existed.
+
+                          * `INACTIVE` — The `/etc/hosts.allow` file whitelist entries were successfully
+
+                          removed or they were already deleted.
+
+                          * `ERR_SETUP` — The system failed to add the `/etc/hosts.allow` file whitelist
+
+                          entries.
+
+                          * `ERR_UNSETUP` — The system failed to remove the `/etc/hosts.allow` file
+
+                          whitelist entries.
+
+                          * `ERR_UNKNOWN` — An unknown error occurred.'
+                        enum:
+                        - ACTIVE
+                        - INACTIVE
+                        - ERR_SETUP
+                        - ERR_UNSETUP
+                        - ERR_UNKNOWN
+                        example: INACTIVE
+                        type: string
+                      hulk_wl_status:
+                        description: 'The status of the
+
+                          [cPHulk](https://docs.cpanel.net/whm/security-center/cphulk-brute-force-protection/)
+
+                          whitelist entries.
+
+
+                          * `ACTIVE` — The system added the appropriate cPHulk whitelist entries or they
+
+                          already existed.
+
+                          * `INACTIVE` — The cPHulk whitelist entries were successfully removed or they
+
+                          were already deleted.
+
+                          * `ERR_SETUP` — The system failed to add the cPHulk whitelist entries.
+
+                          * `ERR_UNSETUP` — The system failed to remove the cPHulk whitelist entries.
+
+                          * `ERR_UNKNOWN` — An unknown error occurred.'
+                        enum:
+                        - ACTIVE
+                        - INACTIVE
+                        - ERR_SETUP
+                        - ERR_UNSETUP
+                        - ERR_UNKNOWN
+                        example: ACTIVE
+                        type: string
+                      non_fatals:
+                        description: 'Any non-fatal errors.
+
+
+                          * `ticket_system_log_entry` — The function could not record the grant operation
+
+                          in the ticket.
+
+                          * `audit_log` — The function could not record the grant operation in the local
+
+                          audit log.
+
+
+                          **Note:**
+
+
+                          The system stores the local audit log in the
+
+                          `/var/cpanel/logs/supportauth/audit.log` file.'
+                        example: []
+                        items:
+                          enum:
+                          - ticket_system_log_entry
+                          - audit_log
+                          type: string
+                        type: array
+                      revoked_keys:
+                        description: The total number of SSH keys that the system removed.
+                        example: 9
+                        minimum: 1
+                        type: integer
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: ticket_remove_closed
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Delete Support SSH key and closed tickets
+      tags:
+      - Support Tickets
+      x-codeSamples:
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/ticket_remove_closed?api.version=1
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11.44'
+      x-cpanel-cli-support: false
+  /ticket_revoke:
+    get:
+      description: 'This function removes a
+
+        cPanel Customer Portal
+
+        SSH key from the server.
+
+
+        **Note:**
+
+
+        This function is **not** available through the command line. You **must** call it
+
+        as a request body.'
+      operationId: TicketSupport-ticket_revoke
+      parameters:
+      - description: The server's ID number.
+        in: query
+        name: server_num
+        required: true
+        schema:
+          example: 1
+          minimum: 1
+          type: integer
+      - description: The username for incoming SSH connections before they escalate to the `root` user.
+        in: query
+        name: ssh_username
+        required: true
+        schema:
+          example: username
+          type: string
+      - description: The support ticket's ID number.
+        in: query
+        name: ticket_id
+        required: true
+        schema:
+          example: 999999999
+          minimum: 1
+          type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      chain_status:
+                        description: 'The status of the
+
+                          [`iptables`](https://netfilter.org/projects/iptables/index.html)
+
+                          whitelist entries.
+
+
+                          * `ACTIVE` — The system added the appropriate whitelist entries or they
+
+                          already existed.
+
+                          * `INACTIVE` — The whitelist entries were successfully removed or were
+
+                          already deleted.
+
+                          * `ERR_SETUP` — The system failed to add the whitelist entries.
+
+                          * `ERR_UNSETUP` — The system failed to remove the whitelist entries.
+
+                          * `ERR_UNKNOWN` — An unknown error occurred.'
+                        enum:
+                        - ACTIVE
+                        - INACTIVE
+                        - ERR_SETUP
+                        - ERR_UNSETUP
+                        - ERR_UNKNOWN
+                        example: ACTIVE
+                        type: string
+                      csf_wl_status:
+                        description: 'The status of the
+
+                          [ConfigServer Security & Firewall (CSF)](https://www.configserver.com/)
+
+                          whitelist entries.
+
+
+                          * `ACTIVE` — The system added the appropriate CSF whitelist entries or they
+
+                          already existed.
+
+                          * `INACTIVE` — The CSF whitelist entries were successfully removed or they
+
+                          were already deleted.
+
+                          * `ERR_SETUP` — The system failed to add the CSF whitelist entries.
+
+                          * `ERR_UNSETUP` — The system failed to remove the CSF whitelist entries.
+
+                          * `ERR_UNKNOWN` — An unknown error occurred.
+
+
+                          **Note:**
+
+
+                          If CSF does not exist on the server, the function will **not**
+
+                          display this return.'
+                        enum:
+                        - ACTIVE
+                        - INACTIVE
+                        - ERR_SETUP
+                        - ERR_UNSETUP
+                        - ERR_UNKNOWN
+                        example: ACTIVE
+                        type: string
+                      host_access_wl_status:
+                        description: 'The status of the `/etc/hosts.allow` file''s whitelist
+
+                          entries.
+
+
+                          * `ACTIVE` — The system added the appropriate `/etc/hosts.allow` file whitelist
+
+                          entries or they already existed.
+
+                          * `INACTIVE` — The `/etc/hosts.allow` file whitelist entries were successfully
+
+                          removed or they were already deleted.
+
+                          * `ERR_SETUP` — The system failed to add the `/etc/hosts.allow` file whitelist entries.
+
+                          * `ERR_UNSETUP` — The system failed to remove the `/etc/hosts.allow` file whitelist
+
+                          entries.
+
+                          * `ERR_UNKNOWN` — An unknown error occurred.                          '
+                        enum:
+                        - ACTIVE
+                        - INACTIVE
+                        - ERR_SETUP
+                        - ERR_UNSETUP
+                        - ERR_UNKNOWN
+                        example: ACTIVE
+                        type: string
+                      hulk_wl_status:
+                        description: 'The status of the
+
+                          [cPHulk](https://docs.cpanel.net/whm/security-center/cphulk-brute-force-protection/)
+
+                          whitelist entries.
+
+
+                          * `ACTIVE` — The system added the appropriate cPHulk whitelist entries or they
+
+                          already existed.
+
+                          * `INACTIVE` — The cPHulk whitelist entries were successfully removed or they
+
+                          were already deleted.
+
+                          * `ERR_SETUP` — The system failed to add the cPHulk whitelist entries.
+
+                          * `ERR_UNSETUP` — The system failed to remove the cPHulk whitelist entries.
+
+                          * `ERR_UNKNOWN` — An unknown error occurred.'
+                        enum:
+                        - ACTIVE
+                        - INACTIVE
+                        - ERR_SETUP
+                        - ERR_UNSETUP
+                        - ERR_UNKNOWN
+                        example: ACTIVE
+                        type: string
+                      non_fatals:
+                        description: 'Any non-fatal errors.
+
+
+                          * `ticket_system_log_entry` — The function could not record the grant operation
+
+                          in the ticket.
+
+                          * `audit_log` — The function could not record the grant operation in the local
+
+                          audit log.
+
+
+                          **Note:**
+
+
+                          The system stores the local audit log in the
+
+                          `/var/cpanel/logs/supportauth/audit.log` file.'
+                        example: []
+                        items:
+                          enum:
+                          - ticket_system_log_entry
+                          - audit_log
+                          type: string
+                        type: array
+                      revoked_keys:
+                        description: The total number of revoked SSH keys.
+                        example: 1
+                        minimum: 1
+                        type: integer
+                      server_num:
+                        description: The server's ID number.
+                        example: 2
+                        minimum: 1
+                        type: integer
+                      ssh_username:
+                        description: The username for incoming SSH connections before they escalate to the `root` user.
+                        example: username
+                        type: string
+                      ticket_id:
+                        description: The revoked support ticket's ID number.
+                        example: 999999999
+                        minimum: 1
+                        type: integer
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: ticket_revoke
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Delete Support SSH key
+      tags:
+      - Support Tickets
+      x-codeSamples:
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/ticket_revoke?api.version=1&ticket_id=999999999&server_num=1&ssh_username=username
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11.44'
+      x-cpanel-cli-support: false
+  /ticket_ssh_test:
+    get:
+      description: 'This function verifies the connection from the
+
+        cPanel Customer Portal
+
+        to the server.
+
+
+        **Note:**
+
+
+        This function is **not** available through the command line. You **must** call it as
+
+        a request body.'
+      operationId: TicketSupport-ticket_ssh_test
+      parameters:
+      - description: The server's ID number.
+        in: query
+        name: server_num
+        required: true
+        schema:
+          example: 2
+          minimum: 1
+          type: integer
+      - description: The ticket's ID number.
+        in: query
+        name: ticket_id
+        required: true
+        schema:
+          example: 999999999
+          minimum: 1
+          type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      non_fatals:
+                        description: 'A list of non-fatal errors, if any exist.
+
+
+                          * `ticket_system_log_entry` — The function could not record the grant operation
+
+                          in the ticket.
+
+                          * `audit_log` — The function could not record the grant operation in the local
+
+                          audit log. The system stores the local audit log in the `/var/cpanel/logs/supportauth/audit.log`
+
+                          file.'
+                        items:
+                          enum:
+                          - ticket_system_log_entry
+                          - audit_log
+                          example: audit_log
+                          type: string
+                        type: array
+                      result:
+                        description: The SSH test's result.
+                        example: SUCCESS
+                        type: string
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: ticket_ssh_test
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Validate Customer Portal connection
+      tags:
+      - Support Tickets
+      x-codeSamples:
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/ticket_ssh_test?api.version=1&ticket_id=999999999&server_num=2
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11.44'
+      x-cpanel-cli-support: false
+  /ticket_ssh_test_start:
+    get:
+      description: 'This function initiates an SSH connection test.
+
+
+        **Important:**
+
+
+        This function is **not** available through the command line. You **must** call it
+
+        as a request body.'
+      operationId: TicketSupport-ticket_ssh_test_start
+      parameters:
+      - description: An integer that represents the ticket's actionable server. Increment the value by one for each server in the support ticket.
+        in: query
+        name: server_num
+        required: true
+        schema:
+          example: 1
+          minimum: 1
+          type: integer
+      - description: The support ticket number that other functions can use to query or make additional changes to the support ticket.
+        in: query
+        name: ticket_id
+        required: true
+        schema:
+          example: 7648492
+          type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties: {}
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: ticket_ssh_test_start
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is 0. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` - Success
+
+                          * `0` - Failed: Check the reason field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Validate Support SSH connection
+      tags:
+      - Support Tickets
+      x-codeSamples:
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/ticket_ssh_test_start?api.version=1&ticket_id=7648492&server_num=1
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '60'
+      x-cpanel-cli-support: false
+  /ticket_update_service_agreement_approval:
+    get:
+      description: 'This function records a user''s acceptance of the Technical Support
+
+        Agreement (TSA). The cPanel Customer Portal stores each record with the user''s
+
+        login, the date and time, and the TSA''s version.
+
+
+        **Note:**
+
+
+        This function is **not** available through the command line.
+
+        You **must** call it as a request body.'
+      operationId: TicketSupport-ticket_update_service_agreement_approval
+      parameters:
+      - description: The version of the TSA that the user approved.
+        in: query
+        name: version
+        required: true
+        schema:
+          example: 2020-04.v01.TSUPPORT
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: ticket_update_service_agreement_approval
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Enable Technical Support Agreement acceptance
+      tags:
+      - Support Tickets
+      x-codeSamples:
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/ticket_update_service_agreement_approval?api.version=1&version=2020-04.v01.TSUPPORT
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '60'
+      x-cpanel-cli-support: false
+  /ticket_validate_oauth2_code:
+    get:
+      description: 'This function validates the OAuth2 code from the
+
+        cPanel Customer Portal.
+
+        After the function validates the token, the system stores it on the current session.
+
+
+        **Note:**
+
+
+        This function is **not** available through the command line. You **must** call it
+
+        as a request body.'
+      operationId: TicketSupport-ticket_validate_oauth2_code
+      parameters:
+      - description: The code from the OAuth2 redirect. The system validates this code and exchanges it for a token.
+        in: query
+        name: code
+        required: true
+        schema:
+          example: 84b1a729-63e3-11e6-a0fb-bfcf357fd76d
+          type: string
+      - description: The redirect URI query argument that the system sent to the initial OAuth2 authentication endpoint.
+        in: query
+        name: redirect_uri
+        required: true
+        schema:
+          example: https://hostname.example.com:2087/
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: ticket_validate_oauth2_code
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Validate Customer Portal OAuth2 code
+      tags:
+      - Support Tickets
+      x-codeSamples:
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/ticket_validate_oauth2_code?api.version=1&code=84b1a729-63e3-11e6-a0fb-bfcf357fd76d&redirect_uri=https%3a%2f%2fhostname.example.com%3a2087%2f
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '60'
+      x-cpanel-cli-support: false
+  /ticket_whitelist_check:
+    get:
+      description: 'This function checks whether the server''s firewall whitelist correlates
+
+        with the granted support tickets. You can view granted support tickets in
+
+        WHM''s
+
+        *Grant cPanel Support Access*
+
+        interface (*WHM >> Home >> Support >> Grant cPanel Support Access*).
+
+
+        **Note:**
+
+
+        This function is **not** available through the command line. You **must** call it as
+
+        a request body.'
+      operationId: TicketSupport-ticket_whitelist_check
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      chain_status:
+                        description: 'The status of the server''s firewall whitelist.
+
+
+                          * `ACTIVE` — The whitelist is active.
+
+                          * `INACTIVE` — The whitelist is inactive.'
+                        enum:
+                        - ACTIVE
+                        - INACTIVE
+                        example: ACTIVE
+                        type: string
+                      problem:
+                        description: 'message that indicates whether a problem exists with the current status.
+
+                          * `NO` — The firewall does not require changes.
+
+                          * `NEED_SETUP` — You have granted cPanel Support access, but the system''s
+
+                          firewall whitelist does not contain support''s IP addresses.
+
+                          * `NEED_UNSETUP` — The system detected that **no** cPanel Support access
+
+                          grants exist, but the system''s firewall whitelist contains support''s IP
+
+                          addresses.'
+                        enum:
+                        - 'NO'
+                        - NEED_SETUP
+                        - NEED_UNSETUP
+                        example: 'NO'
+                        type: string
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: ticket_whitelist_check
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 1
+                        - 0
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Validate Support IP addresses on firewall
+      tags:
+      - Support Tickets
+      x-codeSamples:
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/ticket_whitelist_check?api.version=1
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11.44'
+      x-cpanel-cli-support: false
+  /ticket_whitelist_setup:
+    get:
+      description: 'This function adds cPanel Support''s IP addresses to your server''s firewall
+
+        whitelist. This function is firewall-specific and does **not** change the
+
+        cPHulk
+
+        whitelist.
+
+
+        **Note:**
+
+
+        * This function is **not** available through the command line. You **must** call it as
+
+        a request body.
+
+        * This function logs error messages to the
+
+        `/usr/local/cpanel/logs/error_log`
+
+        file.'
+      operationId: TicketSupport-ticket_whitelist_setup
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      chain_status:
+                        description: 'A message that indicates whether the whitelist setup succeeded.
+
+
+                          * `ACTIVE` — A successful setup.
+
+                          * `ERR_SETUP` — An error occurred.'
+                        enum:
+                        - ACTIVE
+                        - ERR_SETUP
+                        example: ACTIVE
+                        type: string
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: ticket_whitelist_setup
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Add Support IP addresses to firewall
+      tags:
+      - Support Tickets
+      x-codeSamples:
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/ticket_whitelist_setup?api.version=1
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11.44'
+      x-cpanel-cli-support: false
+  /ticket_whitelist_unsetup:
+    get:
+      description: 'This function removes cPanel Support''s IP addresses from your server''s firewall
+
+        whitelist. This function is firewall-specific and does **not** change the
+
+        cPHulk
+
+        whitelist.
+
+
+        **Note:**
+
+
+        * This function is **not** available through the command line. You **must** call it as
+
+        a request body.
+
+        * This function logs error messages to the
+
+        `/usr/local/cpanel/logs/error_log`
+
+        file.'
+      operationId: TicketSupport-ticket_whitelist_unsetup
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      chain_status:
+                        description: 'A message that indicates whether the whitelist removal succeeded.
+
+
+                          * `INACTIVE` — Success.
+
+                          * `ERR_UNSETUP` — An error occurred.'
+                        enum:
+                        - INACTIVE
+                        - ERR_UNSETUP
+                        example: INACTIVE
+                        type: string
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: ticket_whitelist_unsetup
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Remove Support IP addresses from firewall
+      tags:
+      - Support Tickets
+      x-codeSamples:
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/ticket_whitelist_unsetup?api.version=1
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11.44'
+      x-cpanel-cli-support: false
+components:
+  securitySchemes:
+    BasicAuth:
+      scheme: basic
+      type: http
+externalDocs:
+  url: https://cpanel.net/developers/
+x-tagGroups:
+- name: Account Restoration
+  tags:
+  - Restore Account
+  - Restore Queue Management
+  - Restore Queue Reporting
+- name: Accounts
+  tags:
+  - Account Creation
+  - Account Enhancements
+  - Account Management
+  - Bandwidth and Disk Quotas
+  - Domain Information
+  - Passwords
+  - Styles
+  - Suspensions
+- name: API Development Tools
+  tags:
+  - API Execution
+  - API Statistics
+  - API Token Management
+  - Applications
+  - Session
+- name: Authentication
+  tags:
+  - Authentication Providers
+  - External Authentication
+  - Login URL
+  - SSH Keys and Connections
+  - Two-Factor Authentication
+- name: Backups
+  tags:
+  - Backup Destination
+  - Backup or Restore
+  - Backup Settings
+  - Legacy Migration
+- name: Commerce Integration
+  tags:
+  - Market Integration
+  - Sitejet
+- name: cPanel Market
+  tags:
+  - Product Management
+  - Provider Management
+- name: cPanel Support Tickets
+  tags:
+  - Support Access
+  - Ticket Management
+- name: Customizations
+  tags:
+  - Brand
+  - Customizations
+- name: Databases
+  tags:
+  - Manage MySQL Server
+  - MySQL Databases
+  - PostgreSQL Databases
+  - Remote MySQL Databases
+- name: DNS
+  tags:
+  - DNS Cluster Settings
+  - DNS Security
+  - DNS Zones
+  - Domain Management
+  - Domain Management
+  - Resolvers
+  - Service Records
+- name: Hosting Plans
+  tags:
+  - Feature Access
+  - Feature Lists
+  - Hosting Plan Extensions
+  - Hosting Plans
+- name: InProductSurvey
+  tags:
+  - InProductSurvey
+- name: Integrations
+  tags:
+  - API Authentication
+  - Links
+  - Scripts Hooks
+- name: IP Address Management
+  tags:
+  - IPv4 Address Settings
+  - IPv6 Address Settings
+  - Network Address Translation
+- name: Login Security (cPHulk)
+  tags:
+  - Management
+  - Reporting
+  - Settings
+- name: Logs
+  tags:
+  - Web Log Retention
+- name: Mail
+  tags:
+  - cPanel Account Mail Management
+  - Mail DNS Settings
+  - Mail Server Settings
+  - Spam Management
+  - Spam Protection (Greylisting)
+- name: Monitoring
+  tags:
+  - 360 Monitoring
+- name: NGINX Manager
+  tags:
+  - NGINX Manager
+- name: Resellers
+  tags:
+  - Account Enhancement Limit
+  - Account Limits
+  - Account Permissions
+  - Account Settings
+  - Reseller Account Management
+- name: Security
+  tags:
+  - WHM Access
+- name: Server Administration
+  tags:
+  - Configuration Clusters
+  - Configurations
+  - Connected Applications
+  - Connections
+  - cPanel Analytics
+  - License Management
+  - Notifications
+  - Plugin-Based Features
+  - Security
+  - Server Nodes
+  - Server Profiles
+  - Services
+  - System Information
+  - Updates
+- name: SSL Certificates
+  tags:
+  - Auto-Generated Certificates
+  - cPanel Account Settings
+  - SSL Server Settings
+- name: System Package Management
+  tags:
+  - Install or Uninstall Package
+  - List Package Information
+  - Package Manager Settings
+- name: Transfers
+  tags:
+  - cPanel Account Transfer
+  - Transfer Configuration
+  - Transfer Monitoring
+- name: UserData
+  tags:
+  - UserData
+- name: Web Server Configuration
+  tags:
+  - EasyApache Settings
+  - PHP
+  - PHP-FPM
+- name: Web Server Security (ModSecurity)
+  tags:
+  - Rule Settings
+  - Rule Vendor Settings
+  - Server Settings

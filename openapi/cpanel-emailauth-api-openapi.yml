@@ -1,0 +1,2240 @@
+openapi: 3.2.0
+info:
+  contact:
+    email: cs@cpanel.net
+    name: WebPros International, LLC
+    url: https://cpanel.net/support/
+  description: UAPI accesses the cPanel interface's features. Use this API to access and modify cPanel account data and settings.
+  license:
+    name: cPanel License
+    url: https://cpanel.net/legal-notices/
+  termsOfService: https://cpanel.net/legal-notices/
+  title: cPanel U Email Auth API
+  version: 11.137.9999.106
+  x-api-evangelist-provenance: 'Harvested verbatim from cPanel''s developer portal on 2026-09-05 via the MCP tool get-full-api-description at https://api.docs.cpanel.net/mcp. ONE mechanical change was made before storage: example values containing PEM private-key or certificate blocks, and AWS-access-key-shaped example strings, were replaced with REDACTED_* placeholders so the file can be stored in a public git repository without tripping secret scanning. No path, operation, parameter, schema or description was altered, added or removed.'
+servers:
+- description: A server running cPanel.
+  url: https://{host}:{port}/execute
+  variables:
+    host:
+      default: cpanel-server.tld
+      description: The hostname of a server running cPanel.
+    port:
+      default: '2083'
+      description: The cPanel port.
+security:
+- BasicAuth: []
+tags:
+- description: The EmailAuth module for UAPI.
+  name: EmailAuth
+paths:
+  /EmailAuth/apply_dmarc:
+    get:
+      x-readonly: false
+      x-rollback: none
+      description: This function applies a DMARC record to the specified domain(s)
+      operationId: EmailAuth-apply_dmarc
+      parameters:
+      - description: 'The DMARC record to apply to the requested domains.
+
+
+          **Note:**
+
+
+          Visit the following link for more information about the DMARC record specification: https://dmarc.org/resources/specification/'
+        example: v=DMARC1;p=reject;pct=100;rua=mailto:postmaster@example.com
+        in: query
+        name: policy
+        required: true
+        schema:
+          type: string
+      - description: 'The domain for which to apply the DMARC record.
+
+
+          **Note:**
+
+
+          To enable multiple domain DMARC records, duplicate or increment the parameter. For example, to enable DMARC records for three domains, perform either of the following actions:
+
+
+          * Use the `domain` parameter three times.
+
+          * Use the `domain`, `domain-1`, and `domain-2` parameters.
+
+
+          If you do not include this argument, the system applies the DMARC record to all the user''s domains.
+
+
+          You cannot use this function to edit temporary domains'' DMARC records.'
+        examples:
+          multiple:
+            summary: Enable multiple domains' DMARC records.
+            value: domain-1=example1.com domain-2=example2.com domain-3=example3.com
+          multiple-alternative:
+            summary: Enable multiple domains' DMARC records.
+            value: domain=example1.com domain=example2.com domain=example3.com
+          single:
+            summary: Enable a single domain's DMARC records.
+            value: example.com
+        in: query
+        name: domain
+        required: false
+        schema:
+          format: domain
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  apiversion:
+                    description: The version of the API.
+                    example: 3
+                    type: integer
+                  func:
+                    description: The name of the method called.
+                    example: apply_dmarc
+                    type: string
+                  module:
+                    description: The name of the module called.
+                    example: EmailAuth
+                    type: string
+                  result:
+                    properties:
+                      data:
+                        description: An array that contains information about the DMARC records applied to domains.
+                        items:
+                          properties:
+                            domain:
+                              description: The domain for which the DMARC record was applied.
+                              example: example.com
+                              format: domain
+                              type: string
+                            msg:
+                              description: The domain's DMARC record status message.
+                              example: '[ADD:TXT@_dmarc.example.com:v=DMARC1; p=reject;]'
+                              type: string
+                            status:
+                              description: 'Whether the system applied a DMARC record to the domain.
+
+                                * `1` - Applied.
+
+                                * `0` - The system did **not** apply a DMARC record.'
+                              enum:
+                              - 0
+                              - 1
+                              example: 1
+                              type: integer
+                          type: object
+                        type: array
+                      errors:
+                        description: List of errors if the API failed.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      messages:
+                        description: List of messages generated by the API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      metadata:
+                        properties: {}
+                      status:
+                        description: '* `1` - Success.
+
+                          * `0` - Failed. Check the `errors` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      warnings:
+                        description: List of warnings generated by the API. Warnings describe non-critical failures or other problematic conditions noted while running an API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                    type: object
+                type: object
+          description: HTTP Request was successful.
+      summary: Apply DMARC records to domains
+      tags:
+      - EmailAuth
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "uapi --output=jsonpretty \\\n  --user=username \\\n  EmailAuth \\\n  apply_dmarc \\\n  domain='example.com' \\\n  policy='v=DMARC1; p=reject;'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2083/cpsess##########/execute/EmailAuth/apply_dmarc?domain=example.com&policy='v=DMARC1; p=reject;'
+      - label: LiveAPI Perl
+        lang: Perl
+        source: "#--------------------------------------------------------------------------------------\n# Instructions:\n#--------------------------------------------------------------------------------------\n# <theme-name> is the theme assigned to cPanel account.\n# 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n# 2) mkdir api_examples\n# 3) cd api_examples\n# 4) create a file EmailAuth_apply_dmarc.live.pl and put this code into that file.\n# 5) In your browser log in to a cPanel account.\n# 6) Manually change the url from: .../frontend/<theme-name>/\n#    to .../frontend/<theme-name>/api_examples/EmailAuth_apply_dmarc.live.pl\n#--------------------------------------------------------------------------------------\n\nuse strict;\n\nuse Cpanel::LiveAPI ();\n\nmy $cpanel = Cpanel::LiveAPI->new(); # Connect to cPanel - only do this once.\n\n# Print the header\nprint \"Content-type: text/plain\\r\\n\\r\\n\";\n\n# Call the API\nmy $response = $cpanel->uapi(\n    q/EmailAuth/,\n    q/apply_dmarc/,\n    {\n        'domain' => 'example.com',\n        'policy' => 'v=DMARC1; p=reject;'\n    }\n);\n\n# Handle the response\nif ($response->{cpanelresult}{result}{status}) {\n    my $data = $response->{cpanelresult}{result}{data};\n    foreach my $item (@{$data}) {\n        # Do something with the $item\n    }\n\n    # So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    # Report errors:\n    print to_json($response->{cpanelresult}{result}{errors});\n}\n\n# Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n#--------------------------------------------------------------------------------------\n# Helper function to convert a perl object to html-printable json\n#--------------------------------------------------------------------------------------\nsub to_json {\n    require JSON;\n    my $str = JSON->new->pretty->encode($_[0]);\n    return $str;\n}\n"
+      - label: LiveAPI PHP
+        lang: PHP
+        source: "<?php\n//--------------------------------------------------------------------------------------\n// Instructions:\n//--------------------------------------------------------------------------------------\n// <theme-name> is the theme assigned to cPanel account.\n// 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n// 2) mkdir api_examples\n// 3) cd api_examples\n// 4) create a file EmailAuth_apply_dmarc.live.php and put this code into that file.\n// 5) In your browser log in to a cPanel account.\n// 6) Manually change the url from: .../frontend/<theme-name>/\n//    to .../frontend/<theme-name>/api_examples/EmailAuth_apply_dmarc.live.php\n//--------------------------------------------------------------------------------------\n\n// Instantiate the CPANEL object.\nrequire_once \"/usr/local/cpanel/php/cpanel.php\";\n\n// Print the header\nheader('Content-Type: text/plain');\n\n// Connect to cPanel - only do this once.\n$cpanel = new CPANEL();\n\n// Call the API\n$response = $cpanel->uapi(\n    'EmailAuth',\n    'apply_dmarc',\n    array (\n        'domain' => 'example.com',\n        'policy' => 'v=DMARC1; p=reject;'\n    )\n);\n\n// Handle the response\nif ($response['cpanelresult']['result']['status']) {\n    $data = $response['cpanelresult']['result']['data'];\n    foreach ($data as $item) {\n        // Do something with the $item\n    }\n\n    // So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    // Report errors:\n    print to_json($response['cpanelresult']['result']['errors']);\n}\n\n// Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n//--------------------------------------------------------------------------------------\n// Helper function to convert a PHP value to html printable json\n//--------------------------------------------------------------------------------------\nfunction to_json($data) {\n    return json_encode($data, JSON_PRETTY_PRINT);\n}"
+      x-cpanel-api-version: UAPI
+      x-cpanel-available-version: '124'
+  /EmailAuth/disable_dkim:
+    get:
+      x-readonly: false
+      x-rollback: none
+      description: This function removes the DomainKeys Identified Mail (DKIM) records on the DNS server for one or more domains.
+      operationId: EmailAuth-disable_dkim
+      parameters:
+      - description: 'The domain for which to remove DKIM records on the DNS server.
+
+
+          **Note:**
+
+
+          To remove multiple domain DKIM records, duplicate the parameter name. For example, use the `domain=example.com`, `domain=example2.com`, and `domain=example3.com` parameters.'
+        examples:
+          multiple:
+            summary: Multiple domains.
+            value: domain=example.com&domain=example2.com&domain=example.com
+          single:
+            summary: A single domain.
+            value: example.com
+        in: query
+        name: domain
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  apiversion:
+                    description: The version of the API.
+                    example: 3
+                    type: integer
+                  func:
+                    description: The name of the method called.
+                    example: disable_dkim
+                    type: string
+                  module:
+                    description: The name of the module called.
+                    example: EmailAuth
+                    type: string
+                  result:
+                    properties:
+                      data:
+                        description: An array of objects that contain information about the removal of a domain's DKIM record on the DNS server.
+                        items:
+                          properties:
+                            domain:
+                              description: The domain for which the system removed the DKIM record.
+                              example: example.com
+                              format: domain
+                              type: string
+                            msg:
+                              description: Information about the removed DKIM record.
+                              example: '[REMOVE:TXT@default._domainkey:v=DKIM1; k=rsa; p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiLMNOpQDw5nw4NP1RsWXlfmiMzByDfOT16QCZO/xJtrPZKskZF8/sU0zWGTqKUOErlyJfoJzMDUv3/zzjGswc2nEmYqxxoQZaBkN4QaS6MvJQxysAr+sK8C248/r9zMperQdhJedUVejtpFQHJwgqpHy1tQMxY37L7sQjdxmQ5WnQ1acXiwIDAQAB\;]'
+                              type: string
+                            status:
+                              description: 'Whether the system removed the domain''s DKIM record on the DNS server.
+
+                                * `1` - The system removed the domain''s DKIM record.
+
+                                * `0` - The system did **not** remove the domain''s DKIM record.'
+                              enum:
+                              - 0
+                              - 1
+                              example: 1
+                              type: integer
+                          type: object
+                        type: array
+                      errors:
+                        description: List of errors if the API failed.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      messages:
+                        description: List of messages generated by the API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      metadata:
+                        properties: {}
+                      status:
+                        description: '* `1` - Success.
+
+                          * `0` - Failed. Check the `errors` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      warnings:
+                        description: List of warnings generated by the API. Warnings describe non-critical failures or other problematic conditions noted while running a API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                    type: object
+                type: object
+          description: HTTP Request was successful.
+      summary: Remove domains' DKIM records
+      tags:
+      - EmailAuth
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "uapi --output=jsonpretty \\\n  --user=username \\\n  EmailAuth \\\n  disable_dkim \\\n  domain='example.com'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2083/cpsess##########/execute/EmailAuth/disable_dkim?domain=example.com
+      - label: LiveAPI Perl
+        lang: Perl
+        source: "#--------------------------------------------------------------------------------------\n# Instructions:\n#--------------------------------------------------------------------------------------\n# <theme-name> is the theme assigned to cPanel account.\n# 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n# 2) mkdir api_examples\n# 3) cd api_examples\n# 4) create a file EmailAuth_disable_dkim.live.pl and put this code into that file.\n# 5) In your browser login to a cPanel account.\n# 6) Manually change the url from: .../frontend/<theme-name>/\n#    to .../frontend/<theme-name>/api_examples/EmailAuth_disable_dkim.live.pl\n#--------------------------------------------------------------------------------------\n\nuse strict;\n\nuse Cpanel::LiveAPI ();\n\nmy $cpanel = Cpanel::LiveAPI->new(); # Connect to cPanel - only do this once.\n\n# Print the header\nprint \"Content-type: text/plain\\r\\n\\r\\n\";\n\n# Call the API\nmy $response = $cpanel->uapi(\n    q/EmailAuth/,\n    q/disable_dkim/,\n    {\n        'domain' => 'example.com',\n    }\n);\n\n# Handle the response\nif ($response->{cpanelresult}{result}{status}) {\n    my $data = $response->{cpanelresult}{result}{data};\n    foreach my $item (@{$data}) {\n        # Do something with the $item\n    }\n\n    # So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    # Report errors:\n    print to_json($response->{cpanelresult}{result}{errors});\n}\n\n# Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n#--------------------------------------------------------------------------------------\n# Helper function to convert a perl object to html printable json\n#--------------------------------------------------------------------------------------\nsub to_json {\n    require JSON;\n    my $str = JSON->new->pretty->encode($_[0]);\n    return $str;\n}\n"
+      - label: LiveAPI PHP
+        lang: PHP
+        source: "<?php\n//--------------------------------------------------------------------------------------\n// Instructions:\n//--------------------------------------------------------------------------------------\n// <theme-name> is the theme assigned to cPanel account.\n// 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n// 2) mkdir api_examples\n// 3) cd api_examples\n// 4) create a file EmailAuth_disable_dkim.live.php and put this code into that file.\n// 5) In your browser login to a cPanel account.\n// 6) Manually change the url from: .../frontend/<theme-name>/\n//    to .../frontend/<theme-name>/api_examples/EmailAuth_disable_dkim.live.php\n//--------------------------------------------------------------------------------------\n\n// Instantiate the CPANEL object.\nrequire_once \"/usr/local/cpanel/php/cpanel.php\";\n\n// Print the header\nheader('Content-Type: text/plain');\n\n// Connect to cPanel - only do this once.\n$cpanel = new CPANEL();\n\n// Call the API\n$response = $cpanel->uapi(\n    'EmailAuth',\n    'disable_dkim',\n    array (\n        'domain' => 'example.com',\n    )\n);\n\n// Handle the response\nif ($response['cpanelresult']['result']['status']) {\n    $data = $response['cpanelresult']['result']['data'];\n    foreach ($data as $item) {\n        // Do something with the $item\n    }\n\n    // So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    // Report errors:\n    print to_json($response['cpanelresult']['result']['errors']);\n}\n\n// Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n//--------------------------------------------------------------------------------------\n// Helper function to convert a PHP value to html printable json\n//--------------------------------------------------------------------------------------\nfunction to_json($data) {\n    return json_encode($data, JSON_PRETTY_PRINT);\n}"
+      x-cpanel-api-version: UAPI
+      x-cpanel-available-version: cPanel 78
+  /EmailAuth/enable_dkim:
+    get:
+      x-readonly: false
+      x-rollback: none
+      description: 'This function enables DomainKeys Identified Mail (DKIM) records on the DNS server for one or more domains.
+
+
+        **Note:**
+
+
+        If a DKIM record does **not** exist on the server, this function will install a new DKIM record.'
+      operationId: EmailAuth-enable_dkim
+      parameters:
+      - description: 'The domain for which to enable DKIM records on the DNS server.
+
+
+          **Note:**
+
+
+          To enable multiple domain DKIM records, duplicate or increment the parameter. For example, to perform this for three domains, you could:
+
+
+          * Use the `domain` parameter multiple times.
+
+          * Use the `domain`, `domain-1`, and `domain-2` parameters.'
+        examples:
+          multiple:
+            summary: Enable multiple domains' DKIM records.
+            value: domain-1=example1.com domain-2=example2.com domain-3=example3.com
+          multiple-alternative:
+            summary: Enable multiple domains' DKIM records.
+            value: domain=example1.com domain=example2.com domain=example3.com
+          single:
+            summary: Enable a single domain's DKIM records.
+            value: example.com
+        in: query
+        name: domain
+        required: true
+        schema:
+          format: domain
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  apiversion:
+                    description: The version of the API.
+                    example: 3
+                    type: integer
+                  func:
+                    description: The name of the method called.
+                    example: enable_dkim
+                    type: string
+                  module:
+                    description: The name of the module called.
+                    example: EmailAuth
+                    type: string
+                  result:
+                    properties:
+                      data:
+                        description: An array that contains information about the enabled state of a domain's DKIM records on the DNS server.
+                        items:
+                          properties:
+                            domain:
+                              description: The domain for which the system enabled the DKIM record.
+                              example: example.com
+                              format: domain
+                              type: string
+                            msg:
+                              description: The domain's DKIM record status message.
+                              example: '[no changes needed]'
+                              type: string
+                            status:
+                              description: 'Whether the system enabled the domain''s DKIM record on the DNS server.
+
+                                * `1` - Enabled.
+
+                                * `0` - The system did **not** enable the domain''s DKIM record.'
+                              enum:
+                              - 0
+                              - 1
+                              example: 1
+                              type: integer
+                          type: object
+                        type: array
+                      errors:
+                        description: List of errors if the API failed.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      messages:
+                        description: List of messages generated by the API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      metadata:
+                        properties: {}
+                      status:
+                        description: '* `1` - Success.
+
+                          * `0` - Failed. Check the `errors` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      warnings:
+                        description: List of warnings generated by the API. Warnings describe non-critical failures or other problematic conditions noted while running a API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                    type: object
+                type: object
+          description: HTTP Request was successful.
+      summary: Enable domains' DKIM records
+      tags:
+      - EmailAuth
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "uapi --output=jsonpretty \\\n  --user=username \\\n  EmailAuth \\\n  enable_dkim \\\n  domain='example.com'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2083/cpsess##########/execute/EmailAuth/enable_dkim?domain=example.com
+      - label: LiveAPI Perl
+        lang: Perl
+        source: "#--------------------------------------------------------------------------------------\n# Instructions:\n#--------------------------------------------------------------------------------------\n# <theme-name> is the theme assigned to cPanel account.\n# 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n# 2) mkdir api_examples\n# 3) cd api_examples\n# 4) create a file EmailAuth_enable_dkim.live.pl and put this code into that file.\n# 5) In your browser login to a cPanel account.\n# 6) Manually change the url from: .../frontend/<theme-name>/\n#    to .../frontend/<theme-name>/api_examples/EmailAuth_enable_dkim.live.pl\n#--------------------------------------------------------------------------------------\n\nuse strict;\n\nuse Cpanel::LiveAPI ();\n\nmy $cpanel = Cpanel::LiveAPI->new(); # Connect to cPanel - only do this once.\n\n# Print the header\nprint \"Content-type: text/plain\\r\\n\\r\\n\";\n\n# Call the API\nmy $response = $cpanel->uapi(\n    q/EmailAuth/,\n    q/enable_dkim/,\n    {\n        'domain' => 'example.com',\n    }\n);\n\n# Handle the response\nif ($response->{cpanelresult}{result}{status}) {\n    my $data = $response->{cpanelresult}{result}{data};\n    foreach my $item (@{$data}) {\n        # Do something with the $item\n    }\n\n    # So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    # Report errors:\n    print to_json($response->{cpanelresult}{result}{errors});\n}\n\n# Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n#--------------------------------------------------------------------------------------\n# Helper function to convert a perl object to html printable json\n#--------------------------------------------------------------------------------------\nsub to_json {\n    require JSON;\n    my $str = JSON->new->pretty->encode($_[0]);\n    return $str;\n}\n"
+      - label: LiveAPI PHP
+        lang: PHP
+        source: "<?php\n//--------------------------------------------------------------------------------------\n// Instructions:\n//--------------------------------------------------------------------------------------\n// <theme-name> is the theme assigned to cPanel account.\n// 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n// 2) mkdir api_examples\n// 3) cd api_examples\n// 4) create a file EmailAuth_enable_dkim.live.php and put this code into that file.\n// 5) In your browser login to a cPanel account.\n// 6) Manually change the url from: .../frontend/<theme-name>/\n//    to .../frontend/<theme-name>/api_examples/EmailAuth_enable_dkim.live.php\n//--------------------------------------------------------------------------------------\n\n// Instantiate the CPANEL object.\nrequire_once \"/usr/local/cpanel/php/cpanel.php\";\n\n// Print the header\nheader('Content-Type: text/plain');\n\n// Connect to cPanel - only do this once.\n$cpanel = new CPANEL();\n\n// Call the API\n$response = $cpanel->uapi(\n    'EmailAuth',\n    'enable_dkim',\n    array (\n        'domain' => 'example.com',\n    )\n);\n\n// Handle the response\nif ($response['cpanelresult']['result']['status']) {\n    $data = $response['cpanelresult']['result']['data'];\n    foreach ($data as $item) {\n        // Do something with the $item\n    }\n\n    // So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    // Report errors:\n    print to_json($response['cpanelresult']['result']['errors']);\n}\n\n// Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n//--------------------------------------------------------------------------------------\n// Helper function to convert a PHP value to html printable json\n//--------------------------------------------------------------------------------------\nfunction to_json($data) {\n    return json_encode($data, JSON_PRETTY_PRINT);\n}"
+      x-cpanel-api-version: UAPI
+      x-cpanel-available-version: cPanel 78
+  /EmailAuth/ensure_dkim_keys_exist:
+    get:
+      x-readonly: false
+      x-rollback: none
+      description: 'This function confirms the validity of a DomainKeys Identified Mail (DKIM) key for one or more domains.
+
+
+        **Notes:**
+
+
+        * If an existing DKIM key does **not** meet the server''s security requirements, the system replaces the existing DKIM key.
+
+        * If no DKIM key exists, the system creates a new key for the domain.'
+      operationId: EmailAuth-ensure_dkim_keys_exist
+      parameters:
+      - description: "The domain for which to confirm a valid DKIM key exists.\n\n**Note:**\n\n To check the DKIM key validity for multiple domains, duplicate the parameter name. For example, use the `domain=example.com`, `domain=example2.com`, and `domain=example3.com` parameters."
+        examples:
+          multiple:
+            summary: Multiple domains.
+            value: domain=example.com&domain=example2.com&domain=example3.com
+          single:
+            summary: A single domain.
+            value: example.com
+        in: query
+        name: domain
+        required: true
+        schema:
+          format: domain
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  apiversion:
+                    description: The version of the API.
+                    example: 3
+                    type: integer
+                  func:
+                    description: The name of the method called.
+                    example: ensure_dkim_keys_exist
+                    type: string
+                  module:
+                    description: The name of the module called.
+                    example: EmailAuth
+                    type: string
+                  result:
+                    properties:
+                      data:
+                        description: An array of objects that contains information about the domain's DKIM key validity.
+                        items:
+                          properties:
+                            domain:
+                              description: The domain for which the system confirmed that a valid DKIM key exists.
+                              example: example.com
+                              format: domain
+                              type: string
+                            msg:
+                              description: The domain's DKIM key status message.
+                              example: created new key
+                              type: string
+                            status:
+                              description: 'Whether the system verified that the domain''s DKIM key exists.
+
+                                * `1` - The system verified the existence of the domain''s DKIM key.
+
+                                * `0` - The system did **not** verify the existence of the domain''s DKIM key.'
+                              enum:
+                              - 0
+                              - 1
+                              example: 1
+                              type: integer
+                          type: object
+                        type: array
+                      errors:
+                        description: List of errors if the API failed.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      messages:
+                        description: List of messages generated by the API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      metadata:
+                        properties: {}
+                      status:
+                        description: '* `1` - Success.
+
+                          * `0` - Failed. Check the `errors` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      warnings:
+                        description: List of warnings generated by the API. Warnings describe non-critical failures or other problematic conditions noted while running a API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                    type: object
+                type: object
+          description: HTTP Request was successful.
+      summary: Validate domains' DKIM private keys
+      tags:
+      - EmailAuth
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "uapi --output=jsonpretty \\\n  --user=username \\\n  EmailAuth \\\n  ensure_dkim_keys_exist \\\n  domain='example.com'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2083/cpsess##########/execute/EmailAuth/ensure_dkim_keys_exist?domain=example.com
+      - label: LiveAPI Perl
+        lang: Perl
+        source: "#--------------------------------------------------------------------------------------\n# Instructions:\n#--------------------------------------------------------------------------------------\n# <theme-name> is the theme assigned to cPanel account.\n# 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n# 2) mkdir api_examples\n# 3) cd api_examples\n# 4) create a file EmailAuth_ensure_dkim_keys_exist.live.pl and put this code into that file.\n# 5) In your browser login to a cPanel account.\n# 6) Manually change the url from: .../frontend/<theme-name>/\n#    to .../frontend/<theme-name>/api_examples/EmailAuth_ensure_dkim_keys_exist.live.pl\n#--------------------------------------------------------------------------------------\n\nuse strict;\n\nuse Cpanel::LiveAPI ();\n\nmy $cpanel = Cpanel::LiveAPI->new(); # Connect to cPanel - only do this once.\n\n# Print the header\nprint \"Content-type: text/plain\\r\\n\\r\\n\";\n\n# Call the API\nmy $response = $cpanel->uapi(\n    q/EmailAuth/,\n    q/ensure_dkim_keys_exist/,\n    {\n        'domain' => 'example.com',\n    }\n);\n\n# Handle the response\nif ($response->{cpanelresult}{result}{status}) {\n    my $data = $response->{cpanelresult}{result}{data};\n    foreach my $item (@{$data}) {\n        # Do something with the $item\n    }\n\n    # So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    # Report errors:\n    print to_json($response->{cpanelresult}{result}{errors});\n}\n\n# Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n#--------------------------------------------------------------------------------------\n# Helper function to convert a perl object to html printable json\n#--------------------------------------------------------------------------------------\nsub to_json {\n    require JSON;\n    my $str = JSON->new->pretty->encode($_[0]);\n    return $str;\n}\n"
+      - label: LiveAPI PHP
+        lang: PHP
+        source: "<?php\n//--------------------------------------------------------------------------------------\n// Instructions:\n//--------------------------------------------------------------------------------------\n// <theme-name> is the theme assigned to cPanel account.\n// 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n// 2) mkdir api_examples\n// 3) cd api_examples\n// 4) create a file EmailAuth_ensure_dkim_keys_exist.live.php and put this code into that file.\n// 5) In your browser login to a cPanel account.\n// 6) Manually change the url from: .../frontend/<theme-name>/\n//    to .../frontend/<theme-name>/api_examples/EmailAuth_ensure_dkim_keys_exist.live.php\n//--------------------------------------------------------------------------------------\n\n// Instantiate the CPANEL object.\nrequire_once \"/usr/local/cpanel/php/cpanel.php\";\n\n// Print the header\nheader('Content-Type: text/plain');\n\n// Connect to cPanel - only do this once.\n$cpanel = new CPANEL();\n\n// Call the API\n$response = $cpanel->uapi(\n    'EmailAuth',\n    'ensure_dkim_keys_exist',\n    array (\n        'domain' => 'example.com',\n    )\n);\n\n// Handle the response\nif ($response['cpanelresult']['result']['status']) {\n    $data = $response['cpanelresult']['result']['data'];\n    foreach ($data as $item) {\n        // Do something with the $item\n    }\n\n    // So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    // Report errors:\n    print to_json($response['cpanelresult']['result']['errors']);\n}\n\n// Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n//--------------------------------------------------------------------------------------\n// Helper function to convert a PHP value to html printable json\n//--------------------------------------------------------------------------------------\nfunction to_json($data) {\n    return json_encode($data, JSON_PRETTY_PRINT);\n}"
+      x-cpanel-api-version: UAPI
+      x-cpanel-available-version: cPanel 78
+  /EmailAuth/fetch_dkim_private_keys:
+    get:
+      x-readonly: false
+      x-rollback: none
+      description: 'This function returns a domain''s installed DKIM private key in Privacy-Enhanced Mail (PEM) format.
+
+
+        **Warning:**
+
+
+        We **strongly** recommend that you protect your private key. If others obtain your private DKIM key, they could sign emails and impersonate you as a sender.'
+      operationId: EmailAuth-fetch_dkim_private_keys
+      parameters:
+      - description: 'The domain for which to retrieve the installed DKIM private key.
+
+
+          **Note:**
+
+
+          To retrieve multiple domain DKIM keys, duplicate the parameter name. For example, use the `domain=example.com`, `domain=example2.com`, and `domain=example3.com` parameters.'
+        examples:
+          multiple:
+            summary: Multiple domains.
+            value: domain=example.com&domain=example2.com&domain=example3.com
+          single:
+            summary: A single domain.
+            value: example.com
+        in: query
+        name: domain
+        required: true
+        schema:
+          format: domain
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  apiversion:
+                    description: The version of the API.
+                    example: 3
+                    type: integer
+                  func:
+                    description: The name of the method called.
+                    example: fetch_dkim_private_keys
+                    type: string
+                  module:
+                    description: The name of the module called.
+                    example: EmailAuth
+                    type: string
+                  result:
+                    properties:
+                      data:
+                        description: An array of objects that contains information about the domain's DKIM private key.
+                        items:
+                          properties:
+                            domain:
+                              description: The queried domain.
+                              example: example.com
+                              format: domain
+                              type: string
+                            pem:
+                              description: The domain's DKIM private key, in PEM format.
+                              example: REDACTED_PRIVATE_KEY_EXAMPLE
+                              format: pem-private-key
+                              type: string
+                          type: object
+                        type: array
+                      errors:
+                        description: List of errors if the API failed.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      messages:
+                        description: List of messages generated by the API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      metadata:
+                        properties: {}
+                      status:
+                        description: '* `1` - Success.
+
+                          * `0` - Failed. Check the `errors` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      warnings:
+                        description: List of warnings generated by the API. Warnings describe non-critical failures or other problematic conditions noted while running a API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                    type: object
+                type: object
+          description: HTTP Request was successful.
+      summary: Return domains' DKIM private keys
+      tags:
+      - EmailAuth
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "uapi --output=jsonpretty \\\n  --user=username \\\n  EmailAuth \\\n  fetch_dkim_private_keys \\\n  domain='example.com'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2083/cpsess##########/execute/EmailAuth/fetch_dkim_private_keys?domain=example.com
+      - label: LiveAPI Perl
+        lang: Perl
+        source: "#--------------------------------------------------------------------------------------\n# Instructions:\n#--------------------------------------------------------------------------------------\n# <theme-name> is the theme assigned to cPanel account.\n# 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n# 2) mkdir api_examples\n# 3) cd api_examples\n# 4) create a file EmailAuth_fetch_dkim_private_keys.live.pl and put this code into that file.\n# 5) In your browser login to a cPanel account.\n# 6) Manually change the url from: .../frontend/<theme-name>/\n#    to .../frontend/<theme-name>/api_examples/EmailAuth_fetch_dkim_private_keys.live.pl\n#--------------------------------------------------------------------------------------\n\nuse strict;\n\nuse Cpanel::LiveAPI ();\n\nmy $cpanel = Cpanel::LiveAPI->new(); # Connect to cPanel - only do this once.\n\n# Print the header\nprint \"Content-type: text/plain\\r\\n\\r\\n\";\n\n# Call the API\nmy $response = $cpanel->uapi(\n    q/EmailAuth/,\n    q/fetch_dkim_private_keys/,\n    {\n        'domain' => 'example.com',\n    }\n);\n\n# Handle the response\nif ($response->{cpanelresult}{result}{status}) {\n    my $data = $response->{cpanelresult}{result}{data};\n    foreach my $item (@{$data}) {\n        # Do something with the $item\n    }\n\n    # So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    # Report errors:\n    print to_json($response->{cpanelresult}{result}{errors});\n}\n\n# Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n#--------------------------------------------------------------------------------------\n# Helper function to convert a perl object to html printable json\n#--------------------------------------------------------------------------------------\nsub to_json {\n    require JSON;\n    my $str = JSON->new->pretty->encode($_[0]);\n    return $str;\n}\n"
+      - label: LiveAPI PHP
+        lang: PHP
+        source: "<?php\n//--------------------------------------------------------------------------------------\n// Instructions:\n//--------------------------------------------------------------------------------------\n// <theme-name> is the theme assigned to cPanel account.\n// 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n// 2) mkdir api_examples\n// 3) cd api_examples\n// 4) create a file EmailAuth_fetch_dkim_private_keys.live.php and put this code into that file.\n// 5) In your browser login to a cPanel account.\n// 6) Manually change the url from: .../frontend/<theme-name>/\n//    to .../frontend/<theme-name>/api_examples/EmailAuth_fetch_dkim_private_keys.live.php\n//--------------------------------------------------------------------------------------\n\n// Instantiate the CPANEL object.\nrequire_once \"/usr/local/cpanel/php/cpanel.php\";\n\n// Print the header\nheader('Content-Type: text/plain');\n\n// Connect to cPanel - only do this once.\n$cpanel = new CPANEL();\n\n// Call the API\n$response = $cpanel->uapi(\n    'EmailAuth',\n    'fetch_dkim_private_keys',\n    array (\n        'domain' => 'example.com',\n    )\n);\n\n// Handle the response\nif ($response['cpanelresult']['result']['status']) {\n    $data = $response['cpanelresult']['result']['data'];\n    foreach ($data as $item) {\n        // Do something with the $item\n    }\n\n    // So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    // Report errors:\n    print to_json($response['cpanelresult']['result']['errors']);\n}\n\n// Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n//--------------------------------------------------------------------------------------\n// Helper function to convert a PHP value to html printable json\n//--------------------------------------------------------------------------------------\nfunction to_json($data) {\n    return json_encode($data, JSON_PRETTY_PRINT);\n}"
+      x-cpanel-api-version: UAPI
+      x-cpanel-available-version: cPanel 78
+  /EmailAuth/install_dkim_private_keys:
+    get:
+      x-readonly: false
+      x-rollback: none
+      description: 'This function installs existing keys for use in a DomainKeys Identified Mail (DKIM) record. This is useful if you do not want the system to generate keys for DKIM records.
+
+
+        **Note:**
+
+
+        * This function does **not** update the local DNS server''s records.
+
+        * If the local DNS server is authoritative for the domain''s DNS records, use the UAPI `EmailAuth::enable_dkim` function to update the local DNS server''s DNS records.
+
+        * We recommend that you use the UAPI `EmailAuth::install_dkim_private_keys` and `EmailAuth::enable_dkim functions` in a batch UAPI call.'
+      operationId: EmailAuth-install_dkim_private_keys
+      parameters:
+      - description: 'The domain for which to install a DKIM private key on the local server.
+
+
+          **Note:**
+
+
+          To install multiple RSA private keys for multiple domains, duplicate the parameter name. For example, use the `domain=example.com`, `domain=example2.com`, and `domain=example3.com` parameters.'
+        examples:
+          multiple:
+            summary: Multiple domains.
+            value: domain=example&domain=example2.com&domain=example3.com
+          single:
+            summary: A single domain.
+            value: example
+        in: query
+        name: domain
+        required: true
+        schema:
+          format: domain
+          type: string
+      - description: 'An RSA key in [Privacy-Enhanced Mail (PEM)](https://en.wikipedia.org/wiki/Privacy-Enhanced_Mail) format.
+
+
+          **Note:**
+
+
+          You **must** provide this parameter for each `domain` parameter.'
+        in: query
+        name: key
+        required: true
+        schema:
+          example: '-----BEGIN%20RSA%20PRIVATE%20KEY-----%0aAAAAB3NzaC1yc2EAAAABIwAAAQEA5kSivOqhs0U9ZMN20nxFe27QZ3t0lT2zbH7OSXylKd%0a1rjAjYXGnSXC9j2uaZlemHlptBKVziMJC86ha7Hcj6dVOVrDQ6vF4q34bOCjtKLphQ0IjB%0azVIvqILH9eLJdRaOrS34CmgmPaisrCk5wKVlakygvUfcj3HzaTKS6THyZDGx5shdTpa9lb%0ay8tpOD3JceV7ay4w8r0DipoKPC0OLpvS4EABEeMo9sx8zQEaKv03XygjNCCYtFvxlQQIRG%0alVoL7mPaHSaL3anI05RpNbm/PS+9BhZg+BqNjU4ofHBbfkXk5MiN6M7ieR4Sk5BquccboG%0aF13U5slNgmCEekdt0amw%0a-----END%20RSA%20PRIVATE%20KEY-----%0a'
+          format: pem-private-key
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  apiversion:
+                    description: The version of the API.
+                    example: 3
+                    type: integer
+                  func:
+                    description: The name of the method called.
+                    example: install_dkim_private_keys
+                    type: string
+                  module:
+                    description: The name of the module called.
+                    example: EmailAuth
+                    type: string
+                  result:
+                    properties:
+                      data:
+                        description: An array of objects that contains information about the DKIM private key installation to the local server.
+                        items:
+                          properties:
+                            domain:
+                              description: The DKIM private key's associated domain.
+                              example: example.com
+                              format: domain
+                              type: string
+                            msg:
+                              description: The DKIM private key's installation status message.
+                              example: '[ADD:TXT@default._domainkey:v=DKIM1; k=rsa; p=AAAAB3NzaC1yc2EAAAABIwAAAQEA5kSivOqhs0U9ZMN20nxFe27QZ3t0lT2zbH7OSXylKd1rjAjYXGnSXC9j2uaZlemHlptBKVziMJC86ha7Hcj6dVOVrDQ6vF4q34bOCjtKLphQ0IjBzVIvqILH9eLJdRaOrS34CmgmPaisrCk5wKVlakygvUfcj3HzaTKS6THyZDGx5shdTpa9lby8tpOD3JceV7ay4w8r0DipoKPC0OLpvS4EABEeMo9sx8zQEaKv03XygjNCCYtFvxlQQIRGlVoL7mPaHSaL3anI05RpNbm/PS+9BhZg+BqNjU4ofHBbfkXk5MiN6M7ieR4Sk5BquccboGF13U5slNgmCEekdt0amw;]'
+                              type: string
+                            status:
+                              description: 'Whether the system installed the DKIM private key to the local server.
+
+                                * `1` - The system installed the DKIM private key.
+
+                                * `0` - The system **cannot** install the DKIM private key.'
+                              enum:
+                              - 0
+                              - 1
+                              example: 1
+                              type: integer
+                          type: object
+                        type: array
+                      errors:
+                        description: List of errors if the API failed.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      messages:
+                        description: List of messages generated by the API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      metadata:
+                        properties: {}
+                      status:
+                        description: '* `1` - Success.
+
+                          * `0` - Failed. Check the `errors` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      warnings:
+                        description: List of warnings generated by the API. Warnings describe non-critical failures or other problematic conditions noted while running a API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                    type: object
+                type: object
+          description: HTTP Request was successful.
+      summary: Add domains' DKIM record keys
+      tags:
+      - EmailAuth
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "uapi --output=jsonpretty \\\n  --user=username \\\n  EmailAuth \\\n  install_dkim_private_keys \\\n  domain='example' \\\n  key='-----BEGIN%20RSA%20PRIVATE%20KEY-----%0aAAAAB3NzaC1yc2EAAAABIwAAAQEA5kSivOqhs0U9ZMN20nxFe27QZ3t0lT2zbH7OSXylKd%0a1rjAjYXGnSXC9j2uaZlemHlptBKVziMJC86ha7Hcj6dVOVrDQ6vF4q34bOCjtKLphQ0IjB%0azVIvqILH9eLJdRaOrS34CmgmPaisrCk5wKVlakygvUfcj3HzaTKS6THyZDGx5shdTpa9lb%0ay8tpOD3JceV7ay4w8r0DipoKPC0OLpvS4EABEeMo9sx8zQEaKv03XygjNCCYtFvxlQQIRG%0alVoL7mPaHSaL3anI05RpNbm/PS+9BhZg+BqNjU4ofHBbfkXk5MiN6M7ieR4Sk5BquccboG%0aF13U5slNgmCEekdt0amw%0a-----END%20RSA%20PRIVATE%20KEY-----%0a'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2083/cpsess##########/execute/EmailAuth/install_dkim_private_keys?domain=example&key=-----BEGIN%2520RSA%2520PRIVATE%2520KEY-----%250aAAAAB3NzaC1yc2EAAAABIwAAAQEA5kSivOqhs0U9ZMN20nxFe27QZ3t0lT2zbH7OSXylKd%250a1rjAjYXGnSXC9j2uaZlemHlptBKVziMJC86ha7Hcj6dVOVrDQ6vF4q34bOCjtKLphQ0IjB%250azVIvqILH9eLJdRaOrS34CmgmPaisrCk5wKVlakygvUfcj3HzaTKS6THyZDGx5shdTpa9lb%250ay8tpOD3JceV7ay4w8r0DipoKPC0OLpvS4EABEeMo9sx8zQEaKv03XygjNCCYtFvxlQQIRG%250alVoL7mPaHSaL3anI05RpNbm%2fPS%2b9BhZg%2bBqNjU4ofHBbfkXk5MiN6M7ieR4Sk5BquccboG%250aF13U5slNgmCEekdt0amw%250a-----END%2520RSA%2520PRIVATE%2520KEY-----%250a
+      - label: LiveAPI Perl
+        lang: Perl
+        source: "#--------------------------------------------------------------------------------------\n# Instructions:\n#--------------------------------------------------------------------------------------\n# <theme-name> is the theme assigned to cPanel account.\n# 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n# 2) mkdir api_examples\n# 3) cd api_examples\n# 4) create a file EmailAuth_install_dkim_private_keys.live.pl and put this code into that file.\n# 5) In your browser login to a cPanel account.\n# 6) Manually change the url from: .../frontend/<theme-name>/\n#    to .../frontend/<theme-name>/api_examples/EmailAuth_install_dkim_private_keys.live.pl\n#--------------------------------------------------------------------------------------\n\nuse strict;\n\nuse Cpanel::LiveAPI ();\n\nmy $cpanel = Cpanel::LiveAPI->new(); # Connect to cPanel - only do this once.\n\n# Print the header\nprint \"Content-type: text/plain\\r\\n\\r\\n\";\n\n# Call the API\nmy $response = $cpanel->uapi(\n    q/EmailAuth/,\n    q/install_dkim_private_keys/,\n    {\n        'domain' => 'example',\n        'key' => '-----BEGIN%20RSA%20PRIVATE%20KEY-----%0aAAAAB3NzaC1yc2EAAAABIwAAAQEA5kSivOqhs0U9ZMN20nxFe27QZ3t0lT2zbH7OSXylKd%0a1rjAjYXGnSXC9j2uaZlemHlptBKVziMJC86ha7Hcj6dVOVrDQ6vF4q34bOCjtKLphQ0IjB%0azVIvqILH9eLJdRaOrS34CmgmPaisrCk5wKVlakygvUfcj3HzaTKS6THyZDGx5shdTpa9lb%0ay8tpOD3JceV7ay4w8r0DipoKPC0OLpvS4EABEeMo9sx8zQEaKv03XygjNCCYtFvxlQQIRG%0alVoL7mPaHSaL3anI05RpNbm/PS+9BhZg+BqNjU4ofHBbfkXk5MiN6M7ieR4Sk5BquccboG%0aF13U5slNgmCEekdt0amw%0a-----END%20RSA%20PRIVATE%20KEY-----%0a',\n    }\n);\n\n# Handle the response\nif ($response->{cpanelresult}{result}{status}) {\n    my $data = $response->{cpanelresult}{result}{data};\n    foreach my $item (@{$data}) {\n        # Do something with the $item\n    }\n\n    # So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    # Report errors:\n    print to_json($response->{cpanelresult}{result}{errors});\n}\n\n# Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n#--------------------------------------------------------------------------------------\n# Helper function to convert a perl object to html printable json\n#--------------------------------------------------------------------------------------\nsub to_json {\n    require JSON;\n    my $str = JSON->new->pretty->encode($_[0]);\n    return $str;\n}\n"
+      - label: LiveAPI PHP
+        lang: PHP
+        source: "<?php\n//--------------------------------------------------------------------------------------\n// Instructions:\n//--------------------------------------------------------------------------------------\n// <theme-name> is the theme assigned to cPanel account.\n// 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n// 2) mkdir api_examples\n// 3) cd api_examples\n// 4) create a file EmailAuth_install_dkim_private_keys.live.php and put this code into that file.\n// 5) In your browser login to a cPanel account.\n// 6) Manually change the url from: .../frontend/<theme-name>/\n//    to .../frontend/<theme-name>/api_examples/EmailAuth_install_dkim_private_keys.live.php\n//--------------------------------------------------------------------------------------\n\n// Instantiate the CPANEL object.\nrequire_once \"/usr/local/cpanel/php/cpanel.php\";\n\n// Print the header\nheader('Content-Type: text/plain');\n\n// Connect to cPanel - only do this once.\n$cpanel = new CPANEL();\n\n// Call the API\n$response = $cpanel->uapi(\n    'EmailAuth',\n    'install_dkim_private_keys',\n    array (\n        'domain' => 'example',\n        'key' => '-----BEGIN%20RSA%20PRIVATE%20KEY-----%0aAAAAB3NzaC1yc2EAAAABIwAAAQEA5kSivOqhs0U9ZMN20nxFe27QZ3t0lT2zbH7OSXylKd%0a1rjAjYXGnSXC9j2uaZlemHlptBKVziMJC86ha7Hcj6dVOVrDQ6vF4q34bOCjtKLphQ0IjB%0azVIvqILH9eLJdRaOrS34CmgmPaisrCk5wKVlakygvUfcj3HzaTKS6THyZDGx5shdTpa9lb%0ay8tpOD3JceV7ay4w8r0DipoKPC0OLpvS4EABEeMo9sx8zQEaKv03XygjNCCYtFvxlQQIRG%0alVoL7mPaHSaL3anI05RpNbm/PS+9BhZg+BqNjU4ofHBbfkXk5MiN6M7ieR4Sk5BquccboG%0aF13U5slNgmCEekdt0amw%0a-----END%20RSA%20PRIVATE%20KEY-----%0a',\n    )\n);\n\n// Handle the response\nif ($response['cpanelresult']['result']['status']) {\n    $data = $response['cpanelresult']['result']['data'];\n    foreach ($data as $item) {\n        // Do something with the $item\n    }\n\n    // So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    // Report errors:\n    print to_json($response['cpanelresult']['result']['errors']);\n}\n\n// Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n//--------------------------------------------------------------------------------------\n// Helper function to convert a PHP value to html printable json\n//--------------------------------------------------------------------------------------\nfunction to_json($data) {\n    return json_encode($data, JSON_PRETTY_PRINT);\n}"
+      x-cpanel-api-version: UAPI
+      x-cpanel-available-version: cPanel 78
+  /EmailAuth/install_spf_records:
+    get:
+      x-readonly: false
+      x-rollback: none
+      description: This function installs a Sender Policy Framework (SPF) record for a domain on the DNS server.
+      operationId: EmailAuth-install_spf_records
+      parameters:
+      - description: 'The domain for which to install an SPF record on the DNS server.
+
+
+          **Note:**
+
+
+          To install multiple SPF records, duplicate the parameter name. For example, use the `domain=example.com`, `domain=example2.com`, and `domain=example3.com` parameters.'
+        examples:
+          multiple:
+            summary: Multiple domains.
+            value: domain=example.com&domain=example2.com&domain=example3.com
+          single:
+            summary: A single domain.
+            value: example.com
+        in: query
+        name: domain
+        required: true
+        schema:
+          type: string
+      - description: 'An SPF record.
+
+
+          **Note:**
+
+
+          You **must** provide this parameter for each `domain` parameter.'
+        in: query
+        name: record
+        required: true
+        schema:
+          example: '"v=spf1 ip4:10.0.0.1 %2Ba %2Bmx %2Bip4:10.0.0.2 %2Bip4:10.0.0.3 -all"'
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  apiversion:
+                    description: The version of the API.
+                    example: 3
+                    type: integer
+                  func:
+                    description: The name of the method called.
+                    example: install_spf_records
+                    type: string
+                  module:
+                    description: The name of the module called.
+                    example: EmailAuth
+                    type: string
+                  result:
+                    properties:
+                      data:
+                        description: An array of objects that contains information about the domain's SPF record installation to the DNS server.
+                        items:
+                          properties:
+                            domain:
+                              description: The SPF record's associated domain on the DNS server.
+                              example: example.com
+                              format: domain
+                              type: string
+                            msg:
+                              description: The SPF record's installation status to the DNS server.
+                              example: '[ADD:TXT@example.com.:v=spf1 ip4:10.0.0.1 %2Ba %2Bmx %2Bip4:10.0.0.2 %2Bip4:10.0.0.3 -all]'
+                              type: string
+                            status:
+                              description: 'Whether the system installed the SPF record to the DNS server.
+
+                                - `1` - The system installed the SPF record on the DNS server.
+
+                                - `0` - The system **cannot** install the SPF record on the DNS server.'
+                              enum:
+                              - 0
+                              - 1
+                              example: 1
+                              type: integer
+                          type: object
+                        type: array
+                      errors:
+                        description: List of errors if the API failed.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      messages:
+                        description: List of messages generated by the API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      metadata:
+                        properties: {}
+                      status:
+                        description: '- 1 - Success.
+
+                          - 0 - Failed. Check the `errors`  field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      warnings:
+                        description: List of warnings generated by the API. Warnings describe non-critical failures or other problematic conditions noted while running a API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                    type: object
+                type: object
+          description: HTTP Request was successful.
+      summary: Add domains' SPF records
+      tags:
+      - EmailAuth
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "uapi --output=jsonpretty \\\n  --user=username \\\n  EmailAuth \\\n  install_spf_records \\\n  domain='example.com' \\\n  record='\"v=spf1 ip4:10.0.0.1 %2Ba %2Bmx %2Bip4:10.0.0.2 %2Bip4:10.0.0.3 -all\"'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2083/cpsess##########/execute/EmailAuth/install_spf_records?domain=example.com&record=%22v%3dspf1%20ip4%3a10.0.0.1%20%252Ba%20%252Bmx%20%252Bip4%3a10.0.0.2%20%252Bip4%3a10.0.0.3%20-all%22
+      - label: LiveAPI Perl
+        lang: Perl
+        source: "#--------------------------------------------------------------------------------------\n# Instructions:\n#--------------------------------------------------------------------------------------\n# <theme-name> is the theme assigned to cPanel account.\n# 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n# 2) mkdir api_examples\n# 3) cd api_examples\n# 4) create a file EmailAuth_install_spf_records.live.pl and put this code into that file.\n# 5) In your browser login to a cPanel account.\n# 6) Manually change the url from: .../frontend/<theme-name>/\n#    to .../frontend/<theme-name>/api_examples/EmailAuth_install_spf_records.live.pl\n#--------------------------------------------------------------------------------------\n\nuse strict;\n\nuse Cpanel::LiveAPI ();\n\nmy $cpanel = Cpanel::LiveAPI->new(); # Connect to cPanel - only do this once.\n\n# Print the header\nprint \"Content-type: text/plain\\r\\n\\r\\n\";\n\n# Call the API\nmy $response = $cpanel->uapi(\n    q/EmailAuth/,\n    q/install_spf_records/,\n    {\n        'domain' => 'example.com',\n        'record' => '\"v=spf1 ip4:10.0.0.1 %2Ba %2Bmx %2Bip4:10.0.0.2 %2Bip4:10.0.0.3 -all\"',\n    }\n);\n\n# Handle the response\nif ($response->{cpanelresult}{result}{status}) {\n    my $data = $response->{cpanelresult}{result}{data};\n    foreach my $item (@{$data}) {\n        # Do something with the $item\n    }\n\n    # So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    # Report errors:\n    print to_json($response->{cpanelresult}{result}{errors});\n}\n\n# Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n#--------------------------------------------------------------------------------------\n# Helper function to convert a perl object to html printable json\n#--------------------------------------------------------------------------------------\nsub to_json {\n    require JSON;\n    my $str = JSON->new->pretty->encode($_[0]);\n    return $str;\n}\n"
+      - label: LiveAPI PHP
+        lang: PHP
+        source: "<?php\n//--------------------------------------------------------------------------------------\n// Instructions:\n//--------------------------------------------------------------------------------------\n// <theme-name> is the theme assigned to cPanel account.\n// 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n// 2) mkdir api_examples\n// 3) cd api_examples\n// 4) create a file EmailAuth_install_spf_records.live.php and put this code into that file.\n// 5) In your browser login to a cPanel account.\n// 6) Manually change the url from: .../frontend/<theme-name>/\n//    to .../frontend/<theme-name>/api_examples/EmailAuth_install_spf_records.live.php\n//--------------------------------------------------------------------------------------\n\n// Instantiate the CPANEL object.\nrequire_once \"/usr/local/cpanel/php/cpanel.php\";\n\n// Print the header\nheader('Content-Type: text/plain');\n\n// Connect to cPanel - only do this once.\n$cpanel = new CPANEL();\n\n// Call the API\n$response = $cpanel->uapi(\n    'EmailAuth',\n    'install_spf_records',\n    array (\n        'domain' => 'example.com',\n        'record' => '\"v=spf1 ip4:10.0.0.1 %2Ba %2Bmx %2Bip4:10.0.0.2 %2Bip4:10.0.0.3 -all\"',\n    )\n);\n\n// Handle the response\nif ($response['cpanelresult']['result']['status']) {\n    $data = $response['cpanelresult']['result']['data'];\n    foreach ($data as $item) {\n        // Do something with the $item\n    }\n\n    // So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    // Report errors:\n    print to_json($response['cpanelresult']['result']['errors']);\n}\n\n// Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n//--------------------------------------------------------------------------------------\n// Helper function to convert a PHP value to html printable json\n//--------------------------------------------------------------------------------------\nfunction to_json($data) {\n    return json_encode($data, JSON_PRETTY_PRINT);\n}"
+      x-cpanel-api-version: UAPI
+      x-cpanel-available-version: cPanel 78
+  /EmailAuth/remove_dmarc:
+    get:
+      x-readonly: false
+      x-rollback: none
+      description: This function removes the DMARC record for domains.
+      operationId: EmailAuth-remove_dmarc
+      parameters:
+      - description: 'The domain from which to remove the DMARC record.
+
+
+          **Note:**
+
+
+          If you do not include this argument, the system will remove **all** DMARC records from **all** domains owned by the user.
+
+
+          To remove multiple domain DMARC records, duplicate the parameter name. For example, use the `domain=example.com`, `domain=example2.com`, and `domain=example3.com` parameters.
+
+
+          You **cannot** remove DMARC records on temporary domains.'
+        examples:
+          multiple:
+            summary: Multiple domains.
+            value: domain=example.com&domain=example2.com&domain=example.com
+          single:
+            summary: A single domain.
+            value: example.com
+        in: query
+        name: domain
+        required: false
+        schema:
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  apiversion:
+                    description: The version of the API.
+                    example: 3
+                    type: integer
+                  func:
+                    description: The name of the method called.
+                    example: remove_dmarc
+                    type: string
+                  module:
+                    description: The name of the module called.
+                    example: EmailAuth
+                    type: string
+                  result:
+                    properties:
+                      data:
+                        description: An array of objects that contain information about the removed DMARC records.
+                        items:
+                          properties:
+                            domain:
+                              description: The domain for which the DMARC record was removed.
+                              example: example.com
+                              format: domain
+                              type: string
+                            msg:
+                              description: Information about the removed DMARC record.
+                              example: '[REMOVE:TXT@_dmarc.example.com:v=DMARC1; p=reject;]'
+                              type: string
+                            status:
+                              description: 'Whether the system removed the domain''s DMARC record.
+
+                                * `1` - The system removed the domain''s DMARC record.
+
+                                * `0` - The system did **not** remove the domain''s DMARC record.'
+                              enum:
+                              - 0
+                              - 1
+                              example: 1
+                              type: integer
+                          type: object
+                        type: array
+                      errors:
+                        description: List of errors if the API failed.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      messages:
+                        description: List of messages generated by the API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      metadata:
+                        properties: {}
+                      status:
+                        description: '* `1` - Success.
+
+                          * `0` - Failed. Check the `errors` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      warnings:
+                        description: List of warnings generated by the API. Warnings describe non-critical failures or other problematic conditions noted while running an API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                    type: object
+                type: object
+          description: HTTP Request was successful.
+      summary: Remove DMARC record from domain(s)
+      tags:
+      - EmailAuth
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "uapi --output=jsonpretty \\\n  --user=username \\\n  EmailAuth \\\n  remove_dmarc \\\n  domain='example.com'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2083/cpsess##########/execute/EmailAuth/remove_dmarc?domain=example.com
+      - label: LiveAPI Perl
+        lang: Perl
+        source: "#--------------------------------------------------------------------------------------\n# Instructions:\n#--------------------------------------------------------------------------------------\n# <theme-name> is the theme assigned to cPanel account.\n# 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n# 2) mkdir api_examples\n# 3) cd api_examples\n# 4) create a file EmailAuth_remove_dmarc.live.pl and put this code into that file.\n# 5) In your browser log in to a cPanel account.\n# 6) Manually change the url from: .../frontend/<theme-name>/\n#    to .../frontend/<theme-name>/api_examples/EmailAuth_remove_dmarc.live.pl\n#--------------------------------------------------------------------------------------\n\nuse strict;\n\nuse Cpanel::LiveAPI ();\n\nmy $cpanel = Cpanel::LiveAPI->new(); # Connect to cPanel - only do this once.\n\n# Print the header\nprint \"Content-type: text/plain\\r\\n\\r\\n\";\n\n# Call the API\nmy $response = $cpanel->uapi(\n    q/EmailAuth/,\n    q/remove_dmarc/,\n    {\n        'domain' => 'example.com',\n    }\n);\n\n# Handle the response\nif ($response->{cpanelresult}{result}{status}) {\n    my $data = $response->{cpanelresult}{result}{data};\n    foreach my $item (@{$data}) {\n        # Do something with the $item\n    }\n\n    # So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    # Report errors:\n    print to_json($response->{cpanelresult}{result}{errors});\n}\n\n# Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n#--------------------------------------------------------------------------------------\n# Helper function to convert a perl object to html-printable json\n#--------------------------------------------------------------------------------------\nsub to_json {\n    require JSON;\n    my $str = JSON->new->pretty->encode($_[0]);\n    return $str;\n}\n"
+      - label: LiveAPI PHP
+        lang: PHP
+        source: "<?php\n//--------------------------------------------------------------------------------------\n// Instructions:\n//--------------------------------------------------------------------------------------\n// <theme-name> is the theme assigned to cPanel account.\n// 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n// 2) mkdir api_examples\n// 3) cd api_examples\n// 4) create a file EmailAuth_remove_dmarc.live.php and put this code into that file.\n// 5) In your browser log in to a cPanel account.\n// 6) Manually change the url from: .../frontend/<theme-name>/\n//    to .../frontend/<theme-name>/api_examples/EmailAuth_remove_dmarc.live.php\n//--------------------------------------------------------------------------------------\n\n// Instantiate the CPANEL object.\nrequire_once \"/usr/local/cpanel/php/cpanel.php\";\n\n// Print the header\nheader('Content-Type: text/plain');\n\n// Connect to cPanel - only do this once.\n$cpanel = new CPANEL();\n\n// Call the API\n$response = $cpanel->uapi(\n    'EmailAuth',\n    'remove_dmarc',\n    array (\n        'domain' => 'example.com',\n    )\n);\n\n// Handle the response\nif ($response['cpanelresult']['result']['status']) {\n    $data = $response['cpanelresult']['result']['data'];\n    foreach ($data as $item) {\n        // Do something with the $item\n    }\n\n    // So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    // Report errors:\n    print to_json($response['cpanelresult']['result']['errors']);\n}\n\n// Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n//--------------------------------------------------------------------------------------\n// Helper function to convert a PHP value to html-printable json\n//--------------------------------------------------------------------------------------\nfunction to_json($data) {\n    return json_encode($data, JSON_PRETTY_PRINT);\n}"
+      x-cpanel-api-version: UAPI
+      x-cpanel-available-version: '124'
+  /EmailAuth/validate_current_dkims:
+    get:
+      x-readonly: true
+      description: 'This function retrieves and checks the DomainKeys Identified Mail
+
+        (DKIM) records for one or more domains.'
+      operationId: EmailAuth-validate_current_dkims
+      parameters:
+      - description: The domain for which to check the DKIM records.
+        examples:
+          multiple:
+            summary: Check DKIM records for a multiple domains.
+            value: 'domain=example.com,domain=another.com,domain=yetanother.com
+
+              domain=example.com,domain-1=another.com,domain-2=yetanother.com'
+          single:
+            summary: Check DKIM records for a single domain.
+            value: example.com
+        in: query
+        name: domain
+        required: true
+        schema:
+          format: domain
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  apiversion:
+                    description: The version of the API.
+                    example: 3
+                    type: integer
+                  func:
+                    description: The name of the method called.
+                    example: validate_current_dkims
+                    type: string
+                  module:
+                    description: The name of the module called.
+                    example: EmailAuth
+                    type: string
+                  result:
+                    properties:
+                      data:
+                        description: 'An array that contains information about the
+
+                          domain''s DKIM records. '
+                        items:
+                          properties:
+                            domain:
+                              description: 'The domain that the function used to check
+
+                                the DKIM record. This will be the value of
+
+                                the domain parameter with a `default._domainkey` prefix.'
+                              example: default._domainkey.example.com
+                              format: domain
+                              type: string
+                            error:
+                              description: 'A message that details the reason why the DNS lookup failed.
+
+
+                                **Note:**
+
+
+                                The function only returns this value when the `state` returned
+
+                                is the `ERROR` value.'
+                              example: '(XID 4krw35) DNS returned SERVFAIL (code 2)
+
+                                in response to the systems query for default._domainkey.example2.coms
+
+                                TXT records.'
+                              type: string
+                            expected:
+                              description: The DKIM record's contents.
+                              example: v=DKIM1; k=rsa; p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDw5nw4NP1RsWXlfmiMzByDfOT16QCZO\/xJtrPZKskZF8\/sU0zWGTqKUOErlyJfoJzMDUv3\/zzjGswc2nEmYqxxoQZaBkN4QaS6MvJQxysAr+sK8C248\/r9zMperQdhJedUVejtpFQHJwgqpHy1tQMxY37L7sQjdxmQ5WnQ1acXiwIDAQAB
+                              type: string
+                            records:
+                              description: 'The domain''s DNS DKIM TXT records.
+
+
+                                **Important:**
+
+
+                                This function may fail to preserve whitespace in DKIM records.'
+                              items:
+                                properties:
+                                  current:
+                                    description: "The domain's DKIM TXT record data contents.\n\n**Important:**\n\n This function may fail to preserve whitespace in DKIM records."
+                                    example: v=DKIM1; k=rsa; p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDw5nw4NP1RsWXlfmiMzByDfOT16QCZO\/xJtrPZKskZF8\/sU0zWGTqKUOErlyJfoJzMDUv3\/zzjGswc2nEmYqxxoQZaBkN4QaS6MvJQxysAr+sK8C248\/r9zMperQdhJedUVejtpFQHJwgqpHy1tQMxY37L7sQjdxmQ5WnQ1acXiwIDAQAB
+                                    type: string
+                                  reason:
+                                    description: 'The reason why the DKIM TXT record is not correct, if one exists.
+
+
+                                      **Note:**
+
+
+                                      This function **only** returns this value when the `state` value is `PERMFAIL`.'
+                                    example: 'example.com: The DKIM version must be "DKIM1".'
+                                    type: string
+                                  state:
+                                    description: 'The DKIM TXT record''s status:
+
+                                      * `VALID` - The DKIM TXT record matches the local server''s public key.
+
+                                      * `MISMATCH` - The DKIM TXT record does not match the local server''s public key.
+
+                                      * `PERMFAIL` - Multiple DKIM TXT records for the domain exist or a misconfigured DKIM TXT record exists.'
+                                    enum:
+                                    - VALID
+                                    - MISMATCH
+                                    - PERMFAIL
+                                    example: VALID
+                                    type: string
+                                type: object
+                              type: array
+                            state:
+                              description: 'The domain''s DKIM record status.
+
+                                Possible values:
+
+
+                                * `VALID` The DKIM record is valid.
+
+                                * `MALFORMED` A single DKIM record exists, but the record does not match the expected DKIM specifications.
+
+                                * `MISMATCH` A DKIM record exists, but it does not match the expected public key.
+
+                                * `MISSING` No DKIM record exists for the domain.
+
+                                * `MULTIPLE` Multiple DKIM records exist.
+
+                                * `NOPUB` No key exists on the local server for the domain.
+
+                                * `ERROR` The record''s DNS lookup failed. The function returns the reason in the error return.'
+                              enum:
+                              - VALID
+                              - MALFORMED
+                              - MISMATCH
+                              - MISSING
+                              - MULTIPLE
+                              - NOPUB
+                              - ERROR
+                              example: VALID
+                              type: string
+                            validity_cache_update:
+                              description: 'The result of the DKIM record''s validity cache update operation:
+
+                                * `set` The domain is invalid but passed its validity check. The validity check now passes the domain as valid.
+
+                                * `unset` The domain is invalid and did not pass its validity check. The validity check does not pass the domain as valid.
+
+                                * `valid` The domain is valid and passed its validity check. There are no changes required.
+
+                                * `invalid` The domain is invalid and failed its validity check. There are no changes required.
+
+                                * `none` The domain is invalid, but the system will not take further action.
+
+                                * `error` The domain''s validity check operation failed.'
+                              enum:
+                              - set
+                              - unset
+                              - valid
+                              - invalid
+                              - none
+                              - error
+                              example: valid
+                              type: string
+                          type: object
+                        type: array
+                      errors:
+                        description: List of errors if the API failed.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      messages:
+                        description: List of messages generated by the API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      metadata:
+                        properties: {}
+                      status:
+                        description: '- `1` - Success.
+
+                          - `0` - Failed. Check the `errors` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      warnings:
+                        description: List of warnings generated by the API. Warnings describe non-critical failures or other problematic conditions noted while running a API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                    type: object
+                type: object
+          description: HTTP Request was successful.
+      summary: Validate domains' DKIM records
+      tags:
+      - EmailAuth
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "uapi --output=jsonpretty \\\n  --user=username \\\n  EmailAuth \\\n  validate_current_dkims \\\n  domain='example.com'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2083/cpsess##########/execute/EmailAuth/validate_current_dkims?domain=example.com
+      - label: LiveAPI Perl
+        lang: Perl
+        source: "#--------------------------------------------------------------------------------------\n# Instructions:\n#--------------------------------------------------------------------------------------\n# <theme-name> is the theme assigned to cPanel account.\n# 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n# 2) mkdir api_examples\n# 3) cd api_examples\n# 4) create a file EmailAuth_validate_current_dkims.live.pl and put this code into that file.\n# 5) In your browser login to a cPanel account.\n# 6) Manually change the url from: .../frontend/<theme-name>/\n#    to .../frontend/<theme-name>/api_examples/EmailAuth_validate_current_dkims.live.pl\n#--------------------------------------------------------------------------------------\n\nuse strict;\n\nuse Cpanel::LiveAPI ();\n\nmy $cpanel = Cpanel::LiveAPI->new(); # Connect to cPanel - only do this once.\n\n# Print the header\nprint \"Content-type: text/plain\\r\\n\\r\\n\";\n\n# Call the API\nmy $response = $cpanel->uapi(\n    q/EmailAuth/,\n    q/validate_current_dkims/,\n    {\n        'domain' => 'example.com',\n    }\n);\n\n# Handle the response\nif ($response->{cpanelresult}{result}{status}) {\n    my $data = $response->{cpanelresult}{result}{data};\n    foreach my $item (@{$data}) {\n        # Do something with the $item\n    }\n\n    # So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    # Report errors:\n    print to_json($response->{cpanelresult}{result}{errors});\n}\n\n# Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n#--------------------------------------------------------------------------------------\n# Helper function to convert a perl object to html printable json\n#--------------------------------------------------------------------------------------\nsub to_json {\n    require JSON;\n    my $str = JSON->new->pretty->encode($_[0]);\n    return $str;\n}\n"
+      - label: LiveAPI PHP
+        lang: PHP
+        source: "<?php\n//--------------------------------------------------------------------------------------\n// Instructions:\n//--------------------------------------------------------------------------------------\n// <theme-name> is the theme assigned to cPanel account.\n// 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n// 2) mkdir api_examples\n// 3) cd api_examples\n// 4) create a file EmailAuth_validate_current_dkims.live.php and put this code into that file.\n// 5) In your browser login to a cPanel account.\n// 6) Manually change the url from: .../frontend/<theme-name>/\n//    to .../frontend/<theme-name>/api_examples/EmailAuth_validate_current_dkims.live.php\n//--------------------------------------------------------------------------------------\n\n// Instantiate the CPANEL object.\nrequire_once \"/usr/local/cpanel/php/cpanel.php\";\n\n// Print the header\nheader('Content-Type: text/plain');\n\n// Connect to cPanel - only do this once.\n$cpanel = new CPANEL();\n\n// Call the API\n$response = $cpanel->uapi(\n    'EmailAuth',\n    'validate_current_dkims',\n    array (\n        'domain' => 'example.com',\n    )\n);\n\n// Handle the response\nif ($response['cpanelresult']['result']['status']) {\n    $data = $response['cpanelresult']['result']['data'];\n    foreach ($data as $item) {\n        // Do something with the $item\n    }\n\n    // So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    // Report errors:\n    print to_json($response['cpanelresult']['result']['errors']);\n}\n\n// Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n//--------------------------------------------------------------------------------------\n// Helper function to convert a PHP value to html printable json\n//--------------------------------------------------------------------------------------\nfunction to_json($data) {\n    return json_encode($data, JSON_PRETTY_PRINT);\n}"
+      x-cpanel-api-version: UAPI
+      x-cpanel-available-version: cPanel 78
+  /EmailAuth/validate_current_dmarcs:
+    get:
+      x-readonly: true
+      description: This function checks the validity of the current DMARC record for one or more domains.
+      operationId: EmailAuth-validate_current_dmarcs
+      parameters:
+      - description: 'The domain for which to check the DMARC record.
+
+
+          **Note:**
+
+
+          If you do not include this argument, the system will validate DMARC records for all domains owned by the user.'
+        examples:
+          multiple:
+            summary: Check DMARC records for multiple domains.
+            value: domain=example.com,domain=another.com,domain=yetanother.com
+          single:
+            summary: Check DMARC records for a single domain.
+            value: domain=example.com
+        in: query
+        name: domain
+        required: false
+        schema:
+          format: domain
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  apiversion:
+                    description: The version of the API.
+                    example: 3
+                    type: integer
+                  func:
+                    description: The name of the method called.
+                    example: validate_current_dmarcs
+                    type: string
+                  module:
+                    description: The name of the module called.
+                    example: EmailAuth
+                    type: string
+                  result:
+                    properties:
+                      data:
+                        description: 'An array that contains information about the
+
+                          domain''s DMARC records. '
+                        items:
+                          properties:
+                            domain:
+                              description: The target domain of the DMARC policy.
+                              example: example.com
+                              format: domain
+                              type: string
+                            error:
+                              description: 'A message that details either why the DNS lookup failed, or if there is a SPF/DKIM failure.
+
+
+                                **Note:**
+
+
+                                This will be set to `MALFORMED` if there is a syntax issue with this domain''s SPF and DKIM records.'
+                              example: '(XID 4krw35) DNS returned SERVFAIL (code 2)
+
+                                in response to the system''s query for _dmarc.example.com
+
+                                TXT records.'
+                              type: string
+                            record:
+                              description: The domain's DMARC TXT record.
+                              example: v=DMARC1; p=none;
+                              type: string
+                            state:
+                              description: 'The domain''s DMARC record status.
+
+                                Possible values:
+
+
+                                * `VALID` - A DMARC policy is set for the domain, along with valid SPF and DKIM records for the domain and IP address.
+
+                                * `MALFORMED` - A DMARC record is set, but it did not pass a syntax check.
+
+                                * `DKIM_SPF_ERROR` - A DMARC record exists; however, both the DKIM and SPF records for this domain did not pass validation.
+
+                                * `DKIM_ERROR` - A DMARC record exists; however, the DKIM record for this domain did not pass validation.
+
+                                * `SPF_ERROR` - A DMARC record exists; however, the SPF record for this domain did not pass validation.
+
+                                * `MISSING` - No DMARC record exists for the domain at the DMARC subdomain location.
+
+                                * `DNS_ERROR` - A DNS error prevented validation of the DMARC record.'
+                              enum:
+                              - VALID
+                              - MALFORMED
+                              - DKIM_SPF_ERROR
+                              - DKIM_ERROR
+                              - SPF_ERROR
+                              - MISSING
+                              - DNS_ERROR
+                              example: VALID
+                              type: string
+                            subdomain:
+                              description: 'The domain that the function used to check
+
+                                the DMARC record. This will be the value of
+
+                                the `domain` parameter with a `_dmarc` prefix.'
+                              example: _dmarc.example.com
+                              format: domain
+                              type: string
+                            suggested:
+                              description: The recommended DMARC policy.
+                              example: v=DMARC1; p=none;
+                              type: string
+                          type: object
+                        type: array
+                      errors:
+                        description: List of errors if the API failed.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      messages:
+                        description: List of messages generated by the API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      metadata:
+                        properties: {}
+                      status:
+                        description: '- `1` - Success.
+
+                          - `0` - Failed. Check the `errors` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      warnings:
+                        description: List of warnings generated by the API. Warnings describe non-critical failures or other problematic conditions noted while running an API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                    type: object
+                type: object
+          description: HTTP Request was successful.
+      summary: Validate domains' DMARC records
+      tags:
+      - EmailAuth
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "uapi --output=jsonpretty \\\n  --user=username \\\n  EmailAuth \\\n  validate_current_dmarcs \\\n  domain='example.com'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2083/cpsess##########/execute/EmailAuth/validate_current_dmarcs?domain=example.com
+      - label: LiveAPI Perl
+        lang: Perl
+        source: "#--------------------------------------------------------------------------------------\n# Instructions:\n#--------------------------------------------------------------------------------------\n# <theme-name> is the theme assigned to cPanel account.\n# 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n# 2) mkdir api_examples\n# 3) cd api_examples\n# 4) create a file EmailAuth_validate_current_dmarcs.live.pl and put this code into that file.\n# 5) In your browser log in to a cPanel account.\n# 6) Manually change the url from: .../frontend/<theme-name>/\n#    to .../frontend/<theme-name>/api_examples/EmailAuth_validate_current_dmarcs.live.pl\n#--------------------------------------------------------------------------------------\n\nuse strict;\n\nuse Cpanel::LiveAPI ();\n\nmy $cpanel = Cpanel::LiveAPI->new(); # Connect to cPanel - only do this once.\n\n# Print the header\nprint \"Content-type: text/plain\\r\\n\\r\\n\";\n\n# Call the API\nmy $response = $cpanel->uapi(\n    q/EmailAuth/,\n    q/validate_current_dmarcs/,\n    {\n        'domain' => 'example.com',\n    }\n);\n\n# Handle the response\nif ($response->{cpanelresult}{result}{status}) {\n    my $data = $response->{cpanelresult}{result}{data};\n    foreach my $item (@{$data}) {\n        # Do something with the $item\n    }\n\n    # So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    # Report errors:\n    print to_json($response->{cpanelresult}{result}{errors});\n}\n\n# Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n#--------------------------------------------------------------------------------------\n# Helper function to convert a perl object to html printable json\n#--------------------------------------------------------------------------------------\nsub to_json {\n    require JSON;\n    my $str = JSON->new->pretty->encode($_[0]);\n    return $str;\n}\n"
+      - label: LiveAPI PHP
+        lang: PHP
+        source: "<?php\n//--------------------------------------------------------------------------------------\n// Instructions:\n//--------------------------------------------------------------------------------------\n// <theme-name> is the theme assigned to cPanel account.\n// 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n// 2) mkdir api_examples\n// 3) cd api_examples\n// 4) create a file EmailAuth_validate_current_dmarcs.live.php and put this code into that file.\n// 5) In your browser log in to a cPanel account.\n// 6) Manually change the url from: .../frontend/<theme-name>/\n//    to .../frontend/<theme-name>/api_examples/EmailAuth_validate_current_dmarcs.live.php\n//--------------------------------------------------------------------------------------\n\n// Instantiate the CPANEL object.\nrequire_once \"/usr/local/cpanel/php/cpanel.php\";\n\n// Print the header\nheader('Content-Type: text/plain');\n\n// Connect to cPanel - only do this once.\n$cpanel = new CPANEL();\n\n// Call the API\n$response = $cpanel->uapi(\n    'EmailAuth',\n    'validate_current_dmarcs',\n    array (\n        'domain' => 'example.com',\n    )\n);\n\n// Handle the response\nif ($response['cpanelresult']['result']['status']) {\n    $data = $response['cpanelresult']['result']['data'];\n    foreach ($data as $item) {\n        // Do something with the $item\n    }\n\n    // So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    // Report errors:\n    print to_json($response['cpanelresult']['result']['errors']);\n}\n\n// Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n//--------------------------------------------------------------------------------------\n// Helper function to convert a PHP value to html printable json\n//--------------------------------------------------------------------------------------\nfunction to_json($data) {\n    return json_encode($data, JSON_PRETTY_PRINT);\n}"
+      x-cpanel-api-version: UAPI
+      x-cpanel-available-version: cPanel 124
+  /EmailAuth/validate_current_ptrs:
+    get:
+      x-readonly: true
+      description: 'This function validates the pointer records (PTR) for IPv4 and
+
+        IPv6 addresses that the account''s domains send mail from. It retrieves the
+
+        PTR records for each IP address and determines which of the domain''s IP addresses
+
+        send mail. It then validates the PTR records for each IP address and validates
+
+        the A or AAAA records pointing to each domain. This function also ensures
+
+        that at least one of that domain''s A or AAAA records points back to the IP
+
+        address.'
+      operationId: EmailAuth-validate_current_ptrs
+      parameters:
+      - description: The domain for which to validate the PTR records.
+        examples:
+          multiple:
+            summary: Check PTR records for a multiple domains.
+            value: '`domain`=example.com,`domain`=another.com,`domain`=yetanother.com
+
+              `domain`=example.com,`domain-1`=another.com,`domain-2`=yetanother.com'
+          single:
+            summary: Check PTR records for a single domain.
+            value: example.com
+        in: query
+        name: domain
+        required: true
+        schema:
+          format: domain
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  apiversion:
+                    description: The version of the API.
+                    example: 3
+                    type: integer
+                  func:
+                    description: The name of the method called.
+                    example: validate_current_ptrs
+                    type: string
+                  module:
+                    description: The name of the module called.
+                    example: EmailAuth
+                    type: string
+                  result:
+                    properties:
+                      data:
+                        description: An array that contains information about the account's PTR records.
+                        items:
+                          properties:
+                            arpa_domain:
+                              description: 'The IP address used to perform a reverse DNS (rDNS) lookup.
+
+                                For more information about rDNS, read our
+
+                                [How to Configure Reverse DNS for BIND in WHM](https://go.cpanel.net/HowtoConfigureReverseDNSforBINDinWHM)
+
+                                documentation.
+
+                                A valid reversed IP address appended with one of the following:
+
+                                * in-addr.arpa - An IPv4 address.
+
+                                * ip6.arpa - An IPv6 address.
+
+
+                                For information about .arpa domains, read Wikipedia''s
+
+                                [Reverse DNS lookup](https://en.wikipedia.org/wiki/Reverse_DNS_lookup)
+
+                                article.
+
+
+                                **Note:**
+
+
+                                The function does not return this value for a domain with an invalid IP address.'
+                              example: 1.0.0.10.in-addr.arpa
+                              type: string
+                            domain:
+                              description: The queried domain.
+                              example: example.com
+                              format: domain
+                              type: string
+                            error:
+                              description: 'A mmessage that details the reason why the domain''s IP address validation failed.
+
+
+                                **Note:**
+
+
+                                The function only returns this value when the `state` returned is
+
+                                the `ERROR` value.'
+                              example: 1.1.1.1.1 is not a valid IP address.
+                              type: string
+                            helo:
+                              description: 'The hostname that the domain uses to identify
+
+                                itself to remote SMTP servers. A valid hostname.'
+                              example: example.com
+                              format: domain
+                              type: string
+                            ip_address:
+                              description: 'The IP address.
+
+
+                                **Note:**
+
+
+                                The function does **not** return this value for a domain with an invalid IP address.'
+                              example: 10.0.0.1
+                              type: string
+                            ip_version:
+                              description: 'The IP version number.
+
+                                * 4
+
+                                * 6
+
+
+                                **Note:**
+
+
+                                The function does **not** return this value for a domain with an invalid IP address.'
+                              enum:
+                              - 4
+                              - 6
+                              example: 4
+                              type: integer
+                            nameservers:
+                              description: The authoritative nameservers for the domain's PTR record.
+                              items:
+                                example: ns1.example.com
+                                format: domain
+                                type: string
+                              type: array
+                            ptr_records:
+                              description: 'The domain''s PTR records.
+
+
+                                **Note:**
+
+
+                                The function does **not** return this for a domain with an invalid IP address.'
+                              items:
+                                properties:
+                                  domain:
+                                    description: 'The fully-qualified domain name (FQDN)
+
+                                      that a PTR record points to.'
+                                    example: example.com
+                                    format: domain
+                                    type: string
+                                  forward_records:
+                                    description: 'A list of IP addresses that the domain
+
+                                      resolves to for A (IPv4) and AAAA (IPv6) records.'
+                                    items:
+                                      example: 10.0.0.1
+                                      type: string
+                                    type: array
+                                  state:
+                                    description: 'The state of the domain''s PTR record.
+
+                                      * `VALID` - The PTR record is valid.
+
+                                      * `MISSING_FWD` - The PTR points to a domain without an A or AAAA record.
+
+                                      * `FWD_MISMATCH` - The PTR record points to a domain without an A or AAAA record that points back to the IP address.'
+                                    enum:
+                                    - VALID
+                                    - MISSING_FWD
+                                    - FWD_MISMATCH
+                                    example: VALID
+                                    type: string
+                                type: object
+                              type: array
+                            state:
+                              description: 'Whether the PTR records are valid for the domain.
+
+                                * `ERROR` - The domain''s IP address is invalid. The function returns the reason in the error return.
+
+                                * `IP_IS_PRIVATE` - The IP address exists within a range of private IP addresses.
+
+                                * `VALID` - The PTR record is valid.
+
+                                * `MISSING_PTR` - No PTR records exist for the IP address.
+
+                                * `PTR_MISMATCH` - One or more PTR records point to a domain that does not point back to the correct IP address.
+
+
+                                **Note:**
+
+
+                                * DNS does not define PTR records for private IP addresses.
+
+                                * The function only returns a VALID response if all of an IP address''s PTR records are valid.'
+                              enum:
+                              - ERROR
+                              - IP_IS_PRIVATE
+                              - VALID
+                              - MISSING_PTR
+                              - PTR_MISMATCH
+                              example: VALID
+                              type: string
+                          type: object
+                        type: array
+                      errors:
+                        description: List of errors if the API failed.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      messages:
+                        description: List of messages generated by the API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      metadata:
+                        properties: {}
+                      status:
+                        description: '- `1` - Success.
+
+                          - `0` - Failed. Check the `errors` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      warnings:
+                        description: List of warnings generated by the API. Warnings describe non-critical failures or other problematic conditions noted while running a API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                    type: object
+                type: object
+          description: HTTP Request was successful.
+      summary: Validate domains' PTR records
+      tags:
+      - EmailAuth
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "uapi --output=jsonpretty \\\n  --user=username \\\n  EmailAuth \\\n  validate_current_ptrs \\\n  domain='example.com'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2083/cpsess##########/execute/EmailAuth/validate_current_ptrs?domain=example.com
+      - label: LiveAPI Perl
+        lang: Perl
+        source: "#--------------------------------------------------------------------------------------\n# Instructions:\n#--------------------------------------------------------------------------------------\n# <theme-name> is the theme assigned to cPanel account.\n# 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n# 2) mkdir api_examples\n# 3) cd api_examples\n# 4) create a file EmailAuth_validate_current_ptrs.live.pl and put this code into that file.\n# 5) In your browser login to a cPanel account.\n# 6) Manually change the url from: .../frontend/<theme-name>/\n#    to .../frontend/<theme-name>/api_examples/EmailAuth_validate_current_ptrs.live.pl\n#--------------------------------------------------------------------------------------\n\nuse strict;\n\nuse Cpanel::LiveAPI ();\n\nmy $cpanel = Cpanel::LiveAPI->new(); # Connect to cPanel - only do this once.\n\n# Print the header\nprint \"Content-type: text/plain\\r\\n\\r\\n\";\n\n# Call the API\nmy $response = $cpanel->uapi(\n    q/EmailAuth/,\n    q/validate_current_ptrs/,\n    {\n        'domain' => 'example.com',\n    }\n);\n\n# Handle the response\nif ($response->{cpanelresult}{result}{status}) {\n    my $data = $response->{cpanelresult}{result}{data};\n    foreach my $item (@{$data}) {\n        # Do something with the $item\n    }\n\n    # So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    # Report errors:\n    print to_json($response->{cpanelresult}{result}{errors});\n}\n\n# Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n#--------------------------------------------------------------------------------------\n# Helper function to convert a perl object to html printable json\n#--------------------------------------------------------------------------------------\nsub to_json {\n    require JSON;\n    my $str = JSON->new->pretty->encode($_[0]);\n    return $str;\n}\n"
+      - label: LiveAPI PHP
+        lang: PHP
+        source: "<?php\n//--------------------------------------------------------------------------------------\n// Instructions:\n//--------------------------------------------------------------------------------------\n// <theme-name> is the theme assigned to cPanel account.\n// 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n// 2) mkdir api_examples\n// 3) cd api_examples\n// 4) create a file EmailAuth_validate_current_ptrs.live.php and put this code into that file.\n// 5) In your browser login to a cPanel account.\n// 6) Manually change the url from: .../frontend/<theme-name>/\n//    to .../frontend/<theme-name>/api_examples/EmailAuth_validate_current_ptrs.live.php\n//--------------------------------------------------------------------------------------\n\n// Instantiate the CPANEL object.\nrequire_once \"/usr/local/cpanel/php/cpanel.php\";\n\n// Print the header\nheader('Content-Type: text/plain');\n\n// Connect to cPanel - only do this once.\n$cpanel = new CPANEL();\n\n// Call the API\n$response = $cpanel->uapi(\n    'EmailAuth',\n    'validate_current_ptrs',\n    array (\n        'domain' => 'example.com',\n    )\n);\n\n// Handle the response\nif ($response['cpanelresult']['result']['status']) {\n    $data = $response['cpanelresult']['result']['data'];\n    foreach ($data as $item) {\n        // Do something with the $item\n    }\n\n    // So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    // Report errors:\n    print to_json($response['cpanelresult']['result']['errors']);\n}\n\n// Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n//--------------------------------------------------------------------------------------\n// Helper function to convert a PHP value to html printable json\n//--------------------------------------------------------------------------------------\nfunction to_json($data) {\n    return json_encode($data, JSON_PRETTY_PRINT);\n}"
+      x-cpanel-api-version: UAPI
+      x-cpanel-available-version: cPanel 78
+  /EmailAuth/validate_current_spfs:
+    get:
+      x-readonly: true
+      description: 'This function retrieves the the Sender Policy Framework (SPF) records
+
+        for one or more domains.'
+      operationId: EmailAuth-validate_current_spfs
+      parameters:
+      - description: The domain for which to check the `SPF` records.
+        examples:
+          multiple:
+            summary: Check `SPF` records for a multiple domains.
+            value: '`domain`=example.com,`domain`=another.com,`domain`=yetanother.com
+
+              `domain`=example.com,`domain-1`=another.com,`domain-2`=yetanother.com'
+          single:
+            summary: Check `SPF` records for a single domain.
+            value: example.com
+        in: query
+        name: domain
+        required: true
+        schema:
+          format: domain
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  apiversion:
+                    description: The version of the API.
+                    example: 3
+                    type: integer
+                  func:
+                    description: The name of the method called.
+                    example: validate_current_spfs
+                    type: string
+                  module:
+                    description: The name of the module called.
+                    example: EmailAuth
+                    type: string
+                  result:
+                    properties:
+                      data:
+                        description: A list of information about a domain's SPF records.
+                        items:
+                          properties:
+                            domain:
+                              description: The queried domain.
+                              example: example.com
+                              format: domain
+                              type: string
+                            error:
+                              description: "A message that details the reason why the DNS lookup failed.\n\n**Note:**\n\n The function **only** returns this value when the `state` return is the `ERROR` value."
+                              example: '(XID rm8h9f) DNS returned SERVFAIL (code 2)
+
+                                in response to the systems query for example2.coms
+
+                                TXT records.'
+                              type: string
+                            expected:
+                              description: The SPF record for the domain in the DNS.
+                              example: ip6:0:0:0:0:0:ffff:c0a8:101
+                              type: string
+                            ip_address:
+                              description: The domain's IP address.
+                              example: 0:0:0:0:0:ffff:c0a8:101
+                              type: string
+                            ip_version:
+                              description: 'The IP address version.
+
+                                * `4`
+
+                                * `6`'
+                              enum:
+                              - 4
+                              - 6
+                              example: 6
+                              type: integer
+                            records:
+                              description: The SPF records of the domain's DNS.
+                              items:
+                                properties:
+                                  current:
+                                    description: The SPF record's contents.
+                                    example: v=spf1 +a +mx ip6:0:0:0:0:0:ffff:c0a8:101 ~all
+                                    type: string
+                                  reason:
+                                    description: 'The reason why the SPF record is **not** correct, if one exists.
+
+
+                                      **Note:**
+
+
+                                      If no errors exist, the function does **not** return this value.'
+                                    example: '''example.com: Sender
+
+                                      is not authorized by default to use ''''example.com''''
+
+                                      in ''''helo'''' identity, however domain is not
+
+                                      currently prepared for false failures (mechanism
+
+                                      ''''~all'''' matched)'''
+                                    type: string
+                                  state:
+                                    description: 'The SPF record''s status:
+
+                                      * `PASS` - The `SPF` record confirms that the `ip_address` value is a valid sender.
+
+                                      * `NEUTRAL` - The current `SPF` record configuration does not determine the `ip_address` value''s validity.
+
+                                      * `FAIL` - The `SPF` record states that the `ip_address` value is **not** a valid sender.
+
+                                      * `SOFTFAIL` - The `SPF` record states that the `ip_address` value is **not** a valid sender, but does not `FAIL` state it.
+
+                                      * `TEMPERROR` - The `SPF` record check resulted in a failure. For example, a network failure.
+
+                                      * `PERMERROR` - The domain''s `SPF` records are **incorrect** and require manual correction.
+
+
+                                      **Note:**
+
+
+                                      These values correspond with [RFC7208 section 2.6](https://tools.ietf.org/html/rfc7208#section-2.6).'
+                                    enum:
+                                    - PASS
+                                    - NEUTRAL
+                                    - FAIL
+                                    - SOFTFAIL
+                                    - TEMPERROR
+                                    - PERMERROR
+                                    example: PASS
+                                    type: string
+                                type: object
+                              type: array
+                            state:
+                              description: 'The SPF record''s status:
+
+                                * `VALID` - A single `SPF TXT` record exists in the domain''s DNS with the correct `ip_address` value or redirect mechanism.
+
+                                * `MISMATCHED` - An `SPF TXT` record exists for the domain that does **not** match the `ip_address` value.
+
+                                * `MULTIPLE` - Multiple `SPF TXT` records exist in the domain''s DNS.
+
+                                * `MISSING` - No `SPF TXT` record exists for the domain''s DNS.
+
+                                * `ERROR` - The record''s DNS lookup failed. The function returns the reason in the error return.'
+                              enum:
+                              - VALID
+                              - MISMATCHED
+                              - MULTIPLE
+                              - MISSING
+                              - ERROR
+                              example: VALID
+                              type: string
+                          type: object
+                        type: array
+                      errors:
+                        description: List of errors if the API failed.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      messages:
+                        description: List of messages generated by the API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      metadata:
+                        properties: {}
+                      status:
+                        description: '- `1` - Success.
+
+                          - `0` - Failed. Check the `errors` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      warnings:
+                        description: List of warnings generated by the API. Warnings describe non-critical failures or other problematic conditions noted while running a API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                    type: object
+                type: object
+          description: HTTP Request was successful.
+      summary: Validate domains' SPF records
+      tags:
+      - EmailAuth
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "uapi --output=jsonpretty \\\n  --user=username \\\n  EmailAuth \\\n  validate_current_spfs \\\n  domain='example.com'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2083/cpsess##########/execute/EmailAuth/validate_current_spfs?domain=example.com
+      - label: LiveAPI Perl
+        lang: Perl
+        source: "#--------------------------------------------------------------------------------------\n# Instructions:\n#--------------------------------------------------------------------------------------\n# <theme-name> is the theme assigned to cPanel account.\n# 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n# 2) mkdir api_examples\n# 3) cd api_examples\n# 4) create a file EmailAuth_validate_current_spfs.live.pl and put this code into that file.\n# 5) In your browser login to a cPanel account.\n# 6) Manually change the url from: .../frontend/<theme-name>/\n#    to .../frontend/<theme-name>/api_examples/EmailAuth_validate_current_spfs.live.pl\n#--------------------------------------------------------------------------------------\n\nuse strict;\n\nuse Cpanel::LiveAPI ();\n\nmy $cpanel = Cpanel::LiveAPI->new(); # Connect to cPanel - only do this once.\n\n# Print the header\nprint \"Content-type: text/plain\\r\\n\\r\\n\";\n\n# Call the API\nmy $response = $cpanel->uapi(\n    q/EmailAuth/,\n    q/validate_current_spfs/,\n    {\n        'domain' => 'example.com',\n    }\n);\n\n# Handle the response\nif ($response->{cpanelresult}{result}{status}) {\n    my $data = $response->{cpanelresult}{result}{data};\n    foreach my $item (@{$data}) {\n        # Do something with the $item\n    }\n\n    # So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    # Report errors:\n    print to_json($response->{cpanelresult}{result}{errors});\n}\n\n# Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n#--------------------------------------------------------------------------------------\n# Helper function to convert a perl object to html printable json\n#--------------------------------------------------------------------------------------\nsub to_json {\n    require JSON;\n    my $str = JSON->new->pretty->encode($_[0]);\n    return $str;\n}\n"
+      - label: LiveAPI PHP
+        lang: PHP
+        source: "<?php\n//--------------------------------------------------------------------------------------\n// Instructions:\n//--------------------------------------------------------------------------------------\n// <theme-name> is the theme assigned to cPanel account.\n// 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n// 2) mkdir api_examples\n// 3) cd api_examples\n// 4) create a file EmailAuth_validate_current_spfs.live.php and put this code into that file.\n// 5) In your browser login to a cPanel account.\n// 6) Manually change the url from: .../frontend/<theme-name>/\n//    to .../frontend/<theme-name>/api_examples/EmailAuth_validate_current_spfs.live.php\n//--------------------------------------------------------------------------------------\n\n// Instantiate the CPANEL object.\nrequire_once \"/usr/local/cpanel/php/cpanel.php\";\n\n// Print the header\nheader('Content-Type: text/plain');\n\n// Connect to cPanel - only do this once.\n$cpanel = new CPANEL();\n\n// Call the API\n$response = $cpanel->uapi(\n    'EmailAuth',\n    'validate_current_spfs',\n    array (\n        'domain' => 'example.com',\n    )\n);\n\n// Handle the response\nif ($response['cpanelresult']['result']['status']) {\n    $data = $response['cpanelresult']['result']['data'];\n    foreach ($data as $item) {\n        // Do something with the $item\n    }\n\n    // So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    // Report errors:\n    print to_json($response['cpanelresult']['result']['errors']);\n}\n\n// Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n//--------------------------------------------------------------------------------------\n// Helper function to convert a PHP value to html printable json\n//--------------------------------------------------------------------------------------\nfunction to_json($data) {\n    return json_encode($data, JSON_PRETTY_PRINT);\n}"
+      x-cpanel-api-version: UAPI
+      x-cpanel-available-version: cPanel 78
+components:
+  securitySchemes:
+    BasicAuth:
+      scheme: basic
+      type: http
+externalDocs:
+  url: https://cpanel.net/developers/
+x-tagGroups:
+- name: API Development Tools
+  tags:
+  - API Token Management
+  - Batch
+  - SSE Task Management
+  - URL Parsing
+- name: Authentication
+  tags:
+  - External Authentication
+  - Two-Factor Settings
+- name: Backup Information
+  tags:
+  - BackupInfo
+  - BackupInfo Status
+- name: Block Ip Addresses
+  tags:
+  - Block IP
+- name: Commerce Integration
+  tags:
+  - Market Integration
+  - SSL Certificates
+- name: Contact Information
+  tags:
+  - Contact Information
+- name: cPanel Account
+  tags:
+  - Account Enhancements
+  - Account Information
+  - Account Management
+  - AuditLog
+  - Contact Information
+  - cPanel Features
+  - Disk Quotas
+  - DomainRecommendations
+  - Personalization
+  - Resource Usage and Statistics
+  - Subaccount Management
+  - Team Roles
+  - Team Users
+- name: cPanel Account Backups
+  tags:
+  - Backup
+  - File Restoration
+- name: cPanel Plugin Framework
+  tags:
+  - Formbricks
+  - Plugins
+- name: cPanel Theme Management
+  tags:
+  - Application Information
+  - Brand Management
+  - Branding Files
+  - Browser Cache Management
+  - Language
+  - Theme Settings
+- name: Directory Management
+  tags:
+  - Directory Indexes
+  - Directory Privacy
+  - Directory Protection
+- name: DNS
+  tags:
+  - DNS
+  - DNS Information
+  - DNS Security
+  - Dynamic DNS
+  - Email DNS Settings
+  - ZoneEdit
+- name: Domain
+  tags:
+  - Domain
+- name: Domain Management
+  tags:
+  - AddonDomain
+  - Direct Link Protection (Hotlink)
+  - Domain
+  - Domain Information
+  - Domain Redirection
+  - DomainLookup
+  - Park
+  - SubDomain
+  - Virtual Host Information
+- name: Domains
+  tags:
+  - Subdomains
+- name: Email
+  tags:
+  - Email Accounts
+  - Email Filtering
+  - Email Forwarding
+  - Email Server Information
+  - Email Suspensions
+  - Mail Server Information
+  - Mailbox Management
+  - Mailing Lists
+  - Signing and Encryption (GnuPG Keys)
+  - Spam Filtering (Greylisting)
+  - Spam Management
+  - Spam Prevention (BoxTrapper)
+  - Webmail Applications
+  - Webmail Sessions
+- name: Extract Information
+  tags:
+  - ExtractInfo
+  - ExtractInfo Status
+- name: File Manager
+  tags:
+  - Trash
+- name: Files
+  tags:
+  - FTP Accounts
+  - FTP Server Settings
+  - Image Tools
+  - Jodit
+  - Manage Files
+  - Manage Files
+  - WebDisk Settings
+- name: GIT Management
+  tags:
+  - Deployment Settings
+  - Repository Management
+- name: InProductSurvey
+  tags:
+  - InProductSurvey
+- name: MySQL and MariaDB
+  tags:
+  - Database Information
+  - Database Management
+  - Remote Databases
+  - User Management
+- name: Notifications
+  tags:
+  - Pushbullet
+- name: Optional Applications
+  tags:
+  - Antivirus Protection (ClamAV)
+  - Calendar and Contacts (DAV)
+  - Calendar and Contacts Server
+  - WordPress Manager Backups
+- name: PostgreSQL
+  tags:
+  - PostgreSQL Database Management
+  - PostgreSQL User Management
+- name: Retrieve bandwidth information
+  tags:
+  - Bandwidth
+- name: Security
+  tags:
+  - Known SSH Hosts Management
+  - Login Information
+- name: Server Information
+  tags:
+  - cPanel Server Information
+  - Notifications
+  - Password Strength
+  - SSH
+  - WebPros MCP
+  - WebProsMCP
+- name: ServiceProxy
+  tags:
+  - ServiceProxy
+- name: Site Quality Monitoring
+  tags:
+  - SiteQuality
+- name: SSL Certificates
+  tags:
+  - Auto-generated SSL Certificates
+  - cPanel Account SSL Management
+  - SNI Email Settings
+  - SSL Certificate Management
+  - Verify Domain Ownership
+- name: Statistics
+  tags:
+  - Domain Statistics
+  - Weblog Settings
+- name: UserData
+  tags:
+  - UserData
+- name: Web Server Configuration
+  tags:
+  - EA4
+  - EasyApache Settings
+  - PHP
+- name: Web Server Management
+  tags:
+  - Application Manager
+  - ModSecurity
+  - NginxCaching
+  - PHP Settings
+  - Web Apps
+- name: Website Configuration
+  tags:
+  - Handler Management
+  - Logs
+  - Mime Type Management
+  - Nova
+  - Site Information
+  - Site Installation
+  - Sitejet
+  - WPX

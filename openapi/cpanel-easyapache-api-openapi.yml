@@ -1,0 +1,1035 @@
+openapi: 3.2.0
+info:
+  contact:
+    email: cs@cpanel.net
+    name: WebPros International, LLC
+    url: https://cpanel.net/support/
+  description: WHM API.
+  license:
+    name: cPanel License
+    url: https://cpanel.net/legal-notices/
+  termsOfService: https://cpanel.net/legal-notices/
+  title: WHM Easy Apache API
+  version: 11.137.9999.106
+  x-api-evangelist-provenance: 'Harvested verbatim from cPanel''s developer portal on 2026-09-05 via the MCP tool get-full-api-description at https://api.docs.cpanel.net/mcp. ONE mechanical change was made before storage: example values containing PEM private-key or certificate blocks, and AWS-access-key-shaped example strings, were replaced with REDACTED_* placeholders so the file can be stored in a public git repository without tripping secret scanning. No path, operation, parameter, schema or description was altered, added or removed.'
+servers:
+- description: A server running WHM.
+  url: https://{host}:{port}/json-api
+  variables:
+    host:
+      default: whm-server.tld
+      description: The hostname of a server running WHM.
+    port:
+      default: '2087'
+      description: The WHM port.
+security:
+- BasicAuth: []
+tags:
+- description: The EasyApache module for WHM API 1.
+  name: EasyApache
+paths:
+  /ea4_get_additional_pkg_prefixes:
+    get:
+      description: This function returns any additional package prefixes set up in the `/etc/cpanel/ea4/additional-pkg-prefixes/` file.
+      operationId: EA4-ea4_get_additional_pkg_prefixes
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      additional_pkg_prefixes:
+                        description: A list of any additional package prefixes, beyond `ea`, that the server is using.
+                        items:
+                          example: altea
+                          type: string
+                        type: array
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: ea4_get_additional_pkg_prefixes
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Return any additional package prefixes, beyond `ea`
+      tags:
+      - EasyApache
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: 'whmapi1 --output=jsonpretty ea4_get_additional_pkg_prefixes
+
+          '
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/ea4_get_additional_pkg_prefixes?api.version=1
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '116'
+  /ea4_get_currently_installed_packages:
+    get:
+      description: 'This function returns a list of the currently-installed EasyApache 4 packages.
+
+
+        **Important:**
+
+
+        When you disable the Web Server role, the system **disables** this function.'
+      operationId: EA4-ea4_get_currently_installed_packages
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      packages:
+                        description: A list of the currently installed packages.
+                        items:
+                          example: ea-apache24
+                          type: string
+                        type: array
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: ea4_get_currently_installed_packages
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Return installed Easyapache 4 packages
+      tags:
+      - EasyApache
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  ea4_get_currently_installed_packages\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/ea4_get_currently_installed_packages?api.version=1
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '62'
+  /ea4_list_profiles:
+    get:
+      description: 'This function returns a list of all EasyApache 4 profiles and the packages that each profile provides.
+
+
+        **Important:**
+
+
+        When you disable the Web Server role, the system **disables** this function.'
+      operationId: EA4-ea4_list_profiles
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    additionalProperties:
+                      description: '**Note:**
+
+
+                        * This function returns this array when a third-party vendor-created profile exists.
+
+                        * The function may return this array multiple times.'
+                      items:
+                        properties:
+                          desc:
+                            description: A description of the profile.
+                            example: The currently installed packages on the server.
+                            type: string
+                          name:
+                            description: The profile name.
+                            example: No PHP
+                            type: string
+                          path:
+                            description: The file name of the profile.
+                            example: default.json
+                            type: string
+                          pkgs:
+                            description: An array of RPM packages that the profile includes.
+                            example:
+                            - ea-apache24
+                            - ea-php74
+                            items:
+                              type: string
+                            type: array
+                          tags:
+                            description: Labels that highlight key attributes of a profile.
+                            example:
+                            - ea-apache24
+                            - ea-php74
+                            items:
+                              type: string
+                            type: array
+                          validation_data:
+                            properties:
+                              not_on_server:
+                                description: An array of packages in the profile that do not exist in any of the server's yum repositories.
+                                example:
+                                - ea-apache24
+                                - ea-php74
+                                items:
+                                  type: string
+                                type: array
+                            type: object
+                          version:
+                            description: The profile's current version ID.
+                            example: '1.2'
+                            type: string
+                        type: object
+                      type: array
+                    properties:
+                      cpanel:
+                        description: An array of cPanel & WHM-provided EasyApache 4 profile settings objects.
+                        items:
+                          properties:
+                            active:
+                              description: 'Whether the cPanel & WHM-provided EasyApache 4 profile''s settings are active.
+
+                                * `1` - Active.
+
+                                * `0` - Inactive.'
+                              enum:
+                              - 0
+                              - 1
+                              example: 1
+                              type: integer
+                            desc:
+                              description: A description of the profile.
+                              example: The currently installed packages on the server.
+                              type: string
+                            name:
+                              description: The profile name.
+                              example: No PHP
+                              type: string
+                            pkgs:
+                              description: An array of RPM packages that the profile includes.
+                              example:
+                              - ea-apache24
+                              - ea-php74
+                              items:
+                                type: string
+                              type: array
+                            tags:
+                              description: Labels that highlight key attributes of a profile.
+                              example:
+                              - ea-apache24
+                              - ea-php74
+                              items:
+                                type: string
+                              type: array
+                            validation_data:
+                              properties:
+                                not_on_server:
+                                  description: An array of packages in the profile that do not exist in any of the server's yum repositories.
+                                  example:
+                                  - ea-apache24
+                                  - ea-php74
+                                  items:
+                                    type: string
+                                  type: array
+                              type: object
+                            version:
+                              description: The profile's current version ID.
+                              example: '1.2'
+                              type: string
+                          type: object
+                        type: array
+                      custom:
+                        description: 'An array of custom settings objects.
+
+
+                          **Note:**
+
+
+                          This function returns the custom array when a system administrator-created profile exists.'
+                        items:
+                          properties:
+                            desc:
+                              description: A description of the profile.
+                              example: The currently installed packages on the server.
+                              type: string
+                            name:
+                              description: The profile name.
+                              example: No PHP
+                              type: string
+                            path:
+                              description: The file name of the profile.
+                              example: default.json
+                              type: string
+                            pkgs:
+                              description: An array of RPM packages that the profile includes.
+                              example:
+                              - ea-apache24
+                              - ea-php74
+                              items:
+                                type: string
+                              type: array
+                            tags:
+                              description: Labels that highlight key attributes of a profile.
+                              example:
+                              - Apache 2.4
+                              - PHP 7.4
+                              items:
+                                type: string
+                              type: array
+                            validation_data:
+                              properties:
+                                not_on_server:
+                                  description: An array of packages in the profile that do not exist in any of the server's yum repositories.
+                                  example:
+                                  - ea-apache24
+                                  - ea-php74
+                                  items:
+                                    type: string
+                                  type: array
+                              type: object
+                            version:
+                              description: The profile's current version ID.
+                              example: '1.2'
+                              type: string
+                          type: object
+                        type: array
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: ea4_list_profiles
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is 0. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '- 1 - Success.
+
+                          - 0 - Failed: Check the reason field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Return EasyApache 4 profiles
+      tags:
+      - EasyApache
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  ea4_list_profiles\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/ea4_list_profiles?api.version=1
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11.52'
+  /ea4_metainfo:
+    get:
+      description: This function returns the contents of the `/etc/cpanel/ea4/ea4-metainfo.json` file.
+      operationId: EA4-ea4_metainfo
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    additionalProperties:
+                      description: 'Returns the contents of the `/etc/cpanel/ea4/ea4-metainfo.json` file.
+
+                        Returns an empty value if the `/etc/cpanel/ea4/ea4-metainfo.json` file does not exist.'
+                      type: object
+                    description: Contents of the `/etc/cpanel/ea4/ea4-metainfo.json` file.
+                    example:
+                      additional_packages:
+                      - ea-nginx
+                      - ea-example
+                      default_php_handler: cgi
+                      default_php_package: ea-php72
+                      type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: ea4_metainfo
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is 0. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` - Success
+
+                          * `0` - Failed: Check the reason field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Return ea4-metainfo.json file contents
+      tags:
+      - EasyApache
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  ea4_metainfo\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/ea4_metainfo?api.version=1
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '80'
+  /ea4_recommendations:
+    get:
+      description: 'This function returns any recommendations attached to your installed
+
+        EasyApache 4 packages. For more information about the recommendation system,
+
+        read our EasyApache 4 Recommendations documentation.
+
+
+        **Important:**
+
+
+        When you disable the Web Server role, the system **disables** this function.'
+      operationId: EA4-ea4_recommendations
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    additionalProperties:
+                      description: '* An object that contains recommendation information about a package.
+
+
+                        **Note:**
+
+
+                        * The function uses the name of the referenced package as the return name.  For example, `ea-php74-php`.'
+                      items:
+                        properties:
+                          desc:
+                            description: 'The recommendation''s description.
+
+
+                              **Note:**
+
+
+                              * The function **only** returns this value if it exists.'
+                            type: string
+                          level:
+                            description: 'The level that triggers a recommendation to appear, based on [Bootstrap 3 alert components](http://getbootstrap.com/components/#alerts).
+
+
+                              * `primary`
+
+                              * `success`
+
+                              * `info`
+
+                              * `warning`
+
+                              * `danger`
+
+
+                              **Note:**
+
+
+                              * The function **only** returns this value if it exists.
+
+                              * This return''s value only affects the UI if set to `danger`.'
+                            enum:
+                            - primary
+                            - success
+                            - info
+                            - warning
+                            - danger
+                            type: string
+                          name:
+                            description: The recommendation's name.
+                            type: string
+                          'on':
+                            description: 'The action that triggers a recommendation.
+
+
+                              * `add`
+
+                              * `remove`'
+                            enum:
+                            - add
+                            - remove
+                            type: string
+                          options:
+                            description: An object that contains each option for the package's recommendations.
+                            items:
+                              properties:
+                                items:
+                                  description: 'An array of information that corresponds with a text value.
+
+
+                                    **Note:**
+
+
+                                    The function **only** returns this value if it exists.'
+                                  example:
+                                  - ea-apache24
+                                  items:
+                                    type: string
+                                  type: array
+                                level:
+                                  description: 'The level that triggers a recommendation to appear, based on [Bootstrap 3 alert components](http://getbootstrap.com/components/#alerts).
+
+
+                                    * `primary`
+
+                                    * `success`
+
+                                    * `info`
+
+                                    * `warning`
+
+                                    * `danger`
+
+
+                                    **Note:**
+
+
+                                    * The function **only** returns this value if it exists.
+
+                                    * This return''s value only affects the UI if set to `danger`.'
+                                  enum:
+                                  - primary
+                                  - success
+                                  - info
+                                  - warning
+                                  - danger
+                                  type: string
+                                recommended:
+                                  description: 'The type of recommendation that the interface will return.
+
+
+                                    * `true` - Recommended.
+
+                                    * `false` - Not recommended.
+
+
+                                    **Note:**
+
+
+                                    * The function **only** returns this value if it exists.
+
+                                    * If the function does **not** return this value, then the text displayed in the interface is informational.'
+                                  enum:
+                                  - true
+                                  - false
+                                  type: boolean
+                                text:
+                                  description: The text returned in the user interface.
+                                  type: string
+                                url:
+                                  description: 'A URL that provides more information.
+
+
+                                    **Note:**
+
+
+                                    The function **only** returns this value if it exists.'
+                                  format: url
+                                  type: string
+                              type: object
+                            type: array
+                          url:
+                            description: 'A URL to provide more information.
+
+
+                              **Note:**
+
+
+                              * The function **only** returns this value if it exists.'
+                            format: url
+                            type: string
+                        type: object
+                      type: array
+                    example:
+                      ea-php55-php:
+                      - desc: PHP DSO runs as the user by default. In a shared hosting environment, this is a security issue.
+                        level: danger
+                        name: PHP DSO
+                        'on': add
+                        options:
+                        - items:
+                          - ruid2
+                          - mpm-itk
+                          level: success
+                          recommended: true
+                          text: 'We strongly recommend that you install one of the following packages unless this is a single-user system:'
+                        - level: warning
+                          recommended: false
+                          text: If you use suPHP, you will add some security, but may experience performance issues on your server.
+                        url: https://www.example.com
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: ea4_recommendations
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '- 1 - Success.
+
+                          - 0 - Failed: Check the reason field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Return EasyApache 4 recommendations
+      tags:
+      - EasyApache
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  ea4_recommendations\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/ea4_recommendations?api.version=1
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '64'
+  /ea4_save_profile:
+    get:
+      description: 'This function creates an EasyApache 4 profile. This function only writes files to the `/etc/cpanel/ea4/profiles/custom/` directory.
+
+
+        **Important**:
+
+
+        When you disable the Web Server role, the system **disables** this function.'
+      operationId: EA4-ea4_save_profile
+      parameters:
+      - description: The profile's file name.
+        in: query
+        name: filename
+        required: true
+        schema:
+          example: new_profile.json
+          type: string
+      - description: The profile's display name.
+        in: query
+        name: name
+        required: true
+        schema:
+          example: New Profile
+          type: string
+      - description: The packages that the profile contains.
+        explode: true
+        in: query
+        name: pkg
+        required: true
+        schema:
+          example:
+          - ea-apache24
+          - ea-apache24-foo
+          items:
+            type: string
+          type: array
+        style: form
+      - description: The description of the profile.
+        in: query
+        name: desc
+        required: false
+        schema:
+          default: ''
+          example: This is my new profile.
+          type: string
+      - description: 'Whether to overwrite the file, if it exists.
+
+
+          * `1` — Overwrite the file.
+
+          * `0` — Do **not** overwrite the file.'
+        in: query
+        name: overwrite
+        required: false
+        schema:
+          default: 0
+          enum:
+          - 0
+          - 1
+          example: 1
+          type: integer
+      - description: Tags that are appropriate for the profile.
+        explode: true
+        in: query
+        name: tag
+        required: false
+        schema:
+          default: []
+          example:
+          - Apache 2.4
+          - Optimized for static content
+          items:
+            type: string
+          type: array
+        style: form
+      - description: The profile's version number.
+        in: query
+        name: version
+        required: false
+        schema:
+          default: '0'
+          example: '1.3'
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      already_exists:
+                        description: "Whether the filename value already exists.\n\n**Note**:\n\n The function only returns this field if the `overwrite` value is `0`, and the specified `filename` value already exists.\n- `1` — Exists.\n- `0` — Does **not** exist."
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      path:
+                        description: "The new profile's path.\n\n**Note**:\n\n The function only returns this field if it succeeds."
+                        example: /etc/cpanel/ea4/profiles/custom/new_profile.json
+                        type: string
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: ea4_save_profile
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Create EasyApache 4 profile
+      tags:
+      - EasyApache
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  ea4_save_profile \\\n  filename='new_profile.json' \\\n  name='New Profile' \\\n  pkg='ea-apache24' pkg='ea-apache24-foo'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/ea4_save_profile?api.version=1&filename=new_profile.json&name=New%20Profile&pkg=ea-apache24&pkg=ea-apache24-foo
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '64'
+  /eol_php_sites:
+    get:
+      description: 'This function counts the number of domains across all cPanel users that are using
+
+        end-of-life (EOL) PHP versions. It determines EOL status by comparing each domain''s
+
+        PHP version against the `oldest_supported_version` value from the
+
+        `/etc/cpanel/ea4/ea4-metainfo.json` file.'
+      operationId: EolPHPSites-eol_php_sites
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      eol_php_sites:
+                        description: The count of domains using PHP versions older than the oldest supported version.
+                        example: 42
+                        type: integer
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: eol_php_sites
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is 0. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` - Success
+
+                          * `0` - Failed: Check the reason field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Count domains using EOL PHP versions
+      tags:
+      - EasyApache
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  eol_php_sites\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/eol_php_sites?api.version=1
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '136'
+components:
+  securitySchemes:
+    BasicAuth:
+      scheme: basic
+      type: http
+externalDocs:
+  url: https://cpanel.net/developers/
+x-tagGroups:
+- name: Account Restoration
+  tags:
+  - Restore Account
+  - Restore Queue Management
+  - Restore Queue Reporting
+- name: Accounts
+  tags:
+  - Account Creation
+  - Account Enhancements
+  - Account Management
+  - Bandwidth and Disk Quotas
+  - Domain Information
+  - Passwords
+  - Styles
+  - Suspensions
+- name: API Development Tools
+  tags:
+  - API Execution
+  - API Statistics
+  - API Token Management
+  - Applications
+  - Session
+- name: Authentication
+  tags:
+  - Authentication Providers
+  - External Authentication
+  - Login URL
+  - SSH Keys and Connections
+  - Two-Factor Authentication
+- name: Backups
+  tags:
+  - Backup Destination
+  - Backup or Restore
+  - Backup Settings
+  - Legacy Migration
+- name: Commerce Integration
+  tags:
+  - Market Integration
+  - Sitejet
+- name: cPanel Market
+  tags:
+  - Product Management
+  - Provider Management
+- name: cPanel Support Tickets
+  tags:
+  - Support Access
+  - Ticket Management
+- name: Customizations
+  tags:
+  - Brand
+  - Customizations
+- name: Databases
+  tags:
+  - Manage MySQL Server
+  - MySQL Databases
+  - PostgreSQL Databases
+  - Remote MySQL Databases
+- name: DNS
+  tags:
+  - DNS Cluster Settings
+  - DNS Security
+  - DNS Zones
+  - Domain Management
+  - Domain Management
+  - Resolvers
+  - Service Records
+- name: Hosting Plans
+  tags:
+  - Feature Access
+  - Feature Lists
+  - Hosting Plan Extensions
+  - Hosting Plans
+- name: InProductSurvey
+  tags:
+  - InProductSurvey
+- name: Integrations
+  tags:
+  - API Authentication
+  - Links
+  - Scripts Hooks
+- name: IP Address Management
+  tags:
+  - IPv4 Address Settings
+  - IPv6 Address Settings
+  - Network Address Translation
+- name: Login Security (cPHulk)
+  tags:
+  - Management
+  - Reporting
+  - Settings
+- name: Logs
+  tags:
+  - Web Log Retention
+- name: Mail
+  tags:
+  - cPanel Account Mail Management
+  - Mail DNS Settings
+  - Mail Server Settings
+  - Spam Management
+  - Spam Protection (Greylisting)
+- name: Monitoring
+  tags:
+  - 360 Monitoring
+- name: NGINX Manager
+  tags:
+  - NGINX Manager
+- name: Resellers
+  tags:
+  - Account Enhancement Limit
+  - Account Limits
+  - Account Permissions
+  - Account Settings
+  - Reseller Account Management
+- name: Security
+  tags:
+  - WHM Access
+- name: Server Administration
+  tags:
+  - Configuration Clusters
+  - Configurations
+  - Connected Applications
+  - Connections
+  - cPanel Analytics
+  - License Management
+  - Notifications
+  - Plugin-Based Features
+  - Security
+  - Server Nodes
+  - Server Profiles
+  - Services
+  - System Information
+  - Updates
+- name: SSL Certificates
+  tags:
+  - Auto-Generated Certificates
+  - cPanel Account Settings
+  - SSL Server Settings
+- name: System Package Management
+  tags:
+  - Install or Uninstall Package
+  - List Package Information
+  - Package Manager Settings
+- name: Transfers
+  tags:
+  - cPanel Account Transfer
+  - Transfer Configuration
+  - Transfer Monitoring
+- name: UserData
+  tags:
+  - UserData
+- name: Web Server Configuration
+  tags:
+  - EasyApache Settings
+  - PHP
+  - PHP-FPM
+- name: Web Server Security (ModSecurity)
+  tags:
+  - Rule Settings
+  - Rule Vendor Settings
+  - Server Settings

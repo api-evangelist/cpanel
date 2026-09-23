@@ -1,0 +1,866 @@
+openapi: 3.2.0
+info:
+  contact:
+    email: cs@cpanel.net
+    name: WebPros International, LLC
+    url: https://cpanel.net/support/
+  description: WHM API.
+  license:
+    name: cPanel License
+    url: https://cpanel.net/legal-notices/
+  termsOfService: https://cpanel.net/legal-notices/
+  title: WHM API Execution API
+  version: 11.137.9999.106
+  x-api-evangelist-provenance: 'Harvested verbatim from cPanel''s developer portal on 2026-09-05 via the MCP tool get-full-api-description at https://api.docs.cpanel.net/mcp. ONE mechanical change was made before storage: example values containing PEM private-key or certificate blocks, and AWS-access-key-shaped example strings, were replaced with REDACTED_* placeholders so the file can be stored in a public git repository without tripping secret scanning. No path, operation, parameter, schema or description was altered, added or removed.'
+servers:
+- description: A server running WHM.
+  url: https://{host}:{port}/json-api
+  variables:
+    host:
+      default: whm-server.tld
+      description: The hostname of a server running WHM.
+    port:
+      default: '2087'
+      description: The WHM port.
+security:
+- BasicAuth: []
+tags:
+- description: The Server Administration module for WHM API 1.
+  name: API Execution
+paths:
+  /batch:
+    get:
+      description: This function combines calls for multiple WHM API 1 functions.
+      operationId: Other-batch
+      parameters:
+      - description: "The WHM API 1 function to call.\n\n**Important:**\n\nSpecify a `command` parameter for each function.\n\n**Note:**\n\nInclude the function's input parameters as a URI-encoded list after the function name.\nFor example, to call the `killdns` function with a `domain` parameter value of `example.com`\ndirectly you would use:\n\n  `killdns?domain=example.com`\n\nTo call this function using the `batch` function, URI-encode the command and pass it as part of the `batch` function:\n\n  `/json-api/batch?api.version=1&command=killdns%3Fdomain%3Dexample.com`\n\nYou can call the same function multiple times within a single batch API call. For example:\n\n  `/json-api/batch?api.version=1&command=version&command=version&command=version`"
+        in: query
+        name: command
+        required: true
+        schema:
+          example: version
+          type: string
+      - description: 'Whether to stop processing remaining commands in the batch when a command returns an error.
+
+
+          * `1` — Do **not** process remaining commands in the batch when an error occurs.
+
+          * `0` — When an error occurs, process the remaining commands in the batch.'
+        in: query
+        name: abort_on_error
+        required: false
+        schema:
+          default: 0
+          enum:
+          - 0
+          - 1
+          example: 0
+          type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      result:
+                        description: Information regarding function output. Each result contains the returns from one of the command parameter's functions. For information about each function's returns, read the function's documentation.
+                        example:
+                        - data:
+                            hostname: example-hosting.com
+                          metadata:
+                            command: gethostname
+                            reason: OK
+                            result: 1
+                            version: 1
+                        - data:
+                            version: 11.88.0.1
+                          metadata:
+                            command: version
+                            reason: OK
+                            result: 1
+                            version: 1
+                        items:
+                          properties:
+                            data:
+                              description: The data returned by the command.
+                              type: object
+                            metadata:
+                              description: The metadata returned by the command.
+                              properties:
+                                command:
+                                  description: The method name called.
+                                  example: version
+                                  type: string
+                                reason:
+                                  description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                                  example: OK
+                                  type: string
+                                result:
+                                  description: '* `1` - Success.
+
+                                    * `0` - Failed. Check the `reason` field for more details.'
+                                  enum:
+                                  - 0
+                                  - 1
+                                  example: 1
+                                  type: integer
+                                version:
+                                  description: The version of the API function.
+                                  example: 1
+                                  type: integer
+                              type: object
+                          type: object
+                        type: array
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: batch
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` - Success.
+
+                          * `0` - Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Run multiple WHM API 1 functions
+      tags:
+      - API Execution
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  batch \\\n  command='version'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/batch?api.version=1&command=version
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11'
+  /cors_proxy_get:
+    get:
+      description: This function allows your system to perform Cross-Origin Resource Sharing (CORS) HTTP requests.
+      operationId: CORSProxy-cors_proxy_get
+      parameters:
+      - description: The website that you wish to access.
+        in: query
+        name: url
+        required: true
+        schema:
+          example: http://www.example.com
+          format: url
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      _cp_redirects:
+                        description: "An array that contains the redirects which the website performs, if any exist.\n\n**Notes:**\n\n* This return counts redirects.\n* If any redirects exist, this returns as an array of objects containing the `content`, `protocol`, `reason`, `status`, `success`, and `url` returns and the `headers` object.\n* `null`  - Redirects do not exist.\n\n**Note:**\n\n The JSON example output above displays this condition."
+                        items:
+                          properties:
+                            headers:
+                              additionalProperties:
+                                oneOf:
+                                - type: string
+                                - type: integer
+                                x-additionalPropertiesName: header-name
+                              description: 'An object containing the header fields that the request returned.
+
+
+                                **Note:**
+
+
+                                This object''s keys vary based on the URL''s headers.'
+                              example:
+                                age: '425879'
+                                cache-control: max-age=604800
+                                content-length: '1256'
+                                content-type: text/html; charset=UTF-8
+                                date: Thu, 05 Mar 2020 23:42:25 GMT
+                                etag: '"3147526947+ident"'
+                                expires: Thu, 12 Mar 2020 23:42:25 GMT
+                                last-modified: Thu, 17 Oct 2019 07:18:26 GMT
+                                server: ECS (dab/4BA8)
+                                vary: Accept-Encoding
+                                x-cache: HIT
+                              type:
+                              - object
+                              - 'null'
+                            protocol:
+                              description: The URL's HTTP protocol.
+                              example: HTTP/1.1
+                              type:
+                              - string
+                              - 'null'
+                            reason:
+                              description: The response that the server returned.
+                              example: OK
+                              type:
+                              - string
+                              - 'null'
+                            status:
+                              description: The response's HTTP status code.
+                              example: '200'
+                              type:
+                              - string
+                              - 'null'
+                            success:
+                              description: 'Whether the function returned a 2XX HTTP status code.
+
+                                - `1` -  Success.
+
+                                - `0` -  Failure.'
+                              enum:
+                              - 0
+                              - 1
+                              example: 1
+                              type:
+                              - integer
+                              - 'null'
+                            url:
+                              description: The URL that provided the response.
+                              example: http://www.example.com
+                              format: url
+                              type:
+                              - string
+                              - 'null'
+                          type: object
+                        type:
+                        - array
+                        - 'null'
+                      content:
+                        description: "The URL's content.\n\n**Note:**\n\n We strongly recommend that you confirm the content's type before you use the content return's value. The function may also return this value in the _cp_redirects array of hashes. A valid string."
+                        example: '<!doctype html>\n<html>\n<head>\n <title>Example Domain</title>\n\n <meta charset=\"utf-8\" />\n <meta http-equiv=\"Content-type\" content=\"text/html; charset=utf-8\" />\n <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\" />\n <style type=\"text/css\">\n body {\n background-color: #f0f0f2;\n margin: 0;\n padding: 0;\n font-family: -apple-system, system-ui, BlinkMacSystemFont, \"Segoe UI\", \"Open Sans\", \"Helvetica Neue\", Helvetica, Arial, sans-serif;\n\n }\n div {\n width: 600px;\n margin: 5em auto;\n padding: 2em;\n background-color: #fdfdff;\n border-radius: 0.5em;\n box-shadow: 2px 3px 7px 2px rgba(0,0,0,0.02);\n }\n a:link, a:visited {\n color: #38488f;\n text-decoration: none;\n }\n @media (max-width: 700px) {\n div {\n margin: 0 auto;\n width: auto;\n }\n }\n </style>\n</head>\n\n<body>\n<div>\n <h1>Example Domain</h1>\n <p>This domain is for use in illustrative examples in documents. You may use this\n domain in literature without prior coordination or asking for permission.</p>\n <p><a href=\"https://www.iana.org/domains/example\">More information...</a></p>\n</div>\n</body>\n</html>\n'
+                        type: string
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: cors_proxy_get
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` - Success
+
+                          * `0` - Failed: Check the reason field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Enable CORS HTTP requests
+      tags:
+      - API Execution
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  cors_proxy_get \\\n  url='http://www.example.com'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/cors_proxy_get?api.version=1&url=http%3a%2f%2fwww.example.com
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '68'
+      x-cpanel-internal-only: false
+  /cpanel:
+    get:
+      description: 'You can call cPanel API and UAPI functions through the WHM API.
+
+
+        This method is useful, for example, when you develop plugins for WHM users, particularly resellers, but need to access cPanel functions. You can make these calls from within either the WHM or cPanel interfaces.
+
+
+        **Important:**
+
+
+        We recommend that you use the WHM API 1 `uapi_cpanel` function. The `uapi_cpanel` function is a more flexible way to call cPanel API functions from WHM. For example, you can use the `uapi_cpanel` function with the WHM API 1 `batch` function.
+
+
+        Before calling a cPanel API function via this method, read its documentation. The cPanel API function may require other parameters **not** listed in this document.'
+      operationId: Other-cpanel
+      parameters:
+      - description: 'The UAPI function name.
+
+
+          **Important:**
+
+
+          Function names are **case-sensitive**.'
+        in: query
+        name: cpanel_jsonapi_func
+        required: true
+        schema:
+          example: listpopswithdisk
+          type: string
+      - description: 'The UAPI module name.
+
+
+          **Important:**
+
+
+          Module names are **case-sensitive**.'
+        in: query
+        name: cpanel_jsonapi_module
+        required: true
+        schema:
+          example: Email
+          type: string
+      - description: 'The cPanel username for the account through which to call the function.
+
+
+          Make **certain** that you specify the username in lowercase characters **only**. cPanel & WHM automatically converts usernames to lowercase when you create a cPanel account. For this reason, if you supply a username that includes some or all capital letters, the call will fail.'
+        in: query
+        name: cpanel_jsonapi_user
+        required: true
+        schema:
+          example: user
+          format: username
+          type: string
+      - description: 'The cPanel API version to use.
+
+          * `1` — Use cPanel API 1.
+
+          * `2` — Use cPanel API 2.
+
+          * `3` — Use UAPI.'
+        in: query
+        name: cpanel_jsonapi_apiversion
+        schema:
+          default: 2
+          enum:
+          - 1
+          - 2
+          - 3
+          example: 3
+          type: integer
+      - description: 'The function''s input parameters and their values. You can add any additional parameters supported by the underlying cPanel API function.
+
+
+          Example: `domain=example.com`
+
+
+          **Note:**
+
+          * Separate multiple `parameter=value` pairs with the ampersand character (`&`).
+
+          * You **must** URI-encode these values.'
+        in: query
+        name: Variable Names and Values
+        schema:
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    description: Information returned by the cPanel API function passed in `cpanel_jsonapi_module` and `cpanel_jsonapi_func`.
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: cpanel
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is 0. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '- 1 - Success
+
+                          - 0 - Failed: Check the reason field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Run cPanel API or UAPI function
+      tags:
+      - API Execution
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  cpanel \\\n  cpanel_jsonapi_user='user' \\\n  cpanel_jsonapi_module='Email' \\\n  cpanel_jsonapi_func='listpopswithdisk'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/cpanel?api.version=1&cpanel_jsonapi_user=user&cpanel_jsonapi_module=Email&cpanel_jsonapi_func=listpopswithdisk
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '84'
+  /execute_remote_whmapi1_with_password:
+    get:
+      description: This function executes WHM API 1 functions on a remote server.
+      operationId: Cpanel-execute_remote_whmapi1_with_password
+      parameters:
+      - description: The name of the function to call on the remote server.
+        in: query
+        name: function
+        required: true
+        schema:
+          example: passwd
+          type: string
+      - description: The remote server's hostname or IP address.
+        in: query
+        name: host
+        required: true
+        schema:
+          example: host.example.com
+          type: string
+      - description: "The name of the parameter for the function.\n\n**Note:**\n\n You must enter the same number of parameter_name and parameter_value parameters."
+        in: query
+        name: parameter_name
+        required: true
+        schema:
+          example: user
+          type: string
+      - description: "The value of the parameter for the function.\n\n**Note:**\n\n You must enter the same number of parameter_name and parameter_value parameters."
+        in: query
+        name: parameter_value
+        required: true
+        schema:
+          example: username2
+          type: string
+      - description: The password to log in to the remote server.
+        in: query
+        name: password
+        required: true
+        schema:
+          example: luggage12345
+          type: string
+      - description: The username to log in to the remote server.
+        in: query
+        name: username
+        required: true
+        schema:
+          example: username
+          type: string
+      - description: "Whether to use TLS verification. This parameter defaults to On.\n\n**Important:**\n\n We strongly recommend that you use TLS verification. Only connect to a server if you can verify its identity."
+        in: query
+        name: tls_verification
+        required: false
+        schema:
+          example: 'on'
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      app:
+                        items:
+                          type: string
+                        type: array
+                      key-name*:
+                        description: "The function's output.\n\n**Note:**\n\n The system uses the remote function's return name. A valid possible values."
+                        example: system
+                        type: string
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: execute_remote_whmapi1_with_password
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is 0. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '- 1 - Success
+
+                          - 0 - Failed: Check the reason field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Run remote WHM API 1 function
+      tags:
+      - API Execution
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  execute_remote_whmapi1_with_password \\\n  host='host.example.com' \\\n  username='username' \\\n  password='luggage12345' \\\n  function='passwd' \\\n  parameter_name='user' \\\n  parameter_value='username2'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/execute_remote_whmapi1_with_password?api.version=1&host=host.example.com&username=username&password=luggage12345&function=passwd&parameter_name=user&parameter_value=username2
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '90'
+  /uapi_cpanel:
+    get:
+      description: This function calls a UAPI function through the WHM API. This function's output will match the UAPI function that it calls.
+      operationId: Cpanel-uapi_cpanel
+      parameters:
+      - description: 'The UAPI function to call.
+
+
+          ***Note:***
+
+
+          You must include the UAPI function''s required parameters. You can also include its optional parameters.
+
+
+          For example, to call the UAPI `get_stats` function with its required display parameter and the bandwidthusage and diskusage values:
+
+
+          `display=bandwidthusage|diskusage`'
+        in: query
+        name: cpanel.function
+        required: true
+        schema:
+          example: get_stats
+          type: string
+      - description: The UAPI function's cPanel module.
+        in: query
+        name: cpanel.module
+        required: true
+        schema:
+          example: StatsBar
+          type: string
+      - description: The cPanel username to call with the UAPI function.
+        in: query
+        name: cpanel.user
+        required: true
+        schema:
+          example: username
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      uapi:
+                        description: hash of function output. Each hash contains the returns from the called UAPI function. For information about a function's returns, read the function's documentation.
+                        example:
+                          data:
+                          - _count: '0'
+                            _max: unlimited
+                            _maxed: 0
+                            count: '0'
+                            feature: addondomains
+                            id: addondomains
+                            is_maxed: 0
+                            item: Addon Domains
+                            max: unlimited
+                            maxed_phrase: You are using your maximum allotment ([numf,_1]) of addon domains.
+                            module: Park
+                            name: addondomains
+                            near_limit_phrase: You are using [numf,_1] of [numf,_2] available addon [numerate,_2,domain,domains].
+                            percent: 0
+                            percent10: 0
+                            percent20: 0
+                            percent5: 0
+                            phrase: Addon Domains
+                            role: WebServer
+                            zeroisunlimited: 0
+                          errors: null
+                          messages: null
+                          metadata:
+                            transformed: 1
+                          status: 1
+                          warnings: null
+                        properties:
+                          data:
+                            anyOf:
+                            - type: string
+                            - type: number
+                            - type: integer
+                            - type: boolean
+                            - items: {}
+                              type: array
+                            - type: object
+                            description: The UAPI response. This value varies based on the UAPI function requested.
+                          errors:
+                            description: List of errors produced the by the API if any.
+                            items:
+                              type: string
+                            type:
+                            - array
+                            - 'null'
+                          messages:
+                            description: List of messages produced the by the API if any.
+                            items:
+                              type: string
+                            type:
+                            - array
+                            - 'null'
+                          metadata:
+                            properties:
+                              transformed:
+                                description: '- 1 - A transform was applied.
+
+                                  - 0 - A transform was not applied.'
+                                enum:
+                                - 0
+                                - 1
+                                example: 1
+                                type: integer
+                            type: object
+                          status:
+                            description: '- 1 - Success
+
+                              - 0 - Failed: Check the errors field for more details.'
+                            enum:
+                            - 0
+                            - 1
+                            example: 1
+                            type: integer
+                          warnings:
+                            description: List of warnings produced the by the API if any.
+                            items:
+                              type: string
+                            type:
+                            - array
+                            - 'null'
+                        type: object
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: uapi_cpanel
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is 0. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '- 1 - Success
+
+                          - 0 - Failed: Check the reason field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Run UAPI function through WHM API
+      tags:
+      - API Execution
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  uapi_cpanel \\\n  cpanel.function='get_stats' \\\n  cpanel.module='StatsBar' \\\n  cpanel.user='username'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/uapi_cpanel?api.version=1&cpanel.function=get_stats&cpanel.module=StatsBar&cpanel.user=username
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '86'
+components:
+  securitySchemes:
+    BasicAuth:
+      scheme: basic
+      type: http
+externalDocs:
+  url: https://cpanel.net/developers/
+x-tagGroups:
+- name: Account Restoration
+  tags:
+  - Restore Account
+  - Restore Queue Management
+  - Restore Queue Reporting
+- name: Accounts
+  tags:
+  - Account Creation
+  - Account Enhancements
+  - Account Management
+  - Bandwidth and Disk Quotas
+  - Domain Information
+  - Passwords
+  - Styles
+  - Suspensions
+- name: API Development Tools
+  tags:
+  - API Execution
+  - API Statistics
+  - API Token Management
+  - Applications
+  - Session
+- name: Authentication
+  tags:
+  - Authentication Providers
+  - External Authentication
+  - Login URL
+  - SSH Keys and Connections
+  - Two-Factor Authentication
+- name: Backups
+  tags:
+  - Backup Destination
+  - Backup or Restore
+  - Backup Settings
+  - Legacy Migration
+- name: Commerce Integration
+  tags:
+  - Market Integration
+  - Sitejet
+- name: cPanel Market
+  tags:
+  - Product Management
+  - Provider Management
+- name: cPanel Support Tickets
+  tags:
+  - Support Access
+  - Ticket Management
+- name: Customizations
+  tags:
+  - Brand
+  - Customizations
+- name: Databases
+  tags:
+  - Manage MySQL Server
+  - MySQL Databases
+  - PostgreSQL Databases
+  - Remote MySQL Databases
+- name: DNS
+  tags:
+  - DNS Cluster Settings
+  - DNS Security
+  - DNS Zones
+  - Domain Management
+  - Domain Management
+  - Resolvers
+  - Service Records
+- name: Hosting Plans
+  tags:
+  - Feature Access
+  - Feature Lists
+  - Hosting Plan Extensions
+  - Hosting Plans
+- name: InProductSurvey
+  tags:
+  - InProductSurvey
+- name: Integrations
+  tags:
+  - API Authentication
+  - Links
+  - Scripts Hooks
+- name: IP Address Management
+  tags:
+  - IPv4 Address Settings
+  - IPv6 Address Settings
+  - Network Address Translation
+- name: Login Security (cPHulk)
+  tags:
+  - Management
+  - Reporting
+  - Settings
+- name: Logs
+  tags:
+  - Web Log Retention
+- name: Mail
+  tags:
+  - cPanel Account Mail Management
+  - Mail DNS Settings
+  - Mail Server Settings
+  - Spam Management
+  - Spam Protection (Greylisting)
+- name: Monitoring
+  tags:
+  - 360 Monitoring
+- name: NGINX Manager
+  tags:
+  - NGINX Manager
+- name: Resellers
+  tags:
+  - Account Enhancement Limit
+  - Account Limits
+  - Account Permissions
+  - Account Settings
+  - Reseller Account Management
+- name: Security
+  tags:
+  - WHM Access
+- name: Server Administration
+  tags:
+  - Configuration Clusters
+  - Configurations
+  - Connected Applications
+  - Connections
+  - cPanel Analytics
+  - License Management
+  - Notifications
+  - Plugin-Based Features
+  - Security
+  - Server Nodes
+  - Server Profiles
+  - Services
+  - System Information
+  - Updates
+- name: SSL Certificates
+  tags:
+  - Auto-Generated Certificates
+  - cPanel Account Settings
+  - SSL Server Settings
+- name: System Package Management
+  tags:
+  - Install or Uninstall Package
+  - List Package Information
+  - Package Manager Settings
+- name: Transfers
+  tags:
+  - cPanel Account Transfer
+  - Transfer Configuration
+  - Transfer Monitoring
+- name: UserData
+  tags:
+  - UserData
+- name: Web Server Configuration
+  tags:
+  - EasyApache Settings
+  - PHP
+  - PHP-FPM
+- name: Web Server Security (ModSecurity)
+  tags:
+  - Rule Settings
+  - Rule Vendor Settings
+  - Server Settings

@@ -1,0 +1,3036 @@
+openapi: 3.2.0
+info:
+  contact:
+    email: cs@cpanel.net
+    name: WebPros International, LLC
+    url: https://cpanel.net/support/
+  description: UAPI accesses the cPanel interface's features. Use this API to access and modify cPanel account data and settings.
+  license:
+    name: cPanel License
+    url: https://cpanel.net/legal-notices/
+  termsOfService: https://cpanel.net/legal-notices/
+  title: cPanel U Web App API
+  version: 11.137.9999.106
+  x-api-evangelist-provenance: 'Harvested verbatim from cPanel''s developer portal on 2026-09-05 via the MCP tool get-full-api-description at https://api.docs.cpanel.net/mcp. ONE mechanical change was made before storage: example values containing PEM private-key or certificate blocks, and AWS-access-key-shaped example strings, were replaced with REDACTED_* placeholders so the file can be stored in a public git repository without tripping secret scanning. No path, operation, parameter, schema or description was altered, added or removed.'
+servers:
+- description: A server running cPanel.
+  url: https://{host}:{port}/execute
+  variables:
+    host:
+      default: cpanel-server.tld
+      description: The hostname of a server running cPanel.
+    port:
+      default: '2083'
+      description: The cPanel port.
+security:
+- BasicAuth: []
+tags:
+- description: The WebApp module for UAPI.
+  name: Webapp
+paths:
+  /WebApp/configure:
+    get:
+      description: 'This function updates an application''s configuration. Only the
+
+        parameters you pass change; omitted parameters keep their current
+
+        values.
+
+
+        **Important:**
+
+
+        The `env` parameter uses **replace-all** semantics — the value you
+
+        pass becomes the application''s complete set of environment
+
+        variables. To change one variable, read the current set first and
+
+        resubmit it with your change applied.'
+      operationId: WebApp_configure
+      parameters:
+      - description: The application's unique name (slug).
+        in: query
+        name: name
+        required: true
+        schema:
+          example: my-app
+          type: string
+      - description: 'The application root, relative to the top of the source, for a
+
+          source whose application does not live at the top level (for
+
+          example, `packages/web` in a monorepo).
+
+
+          Pass an empty value to reset the root back to the source top.
+
+
+          Changing this value re-runs the preflight against the new root,
+
+          which re-detects the application''s `framework` and `category` and
+
+          re-seeds the suggested build defaults (any value you pass explicitly
+
+          in the same call takes precedence). When it changes, the response
+
+          also carries the `confidence` and `defaults` from the re-detection.
+
+
+          This parameter must be a relative path inside the source.'
+        in: query
+        name: appdir
+        required: false
+        schema:
+          example: packages/web
+          type: string
+      - description: The command that builds the application.
+        in: query
+        name: build_command
+        required: false
+        schema:
+          example: npm run build
+          type: string
+      - description: 'The database action to perform.
+
+
+          * `create` — Provision a new database and database user, and inject the credentials into the application''s environment.
+
+          * `link` — Link the existing database that the `db_name` parameter specifies.'
+        in: query
+        name: db
+        required: false
+        schema:
+          enum:
+          - create
+          - link
+          example: create
+          type: string
+      - description: 'The name of the existing database to link.
+
+
+          **Required** when `db` is `link`.'
+        in: query
+        name: db_name
+        required: false
+        schema:
+          example: example_my_app
+          type: string
+      - description: 'The name (slug) used to name the deployment. When omitted, the
+
+          deployment is named after the application.'
+        in: query
+        name: deployname
+        required: false
+        schema:
+          example: my-app
+          type: string
+      - description: 'The domain to bind the application to. Any domain the account owns is
+
+          accepted — the main domain, an addon domain, a parked domain, or a
+
+          manually created subdomain — and the application is served AT it. A
+
+          domain that does not exist yet is created as a subdomain, provided the
+
+          account owns its root. A domain another application is already serving
+
+          is rejected; see the `domain_in_use` `error_category` value.
+
+
+          Pass an empty value to generate and bind a temporary domain
+
+          automatically. Because that address is generated rather than chosen,
+
+          it is held to a stricter rule: if a domain already exists there the
+
+          call fails with `domain_unavailable` instead of adopting it.'
+        in: query
+        name: domain
+        required: false
+        schema:
+          example: my-app.example.com
+          format: domain
+          type: string
+      - description: 'A JSON-encoded object of the application''s environment variables.
+
+
+          **Warning:** This **replaces all** existing environment variables
+
+          with the set you provide.
+
+
+          **Security note:** These values are stored in plaintext. Do not
+
+          use this parameter for sensitive secrets (API keys, database
+
+          passwords, tokens, etc.).'
+        in: query
+        name: env
+        required: false
+        schema:
+          example: '{"NODE_ENV":"production","API_KEY":"abc123"}'
+          format: json
+          type: string
+      - description: The run mode for `server` category applications.
+        in: query
+        name: mode
+        required: false
+        schema:
+          enum:
+          - production
+          - development
+          example: production
+          type: string
+      - description: The directory, relative to the application root, that the build writes its output to.
+        in: query
+        name: output_dir
+        required: false
+        schema:
+          example: dist
+          type: string
+      - description: The runtime version tag to run the application under. Use `WebApp::get_available` to list the valid tags.
+        in: query
+        name: runtime_tag
+        required: false
+        schema:
+          example: '22'
+          type: string
+      - description: The command that starts the application's server process. Only meaningful for the `server` category.
+        in: query
+        name: startup_command
+        required: false
+        schema:
+          example: npm run start
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  apiversion:
+                    description: The version of the API.
+                    example: 3
+                    type: integer
+                  func:
+                    description: The name of the method called.
+                    example: configure
+                    type: string
+                  module:
+                    description: The name of the module called.
+                    example: WebApp
+                    type: string
+                  result:
+                    properties:
+                      data:
+                        description: The application with its updated configuration.
+                        properties:
+                          category:
+                            description: 'The application''s category. This determines which
+
+                              lifecycle actions apply.
+
+
+                              * `static` — The application builds to static files that the web server serves directly.
+
+                              * `server` — The application runs a long-lived server process.
+
+                              * `other` — Any other kind of application.'
+                            enum:
+                            - static
+                            - server
+                            - other
+                            example: server
+                            type: string
+                          container_name:
+                            description: 'The name of the deployed container backing this
+
+                              application, or `null` while it is only staged.
+
+                              Assigned by the deploy and unique per application
+
+                              instance, so it identifies the exact deployed
+
+                              record even when several applications share a base
+
+                              name.'
+                            example: my-app.bob.01
+                            type:
+                            - string
+                            - 'null'
+                          confidence:
+                            description: 'How confident the preflight detection is. Present
+
+                              only when this call changed `appdir` and re-ran the
+
+                              preflight.
+
+
+                              * `high` — Strong framework markers found.
+
+                              * `low` — Partial markers found; verify the defaults before deploying.
+
+                              * `none` — No recognizable markers; the defaults are generic.'
+                            enum:
+                            - high
+                            - low
+                            - none
+                            example: high
+                            type: string
+                          defaults:
+                            description: Suggested configuration values for the detected framework. Present only when this call changed `appdir` and re-ran the preflight.
+                            properties:
+                              build_command:
+                                description: The suggested build command, or `null` if no build step is needed.
+                                example: npm run build
+                                type:
+                                - string
+                                - 'null'
+                              output_dir:
+                                description: The suggested build output directory, or `null` if not applicable.
+                                example: .next
+                                type:
+                                - string
+                                - 'null'
+                              runtime_tag:
+                                description: The suggested runtime version tag.
+                                example: '22'
+                                type: string
+                              startup_command:
+                                description: The suggested startup command, or `null` for `static` applications.
+                                example: npm run start
+                                type:
+                                - string
+                                - 'null'
+                            type: object
+                          db:
+                            description: The application's linked database information, or `null` if no database is linked.
+                            properties:
+                              env_keys:
+                                description: The environment variable names that carry the database credentials.
+                                example:
+                                - DB_NAME
+                                - DB_HOST
+                                - DB_PORT
+                                items:
+                                  type: string
+                                type: array
+                              host:
+                                description: The database server hostname.
+                                example: localhost
+                                format: hostname
+                                type: string
+                              name:
+                                description: The database name.
+                                example: example_my_app
+                                type: string
+                              port:
+                                description: The database server port.
+                                example: 3306
+                                type: integer
+                            type:
+                            - object
+                            - 'null'
+                          deployed:
+                            description: Whether a deploy has put the application live. This is `true` once the application holds a container or a deploy has completed successfully, and `false` for a freshly staged application or one whose only deploy failed.
+                            example: false
+                            type: boolean
+                          deployname:
+                            description: The name used to name the deployment, or `null` when it defaults to the application name.
+                            example: my-site
+                            type:
+                            - string
+                            - 'null'
+                          domain:
+                            description: The domain the application is bound to. This is an existing domain on the account or an automatically generated temporary domain.
+                            example: my-app.example.com
+                            format: domain
+                            type: string
+                          env:
+                            additionalProperties:
+                              type: string
+                            description: The application's environment variables.
+                            example:
+                              API_KEY: abc123
+                              NODE_ENV: production
+                            type: object
+                          framework:
+                            description: The application's detected or user-selected framework, or `null` if unknown.
+                            example: nextjs
+                            type:
+                            - string
+                            - 'null'
+                          last_deploy:
+                            description: Information about the most recent deploy, or `null` if the application has never deployed.
+                            properties:
+                              deploy_id:
+                                description: The unique identifier of the deploy.
+                                example: dp-20260612-0001
+                                type: string
+                              result:
+                                description: The result of the deploy.
+                                enum:
+                                - success
+                                - failed
+                                example: success
+                                type: string
+                              timestamp:
+                                description: When the deploy finished, in ISO 8601 format.
+                                example: '2026-06-12T14:03:22.000Z'
+                                format: date-time
+                                type: string
+                            type:
+                            - object
+                            - 'null'
+                          mode:
+                            description: The application's run mode. Only meaningful for the `server` category; `null` otherwise.
+                            enum:
+                            - production
+                            - development
+                            example: production
+                            type:
+                            - string
+                            - 'null'
+                          name:
+                            description: 'The application''s name (slug), unique across the
+
+                              account. Use this value to address the application
+
+                              in the per-app operations (`configure`, `deploy`,
+
+                              and the lifecycle verbs). A name is assigned at
+
+                              stage; staging a name a deployed application already
+
+                              uses registers the new one under the next free
+
+                              `<name>-N`, so each application keeps a distinct
+
+                              name.'
+                            example: my-app
+                            type: string
+                          package_manager:
+                            description: 'The package manager the deploy uses to install
+
+                              dependencies and run scripts. It is detected from
+
+                              the source''s `packageManager` field, a lockfile, or
+
+                              the default (`npm`).'
+                            enum:
+                            - npm
+                            - yarn
+                            - pnpm
+                            - bun
+                            example: npm
+                            type: string
+                          runtime:
+                            description: The application's runtime identifier.
+                            example: nodejs
+                            type: string
+                          runtime_tag:
+                            description: The runtime version tag.
+                            example: '22'
+                            type: string
+                          source:
+                            description: The application's source information.
+                            properties:
+                              branch:
+                                description: The Git branch, or `null` for ZIP sources.
+                                example: main
+                                type:
+                                - string
+                                - 'null'
+                              type:
+                                description: 'The source type.
+
+
+                                  * `zip` — An uploaded archive.
+
+                                  * `git` — A Git repository.'
+                                enum:
+                                - zip
+                                - git
+                                example: git
+                                type: string
+                              url:
+                                description: The Git repository URL, or `null` for ZIP sources.
+                                example: https://github.com/example/my-app.git
+                                type:
+                                - string
+                                - 'null'
+                            type: object
+                          staged:
+                            description: Whether the application's source is present in the staging area. This is `true` after the source is uploaded or cloned and until the application is deleted.
+                            example: true
+                            type: boolean
+                          status:
+                            description: 'The application''s current status.
+
+
+                              * `created` — Registered but never deployed.
+
+                              * `deploying` — A deploy is in progress.
+
+                              * `running` — The application is live.
+
+                              * `stopped` — The application is stopped.
+
+                              * `errored` — The last action failed.'
+                            enum:
+                            - created
+                            - deploying
+                            - running
+                            - stopped
+                            - errored
+                            example: created
+                            type: string
+                          url:
+                            description: The application's live HTTPS URL.
+                            example: https://my-app.example.com
+                            format: url
+                            type: string
+                        type: object
+                      errors:
+                        description: List of errors if the API failed.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      messages:
+                        description: List of messages generated by the API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      metadata:
+                        properties:
+                          error_category:
+                            description: 'The machine-readable failure category. Only present
+
+                              when `status` is `0` and the `domain` parameter was
+
+                              rejected.
+
+
+                              * `domain_in_use` — Another of this account''s applications already serves this domain.
+
+                              * `domain_unavailable` — A domain already exists at the application''s generated default address. Only returned when `domain` was passed empty; an explicitly named domain the account owns is adopted instead.'
+                            enum:
+                            - domain_in_use
+                            - domain_unavailable
+                            type:
+                            - string
+                            - 'null'
+                        type: object
+                      status:
+                        description: '- `1` - Success.
+
+                          - `0` - Failed. Check the `errors` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      warnings:
+                        description: List of warnings generated by the API. Warnings describe non-critical failures or other problematic conditions noted while running a API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                    type: object
+                type: object
+          description: HTTP Request was successful.
+      summary: Update an application's configuration
+      tags:
+      - Webapp
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "uapi --output=jsonpretty \\\n  --user=username \\\n  WebApp \\\n  configure \\\n  name='my-app' \\\n  env='{\"NODE_ENV\":\"production\",\"API_KEY\":\"abc123\"}' \\\n  build_command='npm run build' \\\n  startup_command='npm run start' \\\n  runtime_tag='22'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2083/cpsess##########/execute/WebApp/configure?name=my-app&build_command=npm%20run%20build&startup_command=npm%20run%20start&runtime_tag=22
+      - label: LiveAPI Perl
+        lang: Perl
+        source: "#--------------------------------------------------------------------------------------\n# Instructions:\n#--------------------------------------------------------------------------------------\n# <theme-name> is the theme assigned to cPanel account.\n# 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n# 2) mkdir api_examples\n# 3) cd api_examples\n# 4) create a file WebApp_configure.live.pl and put this code into that file.\n# 5) In your browser login to a cPanel account.\n# 6) Manually change the url from: .../frontend/<theme-name>/\n#    to .../frontend/<theme-name>/api_examples/WebApp_configure.live.pl\n#--------------------------------------------------------------------------------------\n\nuse strict;\n\nuse Cpanel::LiveAPI ();\n\nmy $cpanel = Cpanel::LiveAPI->new(); # Connect to cPanel - only do this once.\n\n# Print the header\nprint \"Content-type: text/plain\\r\\n\\r\\n\";\n\n# Call the API\nmy $response = $cpanel->uapi(\n    q/WebApp/,\n    q/configure/,\n    {\n        'name'            => 'my-app',\n        'env'             => '{\"NODE_ENV\":\"production\",\"API_KEY\":\"abc123\"}',\n        'build_command'   => 'npm run build',\n        'startup_command' => 'npm run start',\n        'runtime_tag'     => '22',\n    }\n);\n\n# Handle the response\nif ($response->{cpanelresult}{result}{status}) {\n    my $data = $response->{cpanelresult}{result}{data};\n    # Do something with the $data\n    # So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    # Report errors:\n    print to_json($response->{cpanelresult}{result}{errors});\n}\n\n# Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n#--------------------------------------------------------------------------------------\n# Helper function to convert a perl object to html printable json\n#--------------------------------------------------------------------------------------\nsub to_json {\n    require JSON;\n    my $str = JSON->new->pretty->encode($_[0]);\n    return $str;\n}\n"
+      - label: LiveAPI PHP
+        lang: PHP
+        source: "<?php\n//--------------------------------------------------------------------------------------\n// Instructions:\n//--------------------------------------------------------------------------------------\n// <theme-name> is the theme assigned to cPanel account.\n// 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n// 2) mkdir api_examples\n// 3) cd api_examples\n// 4) create a file WebApp_configure.live.php and put this code into that file.\n// 5) In your browser login to a cPanel account.\n// 6) Manually change the url from: .../frontend/<theme-name>/\n//    to .../frontend/<theme-name>/api_examples/WebApp_configure.live.php\n//--------------------------------------------------------------------------------------\n\n// Instantiate the CPANEL object.\nrequire_once \"/usr/local/cpanel/php/cpanel.php\";\n\n// Print the header\nheader('Content-Type: text/plain');\n\n// Connect to cPanel - only do this once.\n$cpanel = new CPANEL();\n\n// Call the API\n$response = $cpanel->uapi(\n    'WebApp',\n    'configure',\n    array (\n        'name'            => 'my-app',\n        'env'             => '{\"NODE_ENV\":\"production\",\"API_KEY\":\"abc123\"}',\n        'build_command'   => 'npm run build',\n        'startup_command' => 'npm run start',\n        'runtime_tag'     => '22',\n    )\n);\n\n// Handle the response\nif ($response['cpanelresult']['result']['status']) {\n    $data = $response['cpanelresult']['result']['data'];\n    // Do something with the $data\n    // So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    // Report errors:\n    print to_json($response['cpanelresult']['result']['errors']);\n}\n\n// Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n//--------------------------------------------------------------------------------------\n// Helper function to convert a PHP value to html printable json\n//--------------------------------------------------------------------------------------\nfunction to_json($data) {\n    return json_encode($data, JSON_PRETTY_PRINT);\n}"
+      x-cpanel-api-version: UAPI
+      x-cpanel-available-version: cPanel 138
+  /WebApp/delete:
+    get:
+      description: 'This function deletes an application: it stops the application''s
+
+        running process and removes its container, moves the application''s
+
+        directory aside to a `.bak` sibling (kept for verification or rollback
+
+        rather than deleted), and removes the application from the account''s
+
+        registry.
+
+
+        Deleting an application cannot be undone, so it requires an explicit
+
+        confirmation: `verify` must be `1` to proceed. A `verify` of `0` makes
+
+        no changes and returns a confirmation-required error.
+
+
+        The application''s domain is not affected; subdomains are managed
+
+        independently.
+
+
+        On failure, the `metadata.error_category` field carries a
+
+        machine-readable failure category.
+
+
+        **Important**:
+
+
+        The `verify` parameter is **required** and has no default. You must
+
+        set it to `1` to confirm this irreversible operation.'
+      operationId: WebApp_delete
+      parameters:
+      - description: The application's unique name (slug).
+        in: query
+        name: name
+        required: true
+        schema:
+          example: my-app
+          type: string
+      - description: "Confirmation that this irreversible deletion should proceed.\n\n* `1` — Confirm and delete: the container is torn down and the\n  application's directory is moved aside to `<name>.bak` (kept for\n  verification or rollback, not hard-deleted).\n* `0` — Make no changes; the call returns a confirmation-required\n  error.\n\nThis parameter is **required** and has no default."
+        in: query
+        name: verify
+        required: true
+        schema:
+          enum:
+          - 0
+          - 1
+          example: 1
+          type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  apiversion:
+                    description: The version of the API.
+                    example: 3
+                    type: integer
+                  func:
+                    description: The name of the method called.
+                    example: delete
+                    type: string
+                  module:
+                    description: The name of the module called.
+                    example: WebApp
+                    type: string
+                  result:
+                    properties:
+                      data:
+                        properties:
+                          removed:
+                            description: 'Whether the application was removed.
+
+
+                              * `1` — Removed.'
+                            enum:
+                            - 1
+                            example: 1
+                            type: integer
+                        type: object
+                      errors:
+                        description: List of errors if the API failed.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      messages:
+                        description: List of messages generated by the API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      metadata:
+                        properties:
+                          error_category:
+                            description: 'The machine-readable failure category. Only present
+
+                              when `status` is `0`.
+
+
+                              * `teardown_failed` — The system could not fully remove the application (its container or its files); the application remains registered so the deletion can be retried.
+
+                              * `deploy_in_progress` — The application has a deploy currently in flight; wait for it to finish or fail, then retry.'
+                            enum:
+                            - teardown_failed
+                            - deploy_in_progress
+                            type:
+                            - string
+                            - 'null'
+                      status:
+                        description: '- `1` - Success.
+
+                          - `0` - Failed. Check the `errors` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      warnings:
+                        description: List of warnings generated by the API. Warnings describe non-critical failures or other problematic conditions noted while running a API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                    type: object
+                type: object
+          description: HTTP Request was successful.
+      summary: Delete an application
+      tags:
+      - Webapp
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "uapi --output=jsonpretty \\\n  --user=username \\\n  WebApp \\\n  delete \\\n  name='my-app' \\\n  verify='1'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2083/cpsess##########/execute/WebApp/delete?name=my-app&verify=1
+      - label: LiveAPI Perl
+        lang: Perl
+        source: "#--------------------------------------------------------------------------------------\n# Instructions:\n#--------------------------------------------------------------------------------------\n# <theme-name> is the theme assigned to cPanel account.\n# 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n# 2) mkdir api_examples\n# 3) cd api_examples\n# 4) create a file WebApp_delete.live.pl and put this code into that file.\n# 5) In your browser login to a cPanel account.\n# 6) Manually change the url from: .../frontend/<theme-name>/\n#    to .../frontend/<theme-name>/api_examples/WebApp_delete.live.pl\n#--------------------------------------------------------------------------------------\n\nuse strict;\n\nuse Cpanel::LiveAPI ();\n\nmy $cpanel = Cpanel::LiveAPI->new(); # Connect to cPanel - only do this once.\n\n# Print the header\nprint \"Content-type: text/plain\\r\\n\\r\\n\";\n\n# Call the API\nmy $response = $cpanel->uapi(\n    q/WebApp/,\n    q/delete/,\n    {\n        'name'         => 'my-app',\n        'verify'       => 1,\n    }\n);\n\n# Handle the response\nif ($response->{cpanelresult}{result}{status}) {\n    my $data = $response->{cpanelresult}{result}{data};\n    # Do something with the $data\n    # So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    # Report errors:\n    print to_json($response->{cpanelresult}{result}{errors});\n}\n\n# Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n#--------------------------------------------------------------------------------------\n# Helper function to convert a perl object to html printable json\n#--------------------------------------------------------------------------------------\nsub to_json {\n    require JSON;\n    my $str = JSON->new->pretty->encode($_[0]);\n    return $str;\n}\n"
+      - label: LiveAPI PHP
+        lang: PHP
+        source: "<?php\n//--------------------------------------------------------------------------------------\n// Instructions:\n//--------------------------------------------------------------------------------------\n// <theme-name> is the theme assigned to cPanel account.\n// 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n// 2) mkdir api_examples\n// 3) cd api_examples\n// 4) create a file WebApp_delete.live.php and put this code into that file.\n// 5) In your browser login to a cPanel account.\n// 6) Manually change the url from: .../frontend/<theme-name>/\n//    to .../frontend/<theme-name>/api_examples/WebApp_delete.live.php\n//--------------------------------------------------------------------------------------\n\n// Instantiate the CPANEL object.\nrequire_once \"/usr/local/cpanel/php/cpanel.php\";\n\n// Print the header\nheader('Content-Type: text/plain');\n\n// Connect to cPanel - only do this once.\n$cpanel = new CPANEL();\n\n// Call the API\n$response = $cpanel->uapi(\n    'WebApp',\n    'delete',\n    array (\n        'name'         => 'my-app',\n        'verify'       => 1,\n    )\n);\n\n// Handle the response\nif ($response['cpanelresult']['result']['status']) {\n    $data = $response['cpanelresult']['result']['data'];\n    // Do something with the $data\n    // So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    // Report errors:\n    print to_json($response['cpanelresult']['result']['errors']);\n}\n\n// Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n//--------------------------------------------------------------------------------------\n// Helper function to convert a PHP value to html printable json\n//--------------------------------------------------------------------------------------\nfunction to_json($data) {\n    return json_encode($data, JSON_PRETTY_PRINT);\n}"
+      x-cpanel-api-version: UAPI
+      x-cpanel-available-version: cPanel 138
+  /WebApp/deploy:
+    get:
+      description: 'Web Apps is the recommended feature for deploying new web applications; prefer it over the older Application Manager (`PassengerApps`) feature for new deployments.
+
+
+        This function deploys an application: it installs dependencies, runs
+
+        the build, and promotes the result to the live environment.
+
+
+        **Note**:
+
+
+        This function starts an asynchronous task and returns immediately.
+
+        Stream the returned `sse_url` for live progress, or poll the task.
+
+        While the task runs, the application''s status is `deploying`. When
+
+        the task finishes the status transitions to `running` on success or
+
+        `errored` on failure. Use `WebApp::list` to read the current status
+
+        and inspect `last_deploy` for the outcome and any failure category.
+
+
+        **Important**:
+
+
+        This function is idempotent. If you call it while a deploy for the
+
+        same application is already running, it returns the in-flight
+
+        task''s identifiers instead of starting a new deploy.
+
+
+        If this call fails before the task is dispatched (for example, when
+
+        the application does not exist), `metadata.error_category` carries a
+
+        machine-readable failure category. Build and runtime failures occur
+
+        inside the background task and are recorded asynchronously in
+
+        `last_deploy.error_category`, which is accessible via `WebApp::list`.'
+      operationId: WebApp_deploy
+      parameters:
+      - description: The application's unique name (slug).
+        in: query
+        name: name
+        required: true
+        schema:
+          example: my-app
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  apiversion:
+                    description: The version of the API.
+                    example: 3
+                    type: integer
+                  func:
+                    description: The name of the method called.
+                    example: deploy
+                    type: string
+                  module:
+                    description: The name of the module called.
+                    example: WebApp
+                    type: string
+                  result:
+                    properties:
+                      data:
+                        properties:
+                          deploy_id:
+                            description: The unique identifier of this deploy.
+                            example: dp-20260612-0001
+                            type: string
+                          sse_url:
+                            description: The SSE URL to stream the deploy's progress.
+                            example: /sse/UserTasks/00000000_5c6c8b18228a35/deploy.log
+                            format: url-path
+                            type: string
+                          task_id:
+                            description: The task id of the SSE process.
+                            example: 00000000/5c76ec5566332c
+                            type: string
+                        type: object
+                      errors:
+                        description: List of errors if the API failed.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      messages:
+                        description: List of messages generated by the API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      metadata:
+                        properties:
+                          error_category:
+                            description: 'The machine-readable failure category. Only present
+
+                              when `status` is `0` and the error occurred before
+
+                              the background task was dispatched.
+
+
+                              Build and runtime pipeline failures occur asynchronously;
+
+                              they are recorded in `last_deploy.error_category` after
+
+                              the task finishes and are accessible via `WebApp::list`.
+
+
+                              * `build_failed` — The build step failed. The error message includes the breached resource cap when one applied.
+
+                              * `port_conflict` — The application''s port is already in use.
+
+                              * `requires_build` — The application must be built before it can deploy, and no build command is configured.
+
+                              * `start_failed` — The container started but is not listening on a port, so the application is unreachable; it most likely exited immediately.
+
+                              * `limit_exceeded` — Deploying this application would push the account''s number of running application containers to or past its maximum allowed applications.
+
+                              * `domain_in_use` — Another of this account''s applications has claimed the application''s domain since it was last configured.'
+                            enum:
+                            - build_failed
+                            - port_conflict
+                            - requires_build
+                            - start_failed
+                            - limit_exceeded
+                            - domain_in_use
+                            type:
+                            - string
+                            - 'null'
+                        type: object
+                      status:
+                        description: '- `1` - Success.
+
+                          - `0` - Failed. Check the `errors` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      warnings:
+                        description: List of warnings generated by the API. Warnings describe non-critical failures or other problematic conditions noted while running a API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                    type: object
+                type: object
+          description: HTTP Request was successful.
+      summary: Deploy an application
+      tags:
+      - Webapp
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "uapi --output=jsonpretty \\\n  --user=username \\\n  WebApp \\\n  deploy \\\n  name='my-app'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2083/cpsess##########/execute/WebApp/deploy?name=my-app
+      - label: LiveAPI Perl
+        lang: Perl
+        source: "#--------------------------------------------------------------------------------------\n# Instructions:\n#--------------------------------------------------------------------------------------\n# <theme-name> is the theme assigned to cPanel account.\n# 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n# 2) mkdir api_examples\n# 3) cd api_examples\n# 4) create a file WebApp_deploy.live.pl and put this code into that file.\n# 5) In your browser login to a cPanel account.\n# 6) Manually change the url from: .../frontend/<theme-name>/\n#    to .../frontend/<theme-name>/api_examples/WebApp_deploy.live.pl\n#--------------------------------------------------------------------------------------\n\nuse strict;\n\nuse Cpanel::LiveAPI ();\n\nmy $cpanel = Cpanel::LiveAPI->new(); # Connect to cPanel - only do this once.\n\n# Print the header\nprint \"Content-type: text/plain\\r\\n\\r\\n\";\n\n# Call the API\nmy $response = $cpanel->uapi(\n    q/WebApp/,\n    q/deploy/,\n    {\n        'name' => 'my-app',\n    }\n);\n\n# Handle the response\nif ($response->{cpanelresult}{result}{status}) {\n    my $data = $response->{cpanelresult}{result}{data};\n    # Do something with the $data\n    # So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    # Report errors:\n    print to_json($response->{cpanelresult}{result}{errors});\n}\n\n# Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n#--------------------------------------------------------------------------------------\n# Helper function to convert a perl object to html printable json\n#--------------------------------------------------------------------------------------\nsub to_json {\n    require JSON;\n    my $str = JSON->new->pretty->encode($_[0]);\n    return $str;\n}\n"
+      - label: LiveAPI PHP
+        lang: PHP
+        source: "<?php\n//--------------------------------------------------------------------------------------\n// Instructions:\n//--------------------------------------------------------------------------------------\n// <theme-name> is the theme assigned to cPanel account.\n// 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n// 2) mkdir api_examples\n// 3) cd api_examples\n// 4) create a file WebApp_deploy.live.php and put this code into that file.\n// 5) In your browser login to a cPanel account.\n// 6) Manually change the url from: .../frontend/<theme-name>/\n//    to .../frontend/<theme-name>/api_examples/WebApp_deploy.live.php\n//--------------------------------------------------------------------------------------\n\n// Instantiate the CPANEL object.\nrequire_once \"/usr/local/cpanel/php/cpanel.php\";\n\n// Print the header\nheader('Content-Type: text/plain');\n\n// Connect to cPanel - only do this once.\n$cpanel = new CPANEL();\n\n// Call the API\n$response = $cpanel->uapi(\n    'WebApp',\n    'deploy',\n    array (\n        'name' => 'my-app',\n    )\n);\n\n// Handle the response\nif ($response['cpanelresult']['result']['status']) {\n    $data = $response['cpanelresult']['result']['data'];\n    // Do something with the $data\n    // So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    // Report errors:\n    print to_json($response['cpanelresult']['result']['errors']);\n}\n\n// Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n//--------------------------------------------------------------------------------------\n// Helper function to convert a PHP value to html printable json\n//--------------------------------------------------------------------------------------\nfunction to_json($data) {\n    return json_encode($data, JSON_PRETTY_PRINT);\n}"
+      x-cpanel-api-version: UAPI
+      x-cpanel-available-version: cPanel 138
+  /WebApp/fetch_logs:
+    get:
+      description: 'This function fetches an application''s runtime or build logs. It
+
+        returns the most recent lines from the log the container persists on
+
+        disk. It returns a static tail; live streaming of new lines is not yet
+
+        available.'
+      operationId: WebApp_fetch_logs
+      parameters:
+      - description: 'The type of log to fetch.
+
+
+          * `app` — The application''s runtime output (stdout and stderr).
+
+          * `build` — The output of the build step.'
+        in: query
+        name: log_type
+        required: true
+        schema:
+          enum:
+          - app
+          - build
+          example: app
+          type: string
+      - description: The application's unique name (slug).
+        in: query
+        name: name
+        required: true
+        schema:
+          example: my-app
+          type: string
+      - description: 'Limit the output to a specific deploy''s logs. Only meaningful when
+
+          `log_type` is `build`.
+
+
+          This parameter defaults to the most recent deploy.'
+        in: query
+        name: deploy_id
+        required: false
+        schema:
+          example: dp-20260612-0001
+          type: string
+      - description: 'The maximum number of log lines to return, counted from the end
+
+          of the log.'
+        in: query
+        name: lines
+        required: false
+        schema:
+          example: 100
+          type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  apiversion:
+                    description: The version of the API.
+                    example: 3
+                    type: integer
+                  func:
+                    description: The name of the method called.
+                    example: fetch_logs
+                    type: string
+                  module:
+                    description: The name of the module called.
+                    example: WebApp
+                    type: string
+                  result:
+                    properties:
+                      data:
+                        properties:
+                          lines:
+                            description: The requested log lines, oldest first.
+                            example:
+                            - Server listening on port 3000
+                            - GET / 200 12ms
+                            items:
+                              type: string
+                            type: array
+                        type: object
+                      errors:
+                        description: List of errors if the API failed.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      messages:
+                        description: List of messages generated by the API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      metadata:
+                        properties: {}
+                      status:
+                        description: '- `1` - Success.
+
+                          - `0` - Failed. Check the `errors` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      warnings:
+                        description: List of warnings generated by the API. Warnings describe non-critical failures or other problematic conditions noted while running a API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                    type: object
+                type: object
+          description: HTTP Request was successful.
+      summary: Fetch an application's runtime or build logs
+      tags:
+      - Webapp
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "uapi --output=jsonpretty \\\n  --user=username \\\n  WebApp \\\n  fetch_logs \\\n  name='my-app' \\\n  log_type='app' \\\n  lines='100'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2083/cpsess##########/execute/WebApp/fetch_logs?name=my-app&log_type=app&lines=100
+      - label: LiveAPI Perl
+        lang: Perl
+        source: "#--------------------------------------------------------------------------------------\n# Instructions:\n#--------------------------------------------------------------------------------------\n# <theme-name> is the theme assigned to cPanel account.\n# 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n# 2) mkdir api_examples\n# 3) cd api_examples\n# 4) create a file WebApp_fetch_logs.live.pl and put this code into that file.\n# 5) In your browser login to a cPanel account.\n# 6) Manually change the url from: .../frontend/<theme-name>/\n#    to .../frontend/<theme-name>/api_examples/WebApp_fetch_logs.live.pl\n#--------------------------------------------------------------------------------------\n\nuse strict;\n\nuse Cpanel::LiveAPI ();\n\nmy $cpanel = Cpanel::LiveAPI->new(); # Connect to cPanel - only do this once.\n\n# Print the header\nprint \"Content-type: text/plain\\r\\n\\r\\n\";\n\n# Call the API\nmy $response = $cpanel->uapi(\n    q/WebApp/,\n    q/fetch_logs/,\n    {\n        'name'     => 'my-app',\n        'log_type' => 'app',\n        'lines'    => 100,\n    }\n);\n\n# Handle the response\nif ($response->{cpanelresult}{result}{status}) {\n    my $data = $response->{cpanelresult}{result}{data};\n    # Do something with the $data\n    # So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    # Report errors:\n    print to_json($response->{cpanelresult}{result}{errors});\n}\n\n# Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n#--------------------------------------------------------------------------------------\n# Helper function to convert a perl object to html printable json\n#--------------------------------------------------------------------------------------\nsub to_json {\n    require JSON;\n    my $str = JSON->new->pretty->encode($_[0]);\n    return $str;\n}\n"
+      - label: LiveAPI PHP
+        lang: PHP
+        source: "<?php\n//--------------------------------------------------------------------------------------\n// Instructions:\n//--------------------------------------------------------------------------------------\n// <theme-name> is the theme assigned to cPanel account.\n// 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n// 2) mkdir api_examples\n// 3) cd api_examples\n// 4) create a file WebApp_fetch_logs.live.php and put this code into that file.\n// 5) In your browser login to a cPanel account.\n// 6) Manually change the url from: .../frontend/<theme-name>/\n//    to .../frontend/<theme-name>/api_examples/WebApp_fetch_logs.live.php\n//--------------------------------------------------------------------------------------\n\n// Instantiate the CPANEL object.\nrequire_once \"/usr/local/cpanel/php/cpanel.php\";\n\n// Print the header\nheader('Content-Type: text/plain');\n\n// Connect to cPanel - only do this once.\n$cpanel = new CPANEL();\n\n// Call the API\n$response = $cpanel->uapi(\n    'WebApp',\n    'fetch_logs',\n    array (\n        'name'     => 'my-app',\n        'log_type' => 'app',\n        'lines'    => 100,\n    )\n);\n\n// Handle the response\nif ($response['cpanelresult']['result']['status']) {\n    $data = $response['cpanelresult']['result']['data'];\n    // Do something with the $data\n    // So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    // Report errors:\n    print to_json($response['cpanelresult']['result']['errors']);\n}\n\n// Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n//--------------------------------------------------------------------------------------\n// Helper function to convert a PHP value to html printable json\n//--------------------------------------------------------------------------------------\nfunction to_json($data) {\n    return json_encode($data, JSON_PRETTY_PRINT);\n}"
+      x-cpanel-api-version: UAPI
+      x-cpanel-available-version: cPanel 138
+  /WebApp/get_available:
+    get:
+      description: 'This function returns the account''s application capacity: the
+
+        account-wide application pool, and — per App Type enabled on the
+
+        server — the runtime''s supported version tags and their package
+
+        managers and the account''s current per-type usage.
+
+
+        Call this function first to determine what kinds of applications the
+
+        account can deploy.'
+      operationId: WebApp_get_available
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  apiversion:
+                    description: The version of the API.
+                    example: 3
+                    type: integer
+                  func:
+                    description: The name of the method called.
+                    example: get_available
+                    type: string
+                  module:
+                    description: The name of the module called.
+                    example: WebApp
+                    type: string
+                  result:
+                    properties:
+                      data:
+                        properties:
+                          account:
+                            description: The account-wide application capacity, shared across all App Types.
+                            properties:
+                              apps:
+                                description: The account's total application allowance, applied across all App Types together.
+                                properties:
+                                  available:
+                                    description: The number of additional applications the account may still create (`limit` minus `used`, never below zero).
+                                    example: 1
+                                    type: integer
+                                  limit:
+                                    description: The maximum number of applications the account may own.
+                                    example: 4
+                                    type: integer
+                                  used:
+                                    description: The number of applications the account currently owns.
+                                    example: 3
+                                    type: integer
+                                type: object
+                            type: object
+                          runtimes:
+                            additionalProperties:
+                              description: An enabled App Type, keyed by its runtime identifier.
+                              properties:
+                                apps:
+                                  description: The account's current applications of this App Type.
+                                  properties:
+                                    used:
+                                      description: The number of applications of this App Type the account currently owns.
+                                      example: 3
+                                      type: integer
+                                  required:
+                                  - used
+                                  type: object
+                                default_tag:
+                                  description: The runtime version tag used when the caller does not choose one.
+                                  example: '22'
+                                  type: string
+                                display_name:
+                                  description: The runtime's human-readable name.
+                                  example: Node.js
+                                  type: string
+                                tags:
+                                  additionalProperties:
+                                    description: The package managers available for this version tag.
+                                    example:
+                                    - npm
+                                    - yarn
+                                    - pnpm
+                                    items:
+                                      type: string
+                                    type: array
+                                  description: The runtime version tags available on the server, keyed by tag id, each mapping to its available package managers.
+                                  type: object
+                              type: object
+                            description: The App Types enabled on the server, keyed by runtime identifier (for example, `nodejs`). A disabled App Type is absent rather than listed as unavailable.
+                            type: object
+                        type: object
+                      errors:
+                        description: List of errors if the API failed.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      messages:
+                        description: List of messages generated by the API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      metadata:
+                        properties: {}
+                      status:
+                        description: '- `1` - Success.
+
+                          - `0` - Failed. Check the `errors` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      warnings:
+                        description: List of warnings generated by the API. Warnings describe non-critical failures or other problematic conditions noted while running a API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                    type: object
+                type: object
+          description: HTTP Request was successful.
+      summary: List available application runtimes and limits
+      tags:
+      - Webapp
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: 'uapi --output=jsonpretty --user=username WebApp get_available
+
+          '
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2083/cpsess##########/execute/WebApp/get_available
+      - label: LiveAPI Perl
+        lang: Perl
+        source: "#--------------------------------------------------------------------------------------\n# Instructions:\n#--------------------------------------------------------------------------------------\n# <theme-name> is the theme assigned to cPanel account.\n# 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n# 2) mkdir api_examples\n# 3) cd api_examples\n# 4) create a file WebApp_get_available.live.pl and put this code into that file.\n# 5) In your browser login to a cPanel account.\n# 6) Manually change the url from: .../frontend/<theme-name>/\n#    to .../frontend/<theme-name>/api_examples/WebApp_get_available.live.pl\n#--------------------------------------------------------------------------------------\n\nuse strict;\n\nuse Cpanel::LiveAPI ();\n\nmy $cpanel = Cpanel::LiveAPI->new(); # Connect to cPanel - only do this once.\n\n# Print the header\nprint \"Content-type: text/plain\\r\\n\\r\\n\";\n\n# Call the API\nmy $response = $cpanel->uapi(WebApp => 'get_available');\n\n# Handle the response\nif ($response->{cpanelresult}{result}{status}) {\n    my $data = $response->{cpanelresult}{result}{data};\n    # Do something with the $data\n    # So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    # Report errors:\n    print to_json($response->{cpanelresult}{result}{errors});\n}\n\n# Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n#--------------------------------------------------------------------------------------\n# Helper function to convert a perl object to html printable json\n#--------------------------------------------------------------------------------------\nsub to_json {\n    require JSON;\n    my $str = JSON->new->pretty->encode($_[0]);\n    return $str;\n}\n"
+      - label: LiveAPI PHP
+        lang: PHP
+        source: "<?php\n//--------------------------------------------------------------------------------------\n// Instructions:\n//--------------------------------------------------------------------------------------\n// <theme-name> is the theme assigned to cPanel account.\n// 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n// 2) mkdir api_examples\n// 3) cd api_examples\n// 4) create a file WebApp_get_available.live.php and put this code into that file.\n// 5) In your browser login to a cPanel account.\n// 6) Manually change the url from: .../frontend/<theme-name>/\n//    to .../frontend/<theme-name>/api_examples/WebApp_get_available.live.php\n//--------------------------------------------------------------------------------------\n\n// Instantiate the CPANEL object.\nrequire_once \"/usr/local/cpanel/php/cpanel.php\";\n\n// Print the header\nheader('Content-Type: text/plain');\n\n// Connect to cPanel - only do this once.\n$cpanel = new CPANEL();\n\n// Call the API\n$response = $cpanel->uapi(\n    'WebApp',\n    'get_available'\n);\n\n// Handle the response\nif ($response['cpanelresult']['result']['status']) {\n    $data = $response['cpanelresult']['result']['data'];\n    // Do something with the $data\n    // So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    // Report errors:\n    print to_json($response['cpanelresult']['result']['errors']);\n}\n\n// Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n//--------------------------------------------------------------------------------------\n// Helper function to convert a PHP value to html printable json\n//--------------------------------------------------------------------------------------\nfunction to_json($data) {\n    return json_encode($data, JSON_PRETTY_PRINT);\n}"
+      x-cpanel-api-version: UAPI
+      x-cpanel-available-version: cPanel 138
+  /WebApp/has_feature:
+    get:
+      description: 'This function reports whether the Web Apps feature is available
+
+        to the current account, so an interface can decide whether to surface
+
+        it.
+
+
+        It is available when the server has the feature enabled, the
+
+        account''s package feature list includes the feature, and the account is
+
+        allowed at least one application.'
+      operationId: WebApp_has_feature
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  apiversion:
+                    description: The version of the API.
+                    example: 3
+                    type: integer
+                  func:
+                    description: The name of the method called.
+                    example: has_feature
+                    type: string
+                  module:
+                    description: The name of the module called.
+                    example: WebApp
+                    type: string
+                  result:
+                    properties:
+                      data:
+                        properties:
+                          has_feature:
+                            description: 'Whether the Web Apps feature is available to
+
+                              the account.
+
+
+                              * `1` — Available.
+
+                              * `0` — Not available.'
+                            enum:
+                            - 0
+                            - 1
+                            example: 1
+                            type: integer
+                        type: object
+                      errors:
+                        description: List of errors if the API failed.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      messages:
+                        description: List of messages generated by the API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      metadata:
+                        properties: {}
+                      status:
+                        description: '- `1` - Success.
+
+                          - `0` - Failed. Check the `errors` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      warnings:
+                        description: List of warnings generated by the API. Warnings describe non-critical failures or other problematic conditions noted while running a API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                    type: object
+                type: object
+          description: HTTP Request was successful.
+      summary: Report whether the Web Apps feature is available
+      tags:
+      - Webapp
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: 'uapi --output=jsonpretty --user=username WebApp has_feature
+
+          '
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2083/cpsess##########/execute/WebApp/has_feature
+      - label: LiveAPI Perl
+        lang: Perl
+        source: "#--------------------------------------------------------------------------------------\n# Instructions:\n#--------------------------------------------------------------------------------------\n# <theme-name> is the theme assigned to cPanel account.\n# 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n# 2) mkdir api_examples\n# 3) cd api_examples\n# 4) create a file WebApp_has_feature.live.pl and put this code into that file.\n# 5) In your browser login to a cPanel account.\n# 6) Manually change the url from: .../frontend/<theme-name>/\n#    to .../frontend/<theme-name>/api_examples/WebApp_has_feature.live.pl\n#--------------------------------------------------------------------------------------\n\nuse strict;\n\nuse Cpanel::LiveAPI ();\n\nmy $cpanel = Cpanel::LiveAPI->new(); # Connect to cPanel - only do this once.\n\n# Print the header\nprint \"Content-type: text/plain\\r\\n\\r\\n\";\n\n# Call the API\nmy $response = $cpanel->uapi(WebApp => 'has_feature');\n\n# Handle the response\nif ($response->{cpanelresult}{result}{status}) {\n    my $data = $response->{cpanelresult}{result}{data};\n    # Do something with the $data\n    # So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    # Report errors:\n    print to_json($response->{cpanelresult}{result}{errors});\n}\n\n# Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n#--------------------------------------------------------------------------------------\n# Helper function to convert a perl object to html printable json\n#--------------------------------------------------------------------------------------\nsub to_json {\n    require JSON;\n    my $str = JSON->new->pretty->encode($_[0]);\n    return $str;\n}\n"
+      - label: LiveAPI PHP
+        lang: PHP
+        source: "<?php\n//--------------------------------------------------------------------------------------\n// Instructions:\n//--------------------------------------------------------------------------------------\n// <theme-name> is the theme assigned to cPanel account.\n// 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n// 2) mkdir api_examples\n// 3) cd api_examples\n// 4) create a file WebApp_has_feature.live.php and put this code into that file.\n// 5) In your browser login to a cPanel account.\n// 6) Manually change the url from: .../frontend/<theme-name>/\n//    to .../frontend/<theme-name>/api_examples/WebApp_has_feature.live.php\n//--------------------------------------------------------------------------------------\n\n// Instantiate the CPANEL object.\nrequire_once \"/usr/local/cpanel/php/cpanel.php\";\n\n// Print the header\nheader('Content-Type: text/plain');\n\n// Connect to cPanel - only do this once.\n$cpanel = new CPANEL();\n\n// Call the API\n$response = $cpanel->uapi(\n    'WebApp',\n    'has_feature'\n);\n\n// Handle the response\nif ($response['cpanelresult']['result']['status']) {\n    $data = $response['cpanelresult']['result']['data'];\n    // Do something with the $data\n    // So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    // Report errors:\n    print to_json($response['cpanelresult']['result']['errors']);\n}\n\n// Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n//--------------------------------------------------------------------------------------\n// Helper function to convert a PHP value to html printable json\n//--------------------------------------------------------------------------------------\nfunction to_json($data) {\n    return json_encode($data, JSON_PRETTY_PRINT);\n}"
+      x-cpanel-api-version: UAPI
+      x-cpanel-available-version: cPanel 138
+  /WebApp/list:
+    get:
+      description: 'This function lists the account''s web applications and their current
+
+        state.'
+      operationId: WebApp_list
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  apiversion:
+                    description: The version of the API.
+                    example: 3
+                    type: integer
+                  func:
+                    description: The name of the method called.
+                    example: list
+                    type: string
+                  module:
+                    description: The name of the module called.
+                    example: WebApp
+                    type: string
+                  result:
+                    properties:
+                      data:
+                        description: The account's web applications.
+                        items:
+                          properties:
+                            category:
+                              description: 'The application''s category. This determines which
+
+                                lifecycle actions apply.
+
+
+                                * `static` — The application builds to static files that the web server serves directly.
+
+                                * `server` — The application runs a long-lived server process.
+
+                                * `other` — Any other kind of application.'
+                              enum:
+                              - static
+                              - server
+                              - other
+                              example: server
+                              type: string
+                            container_name:
+                              description: 'The name of the deployed container backing this
+
+                                application, or `null` while it is only staged.
+
+                                Assigned by the deploy and unique per application
+
+                                instance, so it identifies the exact deployed
+
+                                record even when several applications share a
+
+                                base name.'
+                              example: my-app.bob.01
+                              type:
+                              - string
+                              - 'null'
+                            db:
+                              description: The application's linked database information, or `null` if no database is linked.
+                              properties:
+                                env_keys:
+                                  description: The environment variable names that carry the database credentials.
+                                  example:
+                                  - DB_NAME
+                                  - DB_HOST
+                                  - DB_PORT
+                                  items:
+                                    type: string
+                                  type: array
+                                host:
+                                  description: The database server hostname.
+                                  example: localhost
+                                  format: hostname
+                                  type: string
+                                name:
+                                  description: The database name.
+                                  example: example_my_app
+                                  type: string
+                                port:
+                                  description: The database server port.
+                                  example: 3306
+                                  type: integer
+                              type:
+                              - object
+                              - 'null'
+                            deployed:
+                              description: Whether a deploy has put the application live. This is `true` once the application holds a container or a deploy has completed successfully, and `false` for a freshly staged application or one whose only deploy failed.
+                              example: false
+                              type: boolean
+                            deployname:
+                              description: The name used to name the deployment, or `null` when it defaults to the application name.
+                              example: my-site
+                              type:
+                              - string
+                              - 'null'
+                            domain:
+                              description: The domain the application is bound to. This is an existing domain on the account or an automatically generated temporary domain.
+                              example: my-app.example.com
+                              format: domain
+                              type: string
+                            env:
+                              additionalProperties:
+                                type: string
+                              description: The application's environment variables.
+                              example:
+                                NODE_ENV: production
+                              type: object
+                            framework:
+                              description: The application's detected or user-selected framework, or `null` if unknown.
+                              example: nextjs
+                              type:
+                              - string
+                              - 'null'
+                            last_deploy:
+                              description: Information about the most recent deploy, or `null` if the application has never deployed.
+                              properties:
+                                deploy_id:
+                                  description: The unique identifier of the deploy.
+                                  example: dp-20260612-0001
+                                  type: string
+                                result:
+                                  description: The result of the deploy.
+                                  enum:
+                                  - success
+                                  - failed
+                                  example: success
+                                  type: string
+                                timestamp:
+                                  description: When the deploy finished, in ISO 8601 format.
+                                  example: '2026-06-12T14:03:22.000Z'
+                                  format: date-time
+                                  type: string
+                              type:
+                              - object
+                              - 'null'
+                            mode:
+                              description: The application's run mode. Only meaningful for the `server` category; `null` otherwise.
+                              enum:
+                              - production
+                              - development
+                              example: production
+                              type:
+                              - string
+                              - 'null'
+                            name:
+                              description: 'The application''s name (slug), unique across the
+
+                                account. Use this value to address the application
+
+                                in the per-app operations (`configure`, `deploy`,
+
+                                and the lifecycle verbs). A name is assigned at
+
+                                stage; staging a name a deployed application
+
+                                already uses registers the new one under the next
+
+                                free `<name>-N`, so each application keeps a
+
+                                distinct name.'
+                              example: my-app
+                              type: string
+                            package_manager:
+                              description: 'The package manager the deploy uses to install
+
+                                dependencies and run scripts. It is detected from
+
+                                the source''s `packageManager` field, a lockfile,
+
+                                or the default (`npm`).'
+                              enum:
+                              - npm
+                              - yarn
+                              - pnpm
+                              - bun
+                              example: npm
+                              type: string
+                            runtime:
+                              description: The application's runtime identifier.
+                              example: nodejs
+                              type: string
+                            runtime_tag:
+                              description: The runtime version tag.
+                              example: '22'
+                              type: string
+                            source:
+                              description: The application's source information.
+                              properties:
+                                branch:
+                                  description: The Git branch, or `null` for ZIP sources.
+                                  example: main
+                                  type:
+                                  - string
+                                  - 'null'
+                                type:
+                                  description: 'The source type.
+
+
+                                    * `zip` — An uploaded archive.
+
+                                    * `git` — A Git repository.'
+                                  enum:
+                                  - zip
+                                  - git
+                                  example: git
+                                  type: string
+                                url:
+                                  description: The Git repository URL, or `null` for ZIP sources.
+                                  example: https://github.com/example/my-app.git
+                                  type:
+                                  - string
+                                  - 'null'
+                              type: object
+                            staged:
+                              description: Whether the application's source is present in the staging area. This is `true` after the source is uploaded or cloned and until the application is deleted.
+                              example: true
+                              type: boolean
+                            status:
+                              description: 'The application''s current status.
+
+
+                                * `created` — Registered but never deployed.
+
+                                * `deploying` — A deploy is in progress.
+
+                                * `running` — The application is live.
+
+                                * `stopped` — The application is stopped.
+
+                                * `errored` — The last action failed.'
+                              enum:
+                              - created
+                              - deploying
+                              - running
+                              - stopped
+                              - errored
+                              example: running
+                              type: string
+                            url:
+                              description: The application's live HTTPS URL.
+                              example: https://my-app.example.com
+                              format: url
+                              type: string
+                          type: object
+                        type: array
+                      errors:
+                        description: List of errors if the API failed.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      messages:
+                        description: List of messages generated by the API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      metadata:
+                        properties: {}
+                      status:
+                        description: '- `1` - Success.
+
+                          - `0` - Failed. Check the `errors` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      warnings:
+                        description: List of warnings generated by the API. Warnings describe non-critical failures or other problematic conditions noted while running a API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                    type: object
+                type: object
+          description: HTTP Request was successful.
+      summary: List the account's web applications
+      tags:
+      - Webapp
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: 'uapi --output=jsonpretty --user=username WebApp list
+
+          '
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2083/cpsess##########/execute/WebApp/list
+      - label: LiveAPI Perl
+        lang: Perl
+        source: "#--------------------------------------------------------------------------------------\n# Instructions:\n#--------------------------------------------------------------------------------------\n# <theme-name> is the theme assigned to cPanel account.\n# 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n# 2) mkdir api_examples\n# 3) cd api_examples\n# 4) create a file WebApp_list.live.pl and put this code into that file.\n# 5) In your browser login to a cPanel account.\n# 6) Manually change the url from: .../frontend/<theme-name>/\n#    to .../frontend/<theme-name>/api_examples/WebApp_list.live.pl\n#--------------------------------------------------------------------------------------\n\nuse strict;\n\nuse Cpanel::LiveAPI ();\n\nmy $cpanel = Cpanel::LiveAPI->new(); # Connect to cPanel - only do this once.\n\n# Print the header\nprint \"Content-type: text/plain\\r\\n\\r\\n\";\n\n# Call the API\nmy $response = $cpanel->uapi(WebApp => 'list');\n\n# Handle the response\nif ($response->{cpanelresult}{result}{status}) {\n    my $data = $response->{cpanelresult}{result}{data};\n    # Do something with the $data\n    # So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    # Report errors:\n    print to_json($response->{cpanelresult}{result}{errors});\n}\n\n# Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n#--------------------------------------------------------------------------------------\n# Helper function to convert a perl object to html printable json\n#--------------------------------------------------------------------------------------\nsub to_json {\n    require JSON;\n    my $str = JSON->new->pretty->encode($_[0]);\n    return $str;\n}\n"
+      - label: LiveAPI PHP
+        lang: PHP
+        source: "<?php\n//--------------------------------------------------------------------------------------\n// Instructions:\n//--------------------------------------------------------------------------------------\n// <theme-name> is the theme assigned to cPanel account.\n// 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n// 2) mkdir api_examples\n// 3) cd api_examples\n// 4) create a file WebApp_list.live.php and put this code into that file.\n// 5) In your browser login to a cPanel account.\n// 6) Manually change the url from: .../frontend/<theme-name>/\n//    to .../frontend/<theme-name>/api_examples/WebApp_list.live.php\n//--------------------------------------------------------------------------------------\n\n// Instantiate the CPANEL object.\nrequire_once \"/usr/local/cpanel/php/cpanel.php\";\n\n// Print the header\nheader('Content-Type: text/plain');\n\n// Connect to cPanel - only do this once.\n$cpanel = new CPANEL();\n\n// Call the API\n$response = $cpanel->uapi(\n    'WebApp',\n    'list'\n);\n\n// Handle the response\nif ($response['cpanelresult']['result']['status']) {\n    $data = $response['cpanelresult']['result']['data'];\n    // Do something with the $data\n    // So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    // Report errors:\n    print to_json($response['cpanelresult']['result']['errors']);\n}\n\n// Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n//--------------------------------------------------------------------------------------\n// Helper function to convert a PHP value to html printable json\n//--------------------------------------------------------------------------------------\nfunction to_json($data) {\n    return json_encode($data, JSON_PRETTY_PRINT);\n}"
+      x-cpanel-api-version: UAPI
+      x-cpanel-available-version: cPanel 138
+  /WebApp/redeploy:
+    get:
+      description: 'This function redeploys an already-deployed application. For
+
+        Git-sourced applications, it pulls the latest changes from the
+
+        configured branch before deploying. Otherwise it behaves exactly
+
+        like `WebApp::deploy`.
+
+
+        **Note**:
+
+
+        This function starts an asynchronous task and returns immediately.
+
+        Stream the returned `sse_url` for live progress, or poll the task.
+
+        While the task runs, the application''s status is `deploying`. When
+
+        the task finishes the status transitions to `running` on success or
+
+        `errored` on failure. Use `WebApp::list` to read the current status
+
+        and inspect `last_deploy` for the outcome and any failure category.
+
+
+        **Important**:
+
+
+        This function is idempotent. If you call it while a deploy for the
+
+        same application is already running, it returns the in-flight
+
+        task''s identifiers instead of starting a new deploy.
+
+
+        If this call fails before the task is dispatched (for example, when
+
+        the application does not exist), `metadata.error_category` carries a
+
+        machine-readable failure category. Build and runtime failures occur
+
+        inside the background task and are recorded asynchronously in
+
+        `last_deploy.error_category`, which is accessible via `WebApp::list`.'
+      operationId: WebApp_redeploy
+      parameters:
+      - description: The application's unique name (slug).
+        in: query
+        name: name
+        required: true
+        schema:
+          example: my-app
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  apiversion:
+                    description: The version of the API.
+                    example: 3
+                    type: integer
+                  func:
+                    description: The name of the method called.
+                    example: redeploy
+                    type: string
+                  module:
+                    description: The name of the module called.
+                    example: WebApp
+                    type: string
+                  result:
+                    properties:
+                      data:
+                        properties:
+                          deploy_id:
+                            description: The unique identifier of this deploy.
+                            example: dp-20260612-0002
+                            type: string
+                          sse_url:
+                            description: The SSE URL to stream the deploy's progress.
+                            example: /sse/UserTasks/00000000_5c6c8b18228a35/deploy.log
+                            format: url-path
+                            type: string
+                          task_id:
+                            description: The task id of the SSE process.
+                            example: 00000000/5c76ec5566332c
+                            type: string
+                        type: object
+                      errors:
+                        description: List of errors if the API failed.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      messages:
+                        description: List of messages generated by the API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      metadata:
+                        properties:
+                          error_category:
+                            description: 'The machine-readable failure category. Only present
+
+                              when `status` is `0` and the error occurred before
+
+                              the background task was dispatched.
+
+
+                              Build and runtime pipeline failures occur asynchronously;
+
+                              they are recorded in `last_deploy.error_category` after
+
+                              the task finishes and are accessible via `WebApp::list`.
+
+
+                              * `build_failed` — The build step failed. The error message includes the breached resource cap when one applied.
+
+                              * `port_conflict` — The application''s port is already in use.
+
+                              * `requires_build` — The application must be built before it can deploy, and no build command is configured.
+
+                              * `start_failed` — The container started but is not listening on a port, so the application is unreachable; it most likely exited immediately.
+
+                              * `limit_exceeded` — Deploying this application would push the account''s number of running application containers to or past its maximum allowed applications.
+
+                              * `domain_in_use` — Another of this account''s applications has claimed the application''s domain since it was last configured.'
+                            enum:
+                            - build_failed
+                            - port_conflict
+                            - requires_build
+                            - start_failed
+                            - limit_exceeded
+                            - domain_in_use
+                            type:
+                            - string
+                            - 'null'
+                        type: object
+                      status:
+                        description: '- `1` - Success.
+
+                          - `0` - Failed. Check the `errors` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      warnings:
+                        description: List of warnings generated by the API. Warnings describe non-critical failures or other problematic conditions noted while running a API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                    type: object
+                type: object
+          description: HTTP Request was successful.
+      summary: Redeploy an application, pulling source updates first
+      tags:
+      - Webapp
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "uapi --output=jsonpretty \\\n  --user=username \\\n  WebApp \\\n  redeploy \\\n  name='my-app'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2083/cpsess##########/execute/WebApp/redeploy?name=my-app
+      - label: LiveAPI Perl
+        lang: Perl
+        source: "#--------------------------------------------------------------------------------------\n# Instructions:\n#--------------------------------------------------------------------------------------\n# <theme-name> is the theme assigned to cPanel account.\n# 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n# 2) mkdir api_examples\n# 3) cd api_examples\n# 4) create a file WebApp_redeploy.live.pl and put this code into that file.\n# 5) In your browser login to a cPanel account.\n# 6) Manually change the url from: .../frontend/<theme-name>/\n#    to .../frontend/<theme-name>/api_examples/WebApp_redeploy.live.pl\n#--------------------------------------------------------------------------------------\n\nuse strict;\n\nuse Cpanel::LiveAPI ();\n\nmy $cpanel = Cpanel::LiveAPI->new(); # Connect to cPanel - only do this once.\n\n# Print the header\nprint \"Content-type: text/plain\\r\\n\\r\\n\";\n\n# Call the API\nmy $response = $cpanel->uapi(\n    q/WebApp/,\n    q/redeploy/,\n    {\n        'name' => 'my-app',\n    }\n);\n\n# Handle the response\nif ($response->{cpanelresult}{result}{status}) {\n    my $data = $response->{cpanelresult}{result}{data};\n    # Do something with the $data\n    # So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    # Report errors:\n    print to_json($response->{cpanelresult}{result}{errors});\n}\n\n# Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n#--------------------------------------------------------------------------------------\n# Helper function to convert a perl object to html printable json\n#--------------------------------------------------------------------------------------\nsub to_json {\n    require JSON;\n    my $str = JSON->new->pretty->encode($_[0]);\n    return $str;\n}\n"
+      - label: LiveAPI PHP
+        lang: PHP
+        source: "<?php\n//--------------------------------------------------------------------------------------\n// Instructions:\n//--------------------------------------------------------------------------------------\n// <theme-name> is the theme assigned to cPanel account.\n// 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n// 2) mkdir api_examples\n// 3) cd api_examples\n// 4) create a file WebApp_redeploy.live.php and put this code into that file.\n// 5) In your browser login to a cPanel account.\n// 6) Manually change the url from: .../frontend/<theme-name>/\n//    to .../frontend/<theme-name>/api_examples/WebApp_redeploy.live.php\n//--------------------------------------------------------------------------------------\n\n// Instantiate the CPANEL object.\nrequire_once \"/usr/local/cpanel/php/cpanel.php\";\n\n// Print the header\nheader('Content-Type: text/plain');\n\n// Connect to cPanel - only do this once.\n$cpanel = new CPANEL();\n\n// Call the API\n$response = $cpanel->uapi(\n    'WebApp',\n    'redeploy',\n    array (\n        'name' => 'my-app',\n    )\n);\n\n// Handle the response\nif ($response['cpanelresult']['result']['status']) {\n    $data = $response['cpanelresult']['result']['data'];\n    // Do something with the $data\n    // So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    // Report errors:\n    print to_json($response['cpanelresult']['result']['errors']);\n}\n\n// Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n//--------------------------------------------------------------------------------------\n// Helper function to convert a PHP value to html printable json\n//--------------------------------------------------------------------------------------\nfunction to_json($data) {\n    return json_encode($data, JSON_PRETTY_PRINT);\n}"
+      x-cpanel-api-version: UAPI
+      x-cpanel-available-version: cPanel 138
+  /WebApp/restart:
+    get:
+      description: 'This function restarts an application''s server process.
+
+
+        **Important**:
+
+
+        This function only applies to applications in the `server`
+
+        category. Calling it on a `static` application fails with the
+
+        `invalid_category` error category.'
+      operationId: WebApp_restart
+      parameters:
+      - description: The application's unique name (slug).
+        in: query
+        name: name
+        required: true
+        schema:
+          example: my-app
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  apiversion:
+                    description: The version of the API.
+                    example: 3
+                    type: integer
+                  func:
+                    description: The name of the method called.
+                    example: restart
+                    type: string
+                  module:
+                    description: The name of the module called.
+                    example: WebApp
+                    type: string
+                  result:
+                    properties:
+                      data:
+                        properties:
+                          status:
+                            description: The application's status after the action.
+                            enum:
+                            - created
+                            - deploying
+                            - running
+                            - stopped
+                            - errored
+                            example: running
+                            type: string
+                        type: object
+                      errors:
+                        description: List of errors if the API failed.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      messages:
+                        description: List of messages generated by the API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      metadata:
+                        properties:
+                          error_category:
+                            description: 'The machine-readable failure category. Only present
+
+                              when `status` is `0`.
+
+
+                              * `invalid_category` — The action does not apply to the application''s category.'
+                            enum:
+                            - invalid_category
+                            type:
+                            - string
+                            - 'null'
+                        type: object
+                      status:
+                        description: '- `1` - Success.
+
+                          - `0` - Failed. Check the `errors` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      warnings:
+                        description: List of warnings generated by the API. Warnings describe non-critical failures or other problematic conditions noted while running a API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                    type: object
+                type: object
+          description: HTTP Request was successful.
+      summary: Restart an application's server process
+      tags:
+      - Webapp
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "uapi --output=jsonpretty \\\n  --user=username \\\n  WebApp \\\n  restart \\\n  name='my-app'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2083/cpsess##########/execute/WebApp/restart?name=my-app
+      - label: LiveAPI Perl
+        lang: Perl
+        source: "#--------------------------------------------------------------------------------------\n# Instructions:\n#--------------------------------------------------------------------------------------\n# <theme-name> is the theme assigned to cPanel account.\n# 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n# 2) mkdir api_examples\n# 3) cd api_examples\n# 4) create a file WebApp_restart.live.pl and put this code into that file.\n# 5) In your browser login to a cPanel account.\n# 6) Manually change the url from: .../frontend/<theme-name>/\n#    to .../frontend/<theme-name>/api_examples/WebApp_restart.live.pl\n#--------------------------------------------------------------------------------------\n\nuse strict;\n\nuse Cpanel::LiveAPI ();\n\nmy $cpanel = Cpanel::LiveAPI->new(); # Connect to cPanel - only do this once.\n\n# Print the header\nprint \"Content-type: text/plain\\r\\n\\r\\n\";\n\n# Call the API\nmy $response = $cpanel->uapi(\n    q/WebApp/,\n    q/restart/,\n    {\n        'name' => 'my-app',\n    }\n);\n\n# Handle the response\nif ($response->{cpanelresult}{result}{status}) {\n    my $data = $response->{cpanelresult}{result}{data};\n    # Do something with the $data\n    # So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    # Report errors:\n    print to_json($response->{cpanelresult}{result}{errors});\n}\n\n# Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n#--------------------------------------------------------------------------------------\n# Helper function to convert a perl object to html printable json\n#--------------------------------------------------------------------------------------\nsub to_json {\n    require JSON;\n    my $str = JSON->new->pretty->encode($_[0]);\n    return $str;\n}\n"
+      - label: LiveAPI PHP
+        lang: PHP
+        source: "<?php\n//--------------------------------------------------------------------------------------\n// Instructions:\n//--------------------------------------------------------------------------------------\n// <theme-name> is the theme assigned to cPanel account.\n// 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n// 2) mkdir api_examples\n// 3) cd api_examples\n// 4) create a file WebApp_restart.live.php and put this code into that file.\n// 5) In your browser login to a cPanel account.\n// 6) Manually change the url from: .../frontend/<theme-name>/\n//    to .../frontend/<theme-name>/api_examples/WebApp_restart.live.php\n//--------------------------------------------------------------------------------------\n\n// Instantiate the CPANEL object.\nrequire_once \"/usr/local/cpanel/php/cpanel.php\";\n\n// Print the header\nheader('Content-Type: text/plain');\n\n// Connect to cPanel - only do this once.\n$cpanel = new CPANEL();\n\n// Call the API\n$response = $cpanel->uapi(\n    'WebApp',\n    'restart',\n    array (\n        'name' => 'my-app',\n    )\n);\n\n// Handle the response\nif ($response['cpanelresult']['result']['status']) {\n    $data = $response['cpanelresult']['result']['data'];\n    // Do something with the $data\n    // So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    // Report errors:\n    print to_json($response['cpanelresult']['result']['errors']);\n}\n\n// Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n//--------------------------------------------------------------------------------------\n// Helper function to convert a PHP value to html printable json\n//--------------------------------------------------------------------------------------\nfunction to_json($data) {\n    return json_encode($data, JSON_PRETTY_PRINT);\n}"
+      x-cpanel-api-version: UAPI
+      x-cpanel-available-version: cPanel 138
+  /WebApp/set_mode:
+    get:
+      description: 'This function sets an application''s run mode and restarts the
+
+        application so the new mode takes effect.
+
+
+        **Important**:
+
+
+        This function only applies to applications in the `server`
+
+        category. Calling it on a `static` application fails with the
+
+        `invalid_category` error category.'
+      operationId: WebApp_set_mode
+      parameters:
+      - description: The run mode to set.
+        in: query
+        name: mode
+        required: true
+        schema:
+          enum:
+          - production
+          - development
+          example: development
+          type: string
+      - description: The application's unique name (slug).
+        in: query
+        name: name
+        required: true
+        schema:
+          example: my-app
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  apiversion:
+                    description: The version of the API.
+                    example: 3
+                    type: integer
+                  func:
+                    description: The name of the method called.
+                    example: set_mode
+                    type: string
+                  module:
+                    description: The name of the module called.
+                    example: WebApp
+                    type: string
+                  result:
+                    properties:
+                      data:
+                        properties:
+                          mode:
+                            description: The application's run mode after the change.
+                            enum:
+                            - production
+                            - development
+                            example: development
+                            type: string
+                          restarted:
+                            description: 'Whether the application restarted to apply the new
+
+                              mode.
+
+
+                              * `1` — Restarted.'
+                            enum:
+                            - 1
+                            example: 1
+                            type: integer
+                        type: object
+                      errors:
+                        description: List of errors if the API failed.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      messages:
+                        description: List of messages generated by the API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      metadata:
+                        properties:
+                          error_category:
+                            description: 'The machine-readable failure category. Only present
+
+                              when `status` is `0`.
+
+
+                              * `invalid_category` — The action does not apply to the application''s category.'
+                            enum:
+                            - invalid_category
+                            type:
+                            - string
+                            - 'null'
+                        type: object
+                      status:
+                        description: '- `1` - Success.
+
+                          - `0` - Failed. Check the `errors` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      warnings:
+                        description: List of warnings generated by the API. Warnings describe non-critical failures or other problematic conditions noted while running a API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                    type: object
+                type: object
+          description: HTTP Request was successful.
+      summary: Set an application's run mode
+      tags:
+      - Webapp
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "uapi --output=jsonpretty \\\n  --user=username \\\n  WebApp \\\n  set_mode \\\n  name='my-app' \\\n  mode='development'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2083/cpsess##########/execute/WebApp/set_mode?name=my-app&mode=development
+      - label: LiveAPI Perl
+        lang: Perl
+        source: "#--------------------------------------------------------------------------------------\n# Instructions:\n#--------------------------------------------------------------------------------------\n# <theme-name> is the theme assigned to cPanel account.\n# 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n# 2) mkdir api_examples\n# 3) cd api_examples\n# 4) create a file WebApp_set_mode.live.pl and put this code into that file.\n# 5) In your browser login to a cPanel account.\n# 6) Manually change the url from: .../frontend/<theme-name>/\n#    to .../frontend/<theme-name>/api_examples/WebApp_set_mode.live.pl\n#--------------------------------------------------------------------------------------\n\nuse strict;\n\nuse Cpanel::LiveAPI ();\n\nmy $cpanel = Cpanel::LiveAPI->new(); # Connect to cPanel - only do this once.\n\n# Print the header\nprint \"Content-type: text/plain\\r\\n\\r\\n\";\n\n# Call the API\nmy $response = $cpanel->uapi(\n    q/WebApp/,\n    q/set_mode/,\n    {\n        'name' => 'my-app',\n        'mode' => 'development',\n    }\n);\n\n# Handle the response\nif ($response->{cpanelresult}{result}{status}) {\n    my $data = $response->{cpanelresult}{result}{data};\n    # Do something with the $data\n    # So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    # Report errors:\n    print to_json($response->{cpanelresult}{result}{errors});\n}\n\n# Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n#--------------------------------------------------------------------------------------\n# Helper function to convert a perl object to html printable json\n#--------------------------------------------------------------------------------------\nsub to_json {\n    require JSON;\n    my $str = JSON->new->pretty->encode($_[0]);\n    return $str;\n}\n"
+      - label: LiveAPI PHP
+        lang: PHP
+        source: "<?php\n//--------------------------------------------------------------------------------------\n// Instructions:\n//--------------------------------------------------------------------------------------\n// <theme-name> is the theme assigned to cPanel account.\n// 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n// 2) mkdir api_examples\n// 3) cd api_examples\n// 4) create a file WebApp_set_mode.live.php and put this code into that file.\n// 5) In your browser login to a cPanel account.\n// 6) Manually change the url from: .../frontend/<theme-name>/\n//    to .../frontend/<theme-name>/api_examples/WebApp_set_mode.live.php\n//--------------------------------------------------------------------------------------\n\n// Instantiate the CPANEL object.\nrequire_once \"/usr/local/cpanel/php/cpanel.php\";\n\n// Print the header\nheader('Content-Type: text/plain');\n\n// Connect to cPanel - only do this once.\n$cpanel = new CPANEL();\n\n// Call the API\n$response = $cpanel->uapi(\n    'WebApp',\n    'set_mode',\n    array (\n        'name' => 'my-app',\n        'mode' => 'development',\n    )\n);\n\n// Handle the response\nif ($response['cpanelresult']['result']['status']) {\n    $data = $response['cpanelresult']['result']['data'];\n    // Do something with the $data\n    // So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    // Report errors:\n    print to_json($response['cpanelresult']['result']['errors']);\n}\n\n// Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n//--------------------------------------------------------------------------------------\n// Helper function to convert a PHP value to html printable json\n//--------------------------------------------------------------------------------------\nfunction to_json($data) {\n    return json_encode($data, JSON_PRETTY_PRINT);\n}"
+      x-cpanel-api-version: UAPI
+      x-cpanel-available-version: cPanel 138
+  /WebApp/stage:
+    get:
+      description: 'Web Apps is the recommended feature for deploying new web applications, and this function is the entry point. Prefer it over the older Application Manager (`PassengerApps`) feature for new deployments.
+
+
+        This function registers a new web application from an uploaded
+
+        archive or a Git repository. Once the source is placed on disk, it
+
+        runs a preflight that inspects the source and detects the
+
+        application''s framework and category, records them on the
+
+        application, and derives suggested configuration defaults. The
+
+        detection `confidence` and the suggested `defaults` are returned so
+
+        you can pass them to `WebApp::configure`. The application is
+
+        registered but **not** deployed — call `WebApp::configure` (optional)
+
+        and then `WebApp::deploy` to bring it live.
+
+
+        The preflight never fails the stage: a source with no recognizable
+
+        markers is registered with a `none` confidence and generic defaults.
+
+
+        Registering a name that is still **staged** (not yet deployed)
+
+        overwrites it: the previously staged application and its source are
+
+        replaced, and the response `warnings` array reports that the old
+
+        files were overwritten.
+
+
+        Registering a name that is already **deployed** leaves the running
+
+        application untouched — its container and live routing are never
+
+        disturbed — but the new application cannot reuse the deployed
+
+        application''s display name, or `WebApp::list` and bare-name
+
+        addressing could not tell the two apart. So it is registered under
+
+        the next free `-N` (for example, `my-app-2`), and the response
+
+        `warnings` array reports the assigned name. **Read the assigned name
+
+        from the response `data.name`: you must pass that name (not the one
+
+        you requested) to `WebApp::configure` and `WebApp::deploy` to act on
+
+        this application**, which stands up as its own separate container.
+
+
+        On failure, the `metadata.error_category` field carries a
+
+        machine-readable failure category.'
+      operationId: WebApp_stage
+      parameters:
+      - description: 'The requested application name (slug). If a deployed application
+
+          already uses it, the application is registered under the next free
+
+          `<name>-N` instead; read the assigned name from the response
+
+          `data.name` and use it for `WebApp::configure` and `WebApp::deploy`.'
+        in: query
+        name: name
+        required: true
+        schema:
+          example: my-app
+          type: string
+      - description: "The application's source location. This is **required** for every\nsource type:\n\n* When `source_type` is `zip` — the path, relative to the user's\n  home directory, of a previously uploaded source archive\n  (for example, `uploads/my-app.zip`).\n* When `source_type` is `git` — the Git repository URL to clone\n  (for example, `https://github.com/example/my-app.git`).\n\n**Security note:** This source is built and run on the server.\nOnly use ZIP archives or Git repositories from a trusted origin.\n\nDo not embed credentials (such as a username and password or an\naccess token) in the Git URL — they are stored in plaintext. To\nclone a private repository, use a Git SSH URL that you have an\nSSH key configured for."
+        in: query
+        name: source
+        required: true
+        schema:
+          example: https://github.com/example/my-app.git
+          type: string
+      - description: 'The application''s source type.
+
+
+          * `zip` — An archive previously uploaded with `Fileman::upload_files`.
+
+          * `git` — A Git repository.'
+        in: query
+        name: source_type
+        required: true
+        schema:
+          enum:
+          - zip
+          - git
+          example: git
+          type: string
+      - description: 'The application root, relative to the top of the cloned repository
+
+          or extracted archive, for a source whose application does not live
+
+          at the top level (for example, `packages/web` in a monorepo). The
+
+          preflight inspects this directory to detect the framework.
+
+
+          This parameter must be a relative path inside the source. When
+
+          omitted, it defaults to the source root, unless the manifest is
+
+          found in a single top-level subdirectory (as in a repository zip),
+
+          in which case that subdirectory is used automatically.'
+        in: query
+        name: appdir
+        required: false
+        schema:
+          example: packages/web
+          type: string
+      - description: 'The Git branch to clone. Only meaningful when `source_type` is
+
+          `git`.
+
+
+          This parameter defaults to the repository''s default branch.'
+        in: query
+        name: branch
+        required: false
+        schema:
+          example: main
+          type: string
+      - description: 'The run mode for `server` category applications.
+
+
+          This parameter defaults to `production`.'
+        in: query
+        name: mode
+        required: false
+        schema:
+          enum:
+          - production
+          - development
+          example: production
+          type: string
+      - description: 'The runtime that backs the application.
+
+
+          This parameter defaults to the system default runtime
+
+          (`nodejs`).'
+        in: query
+        name: runtime
+        required: false
+        schema:
+          enum:
+          - nodejs
+          example: nodejs
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  apiversion:
+                    description: The version of the API.
+                    example: 3
+                    type: integer
+                  func:
+                    description: The name of the method called.
+                    example: stage
+                    type: string
+                  module:
+                    description: The name of the module called.
+                    example: WebApp
+                    type: string
+                  result:
+                    properties:
+                      data:
+                        description: The newly registered application.
+                        properties:
+                          category:
+                            description: 'The application''s category. This determines which
+
+                              lifecycle actions apply.
+
+
+                              * `static` — The application builds to static files that the web server serves directly.
+
+                              * `server` — The application runs a long-lived server process.
+
+                              * `other` — Any other kind of application.'
+                            enum:
+                            - static
+                            - server
+                            - other
+                            example: server
+                            type: string
+                          container_name:
+                            description: 'The name of the deployed container backing this
+
+                              application, or `null` while it is only staged.
+
+                              Assigned by the deploy and unique per application
+
+                              instance, so it identifies the exact deployed
+
+                              record even when several applications share a base
+
+                              name.'
+                            example: my-app.bob.01
+                            type:
+                            - string
+                            - 'null'
+                          confidence:
+                            description: 'How confident the preflight detection is.
+
+
+                              * `high` — Strong framework markers found.
+
+                              * `low` — Partial markers found; verify the defaults before deploying.
+
+                              * `none` — No recognizable markers; the defaults are generic.'
+                            enum:
+                            - high
+                            - low
+                            - none
+                            example: high
+                            type: string
+                          defaults:
+                            description: Suggested configuration values for the detected framework. Pass them to `WebApp::configure` as-is or after user adjustment.
+                            properties:
+                              build_command:
+                                description: The suggested build command, or `null` if no build step is needed.
+                                example: npm run build
+                                type:
+                                - string
+                                - 'null'
+                              output_dir:
+                                description: The suggested build output directory, or `null` if not applicable.
+                                example: .next
+                                type:
+                                - string
+                                - 'null'
+                              runtime_tag:
+                                description: The suggested runtime version tag.
+                                example: '22'
+                                type: string
+                              startup_command:
+                                description: The suggested startup command, or `null` for `static` applications.
+                                example: npm run start
+                                type:
+                                - string
+                                - 'null'
+                            type: object
+                          db:
+                            description: The application's linked database information, or `null` if no database is linked.
+                            properties:
+                              env_keys:
+                                description: The environment variable names that carry the database credentials.
+                                example:
+                                - DB_NAME
+                                - DB_HOST
+                                - DB_PORT
+                                items:
+                                  type: string
+                                type: array
+                              host:
+                                description: The database server hostname.
+                                example: localhost
+                                format: hostname
+                                type: string
+                              name:
+                                description: The database name.
+                                example: example_my_app
+                                type: string
+                              port:
+                                description: The database server port.
+                                example: 3306
+                                type: integer
+                            type:
+                            - object
+                            - 'null'
+                          deployed:
+                            description: Whether a deploy has put the application live. This is `true` once the application holds a container or a deploy has completed successfully, and `false` for a freshly staged application or one whose only deploy failed.
+                            example: false
+                            type: boolean
+                          domain:
+                            description: The domain the application is bound to. This is an existing domain on the account or an automatically generated temporary domain.
+                            example: my-app.example.com
+                            format: domain
+                            type: string
+                          env:
+                            additionalProperties:
+                              type: string
+                            description: The application's environment variables.
+                            example:
+                              NODE_ENV: production
+                            type: object
+                          framework:
+                            description: The application's detected or user-selected framework, or `null` if unknown.
+                            example: null
+                            type:
+                            - string
+                            - 'null'
+                          last_deploy:
+                            description: Information about the most recent deploy, or `null` if the application has never deployed.
+                            properties:
+                              deploy_id:
+                                description: The unique identifier of the deploy.
+                                example: dp-20260612-0001
+                                type: string
+                              result:
+                                description: The result of the deploy.
+                                enum:
+                                - success
+                                - failed
+                                example: success
+                                type: string
+                              timestamp:
+                                description: When the deploy finished, in ISO 8601 format.
+                                example: '2026-06-12T14:03:22.000Z'
+                                format: date-time
+                                type: string
+                            type:
+                            - object
+                            - 'null'
+                          mode:
+                            description: The application's run mode. Only meaningful for the `server` category; `null` otherwise.
+                            enum:
+                            - production
+                            - development
+                            example: production
+                            type:
+                            - string
+                            - 'null'
+                          name:
+                            description: 'The application''s assigned name (slug), unique
+
+                              across the account. This may differ from the name
+
+                              you requested: if a deployed application already
+
+                              used that name, the application was registered
+
+                              under the next free `<name>-N`. Use this value for
+
+                              `WebApp::configure` and `WebApp::deploy`.'
+                            example: my-app
+                            type: string
+                          package_manager:
+                            description: 'The package manager the deploy uses to install
+
+                              dependencies and run scripts. It is detected from
+
+                              the source''s `packageManager` field, a lockfile, or
+
+                              the default (`npm`).'
+                            enum:
+                            - npm
+                            - yarn
+                            - pnpm
+                            - bun
+                            example: npm
+                            type: string
+                          runtime:
+                            description: The application's runtime identifier.
+                            example: nodejs
+                            type: string
+                          runtime_tag:
+                            description: The runtime version tag.
+                            example: '22'
+                            type: string
+                          source:
+                            description: The application's source information.
+                            properties:
+                              branch:
+                                description: The Git branch, or `null` for ZIP sources.
+                                example: main
+                                type:
+                                - string
+                                - 'null'
+                              type:
+                                description: 'The source type.
+
+
+                                  * `zip` — An uploaded archive.
+
+                                  * `git` — A Git repository.'
+                                enum:
+                                - zip
+                                - git
+                                example: git
+                                type: string
+                              url:
+                                description: The Git repository URL, or `null` for ZIP sources.
+                                example: https://github.com/example/my-app.git
+                                type:
+                                - string
+                                - 'null'
+                            type: object
+                          staged:
+                            description: Whether the application's source is present in the staging area. This is `true` after the source is uploaded or cloned and until the application is deleted.
+                            example: true
+                            type: boolean
+                          status:
+                            description: 'The application''s current status.
+
+
+                              * `created` — Registered but never deployed.
+
+                              * `deploying` — A deploy is in progress.
+
+                              * `running` — The application is live.
+
+                              * `stopped` — The application is stopped.
+
+                              * `errored` — The last action failed.'
+                            enum:
+                            - created
+                            - deploying
+                            - running
+                            - stopped
+                            - errored
+                            example: created
+                            type: string
+                          url:
+                            description: The application's live HTTPS URL.
+                            example: https://my-app.example.com
+                            format: url
+                            type: string
+                        type: object
+                      errors:
+                        description: List of errors if the API failed.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      messages:
+                        description: List of messages generated by the API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      metadata:
+                        properties:
+                          error_category:
+                            description: 'The machine-readable failure category. Only present
+
+                              when `status` is `0`.
+
+
+                              * `limit_exceeded` — The account reached its application count or memory limit.
+
+                              * `source_invalid` — The source archive or Git repository is missing, unreadable, or invalid.'
+                            enum:
+                            - limit_exceeded
+                            - source_invalid
+                            type:
+                            - string
+                            - 'null'
+                        type: object
+                      status:
+                        description: '- `1` - Success.
+
+                          - `0` - Failed. Check the `errors` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      warnings:
+                        description: List of warnings generated by the API. Warnings describe non-critical failures or other problematic conditions noted while running a API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                    type: object
+                type: object
+          description: HTTP Request was successful.
+      summary: Register a new web application
+      tags:
+      - Webapp
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "uapi --output=jsonpretty \\\n  --user=username \\\n  WebApp \\\n  stage \\\n  name='my-app' \\\n  source_type='git' \\\n  source='https://github.com/example/my-app.git' \\\n  branch='main'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2083/cpsess##########/execute/WebApp/stage?name=my-app&source_type=git&source=https%3A%2F%2Fgithub.com%2Fexample%2Fmy-app.git&branch=main
+      - label: LiveAPI Perl
+        lang: Perl
+        source: "#--------------------------------------------------------------------------------------\n# Instructions:\n#--------------------------------------------------------------------------------------\n# <theme-name> is the theme assigned to cPanel account.\n# 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n# 2) mkdir api_examples\n# 3) cd api_examples\n# 4) create a file WebApp_stage.live.pl and put this code into that file.\n# 5) In your browser login to a cPanel account.\n# 6) Manually change the url from: .../frontend/<theme-name>/\n#    to .../frontend/<theme-name>/api_examples/WebApp_stage.live.pl\n#--------------------------------------------------------------------------------------\n\nuse strict;\n\nuse Cpanel::LiveAPI ();\n\nmy $cpanel = Cpanel::LiveAPI->new(); # Connect to cPanel - only do this once.\n\n# Print the header\nprint \"Content-type: text/plain\\r\\n\\r\\n\";\n\n# Call the API\nmy $response = $cpanel->uapi(\n    q/WebApp/,\n    q/stage/,\n    {\n        'name'        => 'my-app',\n        'source_type' => 'git',\n        'source'      => 'https://github.com/example/my-app.git',\n        'branch'      => 'main',\n    }\n);\n\n# Handle the response\nif ($response->{cpanelresult}{result}{status}) {\n    my $data = $response->{cpanelresult}{result}{data};\n    # Do something with the $data\n    # So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    # Report errors:\n    print to_json($response->{cpanelresult}{result}{errors});\n}\n\n# Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n#--------------------------------------------------------------------------------------\n# Helper function to convert a perl object to html printable json\n#--------------------------------------------------------------------------------------\nsub to_json {\n    require JSON;\n    my $str = JSON->new->pretty->encode($_[0]);\n    return $str;\n}\n"
+      - label: LiveAPI PHP
+        lang: PHP
+        source: "<?php\n//--------------------------------------------------------------------------------------\n// Instructions:\n//--------------------------------------------------------------------------------------\n// <theme-name> is the theme assigned to cPanel account.\n// 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n// 2) mkdir api_examples\n// 3) cd api_examples\n// 4) create a file WebApp_stage.live.php and put this code into that file.\n// 5) In your browser login to a cPanel account.\n// 6) Manually change the url from: .../frontend/<theme-name>/\n//    to .../frontend/<theme-name>/api_examples/WebApp_stage.live.php\n//--------------------------------------------------------------------------------------\n\n// Instantiate the CPANEL object.\nrequire_once \"/usr/local/cpanel/php/cpanel.php\";\n\n// Print the header\nheader('Content-Type: text/plain');\n\n// Connect to cPanel - only do this once.\n$cpanel = new CPANEL();\n\n// Call the API\n$response = $cpanel->uapi(\n    'WebApp',\n    'stage',\n    array (\n        'name'        => 'my-app',\n        'source_type' => 'git',\n        'source'      => 'https://github.com/example/my-app.git',\n        'branch'      => 'main',\n    )\n);\n\n// Handle the response\nif ($response['cpanelresult']['result']['status']) {\n    $data = $response['cpanelresult']['result']['data'];\n    // Do something with the $data\n    // So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    // Report errors:\n    print to_json($response['cpanelresult']['result']['errors']);\n}\n\n// Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n//--------------------------------------------------------------------------------------\n// Helper function to convert a PHP value to html printable json\n//--------------------------------------------------------------------------------------\nfunction to_json($data) {\n    return json_encode($data, JSON_PRETTY_PRINT);\n}"
+      x-cpanel-api-version: UAPI
+      x-cpanel-available-version: cPanel 138
+  /WebApp/start:
+    get:
+      description: 'This function starts an application''s server process.
+
+
+        **Important**:
+
+
+        This function only applies to applications in the `server`
+
+        category. Calling it on a `static` application fails with the
+
+        `invalid_category` error category.'
+      operationId: WebApp_start
+      parameters:
+      - description: The application's unique name (slug).
+        in: query
+        name: name
+        required: true
+        schema:
+          example: my-app
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  apiversion:
+                    description: The version of the API.
+                    example: 3
+                    type: integer
+                  func:
+                    description: The name of the method called.
+                    example: start
+                    type: string
+                  module:
+                    description: The name of the module called.
+                    example: WebApp
+                    type: string
+                  result:
+                    properties:
+                      data:
+                        properties:
+                          status:
+                            description: The application's status after the action.
+                            enum:
+                            - created
+                            - deploying
+                            - running
+                            - stopped
+                            - errored
+                            example: running
+                            type: string
+                        type: object
+                      errors:
+                        description: List of errors if the API failed.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      messages:
+                        description: List of messages generated by the API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      metadata:
+                        properties:
+                          error_category:
+                            description: 'The machine-readable failure category. Only present
+
+                              when `status` is `0`.
+
+
+                              * `invalid_category` — The action does not apply to the application''s category.'
+                            enum:
+                            - invalid_category
+                            type:
+                            - string
+                            - 'null'
+                        type: object
+                      status:
+                        description: '- `1` - Success.
+
+                          - `0` - Failed. Check the `errors` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      warnings:
+                        description: List of warnings generated by the API. Warnings describe non-critical failures or other problematic conditions noted while running a API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                    type: object
+                type: object
+          description: HTTP Request was successful.
+      summary: Start an application's server process
+      tags:
+      - Webapp
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "uapi --output=jsonpretty \\\n  --user=username \\\n  WebApp \\\n  start \\\n  name='my-app'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2083/cpsess##########/execute/WebApp/start?name=my-app
+      - label: LiveAPI Perl
+        lang: Perl
+        source: "#--------------------------------------------------------------------------------------\n# Instructions:\n#--------------------------------------------------------------------------------------\n# <theme-name> is the theme assigned to cPanel account.\n# 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n# 2) mkdir api_examples\n# 3) cd api_examples\n# 4) create a file WebApp_start.live.pl and put this code into that file.\n# 5) In your browser login to a cPanel account.\n# 6) Manually change the url from: .../frontend/<theme-name>/\n#    to .../frontend/<theme-name>/api_examples/WebApp_start.live.pl\n#--------------------------------------------------------------------------------------\n\nuse strict;\n\nuse Cpanel::LiveAPI ();\n\nmy $cpanel = Cpanel::LiveAPI->new(); # Connect to cPanel - only do this once.\n\n# Print the header\nprint \"Content-type: text/plain\\r\\n\\r\\n\";\n\n# Call the API\nmy $response = $cpanel->uapi(\n    q/WebApp/,\n    q/start/,\n    {\n        'name' => 'my-app',\n    }\n);\n\n# Handle the response\nif ($response->{cpanelresult}{result}{status}) {\n    my $data = $response->{cpanelresult}{result}{data};\n    # Do something with the $data\n    # So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    # Report errors:\n    print to_json($response->{cpanelresult}{result}{errors});\n}\n\n# Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n#--------------------------------------------------------------------------------------\n# Helper function to convert a perl object to html printable json\n#--------------------------------------------------------------------------------------\nsub to_json {\n    require JSON;\n    my $str = JSON->new->pretty->encode($_[0]);\n    return $str;\n}\n"
+      - label: LiveAPI PHP
+        lang: PHP
+        source: "<?php\n//--------------------------------------------------------------------------------------\n// Instructions:\n//--------------------------------------------------------------------------------------\n// <theme-name> is the theme assigned to cPanel account.\n// 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n// 2) mkdir api_examples\n// 3) cd api_examples\n// 4) create a file WebApp_start.live.php and put this code into that file.\n// 5) In your browser login to a cPanel account.\n// 6) Manually change the url from: .../frontend/<theme-name>/\n//    to .../frontend/<theme-name>/api_examples/WebApp_start.live.php\n//--------------------------------------------------------------------------------------\n\n// Instantiate the CPANEL object.\nrequire_once \"/usr/local/cpanel/php/cpanel.php\";\n\n// Print the header\nheader('Content-Type: text/plain');\n\n// Connect to cPanel - only do this once.\n$cpanel = new CPANEL();\n\n// Call the API\n$response = $cpanel->uapi(\n    'WebApp',\n    'start',\n    array (\n        'name' => 'my-app',\n    )\n);\n\n// Handle the response\nif ($response['cpanelresult']['result']['status']) {\n    $data = $response['cpanelresult']['result']['data'];\n    // Do something with the $data\n    // So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    // Report errors:\n    print to_json($response['cpanelresult']['result']['errors']);\n}\n\n// Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n//--------------------------------------------------------------------------------------\n// Helper function to convert a PHP value to html printable json\n//--------------------------------------------------------------------------------------\nfunction to_json($data) {\n    return json_encode($data, JSON_PRETTY_PRINT);\n}"
+      x-cpanel-api-version: UAPI
+      x-cpanel-available-version: cPanel 138
+  /WebApp/stop:
+    get:
+      description: 'This function stops an application''s server process.
+
+
+        **Important**:
+
+
+        This function only applies to applications in the `server`
+
+        category. Calling it on a `static` application fails with the
+
+        `invalid_category` error category.'
+      operationId: WebApp_stop
+      parameters:
+      - description: The application's unique name (slug).
+        in: query
+        name: name
+        required: true
+        schema:
+          example: my-app
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  apiversion:
+                    description: The version of the API.
+                    example: 3
+                    type: integer
+                  func:
+                    description: The name of the method called.
+                    example: stop
+                    type: string
+                  module:
+                    description: The name of the module called.
+                    example: WebApp
+                    type: string
+                  result:
+                    properties:
+                      data:
+                        properties:
+                          status:
+                            description: The application's status after the action.
+                            enum:
+                            - created
+                            - deploying
+                            - running
+                            - stopped
+                            - errored
+                            example: stopped
+                            type: string
+                        type: object
+                      errors:
+                        description: List of errors if the API failed.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      messages:
+                        description: List of messages generated by the API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      metadata:
+                        properties:
+                          error_category:
+                            description: 'The machine-readable failure category. Only present
+
+                              when `status` is `0`.
+
+
+                              * `invalid_category` — The action does not apply to the application''s category.'
+                            enum:
+                            - invalid_category
+                            type:
+                            - string
+                            - 'null'
+                        type: object
+                      status:
+                        description: '- `1` - Success.
+
+                          - `0` - Failed. Check the `errors` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      warnings:
+                        description: List of warnings generated by the API. Warnings describe non-critical failures or other problematic conditions noted while running a API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                    type: object
+                type: object
+          description: HTTP Request was successful.
+      summary: Stop an application's server process
+      tags:
+      - Webapp
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "uapi --output=jsonpretty \\\n  --user=username \\\n  WebApp \\\n  stop \\\n  name='my-app'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2083/cpsess##########/execute/WebApp/stop?name=my-app
+      - label: LiveAPI Perl
+        lang: Perl
+        source: "#--------------------------------------------------------------------------------------\n# Instructions:\n#--------------------------------------------------------------------------------------\n# <theme-name> is the theme assigned to cPanel account.\n# 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n# 2) mkdir api_examples\n# 3) cd api_examples\n# 4) create a file WebApp_stop.live.pl and put this code into that file.\n# 5) In your browser login to a cPanel account.\n# 6) Manually change the url from: .../frontend/<theme-name>/\n#    to .../frontend/<theme-name>/api_examples/WebApp_stop.live.pl\n#--------------------------------------------------------------------------------------\n\nuse strict;\n\nuse Cpanel::LiveAPI ();\n\nmy $cpanel = Cpanel::LiveAPI->new(); # Connect to cPanel - only do this once.\n\n# Print the header\nprint \"Content-type: text/plain\\r\\n\\r\\n\";\n\n# Call the API\nmy $response = $cpanel->uapi(\n    q/WebApp/,\n    q/stop/,\n    {\n        'name' => 'my-app',\n    }\n);\n\n# Handle the response\nif ($response->{cpanelresult}{result}{status}) {\n    my $data = $response->{cpanelresult}{result}{data};\n    # Do something with the $data\n    # So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    # Report errors:\n    print to_json($response->{cpanelresult}{result}{errors});\n}\n\n# Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n#--------------------------------------------------------------------------------------\n# Helper function to convert a perl object to html printable json\n#--------------------------------------------------------------------------------------\nsub to_json {\n    require JSON;\n    my $str = JSON->new->pretty->encode($_[0]);\n    return $str;\n}\n"
+      - label: LiveAPI PHP
+        lang: PHP
+        source: "<?php\n//--------------------------------------------------------------------------------------\n// Instructions:\n//--------------------------------------------------------------------------------------\n// <theme-name> is the theme assigned to cPanel account.\n// 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n// 2) mkdir api_examples\n// 3) cd api_examples\n// 4) create a file WebApp_stop.live.php and put this code into that file.\n// 5) In your browser login to a cPanel account.\n// 6) Manually change the url from: .../frontend/<theme-name>/\n//    to .../frontend/<theme-name>/api_examples/WebApp_stop.live.php\n//--------------------------------------------------------------------------------------\n\n// Instantiate the CPANEL object.\nrequire_once \"/usr/local/cpanel/php/cpanel.php\";\n\n// Print the header\nheader('Content-Type: text/plain');\n\n// Connect to cPanel - only do this once.\n$cpanel = new CPANEL();\n\n// Call the API\n$response = $cpanel->uapi(\n    'WebApp',\n    'stop',\n    array (\n        'name' => 'my-app',\n    )\n);\n\n// Handle the response\nif ($response['cpanelresult']['result']['status']) {\n    $data = $response['cpanelresult']['result']['data'];\n    // Do something with the $data\n    // So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    // Report errors:\n    print to_json($response['cpanelresult']['result']['errors']);\n}\n\n// Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n//--------------------------------------------------------------------------------------\n// Helper function to convert a PHP value to html printable json\n//--------------------------------------------------------------------------------------\nfunction to_json($data) {\n    return json_encode($data, JSON_PRETTY_PRINT);\n}"
+      x-cpanel-api-version: UAPI
+      x-cpanel-available-version: cPanel 138
+components:
+  securitySchemes:
+    BasicAuth:
+      scheme: basic
+      type: http
+externalDocs:
+  url: https://cpanel.net/developers/
+x-tagGroups:
+- name: API Development Tools
+  tags:
+  - API Token Management
+  - Batch
+  - SSE Task Management
+  - URL Parsing
+- name: Authentication
+  tags:
+  - External Authentication
+  - Two-Factor Settings
+- name: Backup Information
+  tags:
+  - BackupInfo
+  - BackupInfo Status
+- name: Block Ip Addresses
+  tags:
+  - Block IP
+- name: Commerce Integration
+  tags:
+  - Market Integration
+  - SSL Certificates
+- name: Contact Information
+  tags:
+  - Contact Information
+- name: cPanel Account
+  tags:
+  - Account Enhancements
+  - Account Information
+  - Account Management
+  - AuditLog
+  - Contact Information
+  - cPanel Features
+  - Disk Quotas
+  - DomainRecommendations
+  - Personalization
+  - Resource Usage and Statistics
+  - Subaccount Management
+  - Team Roles
+  - Team Users
+- name: cPanel Account Backups
+  tags:
+  - Backup
+  - File Restoration
+- name: cPanel Plugin Framework
+  tags:
+  - Formbricks
+  - Plugins
+- name: cPanel Theme Management
+  tags:
+  - Application Information
+  - Brand Management
+  - Branding Files
+  - Browser Cache Management
+  - Language
+  - Theme Settings
+- name: Directory Management
+  tags:
+  - Directory Indexes
+  - Directory Privacy
+  - Directory Protection
+- name: DNS
+  tags:
+  - DNS
+  - DNS Information
+  - DNS Security
+  - Dynamic DNS
+  - Email DNS Settings
+  - ZoneEdit
+- name: Domain
+  tags:
+  - Domain
+- name: Domain Management
+  tags:
+  - AddonDomain
+  - Direct Link Protection (Hotlink)
+  - Domain
+  - Domain Information
+  - Domain Redirection
+  - DomainLookup
+  - Park
+  - SubDomain
+  - Virtual Host Information
+- name: Domains
+  tags:
+  - Subdomains
+- name: Email
+  tags:
+  - Email Accounts
+  - Email Filtering
+  - Email Forwarding
+  - Email Server Information
+  - Email Suspensions
+  - Mail Server Information
+  - Mailbox Management
+  - Mailing Lists
+  - Signing and Encryption (GnuPG Keys)
+  - Spam Filtering (Greylisting)
+  - Spam Management
+  - Spam Prevention (BoxTrapper)
+  - Webmail Applications
+  - Webmail Sessions
+- name: Extract Information
+  tags:
+  - ExtractInfo
+  - ExtractInfo Status
+- name: File Manager
+  tags:
+  - Trash
+- name: Files
+  tags:
+  - FTP Accounts
+  - FTP Server Settings
+  - Image Tools
+  - Jodit
+  - Manage Files
+  - Manage Files
+  - WebDisk Settings
+- name: GIT Management
+  tags:
+  - Deployment Settings
+  - Repository Management
+- name: InProductSurvey
+  tags:
+  - InProductSurvey
+- name: MySQL and MariaDB
+  tags:
+  - Database Information
+  - Database Management
+  - Remote Databases
+  - User Management
+- name: Notifications
+  tags:
+  - Pushbullet
+- name: Optional Applications
+  tags:
+  - Antivirus Protection (ClamAV)
+  - Calendar and Contacts (DAV)
+  - Calendar and Contacts Server
+  - WordPress Manager Backups
+- name: PostgreSQL
+  tags:
+  - PostgreSQL Database Management
+  - PostgreSQL User Management
+- name: Retrieve bandwidth information
+  tags:
+  - Bandwidth
+- name: Security
+  tags:
+  - Known SSH Hosts Management
+  - Login Information
+- name: Server Information
+  tags:
+  - cPanel Server Information
+  - Notifications
+  - Password Strength
+  - SSH
+  - WebPros MCP
+  - WebProsMCP
+- name: ServiceProxy
+  tags:
+  - ServiceProxy
+- name: Site Quality Monitoring
+  tags:
+  - SiteQuality
+- name: SSL Certificates
+  tags:
+  - Auto-generated SSL Certificates
+  - cPanel Account SSL Management
+  - SNI Email Settings
+  - SSL Certificate Management
+  - Verify Domain Ownership
+- name: Statistics
+  tags:
+  - Domain Statistics
+  - Weblog Settings
+- name: UserData
+  tags:
+  - UserData
+- name: Web Server Configuration
+  tags:
+  - EA4
+  - EasyApache Settings
+  - PHP
+- name: Web Server Management
+  tags:
+  - Application Manager
+  - ModSecurity
+  - NginxCaching
+  - PHP Settings
+  - Web Apps
+- name: Website Configuration
+  tags:
+  - Handler Management
+  - Logs
+  - Mime Type Management
+  - Nova
+  - Site Information
+  - Site Installation
+  - Sitejet
+  - WPX

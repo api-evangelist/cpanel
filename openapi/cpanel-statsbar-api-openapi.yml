@@ -1,0 +1,643 @@
+openapi: 3.2.0
+info:
+  contact:
+    email: cs@cpanel.net
+    name: WebPros International, LLC
+    url: https://cpanel.net/support/
+  description: UAPI accesses the cPanel interface's features. Use this API to access and modify cPanel account data and settings.
+  license:
+    name: cPanel License
+    url: https://cpanel.net/legal-notices/
+  termsOfService: https://cpanel.net/legal-notices/
+  title: cPanel U Stats Bar API
+  version: 11.137.9999.106
+  x-api-evangelist-provenance: 'Harvested verbatim from cPanel''s developer portal on 2026-09-05 via the MCP tool get-full-api-description at https://api.docs.cpanel.net/mcp. ONE mechanical change was made before storage: example values containing PEM private-key or certificate blocks, and AWS-access-key-shaped example strings, were replaced with REDACTED_* placeholders so the file can be stored in a public git repository without tripping secret scanning. No path, operation, parameter, schema or description was altered, added or removed.'
+servers:
+- description: A server running cPanel.
+  url: https://{host}:{port}/execute
+  variables:
+    host:
+      default: cpanel-server.tld
+      description: The hostname of a server running cPanel.
+    port:
+      default: '2083'
+      description: The cPanel port.
+security:
+- BasicAuth: []
+tags:
+- description: The StatsBar module for UAPI.
+  name: StatsBar
+paths:
+  /StatsBar/get_stats:
+    get:
+      x-readonly: true
+      description: This function retrieves a cPanel account's statistics.
+      operationId: StatsBar-get_stats
+      parameters:
+      - description: "A pipe-delimited list of the account's statistics.\n\n<details>\n  <summary>Click for a list of available display parameters.</summary>\n\n  * `addondomains` — Information about the account's addon domains.\n  * `apacheversion` — The server's Apache version.\n  * `autoresponders` — Information about the account's auto-responders.\n  * `bandwidthusage` — Information about the account's bandwidth usage.\n  * `cachedlistdiskusage` — The amount of cached mailing list disk space the account currently uses.\n  * `cachedmysqldiskusage` — The amount of cached disk space that the account's MySQL® databases currently use.\n  * `cachedpostgresdiskusage` — The amount of cached disk space that the account's PostgreSQL databases use.\n  * `cpanelversion` — The server's cPanel version.\n  * `dedicatedip` — Account websites that use dedicated IP addresses.\n  * `diskusage` — Information the account's disk space usage.\n  * `emailaccounts` — Information about the account's email accounts.\n  * `emailfilters` — Information the account's email filters.\n  * `emailforwarders` — Information about the account's forwarders.\n  * `fileusage` — Information about the account's file usage.\n  * `ftpaccounts` — Information about the account's FTP accounts.\n  * `hostingpackage` — The account's hosting package.\n  * `hostname` — The server's hostname.\n  * `kernelversion` — The operating system's kernel version.\n  * `localip` — Account websites that use local IP addresses.\n  * `machinetype` — The type of operating system that the server uses.\n  * `mailinglists` — Information the account's mailing lists.\n  * `mysqldatabases` — The number of MySQL databases the account possesses.\n  * `mysqldiskusage` — The amount of disk space that the account's MySQL databases use.\n  * `mysqlversion` — The server's MySQL version.\n  * `operatingsystem` — The server's operating system.\n  * `parkeddomains` — Information about the account's parked domains (aliases).\n  * `perlpath` — The Perl binary's absolute path.\n  * `perlversion` — The server's Perl version.\n  * `phpversion` — The server's PHP version.\n  * `postgresqldatabases` — The number of PostgreSQL databases the cPanel account possesses.\n  * `postgresdiskusage` — The amount of disk space that the cPanel account's PostgreSQL databases use.\n  * `sendmailpath` — The path to the system's sendmail binary.\n  * `sharedip` — Any of the account's websites that use a shared IP address.\n  * `shorthostname` — The short version of your server's hostname.\n  * `sqldatabases` — Information about the all of the account's SQL databases.\n  * `subdomains` — Information about the account's subdomains.\n  * `theme` — The account's current theme.\n</details>\n\n**Note:**\n\n* This function may require URI-encode format (`%7C`) or quotes (`\"`) in some\ncontexts, such as the command line tool.\n* Some display parameters may be unavailable based on the server's configuration."
+        in: query
+        name: display
+        required: true
+        schema:
+          example: bandwidthusage|diskusage
+          type: string
+      - description: The absolute file path to an alternative infinity symbol image.
+        in: query
+        name: infinityimg
+        required: false
+        schema:
+          default: null
+          example: /home/example/infinity.png
+          type:
+          - string
+          - 'null'
+      - description: A phrase to represent infinity that the locales system can use.
+        in: query
+        name: infinitylang
+        required: false
+        schema:
+          default: null
+          example: infinity
+          type:
+          - string
+          - 'null'
+      - description: 'The type of row.
+
+
+          * `odd`
+
+          * `even`'
+        in: query
+        name: rowcounter
+        required: false
+        schema:
+          default: null
+          example: even
+          type:
+          - string
+          - 'null'
+      - description: The minimum level at which to return warnings.
+        in: query
+        name: warninglevel
+        required: false
+        schema:
+          default: null
+          example: 87
+          maximum: 100
+          minimum: 1
+          type:
+          - integer
+          - 'null'
+      - description: 'Whether to return all results with a warning.
+
+
+          * `1` — Return only warnings that **exceed** the `warninglevel` parameter''s
+
+          value.
+
+          * `0` — Return all results.'
+        in: query
+        name: warnings
+        required: false
+        schema:
+          enum:
+          - 1
+          - 0
+          example: 0
+          type:
+          - integer
+          - 'null'
+      - description: 'Whether to display results with a value of `100%`.
+
+
+          * `1` — Display results with a value of `100%`.
+
+          * `0` — Hide results with a value of `100%`.'
+        in: query
+        name: warnout
+        required: false
+        schema:
+          enum:
+          - 1
+          - 0
+          example: 0
+          type:
+          - integer
+          - 'null'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  apiversion:
+                    description: The version of the API.
+                    example: 3
+                    type: integer
+                  func:
+                    description: The name of the method called.
+                    example: get_stats
+                    type: string
+                  module:
+                    description: The name of the module called.
+                    example: StatsBar
+                    type: string
+                  result:
+                    properties:
+                      data:
+                        description: An array of objects containing results from the queried account.
+                        example:
+                        - _count: '0.00'
+                          _max: '1024.00'
+                          _maxed: 0
+                          count: 0 bytes
+                          feature: bandwidth
+                          id: bandwidthusage
+                          is_maxed: 0
+                          item: Monthly Bandwidth Transfer
+                          max: 1 GB
+                          maxed_phrase: You have transferred your maximum allotment of data ([format_bytes,_1]) for this month.
+                          module: Stats
+                          name: bandwidthusage
+                          near_limit_phrase: You have transferred [format_bytes,_1] of your [format_bytes,_2] data allotment for this month.
+                          normalized: 1
+                          percent: 0
+                          percent10: 0
+                          percent20: 0
+                          percent5: 0
+                          phrase: Monthly Bandwidth Transfer
+                          rowtype: even
+                          units: MB
+                          zeroisunlimited: 1
+                        - _count: '1.75'
+                          _max: '1024.00'
+                          _maxed: 0
+                          count: 1.75 MB
+                          id: diskusage
+                          is_maxed: 0
+                          item: Disk Space Usage
+                          langkey: INDXDiskUsage
+                          max: 1 GB
+                          maxed_phrase: You are using your maximum storage allotment, [format_bytes,_1].
+                          module: Quota
+                          name: diskusage
+                          near_limit_phrase: You are using [format_bytes,_1] of the [format_bytes,_2] of storage available to you.
+                          normalized: 1
+                          percent: 0
+                          percent10: 0
+                          percent20: 0
+                          percent5: 0
+                          phrase: Disk Space Usage
+                          rowtype: odd
+                          units: MB
+                          zeroisunlimited: 1
+                        items:
+                          properties:
+                            _count:
+                              description: The queried data's value.
+                              type: string
+                            _max:
+                              description: The queried parameter's limit.
+                              type: string
+                            _maxed:
+                              description: 'Whether the queried value reached its maximum value.
+
+
+                                * `1` — Reached maximum value.
+
+                                * `0` — Has **not** reached maximum value.'
+                              enum:
+                              - 1
+                              - 0
+                              type: integer
+                            condition:
+                              description: 'Whether the queried data''s value possesses a conditional requirement.
+
+
+                                * `1` — Possesses a condition.
+
+                                * `0` — Does **not** possess a condition.
+
+
+                                **Note:**
+
+
+                                The function will **only** return this value if it determines that the
+
+                                related statistic meets the subsystem installation requirements.'
+                              enum:
+                              - 1
+                              - 0
+                              type: integer
+                            count:
+                              description: The queried data's value.
+                              type: string
+                            feature:
+                              description: The queried item's feature name.
+                              type: string
+                            id:
+                              description: The queried item's reference name.
+                              type: string
+                            is_maxed:
+                              description: 'Whether the queried value has reached its maximum value.
+
+
+                                * `1` — The queried value has reached its maximum value.
+
+                                * `0` — The queried value has **not** reached its maximum value.'
+                              enum:
+                              - 1
+                              - 0
+                              type: integer
+                            item:
+                              description: A human-readable version of the queried item.
+                              type: string
+                            max:
+                              description: The queried value's maximum limit.
+                              type: string
+                            maxed_phrase:
+                              description: 'The [`maketext`-formatted](https://go.cpanel.net/locale) message
+
+                                that the interface displays when the user reaches their maximum
+
+                                allowed value.'
+                              type: string
+                            module:
+                              description: The module that retrieved the information.
+                              example: Quota
+                              type: string
+                            name:
+                              description: The display key.
+                              example: diskusage
+                              type: string
+                            near_limit_phrase:
+                              description: 'The [`maketext`-formatted](https://go.cpanel.net/locale) message
+
+                                that the interface displays when the user approaches their
+
+                                maximum allowed value.'
+                              type: string
+                            normalized:
+                              description: 'Whether the function normalized the output values.
+
+
+                                * `1` — Normalized.
+
+                                * `0` — Did **not** normalize.'
+                              enum:
+                              - 1
+                              - 0
+                              type: integer
+                            percent:
+                              description: The percentage of value, if applicable.
+                              type: integer
+                            percent10:
+                              description: The percentage of value that the system rounds to the nearest ten, if applicable.
+                              multipleOf: 10
+                              type: integer
+                            percent20:
+                              description: The percentage of value that the system rounds to the nearest twenty, if applicable.
+                              multipleOf: 20
+                              type: integer
+                            percent5:
+                              description: The percentage of value that the system rounds to the nearest five, if applicable.
+                              multipleOf: 5
+                              type: integer
+                            phrase:
+                              description: The human-readable name of the queried item.
+                              type: string
+                            role:
+                              description: 'The queried value''s role.
+
+
+                                * `CalendarContact`
+
+                                * `DNS`
+
+                                * `FileStorage`
+
+                                * `FTP`
+
+                                * `MailLocal`
+
+                                * `MailReceive`
+
+                                * `MailSend`
+
+                                * `MySQL`
+
+                                * `Postgres`
+
+                                * `SpamFilter`
+
+                                * `Webmail`
+
+                                * `WebDisk`
+
+                                * `WebServer`'
+                              enum:
+                              - CalendarContact
+                              - DNS
+                              - FileStorage
+                              - FTP
+                              - MailLocal
+                              - MailReceive
+                              - MailSend
+                              - MySQL
+                              - Postgres
+                              - SpamFilter
+                              - Webmail
+                              - WebDisk
+                              - WebServer
+                              type: string
+                            rowtype:
+                              description: 'The queried value''s row type.
+
+
+                                * `even`
+
+                                * `odd`'
+                              enum:
+                              - even
+                              - odd
+                              type: string
+                            units:
+                              description: The queried value's unit of measure.
+                              type: string
+                            zeroisunlimited:
+                              description: 'Whether a value of `0` means unlimited or zero.
+
+
+                                * `1` — Unlimited.
+
+                                * `0` — Zero.'
+                              enum:
+                              - 1
+                              - 0
+                              type: integer
+                          type: object
+                        type: array
+                      errors:
+                        description: List of errors if the API failed.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      messages:
+                        description: List of messages generated by the API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      metadata:
+                        properties: {}
+                      status:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the `errors` field for more details.'
+                        enum:
+                        - 1
+                        - 0
+                        example: 1
+                        type: integer
+                      warnings:
+                        description: List of warnings generated by the API. Warnings describe non-critical failures or other problematic conditions noted while running a API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                    type: object
+                type: object
+          description: HTTP Request was successful.
+      summary: Return cPanel account statistics
+      tags:
+      - StatsBar
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "uapi --output=jsonpretty \\\n  --user=username \\\n  StatsBar \\\n  get_stats \\\n  display='bandwidthusage|diskusage'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2083/cpsess##########/execute/StatsBar/get_stats?display=bandwidthusage%7cdiskusage
+      - label: LiveAPI Perl
+        lang: Perl
+        source: "#--------------------------------------------------------------------------------------\n# Instructions:\n#--------------------------------------------------------------------------------------\n# <theme-name> is the theme assigned to cPanel account.\n# 1) cd /usr/local/cpanel/base/frontend/<theme_name>\n# 2) mkdir api_examples\n# 3) cd api_examples\n# 4) create a file StatsBar_get_stats.live.pl and put this code into that file.\n# 5) In your browser login to a cPanel account.\n# 6) Manually change the url from: .../frontend/<theme_name>/\n#    to .../frontend/<theme_name>/api_examples/StatsBar_get_stats.live.pl\n#--------------------------------------------------------------------------------------\n\nuse strict;\n\nuse Cpanel::LiveAPI ();\n\nmy $cpanel = Cpanel::LiveAPI->new(); # Connect to cPanel - only do this once.\n\n# Print the header\nprint \"Content-type: text/plain\\r\\n\\r\\n\";\n\n# Call the API\nmy $response = $cpanel->uapi(\n    q/StatsBar/,\n    q/get_stats/,\n    {\n        'display' => 'bandwidthusage|diskusage',\n    }\n);\n\n# Handle the response\nif ($response->{cpanelresult}{result}{status}) {\n    my $data = $response->{cpanelresult}{result}{data};\n    foreach my $item (@{$data}) {\n        # Do something with the $item\n    }\n\n    # So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    # Report errors:\n    print to_json($response->{cpanelresult}{result}{errors});\n}\n\n# Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n#--------------------------------------------------------------------------------------\n# Helper function to convert a perl object to html printable json\n#--------------------------------------------------------------------------------------\nsub to_json {\n    require JSON;\n    my $str = JSON->new->pretty->encode($_[0]);\n    return $str;\n}\n"
+      - label: LiveAPI PHP
+        lang: PHP
+        source: "<?php\n//--------------------------------------------------------------------------------------\n// Instructions:\n//--------------------------------------------------------------------------------------\n// <theme-name> is the theme assigned to cPanel account.\n// 1) cd /usr/local/cpanel/base/frontend/<theme_name>\n// 2) mkdir api_examples\n// 3) cd api_examples\n// 4) create a file StatsBar_get_stats.live.php and put this code into that file.\n// 5) In your browser login to a cPanel account.\n// 6) Manually change the url from: .../frontend/<theme_name>/\n//    to .../frontend/<theme_name>/api_examples/StatsBar_get_stats.live.php\n//--------------------------------------------------------------------------------------\n\n// Instantiate the CPANEL object.\nrequire_once \"/usr/local/cpanel/php/cpanel.php\";\n\n// Print the header\nheader('Content-Type: text/plain');\n\n// Connect to cPanel - only do this once.\n$cpanel = new CPANEL();\n\n// Call the API\n$response = $cpanel->uapi(\n    'StatsBar',\n    'get_stats',\n    array (\n        'display' => 'bandwidthusage|diskusage',\n    )\n);\n\n// Handle the response\nif ($response['cpanelresult']['result']['status']) {\n    $data = $response['cpanelresult']['result']['data'];\n    foreach ($data as $item) {\n        // Do something with the $item\n    }\n\n    // So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    // Report errors:\n    print to_json($response['cpanelresult']['result']['errors']);\n}\n\n// Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n//--------------------------------------------------------------------------------------\n// Helper function to convert a PHP value to html printable json\n//--------------------------------------------------------------------------------------\nfunction to_json($data) {\n    return json_encode($data, JSON_PRETTY_PRINT);\n}"
+      x-cpanel-api-version: UAPI
+      x-cpanel-available-version: cPanel 11.42
+components:
+  securitySchemes:
+    BasicAuth:
+      scheme: basic
+      type: http
+externalDocs:
+  url: https://cpanel.net/developers/
+x-tagGroups:
+- name: API Development Tools
+  tags:
+  - API Token Management
+  - Batch
+  - SSE Task Management
+  - URL Parsing
+- name: Authentication
+  tags:
+  - External Authentication
+  - Two-Factor Settings
+- name: Backup Information
+  tags:
+  - BackupInfo
+  - BackupInfo Status
+- name: Block Ip Addresses
+  tags:
+  - Block IP
+- name: Commerce Integration
+  tags:
+  - Market Integration
+  - SSL Certificates
+- name: Contact Information
+  tags:
+  - Contact Information
+- name: cPanel Account
+  tags:
+  - Account Enhancements
+  - Account Information
+  - Account Management
+  - AuditLog
+  - Contact Information
+  - cPanel Features
+  - Disk Quotas
+  - DomainRecommendations
+  - Personalization
+  - Resource Usage and Statistics
+  - Subaccount Management
+  - Team Roles
+  - Team Users
+- name: cPanel Account Backups
+  tags:
+  - Backup
+  - File Restoration
+- name: cPanel Plugin Framework
+  tags:
+  - Formbricks
+  - Plugins
+- name: cPanel Theme Management
+  tags:
+  - Application Information
+  - Brand Management
+  - Branding Files
+  - Browser Cache Management
+  - Language
+  - Theme Settings
+- name: Directory Management
+  tags:
+  - Directory Indexes
+  - Directory Privacy
+  - Directory Protection
+- name: DNS
+  tags:
+  - DNS
+  - DNS Information
+  - DNS Security
+  - Dynamic DNS
+  - Email DNS Settings
+  - ZoneEdit
+- name: Domain
+  tags:
+  - Domain
+- name: Domain Management
+  tags:
+  - AddonDomain
+  - Direct Link Protection (Hotlink)
+  - Domain
+  - Domain Information
+  - Domain Redirection
+  - DomainLookup
+  - Park
+  - SubDomain
+  - Virtual Host Information
+- name: Domains
+  tags:
+  - Subdomains
+- name: Email
+  tags:
+  - Email Accounts
+  - Email Filtering
+  - Email Forwarding
+  - Email Server Information
+  - Email Suspensions
+  - Mail Server Information
+  - Mailbox Management
+  - Mailing Lists
+  - Signing and Encryption (GnuPG Keys)
+  - Spam Filtering (Greylisting)
+  - Spam Management
+  - Spam Prevention (BoxTrapper)
+  - Webmail Applications
+  - Webmail Sessions
+- name: Extract Information
+  tags:
+  - ExtractInfo
+  - ExtractInfo Status
+- name: File Manager
+  tags:
+  - Trash
+- name: Files
+  tags:
+  - FTP Accounts
+  - FTP Server Settings
+  - Image Tools
+  - Jodit
+  - Manage Files
+  - Manage Files
+  - WebDisk Settings
+- name: GIT Management
+  tags:
+  - Deployment Settings
+  - Repository Management
+- name: InProductSurvey
+  tags:
+  - InProductSurvey
+- name: MySQL and MariaDB
+  tags:
+  - Database Information
+  - Database Management
+  - Remote Databases
+  - User Management
+- name: Notifications
+  tags:
+  - Pushbullet
+- name: Optional Applications
+  tags:
+  - Antivirus Protection (ClamAV)
+  - Calendar and Contacts (DAV)
+  - Calendar and Contacts Server
+  - WordPress Manager Backups
+- name: PostgreSQL
+  tags:
+  - PostgreSQL Database Management
+  - PostgreSQL User Management
+- name: Retrieve bandwidth information
+  tags:
+  - Bandwidth
+- name: Security
+  tags:
+  - Known SSH Hosts Management
+  - Login Information
+- name: Server Information
+  tags:
+  - cPanel Server Information
+  - Notifications
+  - Password Strength
+  - SSH
+  - WebPros MCP
+  - WebProsMCP
+- name: ServiceProxy
+  tags:
+  - ServiceProxy
+- name: Site Quality Monitoring
+  tags:
+  - SiteQuality
+- name: SSL Certificates
+  tags:
+  - Auto-generated SSL Certificates
+  - cPanel Account SSL Management
+  - SNI Email Settings
+  - SSL Certificate Management
+  - Verify Domain Ownership
+- name: Statistics
+  tags:
+  - Domain Statistics
+  - Weblog Settings
+- name: UserData
+  tags:
+  - UserData
+- name: Web Server Configuration
+  tags:
+  - EA4
+  - EasyApache Settings
+  - PHP
+- name: Web Server Management
+  tags:
+  - Application Manager
+  - ModSecurity
+  - NginxCaching
+  - PHP Settings
+  - Web Apps
+- name: Website Configuration
+  tags:
+  - Handler Management
+  - Logs
+  - Mime Type Management
+  - Nova
+  - Site Information
+  - Site Installation
+  - Sitejet
+  - WPX

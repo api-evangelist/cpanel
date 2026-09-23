@@ -1,0 +1,1286 @@
+openapi: 3.2.0
+info:
+  contact:
+    email: cs@cpanel.net
+    name: WebPros International, LLC
+    url: https://cpanel.net/support/
+  description: UAPI accesses the cPanel interface's features. Use this API to access and modify cPanel account data and settings.
+  license:
+    name: cPanel License
+    url: https://cpanel.net/legal-notices/
+  termsOfService: https://cpanel.net/legal-notices/
+  title: cPanel U Domain Recommendations API
+  version: 11.137.9999.106
+  x-api-evangelist-provenance: 'Harvested verbatim from cPanel''s developer portal on 2026-09-05 via the MCP tool get-full-api-description at https://api.docs.cpanel.net/mcp. ONE mechanical change was made before storage: example values containing PEM private-key or certificate blocks, and AWS-access-key-shaped example strings, were replaced with REDACTED_* placeholders so the file can be stored in a public git repository without tripping secret scanning. No path, operation, parameter, schema or description was altered, added or removed.'
+servers:
+- description: A server running cPanel.
+  url: https://{host}:{port}/execute
+  variables:
+    host:
+      default: cpanel-server.tld
+      description: The hostname of a server running cPanel.
+    port:
+      default: '2083'
+      description: The cPanel port.
+security:
+- BasicAuth: []
+tags:
+- description: The DomainRecommendations module for UAPI.
+  name: DomainRecommendations
+paths:
+  /DomainRecommendations/domain_availability:
+    get:
+      x-readonly: true
+      description: 'This function checks whether a specific domain name is available for registration through the configured domain store.
+
+
+        The system caches the results for up to two minutes per domain. Use the `use_cache=0` option to bypass the cache and force a live request.
+
+
+        **Note:**
+
+
+        This function requires the `domain_recommendation` feature.'
+      operationId: DomainRecommendations-domain_availability
+      parameters:
+      - description: 'The fully-qualified domain name (FQDN) to check for availability.
+
+
+          **Note:**
+
+
+          This value must include the TLD (for example, `mybusiness.com`).'
+        in: query
+        name: domain
+        required: true
+        schema:
+          example: mybusiness.com
+          type: string
+      - description: 'Whether to use the local response cache.
+
+
+          * `1` — Use the cache (default). The system caches the results for up to two minutes.
+
+          * `0` — Bypass the cache and make a live request to the store.'
+        in: query
+        name: use_cache
+        required: false
+        schema:
+          default: 1
+          enum:
+          - 1
+          - 0
+          example: 1
+          type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  apiversion:
+                    description: The version of the API.
+                    example: 3
+                    type: integer
+                  func:
+                    description: The name of the method called.
+                    example: domain_availability
+                    type: string
+                  module:
+                    description: The name of the module called.
+                    example: DomainRecommendations
+                    type: string
+                  result:
+                    properties:
+                      data:
+                        description: 'An object containing the domain availability result
+
+                          from the configured domain store.'
+                        properties:
+                          domain_name:
+                            description: The fully-qualified domain name (FQDN) that the function checked.
+                            example: mybusiness.com
+                            type: string
+                          group:
+                            description: The domain group, if applicable.
+                            example: null
+                            type:
+                            - string
+                            - 'null'
+                          idn_domain_name:
+                            description: The internationalized domain name (IDN) of the checked domain.
+                            example: mybusiness.com
+                            type: string
+                          idn_sld:
+                            description: The internationalized second-level domain (SLD) portion of the checked domain.
+                            example: mybusiness
+                            type: string
+                          is_domain_available:
+                            description: 'Whether the domain is available for
+
+                              registration.
+
+
+                              * `true` — Available.
+
+                              * `false` — Not available.'
+                            example: true
+                            type: boolean
+                          is_premium:
+                            description: 'Whether the domain is a premium domain with
+
+                              special pricing.
+
+
+                              * `true` — The domain is a premium domain.
+
+                              * `false` — The domain is not a premium domain.'
+                            example: false
+                            type: boolean
+                          is_tld_available:
+                            description: 'Whether the TLD is available for registration
+
+                              through the configured store.
+
+
+                              * `true` — The TLD is available.
+
+                              * `false` — The TLD is not available.'
+                            example: true
+                            type: boolean
+                          premium_cost_pricing:
+                            description: The pricing structure for the premium domain, if applicable.
+                            type:
+                            - object
+                            - 'null'
+                          pricing:
+                            description: 'An array of pricing options for each
+
+                              registration period (in years).'
+                            items:
+                              $ref: '#/components/schemas/PricingPeriod'
+                            type: array
+                          shortest_period:
+                            allOf:
+                            - $ref: '#/components/schemas/PricingPeriod'
+                            - description: The pricing for the shortest available registration period.
+                          sld:
+                            description: The second-level domain (SLD) portion of the checked domain.
+                            example: mybusiness
+                            type: string
+                          status:
+                            description: A string describing the availability status of the domain.
+                            example: available for registration
+                            type: string
+                          tld:
+                            description: The top-level domain (TLD) portion of the checked domain.
+                            example: com
+                            type: string
+                        type:
+                        - object
+                        - 'null'
+                      errors:
+                        description: List of errors if the API failed.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      messages:
+                        description: List of messages generated by the API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      metadata:
+                        properties:
+                          transformed:
+                            description: Post-processing may have transformed the data.
+                            enum:
+                            - 1
+                            example: 1
+                            type: integer
+                      status:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the `errors` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      warnings:
+                        description: List of warnings generated by the API. Warnings describe non-critical failures or other problematic conditions noted while running an API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                    type: object
+                type: object
+          description: HTTP Request was successful.
+      summary: Check whether a domain is available for registration
+      tags:
+      - DomainRecommendations
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "uapi --output=jsonpretty \\\n  --user=username \\\n  DomainRecommendations \\\n  domain_availability \\\n  domain=mybusiness.com\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2083/cpsess##########/execute/DomainRecommendations/domain_availability?domain=mybusiness.com
+      - label: LiveAPI Perl
+        lang: Perl
+        source: "#--------------------------------------------------------------------------------------\n# Instructions:\n#--------------------------------------------------------------------------------------\n# <theme-name> is the theme assigned to cPanel account.\n# 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n# 2) mkdir api_examples\n# 3) cd api_examples\n# 4) create a file DomainRecommendations_domain_availability.live.pl and put this code into that file.\n# 5) In your browser login to a cPanel account.\n# 6) Manually change the url from: .../frontend/<theme-name>/\n#    to .../frontend/<theme-name>/api_examples/DomainRecommendations_domain_availability.live.pl\n#--------------------------------------------------------------------------------------\n\nuse strict;\n\nuse Cpanel::LiveAPI ();\n\nmy $cpanel = Cpanel::LiveAPI->new(); # Connect to cPanel - only do this once.\n\n# Print the header\nprint \"Content-type: text/plain\\r\\n\\r\\n\";\n\n# Call the API\nmy $response = $cpanel->uapi(\n    q/DomainRecommendations/,\n    q/domain_availability/,\n    { domain => 'mybusiness.com' }\n);\n\n# Handle the response\nif ($response->{cpanelresult}{result}{status}) {\n    my $data = $response->{cpanelresult}{result}{data};\n    print \"Available: $data->{is_domain_available}\\n\";\n}\nelse {\n    print to_json($response->{cpanelresult}{result}{errors});\n}\n\n$cpanel->end();\n\nsub to_json {\n    require JSON;\n    return JSON->new->pretty->encode($_[0]);\n}\n"
+      - label: LiveAPI PHP
+        lang: PHP
+        source: "<?php\n//--------------------------------------------------------------------------------------\n// Instructions:\n//--------------------------------------------------------------------------------------\n// <theme-name> is the theme assigned to cPanel account.\n// 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n// 2) mkdir api_examples\n// 3) cd api_examples\n// 4) create a file DomainRecommendations_domain_availability.live.php and put this code into that file.\n// 5) In your browser login to a cPanel account.\n// 6) Manually change the url from: .../frontend/<theme-name>/\n//    to .../frontend/<theme-name>/api_examples/DomainRecommendations_domain_availability.live.php\n//--------------------------------------------------------------------------------------\n\nrequire_once \"/usr/local/cpanel/php/cpanel.php\";\n\nheader('Content-Type: text/plain');\n\n$cpanel = new CPANEL();\n\n$response = $cpanel->uapi(\n    'DomainRecommendations',\n    'domain_availability',\n    array('domain' => 'mybusiness.com')\n);\n\nif ($response['cpanelresult']['result']['status']) {\n    $data = $response['cpanelresult']['result']['data'];\n    echo \"Available: \" . $data['is_domain_available'] . \"\\n\";\n}\nelse {\n    echo json_encode($response['cpanelresult']['result']['errors'], JSON_PRETTY_PRINT);\n}\n\n$cpanel->end();"
+      x-cpanel-api-version: UAPI
+      x-cpanel-available-version: cPanel 134
+  /DomainRecommendations/domain_suggestions:
+    get:
+      x-readonly: true
+      description: 'This function returns available domain name suggestions and their registration pricing for a given search term.
+
+
+        The system retrieves the results from the configured domain store and caches them for up to two minutes per unique combination of `search_field`, `page`, `page_size`, and the requested `tld` list. Use the `use_cache=0` option to bypass the cache and force a live request.
+
+
+        **Note:**
+
+
+        This function requires the `domain_recommendation` feature.'
+      operationId: DomainRecommendations-domain_suggestions
+      parameters:
+      - description: 'The search term used to generate domain suggestions. This is a free-text query, not necessarily a fully-qualified domain name.
+
+
+          **Note:**
+
+
+          Use the base domain name without the TLD (for example, `mybusiness` instead of `mybusiness.com`).'
+        in: query
+        name: search_field
+        required: true
+        schema:
+          example: mybusiness
+          type: string
+      - description: 'The page number to retrieve (1-indexed).
+
+
+          If you do not set this value, the function uses the store''s default page.'
+        in: query
+        name: page
+        required: false
+        schema:
+          example: 1
+          minimum: 1
+          type: integer
+      - description: 'The number of suggestions to return per page.
+
+
+          If you do not set this value, the function uses the store''s default page size.'
+        in: query
+        name: page_size
+        required: false
+        schema:
+          example: 10
+          minimum: 1
+          type: integer
+      - description: 'Whether to use the local response cache.
+
+
+          * `1` — Use the cache (default). The function caches the results for up to two minutes.
+
+          * `0` — Bypass the cache and make a live request to the store.'
+        in: query
+        name: use_cache
+        required: false
+        schema:
+          default: 1
+          enum:
+          - 1
+          - 0
+          example: 1
+          type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  apiversion:
+                    description: The version of the API.
+                    example: 3
+                    type: integer
+                  func:
+                    description: The name of the method called.
+                    example: domain_suggestions
+                    type: string
+                  module:
+                    description: The name of the module called.
+                    example: DomainRecommendations
+                    type: string
+                  result:
+                    properties:
+                      data:
+                        description: An object containing pagination metadata and domain suggestions.
+                        properties:
+                          meta:
+                            additionalProperties: true
+                            description: Pagination and result metadata that the store returns.
+                            properties:
+                              page:
+                                description: The current page number (1-indexed).
+                                example: 1
+                                type: integer
+                              page_size:
+                                description: The number of results per page.
+                                example: 10
+                                type: integer
+                              total_items:
+                                description: The total number of available matching domain suggestions.
+                                example: 25
+                                type: integer
+                              total_pages:
+                                description: The total number of available pages.
+                                example: 3
+                                type: integer
+                            type: object
+                          suggestions:
+                            additionalProperties:
+                              description: Suggestion details for the domain.
+                              required:
+                              - pricing
+                              - is_premium
+                              - premium_cost_pricing
+                              properties:
+                                pricing:
+                                  description: An array of available pricing periods for the domain.
+                                  items:
+                                    $ref: '#/components/schemas/PricingPeriod'
+                                  type: array
+                                is_premium:
+                                  description: 'Whether the domain suggestion is marked as premium.
+
+                                    * `1` — Premium domain.
+
+                                    * `0` — Non-premium domain.'
+                                  enum:
+                                  - 0
+                                  - 1
+                                  example: 0
+                                  type: integer
+                                premium_cost_pricing:
+                                  description: Premium pricing details for premium domains.
+                                  properties:
+                                    register:
+                                      description: Registration premium price details, keyed by registration term (in years).
+                                      additionalProperties:
+                                        description: Premium registration price for this term.
+                                        properties:
+                                          code:
+                                            type: string
+                                          display_value:
+                                            type: string
+                                          prefix:
+                                            type: string
+                                          suffix:
+                                            type: string
+                                          value:
+                                            type: string
+                                        type: object
+                                      example:
+                                        '1':
+                                          code: USD
+                                          display_value: $50.00 USD
+                                          prefix: $
+                                          suffix: ' USD'
+                                          value: '50.00'
+                                      type: object
+                                  type:
+                                  - object
+                                  - 'null'
+                              type: object
+                            description: 'A mapping of available domain names to pricing periods.
+
+
+                              Each key is a fully-qualified domain name (for example,
+
+                              `mybusiness.com`). Each value is an object containing a
+
+                              `pricing` array of `PricingPeriod` objects, an
+
+                              `is_premium` flag, and optional `premium_cost_pricing`
+
+                              details.
+
+
+                              The function returns an empty object (`{}`) when no
+
+                              suggestions are available.'
+                            example:
+                              mybusiness.com:
+                                is_premium: 0
+                                premium_cost_pricing: null
+                                pricing:
+                                - period: 1
+                                  register:
+                                    code: USD
+                                    display_value: $9.99 USD
+                                    prefix: $
+                                    suffix: ' USD'
+                                    value: '9.99'
+                                  renew:
+                                    code: USD
+                                    display_value: $9.99 USD
+                                    prefix: $
+                                    suffix: ' USD'
+                                    value: '9.99'
+                                  transfer: null
+                            type: object
+                        type: object
+                      errors:
+                        description: List of errors if the API failed.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      messages:
+                        description: List of messages generated by the API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      metadata:
+                        properties:
+                          transformed:
+                            description: Post-processing may have transformed the data.
+                            enum:
+                            - 1
+                            example: 1
+                            type: integer
+                      status:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the `errors` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      warnings:
+                        description: List of warnings generated by the API. Warnings describe non-critical failures or other problematic conditions noted while running an API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                    type: object
+                type: object
+          description: HTTP Request was successful.
+      summary: Search for available domain names and pricing
+      tags:
+      - DomainRecommendations
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "uapi --output=jsonpretty \\\n  --user=username \\\n  DomainRecommendations \\\n  domain_suggestions \\\n  search_field=mybusiness\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2083/cpsess##########/execute/DomainRecommendations/domain_suggestions?search_field=mybusiness
+      - label: LiveAPI Perl
+        lang: Perl
+        source: "#--------------------------------------------------------------------------------------\n# Instructions:\n#--------------------------------------------------------------------------------------\n# <theme-name> is the theme assigned to cPanel account.\n# 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n# 2) mkdir api_examples\n# 3) cd api_examples\n# 4) create a file DomainRecommendations_domain_suggestions.live.pl and put this code into that file.\n# 5) In your browser login to a cPanel account.\n# 6) Manually change the url from: .../frontend/<theme-name>/\n#    to .../frontend/<theme-name>/api_examples/DomainRecommendations_domain_suggestions.live.pl\n#--------------------------------------------------------------------------------------\n\nuse strict;\n\nuse Cpanel::LiveAPI ();\n\nmy $cpanel = Cpanel::LiveAPI->new(); # Connect to cPanel - only do this once.\n\n# Print the header\nprint \"Content-type: text/plain\\r\\n\\r\\n\";\n\n# Call the API\nmy $response = $cpanel->uapi(\n    q/DomainRecommendations/,\n    q/domain_suggestions/,\n    { search_field => 'mybusiness' }\n);\n\n# Handle the response\nif ($response->{cpanelresult}{result}{status}) {\n    my $data        = $response->{cpanelresult}{result}{data};\n    my $suggestions = $data->{suggestions};\n    foreach my $domain ( sort keys %$suggestions ) {\n        # suggestions->{$domain} is a hashref with 'pricing', 'is_premium', 'premium_cost_pricing'\n        my $suggestion   = $suggestions->{$domain};\n        my ($period_1yr) = grep { $_->{period} == 1 } @{ $suggestion->{pricing} };\n        my $price = $period_1yr ? $period_1yr->{register}{display_value} : 'N/A';\n        print \"$domain: $price\\n\";\n    }\n}\nelse {\n    print to_json($response->{cpanelresult}{result}{errors});\n}\n\n$cpanel->end();\n\nsub to_json {\n    require JSON;\n    return JSON->new->pretty->encode($_[0]);\n}\n"
+      - label: LiveAPI PHP
+        lang: PHP
+        source: "<?php\n//--------------------------------------------------------------------------------------\n// Instructions:\n//--------------------------------------------------------------------------------------\n// <theme-name> is the theme assigned to cPanel account.\n// 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n// 2) mkdir api_examples\n// 3) cd api_examples\n// 4) create a file DomainRecommendations_domain_suggestions.live.php and put this code into that file.\n// 5) In your browser login to a cPanel account.\n// 6) Manually change the url from: .../frontend/<theme-name>/\n//    to .../frontend/<theme-name>/api_examples/DomainRecommendations_domain_suggestions.live.php\n//--------------------------------------------------------------------------------------\n\nrequire_once \"/usr/local/cpanel/php/cpanel.php\";\n\nheader('Content-Type: text/plain');\n\n$cpanel = new CPANEL();\n\n$response = $cpanel->uapi(\n    'DomainRecommendations',\n    'domain_suggestions',\n    array('search_field' => 'mybusiness')\n);\n\nif ($response['cpanelresult']['result']['status']) {\n    $data        = $response['cpanelresult']['result']['data'];\n    $suggestions = $data['suggestions'];\n    foreach ($suggestions as $domain => $suggestion) {\n        // $suggestion has 'pricing', 'is_premium', 'premium_cost_pricing'\n        $price = 'N/A';\n        foreach ($suggestion['pricing'] as $period) {\n            if ($period['period'] === 1) {\n                $price = $period['register']['display_value'];\n                break;\n            }\n        }\n        echo \"$domain: $price\\n\";\n    }\n}\nelse {\n    echo json_encode($response['cpanelresult']['result']['errors'], JSON_PRETTY_PRINT);\n}\n\n$cpanel->end();"
+      x-cpanel-api-version: UAPI
+      x-cpanel-available-version: cPanel 134
+  /DomainRecommendations/get_store_config:
+    get:
+      x-readonly: true
+      description: 'This function returns the allowlisted store configuration for the Domain Recommendations feature.
+
+
+        **Important:**
+
+
+        This function returns only explicitly allowlisted fields. Any key not on the allowlist — including credentials, URLs, and future additions — is excluded by default.
+
+
+        **Note:**
+
+
+        This function requires the `domain_recommendation` feature.'
+      operationId: DomainRecommendations-get_store_config
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  apiversion:
+                    description: The version of the API.
+                    example: 3
+                    type: integer
+                  func:
+                    description: The name of the method called.
+                    example: get_store_config
+                    type: string
+                  module:
+                    description: The name of the module called.
+                    example: DomainRecommendations
+                    type: string
+                  result:
+                    properties:
+                      data:
+                        description: 'An object containing the allowlisted store configuration values.
+
+                          Returns an empty object (`{}`) if no store is configured.'
+                        properties:
+                          store_type:
+                            description: 'The type of the configured domain store.
+
+
+                              * `WHMCS` — The store uses a WHMCS backend.'
+                            example: WHMCS
+                            type: string
+                        additionalProperties: false
+                        type: object
+                      errors:
+                        description: List of errors if the API failed.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      messages:
+                        description: List of messages generated by the API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      metadata:
+                        properties:
+                          transformed:
+                            description: Post-processing may have transformed the data.
+                            enum:
+                            - 1
+                            example: 1
+                            type: integer
+                      status:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the `errors` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      warnings:
+                        description: List of warnings generated by the API. Warnings describe non-critical failures or other problematic conditions noted while running an API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                    type: object
+                type: object
+          description: HTTP Request was successful.
+      summary: Retrieve the sanitized domain store configuration
+      tags:
+      - DomainRecommendations
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "uapi --output=jsonpretty \\\n  --user=username \\\n  DomainRecommendations \\\n  get_store_config\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2083/cpsess##########/execute/DomainRecommendations/get_store_config
+      - label: LiveAPI Perl
+        lang: Perl
+        source: "#--------------------------------------------------------------------------------------\n# Instructions:\n#--------------------------------------------------------------------------------------\n# <theme-name> is the theme assigned to cPanel account.\n# 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n# 2) mkdir api_examples\n# 3) cd api_examples\n# 4) create a file DomainRecommendations_get_store_config.live.pl and put this code into that file.\n# 5) In your browser login to a cPanel account.\n# 6) Manually change the url from: .../frontend/<theme-name>/\n#    to .../frontend/<theme-name>/api_examples/DomainRecommendations_get_store_config.live.pl\n#--------------------------------------------------------------------------------------\n\nuse strict;\n\nuse Cpanel::LiveAPI ();\n\nmy $cpanel = Cpanel::LiveAPI->new(); # Connect to cPanel - only do this once.\n\n# Print the header\nprint \"Content-type: text/plain\\r\\n\\r\\n\";\n\n# Call the API\nmy $response = $cpanel->uapi(\n    q/DomainRecommendations/,\n    q/get_store_config/\n);\n\n# Handle the response\nif ($response->{cpanelresult}{result}{status}) {\n    my $data = $response->{cpanelresult}{result}{data};\n    print to_json($data);\n}\nelse {\n    print to_json($response->{cpanelresult}{result}{errors});\n}\n\n$cpanel->end();\n\nsub to_json {\n    require JSON;\n    return JSON->new->pretty->encode($_[0]);\n}\n"
+      - label: LiveAPI PHP
+        lang: PHP
+        source: "<?php\n//--------------------------------------------------------------------------------------\n// Instructions:\n//--------------------------------------------------------------------------------------\n// <theme-name> is the theme assigned to cPanel account.\n// 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n// 2) mkdir api_examples\n// 3) cd api_examples\n// 4) create a file DomainRecommendations_get_store_config.live.php and put this code into that file.\n// 5) In your browser login to a cPanel account.\n// 6) Manually change the url from: .../frontend/<theme-name>/\n//    to .../frontend/<theme-name>/api_examples/DomainRecommendations_get_store_config.live.php\n//--------------------------------------------------------------------------------------\n\nrequire_once \"/usr/local/cpanel/php/cpanel.php\";\n\nheader('Content-Type: text/plain');\n\n$cpanel = new CPANEL();\n\n$response = $cpanel->uapi(\n    'DomainRecommendations',\n    'get_store_config'\n);\n\nif ($response['cpanelresult']['result']['status']) {\n    $data = $response['cpanelresult']['result']['data'];\n    echo json_encode($data, JSON_PRETTY_PRINT);\n}\nelse {\n    echo json_encode($response['cpanelresult']['result']['errors'], JSON_PRETTY_PRINT);\n}\n\n$cpanel->end();"
+      x-cpanel-api-version: UAPI
+      x-cpanel-available-version: cPanel 134
+  /DomainRecommendations/is_enabled:
+    get:
+      x-readonly: true
+      description: 'This function returns the enablement status of the Domain Recommendations feature on the server.
+
+
+        **Note:**
+
+
+        This function requires the `domain_recommendation` feature. If the cPanel account does not have this feature, the function returns an error.'
+      operationId: DomainRecommendations-is_enabled
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  apiversion:
+                    description: The version of the API.
+                    example: 3
+                    type: integer
+                  func:
+                    description: The name of the method called.
+                    example: is_enabled
+                    type: string
+                  module:
+                    description: The name of the module called.
+                    example: DomainRecommendations
+                    type: string
+                  result:
+                    properties:
+                      data:
+                        description: An object containing the enabled status of the Domain Recommendations feature.
+                        properties:
+                          is_enabled:
+                            description: 'Whether the server has the Domain Recommendations feature enabled.
+
+
+                              * `1` — Enabled.
+
+                              * `0` — Disabled.'
+                            enum:
+                            - 1
+                            - 0
+                            example: 1
+                            type: integer
+                        type: object
+                      errors:
+                        description: List of errors if the API failed.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      messages:
+                        description: List of messages generated by the API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      metadata:
+                        properties:
+                          transformed:
+                            description: Post-processing may have transformed the data.
+                            enum:
+                            - 1
+                            example: 1
+                            type: integer
+                      status:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the `errors` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      warnings:
+                        description: List of warnings generated by the API. Warnings describe non-critical failures or other problematic conditions noted while running an API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                    type: object
+                type: object
+          description: HTTP Request was successful.
+      summary: Check whether Domain Recommendations is enabled
+      tags:
+      - DomainRecommendations
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "uapi --output=jsonpretty \\\n  --user=username \\\n  DomainRecommendations \\\n  is_enabled\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2083/cpsess##########/execute/DomainRecommendations/is_enabled
+      - label: LiveAPI Perl
+        lang: Perl
+        source: "#--------------------------------------------------------------------------------------\n# Instructions:\n#--------------------------------------------------------------------------------------\n# <theme-name> is the theme assigned to cPanel account.\n# 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n# 2) mkdir api_examples\n# 3) cd api_examples\n# 4) create a file DomainRecommendations_is_enabled.live.pl and put this code into that file.\n# 5) In your browser login to a cPanel account.\n# 6) Manually change the url from: .../frontend/<theme-name>/\n#    to .../frontend/<theme-name>/api_examples/DomainRecommendations_is_enabled.live.pl\n#--------------------------------------------------------------------------------------\n\nuse strict;\n\nuse Cpanel::LiveAPI ();\n\nmy $cpanel = Cpanel::LiveAPI->new(); # Connect to cPanel - only do this once.\n\n# Print the header\nprint \"Content-type: text/plain\\r\\n\\r\\n\";\n\n# Call the API\nmy $response = $cpanel->uapi(\n    q/DomainRecommendations/,\n    q/is_enabled/\n);\n\n# Handle the response\nif ($response->{cpanelresult}{result}{status}) {\n    my $data = $response->{cpanelresult}{result}{data};\n    print \"Domain Recommendations enabled: $data->{is_enabled}\\n\";\n}\nelse {\n    print to_json($response->{cpanelresult}{result}{errors});\n}\n\n$cpanel->end();\n\nsub to_json {\n    require JSON;\n    return JSON->new->pretty->encode($_[0]);\n}\n"
+      - label: LiveAPI PHP
+        lang: PHP
+        source: "<?php\n//--------------------------------------------------------------------------------------\n// Instructions:\n//--------------------------------------------------------------------------------------\n// <theme-name> is the theme assigned to cPanel account.\n// 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n// 2) mkdir api_examples\n// 3) cd api_examples\n// 4) create a file DomainRecommendations_is_enabled.live.php and put this code into that file.\n// 5) In your browser login to a cPanel account.\n// 6) Manually change the url from: .../frontend/<theme-name>/\n//    to .../frontend/<theme-name>/api_examples/DomainRecommendations_is_enabled.live.php\n//--------------------------------------------------------------------------------------\n\nrequire_once \"/usr/local/cpanel/php/cpanel.php\";\n\nheader('Content-Type: text/plain');\n\n$cpanel = new CPANEL();\n\n$response = $cpanel->uapi(\n    'DomainRecommendations',\n    'is_enabled'\n);\n\nif ($response['cpanelresult']['result']['status']) {\n    $data = $response['cpanelresult']['result']['data'];\n    echo \"Domain Recommendations enabled: \" . $data['is_enabled'] . \"\\n\";\n}\nelse {\n    echo json_encode($response['cpanelresult']['result']['errors'], JSON_PRETTY_PRINT);\n}\n\n$cpanel->end();"
+      x-cpanel-api-version: UAPI
+      x-cpanel-available-version: cPanel 134
+  /DomainRecommendations/purchase_domain:
+    get:
+      x-readonly: false
+      x-rollback: none
+      description: 'This function returns a URL for the configured domain store''s checkout page. This URL allows the user to complete the purchase of a domain name.
+
+
+        **Note:**
+
+
+        This function requires the `domain_recommendation` feature.'
+      operationId: DomainRecommendations-purchase_domain
+      parameters:
+      - description: 'The fully-qualified domain name (FQDN) to purchase.
+
+
+          **Note:**
+
+
+          This value must include the TLD (for example, `mybusiness.com`).'
+        in: query
+        name: domain
+        required: true
+        schema:
+          example: mybusiness.com
+          type: string
+      - description: The registration period in years.
+        in: query
+        name: period
+        required: true
+        schema:
+          example: 1
+          minimum: 1
+          type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  apiversion:
+                    description: The version of the API.
+                    example: 3
+                    type: integer
+                  func:
+                    description: The name of the method called.
+                    example: purchase_domain
+                    type: string
+                  module:
+                    description: The name of the module called.
+                    example: DomainRecommendations
+                    type: string
+                  result:
+                    properties:
+                      data:
+                        description: An object that contains the URL to complete the domain purchase.
+                        properties:
+                          purchase_url:
+                            description: The URL to redirect the user to in order to complete the domain purchase through the configured store.
+                            example: https://store.example.com/cart.php?a=add&domain=register&sld=mybusiness&tld=.com&regperiod=1
+                            type: string
+                        type: object
+                      errors:
+                        description: List of errors if the API failed.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      messages:
+                        description: List of messages generated by the API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      metadata:
+                        properties:
+                          transformed:
+                            description: Post-processing may have transformed the data.
+                            enum:
+                            - 1
+                            example: 1
+                            type: integer
+                      status:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the `errors` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      warnings:
+                        description: List of warnings generated by the API. Warnings describe non-critical failures or other problematic conditions noted while running an API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                    type: object
+                type: object
+          description: HTTP Request was successful.
+      summary: Get a URL to purchase a domain
+      tags:
+      - DomainRecommendations
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "uapi --output=jsonpretty \\\n  --user=username \\\n  DomainRecommendations \\\n  purchase_domain \\\n  domain=mybusiness.com \\\n  period=1\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2083/cpsess##########/execute/DomainRecommendations/purchase_domain?domain=mybusiness.com&period=1
+      - label: LiveAPI Perl
+        lang: Perl
+        source: "#--------------------------------------------------------------------------------------\n# Instructions:\n#--------------------------------------------------------------------------------------\n# <theme-name> is the theme assigned to cPanel account.\n# 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n# 2) mkdir api_examples\n# 3) cd api_examples\n# 4) create a file DomainRecommendations_purchase_domain.live.pl and put this code into that file.\n# 5) In your browser login to a cPanel account.\n# 6) Manually change the url from: .../frontend/<theme-name>/\n#    to .../frontend/<theme-name>/api_examples/DomainRecommendations_purchase_domain.live.pl\n#--------------------------------------------------------------------------------------\n\nuse strict;\n\nuse Cpanel::LiveAPI ();\n\nmy $cpanel = Cpanel::LiveAPI->new(); # Connect to cPanel - only do this once.\n\n# Print the header\nprint \"Content-type: text/plain\\r\\n\\r\\n\";\n\n# Call the API\nmy $response = $cpanel->uapi(\n    q/DomainRecommendations/,\n    q/purchase_domain/,\n    {\n        domain => 'mybusiness.com',\n        period => 1,\n    }\n);\n\n# Handle the response\nif ($response->{cpanelresult}{result}{status}) {\n    my $data = $response->{cpanelresult}{result}{data};\n    print \"Purchase URL: $data->{purchase_url}\\n\";\n}\nelse {\n    print to_json($response->{cpanelresult}{result}{errors});\n}\n\n$cpanel->end();\n\nsub to_json {\n    require JSON;\n    return JSON->new->pretty->encode($_[0]);\n}\n"
+      - label: LiveAPI PHP
+        lang: PHP
+        source: "<?php\n//--------------------------------------------------------------------------------------\n// Instructions:\n//--------------------------------------------------------------------------------------\n// <theme-name> is the theme assigned to cPanel account.\n// 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n// 2) mkdir api_examples\n// 3) cd api_examples\n// 4) create a file DomainRecommendations_purchase_domain.live.php and put this code into that file.\n// 5) In your browser login to a cPanel account.\n// 6) Manually change the url from: .../frontend/<theme-name>/\n//    to .../frontend/<theme-name>/api_examples/DomainRecommendations_purchase_domain.live.php\n//--------------------------------------------------------------------------------------\n\nrequire_once \"/usr/local/cpanel/php/cpanel.php\";\n\nheader('Content-Type: text/plain');\n\n$cpanel = new CPANEL();\n\n$response = $cpanel->uapi(\n    'DomainRecommendations',\n    'purchase_domain',\n    array(\n        'domain' => 'mybusiness.com',\n        'period' => 1,\n    )\n);\n\nif ($response['cpanelresult']['result']['status']) {\n    $data = $response['cpanelresult']['result']['data'];\n    echo \"Purchase URL: \" . $data['purchase_url'] . \"\\n\";\n}\nelse {\n    echo json_encode($response['cpanelresult']['result']['errors'], JSON_PRETTY_PRINT);\n}\n\n$cpanel->end();"
+      x-cpanel-api-version: UAPI
+      x-cpanel-available-version: cPanel 138
+  /DomainRecommendations/supported_tlds:
+    get:
+      x-readonly: true
+      description: 'This function returns the list of top-level domains (TLDs) that the configured domain store supports for registration.
+
+
+        The system caches the results for up to two minutes. Use the `use_cache=0` option to bypass the cache and force a live request.
+
+
+        **Note:**
+
+
+        This function requires the `domain_recommendation` feature.'
+      operationId: DomainRecommendations-supported_tlds
+      parameters:
+      - description: 'Whether to use the local response cache.
+
+
+          * `1` — Use the cache (default). The system caches the results for up to two minutes.
+
+          * `0` — Bypass the cache and make a live request to the store.'
+        in: query
+        name: use_cache
+        required: false
+        schema:
+          default: 1
+          enum:
+          - 1
+          - 0
+          example: 1
+          type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  apiversion:
+                    description: The version of the API.
+                    example: 3
+                    type: integer
+                  func:
+                    description: The name of the method called.
+                    example: supported_tlds
+                    type: string
+                  module:
+                    description: The name of the module called.
+                    example: DomainRecommendations
+                    type: string
+                  result:
+                    properties:
+                      data:
+                        description: An object containing the list of supported TLDs.
+                        properties:
+                          tlds:
+                            description: 'An array of top-level domain (TLD) strings that the
+
+                              configured store supports for registration.
+
+
+                              Each entry is a TLD string without a leading dot
+
+                              (for example, `com`, `net`, `org`).'
+                            example:
+                            - com
+                            - net
+                            - org
+                            - io
+                            items:
+                              example: com
+                              type: string
+                            type: array
+                        type: object
+                      errors:
+                        description: List of errors if the API failed.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      messages:
+                        description: List of messages generated by the API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      metadata:
+                        properties:
+                          transformed:
+                            description: Post-processing may have transformed the data.
+                            enum:
+                            - 1
+                            example: 1
+                            type: integer
+                      status:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the `errors` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      warnings:
+                        description: List of warnings generated by the API. Warnings describe non-critical failures or other problematic conditions noted while running an API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                    type: object
+                type: object
+          description: HTTP Request was successful.
+      summary: List the TLDs supported by the domain store
+      tags:
+      - DomainRecommendations
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "uapi --output=jsonpretty \\\n  --user=username \\\n  DomainRecommendations \\\n  supported_tlds\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2083/cpsess##########/execute/DomainRecommendations/supported_tlds
+      - label: LiveAPI Perl
+        lang: Perl
+        source: "#--------------------------------------------------------------------------------------\n# Instructions:\n#--------------------------------------------------------------------------------------\n# <theme-name> is the theme assigned to cPanel account.\n# 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n# 2) mkdir api_examples\n# 3) cd api_examples\n# 4) create a file DomainRecommendations_supported_tlds.live.pl and put this code into that file.\n# 5) In your browser login to a cPanel account.\n# 6) Manually change the url from: .../frontend/<theme-name>/\n#    to .../frontend/<theme-name>/api_examples/DomainRecommendations_supported_tlds.live.pl\n#--------------------------------------------------------------------------------------\n\nuse strict;\n\nuse Cpanel::LiveAPI ();\n\nmy $cpanel = Cpanel::LiveAPI->new(); # Connect to cPanel - only do this once.\n\n# Print the header\nprint \"Content-type: text/plain\\r\\n\\r\\n\";\n\n# Call the API\nmy $response = $cpanel->uapi(\n    q/DomainRecommendations/,\n    q/supported_tlds/\n);\n\n# Handle the response\nif ($response->{cpanelresult}{result}{status}) {\n    my $data = $response->{cpanelresult}{result}{data};\n    print \"Supported TLDs: \" . join(', ', @{ $data->{tlds} }) . \"\\n\";\n}\nelse {\n    print to_json($response->{cpanelresult}{result}{errors});\n}\n\n$cpanel->end();\n\nsub to_json {\n    require JSON;\n    return JSON->new->pretty->encode($_[0]);\n}\n"
+      - label: LiveAPI PHP
+        lang: PHP
+        source: "<?php\n//--------------------------------------------------------------------------------------\n// Instructions:\n//--------------------------------------------------------------------------------------\n// <theme-name> is the theme assigned to cPanel account.\n// 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n// 2) mkdir api_examples\n// 3) cd api_examples\n// 4) create a file DomainRecommendations_supported_tlds.live.php and put this code into that file.\n// 5) In your browser login to a cPanel account.\n// 6) Manually change the url from: .../frontend/<theme-name>/\n//    to .../frontend/<theme-name>/api_examples/DomainRecommendations_supported_tlds.live.php\n//--------------------------------------------------------------------------------------\n\nrequire_once \"/usr/local/cpanel/php/cpanel.php\";\n\nheader('Content-Type: text/plain');\n\n$cpanel = new CPANEL();\n\n$response = $cpanel->uapi(\n    'DomainRecommendations',\n    'supported_tlds'\n);\n\nif ($response['cpanelresult']['result']['status']) {\n    $data = $response['cpanelresult']['result']['data'];\n    echo \"Supported TLDs: \" . implode(', ', $data['tlds']) . \"\\n\";\n}\nelse {\n    echo json_encode($response['cpanelresult']['result']['errors'], JSON_PRETTY_PRINT);\n}\n\n$cpanel->end();"
+      x-cpanel-api-version: UAPI
+      x-cpanel-available-version: cPanel 138
+components:
+  schemas:
+    PricingPeriod:
+      description: Pricing for a single registration period.
+      properties:
+        period:
+          description: The registration period in years.
+          example: 1
+          type: integer
+        register:
+          description: The registration price for this period.
+          properties:
+            code:
+              description: The ISO 4217 currency code.
+              example: USD
+              type: string
+            display_value:
+              description: The formatted price string including prefix and suffix.
+              example: $10.74 USD
+              type: string
+            prefix:
+              description: The currency symbol that appears before the value.
+              example: $
+              type: string
+            suffix:
+              description: The currency label that appears after the value.
+              example: ' USD'
+              type: string
+            value:
+              description: The numeric price as a decimal string.
+              example: '10.74'
+              type: string
+          type:
+          - object
+          - 'null'
+        renew:
+          description: The renewal price for this period.
+          properties:
+            code:
+              description: The ISO 4217 currency code.
+              example: USD
+              type: string
+            display_value:
+              description: The formatted price string including prefix and suffix.
+              example: $10.74 USD
+              type: string
+            prefix:
+              description: The currency symbol that appears before the value.
+              example: $
+              type: string
+            suffix:
+              description: The currency label that appears after the value.
+              example: ' USD'
+              type: string
+            value:
+              description: The numeric price as a decimal string.
+              example: '10.74'
+              type: string
+          type:
+          - object
+          - 'null'
+        transfer:
+          description: The transfer price for this period.
+          properties:
+            code:
+              description: The ISO 4217 currency code.
+              example: USD
+              type: string
+            display_value:
+              description: The formatted price string including prefix and suffix.
+              example: $11.40 USD
+              type: string
+            prefix:
+              description: The currency symbol that appears before the value.
+              example: $
+              type: string
+            suffix:
+              description: The currency label that appears after the value.
+              example: ' USD'
+              type: string
+            value:
+              description: The numeric price as a decimal string.
+              example: '11.40'
+              type: string
+          type:
+          - object
+          - 'null'
+      type: object
+  securitySchemes:
+    BasicAuth:
+      scheme: basic
+      type: http
+externalDocs:
+  url: https://cpanel.net/developers/
+x-tagGroups:
+- name: API Development Tools
+  tags:
+  - API Token Management
+  - Batch
+  - SSE Task Management
+  - URL Parsing
+- name: Authentication
+  tags:
+  - External Authentication
+  - Two-Factor Settings
+- name: Backup Information
+  tags:
+  - BackupInfo
+  - BackupInfo Status
+- name: Block Ip Addresses
+  tags:
+  - Block IP
+- name: Commerce Integration
+  tags:
+  - Market Integration
+  - SSL Certificates
+- name: Contact Information
+  tags:
+  - Contact Information
+- name: cPanel Account
+  tags:
+  - Account Enhancements
+  - Account Information
+  - Account Management
+  - AuditLog
+  - Contact Information
+  - cPanel Features
+  - Disk Quotas
+  - DomainRecommendations
+  - Personalization
+  - Resource Usage and Statistics
+  - Subaccount Management
+  - Team Roles
+  - Team Users
+- name: cPanel Account Backups
+  tags:
+  - Backup
+  - File Restoration
+- name: cPanel Plugin Framework
+  tags:
+  - Formbricks
+  - Plugins
+- name: cPanel Theme Management
+  tags:
+  - Application Information
+  - Brand Management
+  - Branding Files
+  - Browser Cache Management
+  - Language
+  - Theme Settings
+- name: Directory Management
+  tags:
+  - Directory Indexes
+  - Directory Privacy
+  - Directory Protection
+- name: DNS
+  tags:
+  - DNS
+  - DNS Information
+  - DNS Security
+  - Dynamic DNS
+  - Email DNS Settings
+  - ZoneEdit
+- name: Domain
+  tags:
+  - Domain
+- name: Domain Management
+  tags:
+  - AddonDomain
+  - Direct Link Protection (Hotlink)
+  - Domain
+  - Domain Information
+  - Domain Redirection
+  - DomainLookup
+  - Park
+  - SubDomain
+  - Virtual Host Information
+- name: Domains
+  tags:
+  - Subdomains
+- name: Email
+  tags:
+  - Email Accounts
+  - Email Filtering
+  - Email Forwarding
+  - Email Server Information
+  - Email Suspensions
+  - Mail Server Information
+  - Mailbox Management
+  - Mailing Lists
+  - Signing and Encryption (GnuPG Keys)
+  - Spam Filtering (Greylisting)
+  - Spam Management
+  - Spam Prevention (BoxTrapper)
+  - Webmail Applications
+  - Webmail Sessions
+- name: Extract Information
+  tags:
+  - ExtractInfo
+  - ExtractInfo Status
+- name: File Manager
+  tags:
+  - Trash
+- name: Files
+  tags:
+  - FTP Accounts
+  - FTP Server Settings
+  - Image Tools
+  - Jodit
+  - Manage Files
+  - Manage Files
+  - WebDisk Settings
+- name: GIT Management
+  tags:
+  - Deployment Settings
+  - Repository Management
+- name: InProductSurvey
+  tags:
+  - InProductSurvey
+- name: MySQL and MariaDB
+  tags:
+  - Database Information
+  - Database Management
+  - Remote Databases
+  - User Management
+- name: Notifications
+  tags:
+  - Pushbullet
+- name: Optional Applications
+  tags:
+  - Antivirus Protection (ClamAV)
+  - Calendar and Contacts (DAV)
+  - Calendar and Contacts Server
+  - WordPress Manager Backups
+- name: PostgreSQL
+  tags:
+  - PostgreSQL Database Management
+  - PostgreSQL User Management
+- name: Retrieve bandwidth information
+  tags:
+  - Bandwidth
+- name: Security
+  tags:
+  - Known SSH Hosts Management
+  - Login Information
+- name: Server Information
+  tags:
+  - cPanel Server Information
+  - Notifications
+  - Password Strength
+  - SSH
+  - WebPros MCP
+  - WebProsMCP
+- name: ServiceProxy
+  tags:
+  - ServiceProxy
+- name: Site Quality Monitoring
+  tags:
+  - SiteQuality
+- name: SSL Certificates
+  tags:
+  - Auto-generated SSL Certificates
+  - cPanel Account SSL Management
+  - SNI Email Settings
+  - SSL Certificate Management
+  - Verify Domain Ownership
+- name: Statistics
+  tags:
+  - Domain Statistics
+  - Weblog Settings
+- name: UserData
+  tags:
+  - UserData
+- name: Web Server Configuration
+  tags:
+  - EA4
+  - EasyApache Settings
+  - PHP
+- name: Web Server Management
+  tags:
+  - Application Manager
+  - ModSecurity
+  - NginxCaching
+  - PHP Settings
+  - Web Apps
+- name: Website Configuration
+  tags:
+  - Handler Management
+  - Logs
+  - Mime Type Management
+  - Nova
+  - Site Information
+  - Site Installation
+  - Sitejet
+  - WPX

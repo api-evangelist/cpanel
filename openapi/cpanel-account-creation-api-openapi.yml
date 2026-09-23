@@ -1,0 +1,1243 @@
+openapi: 3.2.0
+info:
+  contact:
+    email: cs@cpanel.net
+    name: WebPros International, LLC
+    url: https://cpanel.net/support/
+  description: WHM API.
+  license:
+    name: cPanel License
+    url: https://cpanel.net/legal-notices/
+  termsOfService: https://cpanel.net/legal-notices/
+  title: WHM Account Creation API
+  version: 11.137.9999.106
+  x-api-evangelist-provenance: 'Harvested verbatim from cPanel''s developer portal on 2026-09-05 via the MCP tool get-full-api-description at https://api.docs.cpanel.net/mcp. ONE mechanical change was made before storage: example values containing PEM private-key or certificate blocks, and AWS-access-key-shaped example strings, were replaced with REDACTED_* placeholders so the file can be stored in a public git repository without tripping secret scanning. No path, operation, parameter, schema or description was altered, added or removed.'
+servers:
+- description: A server running WHM.
+  url: https://{host}:{port}/json-api
+  variables:
+    host:
+      default: whm-server.tld
+      description: The hostname of a server running WHM.
+    port:
+      default: '2087'
+      description: The WHM port.
+security:
+- BasicAuth: []
+tags:
+- description: Accounts Creation / Accounts
+  name: Account Creation
+paths:
+  /createacct:
+    get:
+      description: 'This function creates a cPanel account and sets up its domain information.
+
+
+        **Note:**
+
+
+        * On servers that run CentOS 7, you may see a `named` warning about the absence of SPF resource records on DNS.
+
+        * This warning is **not** relevant on CentOS 7 servers, because RFC 7208 deprecated SPF records. CentOS 7 servers use TXT records instead of SPF records.
+
+        * Red Hat 7.1 and CentOS 7.1 both contain `bind-9.9.4-23.el7`, which is an updated version of BIND that complies with RFC 7208. To resolve this issue, update your operating system to a version that contains the updated version of BIND. For more information, read the Red Hat Bugzilla case about SPF record errors.'
+      operationId: Accounts-createacct
+      parameters:
+      - description: 'The new account''s username. cPanel usernames **must** adhere to the following criteria:
+
+          * The first eight characters of a username **must** be unique.
+
+          * A username **cannot** begin with a number or the test string.
+
+
+          **Note:**
+
+
+          * Use the `Cpanel::Validate::Username` Perl module to validate usernames before you call this function. For more information, read the `/usr/local/cpanel/Cpanel/Validate/Username.pod` file.
+
+          * The system will automatically convert this value to all lowercase letters.
+
+          * MySQL''s unique character limitations do **not** exist on servers that use MariaDB.'
+        in: query
+        name: username
+        required: true
+        schema:
+          example: username
+          maxLength: 16
+          type: string
+      - description: Assign [Account Enhancements](https://go.cpanel.net/account-enhancements) to the cPanel account. To view your server's Account Enhancements, run WHM API 1's `list_account_enhancements` function.
+        examples:
+          multiple:
+            summary: Assign multiple enhancements
+            value:
+            - My Custom Enhancement
+            - Sample Enhancement
+          single:
+            summary: Assign one enhancement
+            value: My Custom Enhancement
+        in: query
+        name: account_enhancements
+        schema:
+          oneOf:
+          - type: string
+          - type: array
+            items:
+              type: string
+      - description: 'The account''s maximum bandwidth.
+
+          * `0`, `unlimited`, or `null` — The account possesses unlimited bandwidth.'
+        in: query
+        name: bwlimit
+        required: false
+        schema:
+          example: unlimited
+          format: megabytes
+          oneOf:
+          - enum:
+            - null
+          - enum:
+            - unlimited
+            type: string
+          - minimum: 0
+            type: integer
+      - description: "Whether the account has [Common Gateway Interface (CGI)](https://en.wikipedia.org/wiki/Common_Gateway_Interface) access enabled.\n* `1` — Enabled.\n* `0` — Disabled.\n\n**Note:**\n\n When a [server profile](https://docs.cpanel.net/whm/server-configuration/server-profile/) disables the [Web Server](https://docs.cpanel.net/knowledge-base/general-systems-administration/how-to-use-server-profiles/86/) role, this parameter defaults to `0`. On these servers, you **cannot** enable CGI access."
+        in: query
+        name: cgi
+        required: false
+        schema:
+          default: 1
+          enum:
+          - 1
+          - 0
+          example: 1
+          type: integer
+      - description: The account's contact email address.
+        in: query
+        name: contactemail
+        required: false
+        schema:
+          default: ''
+          example: username@example.com
+          format: email
+          type: string
+      - description: 'The account''s cPanel theme.
+
+
+          **Note:**
+
+
+          This parameter defaults to the server''s [default cPanel theme](https://docs.cpanel.net/whm/server-configuration/basic-webhost-manager-setup/).'
+        in: query
+        name: cpmod
+        required: false
+        schema:
+          example: jupiter
+          type: string
+      - description: 'The account''s IP address.
+
+
+          **Note:**
+
+
+          If you do not specify this parameter, the system will determine the account''s IP address.'
+        in: query
+        name: customip
+        required: false
+        schema:
+          example: 192.0.2.0
+          format: ipv4
+          type: string
+      - description: 'Whether [DomainKeys Identified Mail (DKIM)](https://en.wikipedia.org/wiki/DomainKeys_Identified_Mail) is enabled for the account.
+
+          * `1` — Enabled.
+
+          * `0` — Disabled.
+
+
+          **Note:**
+
+
+          This parameter defaults to the *Enable DKIM on domains for newly created accounts* setting''s value in WHM''s *[Tweak Settings](https://docs.cpanel.net/whm/server-configuration/tweak-settings/) interface (WHM >> Home >> System Configuration >> Tweak Settings)*.'
+        in: query
+        name: dkim
+        required: false
+        schema:
+          enum:
+          - 0
+          - 1
+          example: 1
+          type: integer
+      - description: 'Whether [Domain-based Message Authentication, Reporting, and Conformance (DMARC)](https://docs.cpanel.net/knowledge-base/cpanel-product/cpanel-glossary/#dmarc) is enabled for the account.
+
+          * `1` — Enabled.
+
+          * `0` — Disabled.
+
+
+          **Note:**
+
+
+          This parameter defaults to the *Enable DMARC on domains for newly created accounts* setting''s value in the _Domains_ section of WHM''s *[Tweak Settings](https://docs.cpanel.net/whm/server-configuration/tweak-settings/#domains) interface (WHM >> Home >> System Configuration >> Tweak Settings)*.'
+        in: query
+        name: dmarc
+        required: false
+        schema:
+          enum:
+          - 0
+          - 1
+          example: 1
+          type: integer
+      - description: 'The account''s main domain.
+
+
+          **Note:**
+
+
+          * If you do not provide a domain, the system will automatically create a temporary domain for the account.
+
+          * For more information about temporary domains, read our [Temporary Domains](https://go.cpanel.net/cp-temporary-domain) documentation.'
+        in: query
+        name: domain
+        required: false
+        schema:
+          example: example.com
+          type: string
+      - description: The account's assigned feature list.
+        in: query
+        name: featurelist
+        required: false
+        schema:
+          default: default
+          example: feature_list
+          type: string
+      - description: 'Whether to overwrite an existing DNS zone with the new account''s information. The system performs this action if a matching DNS zone currently exists.
+
+          * `1` — Overwrite.
+
+          * `0` — Do **not** overwrite.'
+        in: query
+        name: forcedns
+        required: false
+        schema:
+          default: 0
+          enum:
+          - 0
+          - 1
+          example: 0
+          type: integer
+      - deprecated: true
+        description: "Whether the account has Microsoft® FrontPage Extensions enabled.\n\n**Note:**\n\n cPanel & WHM ignores all FrontPage settings and parameters."
+        in: query
+        name: frontpage
+        required: false
+        schema:
+          default: null
+          type:
+          - integer
+          - 'null'
+      - description: 'The account''s group ID.
+
+
+          **Note:**
+
+
+          * To use this parameter, the function''s caller **must** authenticate as the root user.
+
+          * If you do **not** specify this parameter, the system generates a group ID.
+
+          * This **must** be a unique value that is **not** currently associated with disk usage and does **not** exist on the server.'
+        in: query
+        name: gid
+        required: false
+        schema:
+          example: 123456789
+          minimum: 1
+          type: integer
+      - description: 'Whether the account has shell (SSH) access enabled.
+
+          * `1` — Enabled.
+
+          * `0` — Disabled.'
+        in: query
+        name: hasshell
+        required: false
+        schema:
+          default: 0
+          enum:
+          - 0
+          - 1
+          example: 0
+          type: integer
+      - description: "A legacy parameter.\n* `1` — Enabled.\n* `0` — Disabled.\n\n**Important:**\n\n Only include this parameter if you set a useregns value of 1."
+        in: query
+        name: hasuseregns
+        required: false
+        schema:
+          default: 0
+          enum:
+          - 0
+          - 1
+          example: 1
+          type: integer
+      - description: 'The absolute path to the account''s `home` directory.
+
+
+          **Note:**
+
+
+          * To use this parameter, the function''s caller **must** authenticate as the `root` user.
+
+          * If you do not specify a value, the system uses the `/home/user` directory, where `user` is the account''s username.'
+        in: query
+        name: homedir
+        required: false
+        schema:
+          example: /home/user
+          type: string
+      - description: 'Whether the account has a dedicated IP address.
+
+          * `y` — The account possesses a dedicated IP address.
+
+          * `n` — The account does **not** possess a dedicated IP address.'
+        in: query
+        name: ip
+        required: false
+        schema:
+          default: n
+          enum:
+          - y
+          - n
+          example: n
+          type: string
+      - description: 'The account''s default locale.
+
+
+          **Note:**
+
+
+          * This value is case-sensitive.
+
+          * For region-specific locales, use the ISO 639-1 code, an underscore (`_`), and the [ISO 3166-1](https://en.wikipedia.org/wiki/ISO_3166-1) code.'
+        in: query
+        name: language
+        required: false
+        schema:
+          example: en
+          type: string
+      - description: "A [linked cPanel mail server](https://docs.cpanel.net/whm/server-configuration/link-server-nodes/) on which to also create the account. This is the server's alias (friendly name) defined when creating the link to a cPanel mail server.\n\n**Note:**\n\n This function **requires** a linked cPanel mail server."
+        in: query
+        name: mail_node_alias
+        required: false
+        schema:
+          example: mailnode
+          type: string
+      - description: 'A mailbox format to use, if you do not wish to use the system''s default mailbox format.
+
+
+          **Note:**
+
+
+          * Use this parameter when you transfer between servers with different mailbox formats.
+
+          * This parameter defaults to the *The mailbox storage format for new accounts setting* in the *Mail* section of WHM''s [*Tweak Settings*](https://docs.cpanel.net/whm/server-configuration/tweak-settings/#mail) interface (*WHM >> Home >> Server Configuration >> Tweak Settings*).'
+        in: query
+        name: mailbox_format
+        required: false
+        schema:
+          enum:
+          - mdbox
+          - maildir
+          example: mdbox
+          type: string
+      - description: 'The percentage of failed or deferred email messages that the account can send per hour. If the account exceeds this value its outgoing mail is rate-limited.
+
+          * `0` or `unlimited` — The account can send an unlimited number of failed or deferred messages.'
+        in: query
+        name: max_defer_fail_percentage
+        required: false
+        schema:
+          default: unlimited
+          example: unlimited
+          oneOf:
+          - enum:
+            - unlimited
+            type: string
+          - minimum: 0
+            type: integer
+      - description: 'The maximum number of emails that the account can send in one hour.
+
+          * `0` or `unlimited` — The account can send an unlimited number of emails.'
+        in: query
+        name: max_email_per_hour
+        required: false
+        schema:
+          example: unlimited
+          oneOf:
+          - enum:
+            - unlimited
+            type: string
+          - minimum: 0
+            type: integer
+      - description: "The maximum size that the account can define when it creates an email account.\n* `0` or `unlimited` — The account possesses an unlimited quota.\n\n**Important:**\n\n * This value applies to each email account, **not** each cPanel account.\n * If you define this parameter it overwrites the hosting plan's defined value for the account.\n * We recommend that you allow the account's plan to determine this value."
+        in: query
+        name: max_emailacct_quota
+        schema:
+          default: 1024
+          example: 1024
+          format: megabytes
+          oneOf:
+          - enum:
+            - unlimited
+            type: string
+          - maximum: 4294967296
+            minimum: 0
+            type: integer
+      - description: 'The maximum number of Team users for this account.
+
+          This parameter should be a number between 0 and the server''s default value, inclusively.
+
+          This parameter can not be a number greater than the server''s default value.'
+        in: query
+        name: max_team_users
+        required: false
+        schema:
+          example: 7
+          maximum: 7
+          minimum: 0
+          type: integer
+      - description: 'The account''s maximum number of addon domains.
+
+          * `unlimited`, or `null` — The account possesses unlimited addon domains.'
+        in: query
+        name: maxaddon
+        required: false
+        schema:
+          default: 0
+          example: unlimited
+          oneOf:
+          - enum:
+            - null
+          - enum:
+            - unlimited
+            type: string
+          - maximum: 999999
+            minimum: 0
+            type: integer
+      - description: 'The account''s maximum number of FTP accounts.
+
+          * `0`, `unlimited`, or `null` — The account possesses unlimited FTP accounts.'
+        in: query
+        name: maxftp
+        required: false
+        schema:
+          example: unlimited
+          oneOf:
+          - enum:
+            - null
+          - enum:
+            - unlimited
+            type: string
+          - maximum: 999999
+            minimum: 0
+            type: integer
+      - description: 'The account''s maximum number of mailing lists.
+
+          * `0`, `unlimited`, or `null` — The account possesses unlimited mailing lists.'
+        in: query
+        name: maxlst
+        required: false
+        schema:
+          example: unlimited
+          oneOf:
+          - enum:
+            - null
+          - enum:
+            - unlimited
+            type: string
+          - maximum: 999999
+            minimum: 0
+            type: integer
+      - description: 'The account''s maximum number of parked domains (aliases).
+
+          * `unlimited` or `null` — The account possesses unlimited parked domains.'
+        in: query
+        name: maxpark
+        required: false
+        schema:
+          default: 0
+          example: unlimited
+          oneOf:
+          - enum:
+            - null
+          - enum:
+            - unlimited
+            type: string
+          - maximum: 999999
+            minimum: 0
+            type: integer
+      - description: 'The account''s maximum number of email accounts.
+
+          * `0`, `unlimited`, or `null` — The account possesses unlimited email accounts.'
+        in: query
+        name: maxpop
+        required: false
+        schema:
+          example: unlimited
+          oneOf:
+          - enum:
+            - null
+          - enum:
+            - unlimited
+            type: string
+          - maximum: 999999
+            minimum: 0
+            type: integer
+      - description: 'The account''s maximum number of each available type of SQL database.
+
+          For example, this parameter has a `5` value and the system administrator allows
+
+          MySQL® and PostgreSQL® databases. Users can create up to five MySQL databases
+
+          and up to five PostgreSQL databases.
+
+          * `0`, `unlimited`, or `null` — The account possesses unlimited databases.'
+        in: query
+        name: maxsql
+        required: false
+        schema:
+          example: unlimited
+          oneOf:
+          - enum:
+            - null
+          - enum:
+            - unlimited
+            type: string
+          - maximum: 999999
+            minimum: 0
+            type: integer
+      - description: 'The account''s maximum number of subdomains.
+
+          `unlimited` or `null` — The account possesses unlimited subdomains.'
+        in: query
+        name: maxsub
+        required: false
+        schema:
+          example: unlimited
+          oneOf:
+          - enum:
+            - null
+          - enum:
+            - unlimited
+            type: string
+          - maximum: 999999
+            minimum: 0
+            type: integer
+      - description: 'The account''s main mail exchanger''s type.
+
+          * `local` - Local Mail Exchanger.
+
+          * `secondary` - Backup Mail Exchanger.
+
+          * `remote` - Remote Mail Exchanger.
+
+          * `auto` - Automatically Detect Configuration.
+
+
+          **Note:**
+
+
+          The function does **not** configure the primary MX entry to point to the appropriate exchanger. You must [perform this function separately](https://docs.cpanel.net/whm/dns-functions/email-routing-configuration/).'
+        in: query
+        name: mxcheck
+        required: false
+        schema:
+          default: local
+          enum:
+          - local
+          - secondary
+          - remote
+          - auto
+          example: auto
+          type: string
+      - description: 'The name of the account owner.
+
+          * `root`
+
+          *  A valid reseller account username on the server.'
+        in: query
+        name: owner
+        required: false
+        schema:
+          example: root
+          type: string
+      - description: 'Set the account to own itself. Ignored if `owner` is set.
+
+          * `1` — Set account to own itself.
+
+          * `0` — Do nothing.'
+        in: query
+        name: ownerself
+        required: false
+        schema:
+          default: 0
+          enum:
+          - 0
+          - 1
+          example: 1
+          type: integer
+      - description: "The account's password.\n\n**Note:**\n\n * You can use either the `pass` or the `password` parameter, but **not** both.\n * If you don't specify this value, the system generates a secure password."
+        in: query
+        name: pass
+        required: false
+        schema:
+          example: 123456luggage
+          type: string
+      - description: "The account's password.\n\n**Note:**\n\n * You can use **either** the `pass` or the `password` parameter, but **not** both.\n * If you don't specify this value, the system generates a secure password."
+        in: query
+        name: password
+        required: false
+        schema:
+          example: 123456luggage
+          type: string
+      - description: "A new plan name. Use this parameter to save unique account settings as a new plan.\n\n**Note:**\n\n * If you do **not** use this parameter but specify `1` for the `savepkg` value, the system will generate a plan name.\n * If you do **not** use this parameter and specify `0` or do not use the `savepkg` parameter, the function does not save a new plan.\n * If you do **not** use this parameter, the function will not save the new account settings."
+        in: query
+        name: pkgname
+        required: false
+        schema:
+          example: my_new_package
+          type: string
+      - description: "The account's hosting plan (package).\n\n**Important:**\n\n If you provide this value, **do not** use the optional quota-related parameters below. Instead, we recommend that you allow the account's plan to determine these values."
+        in: query
+        name: plan
+        required: false
+        schema:
+          default: default
+          example: default
+          type: string
+      - description: 'The account''s disk space quota.
+
+          * `0` — The account''s disk space is unlimited.'
+        in: query
+        name: quota
+        required: false
+        schema:
+          default: 0
+          example: 500
+          format: megabytes
+          maximum: 999999
+          minimum: 0
+          type: integer
+      - description: 'Whether to grant reseller privileges to the account.
+
+          * `1` — Grant reseller privileges.
+
+          * `0` — Do **not** grant reseller privileges.'
+        in: query
+        name: reseller
+        required: false
+        schema:
+          default: 0
+          enum:
+          - 0
+          - 1
+          example: 0
+          type: integer
+      - description: 'Create the user as a reseller without an associated domain.
+
+          * `1` - Create the account as a reseller without an associated domain.
+
+          * `0` - Do **not** create the account as a reseller without an associated domain.
+
+
+          **Warning:**
+
+
+          If you create a reseller without a domain, certain parts of WHM will not function
+
+          for that user. These limitations exist both when logged in as that user **and**
+
+          when you attempt to perform actions which affect that user.'
+        in: query
+        name: reseller_without_domain
+        required: false
+        schema:
+          default: 0
+          enum:
+          - 0
+          - 1
+          example: 0
+          type: integer
+      - description: 'Whether to save the account''s settings as a new plan.
+
+          * `1` — Save.
+
+          * `0` — Do **not** save.'
+        in: query
+        name: savepkg
+        required: false
+        schema:
+          default: 0
+          enum:
+          - 0
+          - 1
+          example: 1
+          type: integer
+      - description: 'Whether to display the account password in the output.
+
+          * `y` — Display the account password in the output.
+
+          * `n` — Do NOT display the account password in the output.'
+        in: query
+        name: showpass
+        required: false
+        schema:
+          default: y
+          enum:
+          - y
+          - n
+          example: n
+          type: string
+      - description: 'Whether the account has Apache SpamAssassin™ enabled.
+
+          * `1` — Enabled.
+
+          * `0` — Disabled.'
+        in: query
+        name: spamassassin
+        required: false
+        schema:
+          default: 1
+          enum:
+          - 0
+          - 1
+          example: 1
+          type: integer
+      - description: "Whether to enable spam box filtering for the account.\n* `y` - Enable spam box filtering.\n* `n` - Disable spam box filtering.\n**Note:**\n\n You **must** enable Apache SpamAssassin™ to use the Spam Box feature."
+        in: query
+        name: spambox
+        required: false
+        schema:
+          default: y
+          enum:
+          - y
+          - n
+          example: y
+          type: string
+      - description: 'Whether [Sender Policy Framework (SPF)](https://en.wikipedia.org/wiki/Sender_Policy_Framework) is enabled for the account.
+
+          * `1` — Enabled.
+
+          * `0` — Disabled.
+
+
+          This parameter defaults to the *Enable SPF on domains for newly created accounts*
+
+          setting''s value in WHM''s [*Tweak Settings*](https://docs.cpanel.net/whm/server-configuration/tweak-settings/) interface (*WHM >> Home >> System Configuration >> Tweak Settings*).'
+        in: query
+        name: spf
+        required: false
+        schema:
+          enum:
+          - 0
+          - 1
+          example: 1
+          type: integer
+      - description: "The account's user ID.\n\n**Note:**\n\n * To use this parameter, the function's caller **must** authenticate as the `root` user.\n * If you do not specify this parameter, the system generates a user ID.\n * This **must** be a unique value that is **not** currently associated with disk usage and does **not** exist on the server."
+        in: query
+        name: uid
+        required: false
+        schema:
+          example: 123456789
+          minimum: 0
+          type: integer
+      - description: "Whether to use registered nameservers for the domain.\n* `1` - Use registered nameservers.\n* `0` - Use the server's default nameservers.\n\n**Important:**\n\n If you set this parameter to `1`, you must also include the `hasuseregns` parameter with a value of `1`."
+        in: query
+        name: useregns
+        required: false
+        schema:
+          default: 0
+          enum:
+          - 0
+          - 1
+          example: 0
+          type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      ip:
+                        description: The account's primary nameserver's IP address.
+                        example: 192.0.2.0
+                        format: ipv4
+                        type: string
+                      nameserver:
+                        description: The account's primary nameserver.
+                        example: ns1.example.com
+                        type: string
+                      nameserver2:
+                        description: The account's secondary nameserver.
+                        example: ns2.example.com
+                        type: string
+                      nameserver3:
+                        description: The account's tertiary nameserver.
+                        example: ns3.example.com
+                        type: string
+                      nameserver4:
+                        description: The account's quaternary nameserver.
+                        example: ns4.example.com
+                        type: string
+                      nameservera:
+                        description: The account's primary nameservers' IP address.
+                        example: 192.0.2.1
+                        format: ipv4
+                        type:
+                        - string
+                        - 'null'
+                      nameservera2:
+                        description: The account's secondary nameservers' IP address.
+                        example: 192.0.2.2
+                        format: ipv4
+                        type:
+                        - string
+                        - 'null'
+                      nameservera3:
+                        description: The account's tertiary nameservers' IP address.
+                        example: 192.0.2.3
+                        format: ipv4
+                        type:
+                        - string
+                        - 'null'
+                      nameservera4:
+                        description: The account's quaternary nameservers' IP address.
+                        example: 192.0.2.4
+                        format: ipv4
+                        type:
+                        - string
+                        - 'null'
+                      nameserverentry:
+                        description: The primary nameserver's DNS name.
+                        example: dnsentry1
+                        type:
+                        - string
+                        - 'null'
+                      nameserverentry2:
+                        description: The secondary nameserver's DNS name.
+                        example: dnsentry2
+                        type:
+                        - string
+                        - 'null'
+                      nameserverentry3:
+                        description: The tertiary nameserver's DNS name.
+                        example: dnsentry3
+                        type:
+                        - string
+                        - 'null'
+                      nameserverentry4:
+                        description: The quaternary nameserver's DNS name.
+                        example: dnsentry4
+                        type:
+                        - string
+                        - 'null'
+                      package:
+                        description: The account's plan (package) name.
+                        example: my_new_package
+                        type: string
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: createacct
+                        type: string
+                      output:
+                        description: An object that contains the function's raw output information.
+                        properties:
+                          raw:
+                            description: The raw output from the account creation operation. This return may contain HTML code.
+                            example: 'Checking input data...Forced Dns is enabled.\nValidating Username......Done\nValidating IP......Done\nValidating Contact Email......Done\n...Done\nValidating system setup......Done\nChecking for database conflicts......Done\nWWWAcct 12.6.0 (c) 2024 WebPros International, LLC...\n\n+===================================+\n| New Account Info |\n+===================================+\n| Domain: example.com\n| Ip: 192.0.2.0 (n)\n| HasCgi: y\n| UserName: username\n| PassWord: 123456luggage\n| CpanelMod: jupiter\n| HomeRoot: /home\n| Quota: 1 GB\n| NameServer1: ns1.example.com\n| NameServer2: ns2.example.com\n| NameServer3:\n| NameServer4:\n| Contact Email: username@example.com\n| Package: my_new_package\n| Feature List: feature_list\n| Language: en\n+===================================+\n...Done\nCustom Account Data Provided: no\nRunning pre creation script (/usr/local/cpanel/scripts/prewwwacct)......Done\nAdding User...Removing Shell Access (n)\nSuccess...Done\nAdding Entries to userdata......Done\nSetting up Mail & Local Domains...localdomains...valiases ...vdomainaliases ...vfilters ......Done\nConfiguring DNS...Zone example.com has been successfully added\n...Done\nVerifying MX Records and Setting up Databases...Reconfiguring Mail Routing:\nLOCAL MAIL EXCHANGER: This server will serve as a primary mail exchanger for example.com''s mail.:\n This configuration has been automatically detected based on your mx entries.\n\n...Done\nSetting up Service Subdomains......Done\nUpdating Authentication Databases......Done\nSetting passwords......Done\nUpdating the userdata cache......Done\n\nCreating bandwidth datastore......Done\nUpdating the dedicated IP address usage cache......Done\nGenerating and installing DKIM keys......Done\nEnabling Apache SpamAssassin......Done\nEnabling Apache SpamAssassin Spam Box......Done\nSending Account Information......Done\nRunning post creation scripts (/usr/local/cpanel/scripts/legacypostwwwacct, /usr/local/cpanel/scripts/postwwwacct, /usr/local/cpanel/scripts/postwwwacctuser)......Done\nwwwacct creation finished\nAccount Creation Complete!!!...Account Creation Ok...Done\n'
+                            type: string
+                        type: object
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: Account Creation Ok
+                        type: string
+                      result:
+                        description: '* `1` - Success.
+
+                          * `0` - Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Create cPanel account
+      tags:
+      - Account Creation
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  createacct \\\n  username='username' \\\n  domain='example.com'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/createacct?api.version=1&username=username&domain=example.com
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11.32'
+  /get_current_users_count:
+    get:
+      description: This function returns the number of cPanel accounts on the server.
+      operationId: Accounts-get_current_users_count
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      users:
+                        description: The number of cPanel accounts.
+                        example: 100
+                        minimum: 0
+                        type: integer
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: get_current_users_count
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is 0. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '- `1` - Success
+
+                          - `0` - Failed: Check the reason field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Return cPanel accounts total number
+      tags:
+      - Account Creation
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  get_current_users_count\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/get_current_users_count?api.version=1
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '78'
+  /get_maximum_users:
+    get:
+      description: This function returns the maximum number of cPanel accounts that the server's license allows.
+      operationId: Accounts-get_maximum_users
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      users:
+                        description: 'The maximum number of cPanel accounts that the server''s license allows.
+
+                          * `0` - Unlimited'
+                        example: 100
+                        minimum: 0
+                        type: integer
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: get_maximum_users
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is 0. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` - Success
+
+                          * `0` - Failed: Check the reason field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Return maximum accounts for license
+      tags:
+      - Account Creation
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  get_maximum_users\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/get_maximum_users?api.version=1
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '78'
+  /verify_new_username:
+    get:
+      description: This function checks for username conflicts during account creation.
+      operationId: NameConflict-verify_new_username
+      parameters:
+      - description: The account that you wish to create.
+        in: query
+        name: user
+        required: true
+        schema:
+          example: username
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: verify_new_username
+                        type: string
+                      reason:
+                        description: 'The reason the API function failed when the `metadata.result`
+
+                          field is `0`. This field may display a success message when
+
+                          a function succeeds.
+
+
+                          **Note:**
+
+
+                          If the function detects a username conflict, it returns an error
+
+                          message in this field.'
+                        example: OK
+                        type: string
+                      result:
+                        description: '- `1` — Success.
+
+                          - `0` — Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Validate new cPanel account username
+      tags:
+      - Account Creation
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  verify_new_username \\\n  user='username'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/verify_new_username?api.version=1&user=username
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '58'
+components:
+  securitySchemes:
+    BasicAuth:
+      scheme: basic
+      type: http
+externalDocs:
+  url: https://cpanel.net/developers/
+x-tagGroups:
+- name: Account Restoration
+  tags:
+  - Restore Account
+  - Restore Queue Management
+  - Restore Queue Reporting
+- name: Accounts
+  tags:
+  - Account Creation
+  - Account Enhancements
+  - Account Management
+  - Bandwidth and Disk Quotas
+  - Domain Information
+  - Passwords
+  - Styles
+  - Suspensions
+- name: API Development Tools
+  tags:
+  - API Execution
+  - API Statistics
+  - API Token Management
+  - Applications
+  - Session
+- name: Authentication
+  tags:
+  - Authentication Providers
+  - External Authentication
+  - Login URL
+  - SSH Keys and Connections
+  - Two-Factor Authentication
+- name: Backups
+  tags:
+  - Backup Destination
+  - Backup or Restore
+  - Backup Settings
+  - Legacy Migration
+- name: Commerce Integration
+  tags:
+  - Market Integration
+  - Sitejet
+- name: cPanel Market
+  tags:
+  - Product Management
+  - Provider Management
+- name: cPanel Support Tickets
+  tags:
+  - Support Access
+  - Ticket Management
+- name: Customizations
+  tags:
+  - Brand
+  - Customizations
+- name: Databases
+  tags:
+  - Manage MySQL Server
+  - MySQL Databases
+  - PostgreSQL Databases
+  - Remote MySQL Databases
+- name: DNS
+  tags:
+  - DNS Cluster Settings
+  - DNS Security
+  - DNS Zones
+  - Domain Management
+  - Domain Management
+  - Resolvers
+  - Service Records
+- name: Hosting Plans
+  tags:
+  - Feature Access
+  - Feature Lists
+  - Hosting Plan Extensions
+  - Hosting Plans
+- name: InProductSurvey
+  tags:
+  - InProductSurvey
+- name: Integrations
+  tags:
+  - API Authentication
+  - Links
+  - Scripts Hooks
+- name: IP Address Management
+  tags:
+  - IPv4 Address Settings
+  - IPv6 Address Settings
+  - Network Address Translation
+- name: Login Security (cPHulk)
+  tags:
+  - Management
+  - Reporting
+  - Settings
+- name: Logs
+  tags:
+  - Web Log Retention
+- name: Mail
+  tags:
+  - cPanel Account Mail Management
+  - Mail DNS Settings
+  - Mail Server Settings
+  - Spam Management
+  - Spam Protection (Greylisting)
+- name: Monitoring
+  tags:
+  - 360 Monitoring
+- name: NGINX Manager
+  tags:
+  - NGINX Manager
+- name: Resellers
+  tags:
+  - Account Enhancement Limit
+  - Account Limits
+  - Account Permissions
+  - Account Settings
+  - Reseller Account Management
+- name: Security
+  tags:
+  - WHM Access
+- name: Server Administration
+  tags:
+  - Configuration Clusters
+  - Configurations
+  - Connected Applications
+  - Connections
+  - cPanel Analytics
+  - License Management
+  - Notifications
+  - Plugin-Based Features
+  - Security
+  - Server Nodes
+  - Server Profiles
+  - Services
+  - System Information
+  - Updates
+- name: SSL Certificates
+  tags:
+  - Auto-Generated Certificates
+  - cPanel Account Settings
+  - SSL Server Settings
+- name: System Package Management
+  tags:
+  - Install or Uninstall Package
+  - List Package Information
+  - Package Manager Settings
+- name: Transfers
+  tags:
+  - cPanel Account Transfer
+  - Transfer Configuration
+  - Transfer Monitoring
+- name: UserData
+  tags:
+  - UserData
+- name: Web Server Configuration
+  tags:
+  - EasyApache Settings
+  - PHP
+  - PHP-FPM
+- name: Web Server Security (ModSecurity)
+  tags:
+  - Rule Settings
+  - Rule Vendor Settings
+  - Server Settings

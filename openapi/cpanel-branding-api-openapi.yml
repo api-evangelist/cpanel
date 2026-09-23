@@ -1,0 +1,1619 @@
+openapi: 3.2.0
+info:
+  contact:
+    email: cs@cpanel.net
+    name: WebPros International, LLC
+    url: https://cpanel.net/support/
+  description: UAPI accesses the cPanel interface's features. Use this API to access and modify cPanel account data and settings.
+  license:
+    name: cPanel License
+    url: https://cpanel.net/legal-notices/
+  termsOfService: https://cpanel.net/legal-notices/
+  title: cPanel U Branding API
+  version: 11.137.9999.106
+  x-api-evangelist-provenance: 'Harvested verbatim from cPanel''s developer portal on 2026-09-05 via the MCP tool get-full-api-description at https://api.docs.cpanel.net/mcp. ONE mechanical change was made before storage: example values containing PEM private-key or certificate blocks, and AWS-access-key-shaped example strings, were replaced with REDACTED_* placeholders so the file can be stored in a public git repository without tripping secret scanning. No path, operation, parameter, schema or description was altered, added or removed.'
+servers:
+- description: A server running cPanel.
+  url: https://{host}:{port}/execute
+  variables:
+    host:
+      default: cpanel-server.tld
+      description: The hostname of a server running cPanel.
+    port:
+      default: '2083'
+      description: The cPanel port.
+security:
+- BasicAuth: []
+tags:
+- description: The Branding module for UAPI.
+  name: Branding
+paths:
+  /Branding/get_application_information:
+    get:
+      x-readonly: true
+      description: This function retrieves an application's information from the `dynamicui.conf` file.
+      operationId: Branding-get_application_information
+      parameters:
+      - description: The application's feature name. This value **must** match a feature's `app_key` value. For a list of app_key values, read our [Guide to cPanel Interface Customization - Appkeys](https://go.cpanel.net/appkey) documentation.
+        in: query
+        name: app_key
+        required: true
+        schema:
+          example: boxtrapper
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  apiversion:
+                    description: The version of the API.
+                    example: 3
+                    type: integer
+                  func:
+                    description: The name of the method called.
+                    example: get_application_information
+                    type: string
+                  module:
+                    description: The name of the module called.
+                    example: Branding
+                    type: string
+                  result:
+                    properties:
+                      data:
+                        properties:
+                          feature:
+                            description: The application's feature name. The `app_key` parameter's value.
+                            example: boxtrapper
+                            type: string
+                          file:
+                            description: The application's icon's filename.
+                            example: boxtrapper
+                            type: string
+                          group:
+                            description: The application's group.
+                            example: mail
+                            type: string
+                          height:
+                            description: The application's icon's height, in pixels.
+                            example: 32
+                            minimum: 1
+                            type: integer
+                          if:
+                            description: Conditional arguments that determine whether to display the item, if any exist. Conditional arguments that determine whether to display the item. For example, $isreseller indicates that the item only displays for reseller accounts. For more information, read our Guide to cPanel Variables documentation.
+                            example: $hasboxtrapper
+                            type: string
+                          imgtype:
+                            description: "The item's image type.\n `icon` is the only possible value."
+                            enum:
+                            - icon
+                            example: icon
+                            type: string
+                          itemdesc:
+                            description: The application's display name.
+                            example: BoxTrapper
+                            type: string
+                          itemorder:
+                            description: The application's order in the `dynamicui.conf` file representing the application's display order in cPanel's Home interface. For example, the first item on the cPanel Home interface has an `itemorder` value of `1`.
+                            example: 3
+                            minimum: 1
+                            type: integer
+                          module:
+                            description: The application's module. A valid module name.
+                            example: BoxTrapper
+                            type: string
+                          searchtext:
+                            description: One or more search terms. The application's icon will display when users enter these search terms in the Quick Find text box. A space-separated list of search terms.
+                            example: boxtrapper
+                            type: string
+                          subtype:
+                            description: "The item's subtype.\n `img` is the only possible value ."
+                            enum:
+                            - img
+                            example: img
+                            type: string
+                          type:
+                            description: "The application's type.\n `image` is the only possible value."
+                            enum:
+                            - image
+                            example: image
+                            type: string
+                          url:
+                            description: The location to which the application's icon links. A valid filepath or URL.
+                            example: mail/boxtrapper.html
+                            type: string
+                          width:
+                            description: The application's icon's width representing an image width, in pixels.
+                            example: 35
+                            minimum: 1
+                            type: integer
+                        type: object
+                      errors:
+                        description: List of errors if the API failed.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      messages:
+                        description: List of messages generated by the API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      metadata:
+                        properties: {}
+                      status:
+                        description: '- 1 - Success.
+
+                          - 0 - Failed. Check the `errors` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      warnings:
+                        description: List of warnings generated by the API. Warnings describe non-critical failures or other problematic conditions noted while running a API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                    type: object
+                type: object
+          description: HTTP Request was successful.
+      summary: Return single app's info from dynamicui.conf
+      tags:
+      - Branding
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "uapi --output=jsonpretty \\\n  --user=username \\\n  Branding \\\n  get_application_information \\\n  app_key='boxtrapper'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2083/cpsess##########/execute/Branding/get_application_information?app_key=boxtrapper
+      - label: LiveAPI Perl
+        lang: Perl
+        source: "#--------------------------------------------------------------------------------------\n# Instructions:\n#--------------------------------------------------------------------------------------\n# <theme-name> is the theme assigned to cPanel account.\n# 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n# 2) mkdir api_examples\n# 3) cd api_examples\n# 4) create a file Branding_get_application_information.live.pl and put this code into that file.\n# 5) In your browser login to a cPanel account.\n# 6) Manually change the url from: .../frontend/<theme-name>/\n#    to .../frontend/<theme-name>/api_examples/Branding_get_application_information.live.pl\n#--------------------------------------------------------------------------------------\n\nuse strict;\n\nuse Cpanel::LiveAPI ();\n\nmy $cpanel = Cpanel::LiveAPI->new(); # Connect to cPanel - only do this once.\n\n# Print the header\nprint \"Content-type: text/plain\\r\\n\\r\\n\";\n\n# Call the API\nmy $response = $cpanel->uapi(\n    q/Branding/,\n    q/get_application_information/,\n    {\n        'app_key' => 'boxtrapper',\n    }\n);\n\n# Handle the response\nif ($response->{cpanelresult}{result}{status}) {\n    my $data = $response->{cpanelresult}{result}{data};\n    # Do something with the $data\n    # So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    # Report errors:\n    print to_json($response->{cpanelresult}{result}{errors});\n}\n\n# Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n#--------------------------------------------------------------------------------------\n# Helper function to convert a perl object to html printable json\n#--------------------------------------------------------------------------------------\nsub to_json {\n    require JSON;\n    my $str = JSON->new->pretty->encode($_[0]);\n    return $str;\n}\n"
+      - label: LiveAPI PHP
+        lang: PHP
+        source: "<?php\n//--------------------------------------------------------------------------------------\n// Instructions:\n//--------------------------------------------------------------------------------------\n// <theme-name> is the theme assigned to cPanel account.\n// 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n// 2) mkdir api_examples\n// 3) cd api_examples\n// 4) create a file Branding_get_application_information.live.php and put this code into that file.\n// 5) In your browser login to a cPanel account.\n// 6) Manually change the url from: .../frontend/<theme-name>/\n//    to .../frontend/<theme-name>/api_examples/Branding_get_application_information.live.php\n//--------------------------------------------------------------------------------------\n\n// Instantiate the CPANEL object.\nrequire_once \"/usr/local/cpanel/php/cpanel.php\";\n\n// Print the header\nheader('Content-Type: text/plain');\n\n// Connect to cPanel - only do this once.\n$cpanel = new CPANEL();\n\n// Call the API\n$response = $cpanel->uapi(\n    'Branding',\n    'get_application_information',\n    array (\n        'app_key' => 'boxtrapper',\n    )\n);\n\n// Handle the response\nif ($response['cpanelresult']['result']['status']) {\n    $data = $response['cpanelresult']['result']['data'];\n    // Do something with the $data\n    // So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    // Report errors:\n    print to_json($response['cpanelresult']['result']['errors']);\n}\n\n// Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n//--------------------------------------------------------------------------------------\n// Helper function to convert a PHP value to html printable json\n//--------------------------------------------------------------------------------------\nfunction to_json($data) {\n    return json_encode($data, JSON_PRETTY_PRINT);\n}"
+      x-cpanel-api-version: UAPI
+      x-cpanel-available-version: cPanel 11.42
+  /Branding/get_applications:
+    get:
+      x-readonly: true
+      description: This function retrieves an application's information from a specific theme's `dynamicui.conf` file.
+      operationId: Branding-get_applications
+      parameters:
+      - description: 'A comma-separated list of an application feature names. If you do not specify this parameter,
+
+          the output will include all of the applications that the `dynamicui.conf` file contains.
+
+
+          **Note:**
+
+
+          * This value must match an application''s `feature` value in the `dynamicui.conf` file.
+
+          * For more information, read our [Guide to cPanel Interface Customization - Appkeys](https://go.cpanel.net/appkey) documentation.'
+        in: query
+        name: app_keys
+        required: false
+        schema:
+          example: addon_domains,ftp_accounts,anonymous_ftp
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  apiversion:
+                    description: The version of the API.
+                    example: 3
+                    type: integer
+                  func:
+                    description: The name of the method called.
+                    example: get_applications
+                    type: string
+                  module:
+                    description: The name of the module called.
+                    example: Branding
+                    type: string
+                  result:
+                    properties:
+                      data:
+                        additionalProperties:
+                          description: 'The feature''s details. The function returns an object for each
+
+                            application feature.
+
+
+                            **Note:***
+
+
+                            The property name corresponds to the name(s) specified
+
+                            in the `app_keys` parameter.'
+                          properties:
+                            feature:
+                              description: The feature name. The item will **only** display if the cPanel user has access to this feature.
+                              example: addondomains
+                              type: string
+                            file:
+                              description: The application's icon's filename.
+                              example: addon_domains
+                              type: string
+                            group:
+                              description: The item's group.
+                              example: advanced
+                              type: string
+                            height:
+                              description: The application's icon's height, in pixels.
+                              example: 48
+                              minimum: 1
+                              type: integer
+                            if:
+                              description: 'Conditional arguments that determine whether to display the item, if any exist.
+
+
+                                For example, `$isreseller` indicates that the item **only** displays for reseller
+
+                                accounts.
+
+
+                                For more information, read our
+
+                                [Guide to cPanel Variables](https://go.cpanel.net/guidetovariables)
+
+                                documentation.'
+                              example: $is_reseller
+                              type: string
+                            imgtype:
+                              description: 'The item''s image type.
+
+
+                                * `icon` is the only possible value.'
+                              enum:
+                              - icon
+                              example: icon
+                              type: string
+                            implements:
+                              description: The `implements` value for the application. This corresponds to the `implements` field in the `dynamicui.conf` file.
+                              example: Domains_AddonDomains
+                              type: string
+                            itemdesc:
+                              description: The application's display name. value.
+                              example: Addon Domain
+                              type: string
+                            itemorder:
+                              description: 'The application''s order in the `dynamicui.conf`
+
+                                file, representing the application''s display order in
+
+                                cPanel''s *Home* interface.
+
+
+                                For example, the first item on the cPanel *Home* interface
+
+                                has an `itemorder` value of `1`.'
+                              example: 4
+                              minimum: 1
+                              type: integer
+                            searchtext:
+                              description: A space-separated list of search terms. The item will display when users enter these search terms in the *Quick Find* textbox.
+                              example: Domains Addon domain
+                              type: string
+                            subtype:
+                              description: 'The item''s subtype.
+
+
+                                * `img` is the only possible value.'
+                              enum:
+                              - img
+                              example: img
+                              type: string
+                            touch:
+                              description: Conditional arguments that determine whether to display the item, if the touch file exists.
+                              example: ftp
+                              type: string
+                            type:
+                              description: 'The application''s type.
+
+
+                                * `image` is the only possible value.'
+                              enum:
+                              - image
+                              example: image
+                              type: string
+                            url:
+                              description: The location to which the application's icon links.
+                              example: addon/index.html
+                              format: url-path
+                              type: string
+                            width:
+                              description: The application's icon's width.
+                              example: 48
+                              minimum: 1
+                              type: integer
+                          type: object
+                        example:
+                          addon_domains:
+                            acontent: ''
+                            base64_png_image: ''
+                            feature: addondomains
+                            file: addon_domains
+                            group: domains
+                            height: '48'
+                            if: $HASROLE{'WebServer'}
+                            imgtype: icon
+                            implements: Domains_AddonDomains
+                            itemdesc: Addon Domains
+                            itemorder: '3'
+                            key: addon_domains
+                            onclick: ''
+                            plainitemdesc: Addon Domains
+                            searchtext: Domains Addon domain Addon Domains
+                            subtype: img
+                            target: ''
+                            type: image
+                            url: addon/index.html
+                            width: '48'
+                          anonymous_ftp:
+                            acontent: ''
+                            base64_png_image: ''
+                            feature: ftpaccts
+                            file: anonymous_ftp
+                            group: files
+                            height: '48'
+                            if: $SERVICEPROVIDED{'ftp'} && $hasanonftp
+                            imgtype: icon
+                            itemdesc: Anonymous FTP
+                            itemorder: '8'
+                            key: anonymous_ftp
+                            onclick: ''
+                            plainitemdesc: Anonymous FTP
+                            searchtext: Anonymous FTP anonymousftp
+                            subtype: img
+                            target: ''
+                            touch: ftp
+                            type: image
+                            url: ftp/anonymous.html
+                            width: '48'
+                          ftp_accounts:
+                            acontent: ''
+                            base64_png_image: ''
+                            feature: ftpaccts
+                            file: ftp_accounts
+                            group: files
+                            height: '48'
+                            if: $SERVICEPROVIDED{'ftp'}
+                            imgtype: icon
+                            itemdesc: FTP Accounts
+                            itemorder: '6'
+                            key: ftp_accounts
+                            onclick: ''
+                            plainitemdesc: FTP Accounts
+                            searchtext: FTP Accounts ftp create
+                            subtype: img
+                            target: ''
+                            touch: ftp
+                            type: image
+                            url: ftp/accounts.html
+                            width: '48'
+                      errors:
+                        description: List of errors if the API failed.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      messages:
+                        description: List of messages generated by the API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      metadata:
+                        properties: {}
+                      status:
+                        description: '- 1 - Success
+
+                          - 0 - Failed: Check the errors field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      warnings:
+                        description: List of warnings generated by the API. Warnings describe non-critical failures or other problematic conditions noted while running a API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                    type: object
+                type: object
+          description: HTTP Request was successful.
+      summary: Return multiple apps' info from dynamicui.conf
+      tags:
+      - Branding
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "uapi --output=jsonpretty \\\n  --user=username \\\n  Branding \\\n  get_applications\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2083/cpsess##########/execute/Branding/get_applications
+      - label: LiveAPI Perl
+        lang: Perl
+        source: "#--------------------------------------------------------------------------------------\n# Instructions:\n#--------------------------------------------------------------------------------------\n# <theme-name> is the theme assigned to cPanel account.\n# 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n# 2) mkdir api_examples\n# 3) cd api_examples\n# 4) create a file Branding_get_applications.live.pl and put this code into that file.\n# 5) In your browser login to a cPanel account.\n# 6) Manually change the url from: .../frontend/<theme-name>/\n#    to .../frontend/<theme-name>/api_examples/Branding_get_applications.live.pl\n#--------------------------------------------------------------------------------------\n\nuse strict;\n\nuse Cpanel::LiveAPI ();\n\nmy $cpanel = Cpanel::LiveAPI->new(); # Connect to cPanel - only do this once.\n\n# Print the header\nprint \"Content-type: text/plain\\r\\n\\r\\n\";\n\n# Call the API\nmy $response = $cpanel->uapi(\n    q/Branding/,\n    q/get_applications/\n);\n\n# Handle the response\nif ($response->{cpanelresult}{result}{status}) {\n    my $data = $response->{cpanelresult}{result}{data};\n    # Do something with the $data\n    # So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    # Report errors:\n    print to_json($response->{cpanelresult}{result}{errors});\n}\n\n# Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n#--------------------------------------------------------------------------------------\n# Helper function to convert a perl object to html printable json\n#--------------------------------------------------------------------------------------\nsub to_json {\n    require JSON;\n    my $str = JSON->new->pretty->encode($_[0]);\n    return $str;\n}\n"
+      - label: LiveAPI PHP
+        lang: PHP
+        source: "<?php\n//--------------------------------------------------------------------------------------\n// Instructions:\n//--------------------------------------------------------------------------------------\n// <theme-name> is the theme assigned to cPanel account.\n// 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n// 2) mkdir api_examples\n// 3) cd api_examples\n// 4) create a file Branding_get_applications.live.php and put this code into that file.\n// 5) In your browser login to a cPanel account.\n// 6) Manually change the url from: .../frontend/<theme-name>/\n//    to .../frontend/<theme-name>/api_examples/Branding_get_applications.live.php\n//--------------------------------------------------------------------------------------\n\n// Instantiate the CPANEL object.\nrequire_once \"/usr/local/cpanel/php/cpanel.php\";\n\n// Print the header\nheader('Content-Type: text/plain');\n\n// Connect to cPanel - only do this once.\n$cpanel = new CPANEL();\n\n// Call the API\n$response = $cpanel->uapi(\n    'Branding',\n    'get_applications'\n);\n\n// Handle the response\nif ($response['cpanelresult']['result']['status']) {\n    $data = $response['cpanelresult']['result']['data'];\n    // Do something with the $data\n    // So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    // Report errors:\n    print to_json($response['cpanelresult']['result']['errors']);\n}\n\n// Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n//--------------------------------------------------------------------------------------\n// Helper function to convert a PHP value to html printable json\n//--------------------------------------------------------------------------------------\nfunction to_json($data) {\n    return json_encode($data, JSON_PRETTY_PRINT);\n}"
+      x-cpanel-api-version: UAPI
+      x-cpanel-available-version: cPanel 11.52
+  /Branding/get_available_applications:
+    get:
+      x-readonly: true
+      description: This function retrieves information about the groups and applications in the authenticated user's cPanel interface.
+      operationId: Branding-get_available_applications
+      parameters:
+      - description: 'A pipe-separated list of group names denoting the order in which to sort the
+
+          groups. If you do not supply a value, the function does not sort the groups.
+
+
+          **Note:**
+
+
+          `arglist` is an alias for this parameter.'
+        in: query
+        name: nvarglist
+        required: false
+        schema:
+          example: pref|software|domains
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  apiversion:
+                    description: The version of the API.
+                    example: 3
+                    type: integer
+                  func:
+                    description: The name of the method called.
+                    example: get_available_applications
+                    type: string
+                  module:
+                    description: The name of the module called.
+                    example: Branding
+                    type: string
+                  result:
+                    properties:
+                      data:
+                        properties:
+                          default_group_order:
+                            additionalProperties:
+                              description: 'The group''s default position.
+
+
+                                **Note:**
+
+
+                                The property name is the group ID.'
+                              type: integer
+                            description: An object that defines the default order of applications in cPanel.
+                            example:
+                              advanced: 7
+                              databases: 2
+                              domains: 3
+                              email: 4
+                              files: 1
+                              metrics: 5
+                              preferences: 8
+                              sample_apps: 9
+                              security: 6
+                              software: 6
+                            type: object
+                          grouporder:
+                            description: A list of group IDs, in the order in which the groups appear.
+                            example:
+                            - files
+                            - databases
+                            - domains
+                            - email
+                            - metrics
+                            - security
+                            - software
+                            - advanced
+                            - preferences
+                            - pref
+                            items:
+                              type: string
+                            type: array
+                          groups:
+                            description: Information about each group in the cPanel interface.
+                            items:
+                              properties:
+                                desc:
+                                  description: The group's description.
+                                  example: Files
+                                  type: string
+                                group:
+                                  description: The group's ID.
+                                  example: files
+                                  type: string
+                                items:
+                                  description: The groups and their application details.
+                                  items:
+                                    example:
+                                      acontent: target="file_manager"
+                                      base64_png_image: ''
+                                      feature: filemanager
+                                      file: file_manager
+                                      group: files
+                                      height: '48'
+                                      if: $HASROLE{'FileStorage'}
+                                      imgtype: icon
+                                      implements: FileManager_Home
+                                      itemdesc: File Manager
+                                      itemorder: '1'
+                                      key: file_manager
+                                      onclick: ''
+                                      plainitemdesc: File Manager
+                                      searchtext: File Manager file-manager
+                                      subtype: img
+                                      target: file_manager
+                                      type: image
+                                      url: filemanager/index.html
+                                      width: '48'
+                                    properties:
+                                      acontent:
+                                        description: The content of a tag in the application's link.
+                                        example: file_manager
+                                        type: string
+                                      base64_png_image:
+                                        description: The application's icon in Base64 format.
+                                        format: base64 image
+                                        type: string
+                                      feature:
+                                        description: A feature name. The icon **only** displays if the cPanel user can access this feature.
+                                        example: addondomains
+                                        type: string
+                                      file:
+                                        description: The application's icon's filename.
+                                        example: addon_domains
+                                        type: string
+                                      group:
+                                        description: The item's group.
+                                        example: advanced
+                                        type: string
+                                      height:
+                                        description: The application icon height, in pixels.
+                                        example: '48'
+                                        type: string
+                                      if:
+                                        description: 'An expression containing cPanel variables that determine whether
+
+                                          to display the item. The function **only** returns this value if
+
+                                          any variables exist.
+
+
+                                          For example, `$isreseller` indicates that the item **only**
+
+                                          displays for reseller accounts.
+
+
+                                          For more information, read our
+
+                                          [Guide to cPanel Variables documentation](https://go.cpanel.net/guidetovariables).'
+                                        example: $isreseller
+                                        type: string
+                                      imgtype:
+                                        description: 'The item''s image type.
+
+
+                                          `icon` is the only possible value.'
+                                        enum:
+                                        - icon
+                                        example: icon
+                                        type: string
+                                      implements:
+                                        description: The `implements` name of the application. WHM API 1's `create_user_session` and `get_users_links` functions use this value.
+                                        example: Domains_AddonDomains
+                                        type: string
+                                      itemdesc:
+                                        description: The application's display name.
+                                        example: Addon Domain
+                                        type: string
+                                      itemorder:
+                                        description: The application's order in the `dynamicui.conf` file. This value represents the application's display order in cPanel's *Home* interface.
+                                        example: '4'
+                                        type: string
+                                      module:
+                                        description: The Perl module that the application requires.
+                                        example: My::Module
+                                        type: string
+                                      onclick:
+                                        description: JavaScript function that the browser calls before or instead of URL navigation.
+                                        example: function
+                                        type: string
+                                      searchtext:
+                                        description: One or more space-separated search terms.  The icon will display when users enter these search terms in the *Quick Find* text box in the cPanel interface.
+                                        example: Domains Addon domain
+                                        type: string
+                                      subtype:
+                                        description: 'The item''s subtype.
+
+
+                                          `img` is the only possible value.'
+                                        enum:
+                                        - img
+                                        example: img
+                                        type: string
+                                      target:
+                                        description: The target of the application's link.
+                                        example: file_manager
+                                        type: string
+                                      touch:
+                                        description: Conditional arguments that determine whether to display the item, if a specified touch file exists.
+                                        example: ftp
+                                        type: string
+                                      type:
+                                        description: 'The application''s type.
+
+
+                                          `image` is the only possible value.'
+                                        enum:
+                                        - image
+                                        example: image
+                                        type: string
+                                      url:
+                                        description: The path to which the application's icon links.
+                                        example: addon/index.html
+                                        format: url-path
+                                        type: string
+                                      width:
+                                        description: The application's icon's width, in pixels.
+                                        example: '48'
+                                        type: string
+                                    type: object
+                                  type: array
+                              type: object
+                            type: array
+                          implements:
+                            additionalProperties:
+                              description: 'The application and its Appkey value.
+
+
+                                **Note:**
+
+
+                                This return''s name is the application''s name, in its `implements` value format.'
+                              type: string
+                            description: 'An object mapping the `implements` names to Appkey values for applications in cPanel.
+
+
+                              For example, use this mapping to determine that the `implements`
+
+                              value `SSL_TLS_Status` maps to the Appkey value `tls_status`.
+
+
+                              **Note:**
+
+
+                              * The Appkey for an application can be found in the `key` attribute elsewhere in the API response.
+
+                              * The `implements` for an application can be found in the `implements` attribute elsewhere in the API response.
+
+                              * For more information about Appkey values, read our [Guide to cPanel Interface Customization - Appkeys](https://go.cpanel.net/paper-lantern-theme-guide-to-cpanel-interface-customization-appkeys) documentation.'
+                            example:
+                              API_Tokens_Manager: api_tokens
+                              Backups_Home: backup
+                              Calendar_Configure: calendar_and_contacts
+                              ContactInfo_Change: contact_information
+                              Cron_Home: cron_jobs
+                              Database_MySQL: mysql_databases
+                              Database_phpMyAdmin: php_my_admin
+                              Domains_AddonDomains: addon_domains
+                              Domains_SubDomains: subdomains
+                              Email_AccountLevelFiltering: global_email_filters
+                              Email_Accounts: email_accounts
+                              Email_Authentication: email_deliverability
+                              Email_AutoResponders: autoresponders
+                              Email_BoxTrapper: boxtrapper
+                              Email_DefaultAddress: default_address
+                              Email_DeliveryReport: track_delivery
+                              Email_Disk_Usage: email_disk_usage
+                              Email_Forwarders: forwarders
+                              Email_MailingLists: mailing_lists
+                              Email_Routing: email_routing
+                              Email_SpamFilter: apache_spam_assassin
+                              Email_UserLevelFiltering: email_filters
+                              FileManager_Home: file_manager
+                              Locale_Change: change_language
+                              Password_Change: change_password
+                              SSL_TLS_Manager: ssl_tls
+                              SSL_TLS_Status: tls_status
+                              Site_Software: site_software
+                              Stats_AWStats: awstats
+                            type: object
+                          index:
+                            additionalProperties:
+                              description: 'The order in which the application appears in the cPanel interface:
+
+                                * The first integer represents the group in which the application appears, starting at `0`.
+
+                                * The second integer represents the order in which the application appears in the group, starting at `0`.
+
+
+                                **Note:**
+
+
+                                The array''s name is the application''s name.'
+                              items:
+                                type: integer
+                              type: array
+                            description: The applications and the order in which they appear in the cPanel interface.
+                            example:
+                              addon_domains:
+                              - 2
+                              - 2
+                              address_importer:
+                              - 3
+                              - 10
+                              aliases:
+                              - 2
+                              - 4
+                              analog_stats:
+                              - 4
+                              - 5
+                              apache_handlers:
+                              - 7
+                              - 5
+                              apache_spam_assassin:
+                              - 3
+                              - 11
+                              api_tokens:
+                              - 5
+                              - 3
+                              autoresponders:
+                              - 3
+                              - 3
+                              awstats:
+                              - 4
+                              - 4
+                              backup:
+                              - 0
+                              - 5
+                              backup_wizard:
+                              - 0
+                              - 6
+                              bandwidth:
+                              - 4
+                              - 2
+                              boxtrapper:
+                              - 3
+                              - 13
+                              calendar_and_contacts:
+                              - 3
+                              - 14
+                              change_language:
+                              - 8
+                              - 1
+                              change_password:
+                              - 8
+                              - 0
+                              change_style:
+                              - 8
+                              - 2
+                              contact_information:
+                              - 8
+                              - 3
+                              cron_jobs:
+                              - 7
+                              - 1
+                              default_address:
+                              - 3
+                              - 4
+                              directory_privacy:
+                              - 0
+                              - 2
+                              disk_usage:
+                              - 0
+                              - 3
+                              domains:
+                              - 2
+                              - 1
+                              email_accounts:
+                              - 3
+                              - 0
+                              email_deliverability:
+                              - 3
+                              - 9
+                              email_disk_usage:
+                              - 3
+                              - 15
+                              email_filters:
+                              - 3
+                              - 8
+                              email_routing:
+                              - 3
+                              - 2
+                              encryption:
+                              - 3
+                              - 12
+                              error_pages:
+                              - 7
+                              - 4
+                              errors:
+                              - 4
+                              - 1
+                              file_manager:
+                              - 0
+                              - 0
+                              forwarders:
+                              - 3
+                              - 1
+                              global_email_filters:
+                              - 3
+                              - 7
+                              hotlink_protection:
+                              - 5
+                              - 4
+                              images:
+                              - 0
+                              - 1
+                              indexes:
+                              - 7
+                              - 3
+                              ip_blocker:
+                              - 5
+                              - 1
+                              leech_protection:
+                              - 5
+                              - 5
+                              mailing_lists:
+                              - 3
+                              - 5
+                              metrics_editor:
+                              - 4
+                              - 7
+                              mime_types:
+                              - 7
+                              - 6
+                              multiphp_ini_editor:
+                              - 6
+                              - 5
+                              multiphp_manager:
+                              - 6
+                              - 4
+                              mysql_database_wizard:
+                              - 1
+                              - 2
+                              mysql_databases:
+                              - 1
+                              - 1
+                              optimize_website:
+                              - 6
+                              - 3
+                              perl_modules:
+                              - 6
+                              - 1
+                              php_my_admin:
+                              - 1
+                              - 0
+                              php_pear_packages:
+                              - 6
+                              - 0
+                              raw_access:
+                              - 4
+                              - 3
+                              redirects:
+                              - 2
+                              - 5
+                              remote_mysql:
+                              - 1
+                              - 3
+                              site_publisher:
+                              - 2
+                              - 0
+                              site_software:
+                              - 6
+                              - 2
+                              ssh_access:
+                              - 5
+                              - 0
+                              ssl_tls:
+                              - 5
+                              - 2
+                              subdomains:
+                              - 2
+                              - 3
+                              terminal:
+                              - 7
+                              - 0
+                              tls_status:
+                              - 5
+                              - 6
+                              track_delivery:
+                              - 3
+                              - 6
+                              track_dns:
+                              - 7
+                              - 2
+                              user_manager:
+                              - 8
+                              - 4
+                              version_control:
+                              - 0
+                              - 7
+                              visitors:
+                              - 4
+                              - 0
+                              web_disk:
+                              - 0
+                              - 4
+                              webalizer:
+                              - 4
+                              - 6
+                              zone_editor:
+                              - 2
+                              - 6
+                            type: object
+                        type: object
+                      errors:
+                        description: List of errors if the API failed.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      messages:
+                        description: List of messages generated by the API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      metadata:
+                        properties: {}
+                      status:
+                        description: '- 1 - Success
+
+                          - 0 - Failed: Check the errors field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      warnings:
+                        description: List of warnings generated by the API. Warnings describe non-critical failures or other problematic conditions noted while running a API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                    type: object
+                type: object
+          description: HTTP Request was successful.
+      summary: Return current user's cPanel application details
+      tags:
+      - Branding
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "uapi --output=jsonpretty \\\n  --user=username \\\n  Branding \\\n  get_available_applications\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2083/cpsess##########/execute/Branding/get_available_applications
+      - label: LiveAPI Perl
+        lang: Perl
+        source: "#--------------------------------------------------------------------------------------\n# Instructions:\n#--------------------------------------------------------------------------------------\n# <theme-name> is the theme assigned to cPanel account.\n# 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n# 2) mkdir api_examples\n# 3) cd api_examples\n# 4) create a file Branding_get_available_applications.live.pl and put this code into that file.\n# 5) In your browser login to a cPanel account.\n# 6) Manually change the url from: .../frontend/<theme-name>/\n#    to .../frontend/<theme-name>/api_examples/Branding_get_available_applications.live.pl\n#--------------------------------------------------------------------------------------\n\nuse strict;\n\nuse Cpanel::LiveAPI ();\n\nmy $cpanel = Cpanel::LiveAPI->new(); # Connect to cPanel - only do this once.\n\n# Print the header\nprint \"Content-type: text/plain\\r\\n\\r\\n\";\n\n# Call the API\nmy $response = $cpanel->uapi(\n    q/Branding/,\n    q/get_available_applications/\n);\n\n# Handle the response\nif ($response->{cpanelresult}{result}{status}) {\n    my $data = $response->{cpanelresult}{result}{data};\n    # Do something with the $data\n    # So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    # Report errors:\n    print to_json($response->{cpanelresult}{result}{errors});\n}\n\n# Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n#--------------------------------------------------------------------------------------\n# Helper function to convert a perl object to html printable json\n#--------------------------------------------------------------------------------------\nsub to_json {\n    require JSON;\n    my $str = JSON->new->pretty->encode($_[0]);\n    return $str;\n}\n"
+      - label: LiveAPI PHP
+        lang: PHP
+        source: "<?php\n//--------------------------------------------------------------------------------------\n// Instructions:\n//--------------------------------------------------------------------------------------\n// <theme-name> is the theme assigned to cPanel account.\n// 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n// 2) mkdir api_examples\n// 3) cd api_examples\n// 4) create a file Branding_get_available_applications.live.php and put this code into that file.\n// 5) In your browser login to a cPanel account.\n// 6) Manually change the url from: .../frontend/<theme-name>/\n//    to .../frontend/<theme-name>/api_examples/Branding_get_available_applications.live.php\n//--------------------------------------------------------------------------------------\n\n// Instantiate the CPANEL object.\nrequire_once \"/usr/local/cpanel/php/cpanel.php\";\n\n// Print the header\nheader('Content-Type: text/plain');\n\n// Connect to cPanel - only do this once.\n$cpanel = new CPANEL();\n\n// Call the API\n$response = $cpanel->uapi(\n    'Branding',\n    'get_available_applications'\n);\n\n// Handle the response\nif ($response['cpanelresult']['result']['status']) {\n    $data = $response['cpanelresult']['result']['data'];\n    // Do something with the $data\n    // So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    // Report errors:\n    print to_json($response['cpanelresult']['result']['errors']);\n}\n\n// Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n//--------------------------------------------------------------------------------------\n// Helper function to convert a PHP value to html printable json\n//--------------------------------------------------------------------------------------\nfunction to_json($data) {\n    return json_encode($data, JSON_PRETTY_PRINT);\n}"
+      x-cpanel-api-version: UAPI
+      x-cpanel-available-version: cPanel 54
+  /Branding/get_information_for_applications:
+    get:
+      x-readonly: true
+      description: 'This function retrieves an application''s information from a specific
+
+        theme''s `sitemap.json` file.'
+      operationId: Branding-get_information_for_applications
+      parameters:
+      - description: 'The absolute path to the directory containing the `sitemap.json` file.
+
+          This is the path to your theme''s document root.'
+        in: query
+        name: docroot
+        required: true
+        schema:
+          example: /usr/local/cpanel/base/webmail/jupiter
+          format: path
+          type: string
+      - description: 'A comma-separated list of Appkey names. If you do **not**
+
+          specify this parameter, the output will include all of the applications that the
+
+          `sitemap.json` file contains.
+
+
+          **Note:**
+
+
+          This value **must** match an application''s `key` value in the `sitemap.json` file.
+
+          For more information, read our
+
+          [Guide to cPanel Interface Customization - Appkeys](https://go.cpanel.net/appkey)
+
+          documentation.'
+        in: query
+        name: app_keys
+        required: false
+        schema:
+          example: email_filters
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  apiversion:
+                    description: The version of the API.
+                    example: 3
+                    type: integer
+                  func:
+                    description: The name of the method called.
+                    example: get_information_for_applications
+                    type: string
+                  module:
+                    description: The name of the module called.
+                    example: Branding
+                    type: string
+                  result:
+                    properties:
+                      data:
+                        additionalProperties:
+                          description: 'An object containing information about the queried `app_keys` application.
+
+
+                            **Note:**
+
+
+                            The object''s name is the value specified in the `app_keys` parameter.'
+                          properties:
+                            condition:
+                              description: An object containing the application's conditions.
+                              properties:
+                                feature:
+                                  description: The feature that the user must have access to in order to see the application in their cPanel *Home* interface.
+                                  example: blockers
+                                  type: string
+                                if:
+                                  description: 'cPanel variables that determine whether to display the
+
+                                    item, if any exist.
+
+
+                                    For example, `$isreseller` indicates that the item **only**
+
+                                    displays for reseller accounts.
+
+
+                                    For more information, read our
+
+                                    [Guide to cPanel Variables](https://go.cpanel.net/guidetovariables)
+
+                                    documentation.'
+                                  example: '!$isarchiveuser'
+                                  type: string
+                                module:
+                                  description: The name of the module that provides the application.
+                                  type: string
+                              type: object
+                            description:
+                              description: The application's display name.
+                              example: Email Filters
+                              type: string
+                            icon:
+                              description: The application's icon information.
+                              properties:
+                                height:
+                                  description: The application's icon's height, in pixels.
+                                  example: 32
+                                  minimum: 1
+                                  type: integer
+                                url:
+                                  description: The file path or URL location of the application's icon.
+                                  example: email_filters
+                                  format: url-path
+                                  type: string
+                                width:
+                                  description: The application's icon's width, in pixels.
+                                  example: 35
+                                  minimum: 1
+                                  type: integer
+                              type: object
+                            implements:
+                              description: The module namespace for the specific application.
+                              example: Email_UserLevelFiltering
+                              type: string
+                            key:
+                              description: The application's Appkey name.
+                              example: email_filters
+                              type: string
+                            name:
+                              description: The application's name.
+                              example: Email Filters
+                              type: string
+                            order:
+                              description: The application's order in the `sitemap.json` file. This value represents the application's display order in cPanel's *Home* interface.
+                              example: 4
+                              minimum: 1
+                              type: integer
+                            terms:
+                              description: Search keywords for the application.
+                              example:
+                              - email
+                              - filter
+                              - filters
+                              items:
+                                type: string
+                            type:
+                              description: 'The application''s type.
+
+
+                                `item` is the only possible value.'
+                              enum:
+                              - item
+                              example: item
+                              type: string
+                            url:
+                              description: The file path or URL to the the application's file.
+                              example: mail/filters/userfilters.html
+                              format: url-path
+                              type: string
+                          type: object
+                        type: object
+                      errors:
+                        description: List of errors if the API failed.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      messages:
+                        description: List of messages generated by the API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      metadata:
+                        properties: {}
+                      status:
+                        description: '- 1 - Success
+
+                          - 0 - Failed: Check the errors field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      warnings:
+                        description: List of warnings generated by the API. Warnings describe non-critical failures or other problematic conditions noted while running a API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                    type: object
+                type: object
+          description: HTTP Request was successful.
+      summary: Return app's info from sitemap.json
+      tags:
+      - Branding
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "uapi --output=jsonpretty \\\n  --user=username \\\n  Branding \\\n  get_information_for_applications \\\n  docroot='/usr/local/cpanel/base/webmail/jupiter'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2083/cpsess##########/execute/Branding/get_information_for_applications?docroot=%2fusr%2flocal%2fcpanel%2fbase%2fwebmail%2fpaper_lantern
+      - label: LiveAPI Perl
+        lang: Perl
+        source: "#--------------------------------------------------------------------------------------\n# Instructions:\n#--------------------------------------------------------------------------------------\n# <theme-name> is the theme assigned to cPanel account.\n# 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n# 2) mkdir api_examples\n# 3) cd api_examples\n# 4) create a file Branding_get_information_for_applications.live.pl and put this code into that file.\n# 5) In your browser login to a cPanel account.\n# 6) Manually change the url from: .../frontend/<theme-name>/\n#    to .../frontend/<theme-name>/api_examples/Branding_get_information_for_applications.live.pl\n#--------------------------------------------------------------------------------------\n\nuse strict;\n\nuse Cpanel::LiveAPI ();\n\nmy $cpanel = Cpanel::LiveAPI->new(); # Connect to cPanel - only do this once.\n\n# Print the header\nprint \"Content-type: text/plain\\r\\n\\r\\n\";\n\n# Call the API\nmy $response = $cpanel->uapi(\n    q/Branding/,\n    q/get_information_for_applications/,\n    {\n        'docroot' => '/usr/local/cpanel/base/webmail/jupiter',\n    }\n);\n\n# Handle the response\nif ($response->{cpanelresult}{result}{status}) {\n    my $data = $response->{cpanelresult}{result}{data};\n    # Do something with the $data\n    # So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    # Report errors:\n    print to_json($response->{cpanelresult}{result}{errors});\n}\n\n# Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n#--------------------------------------------------------------------------------------\n# Helper function to convert a perl object to html printable json\n#--------------------------------------------------------------------------------------\nsub to_json {\n    require JSON;\n    my $str = JSON->new->pretty->encode($_[0]);\n    return $str;\n}\n"
+      - label: LiveAPI PHP
+        lang: PHP
+        source: "<?php\n//--------------------------------------------------------------------------------------\n// Instructions:\n//--------------------------------------------------------------------------------------\n// <theme-name> is the theme assigned to cPanel account.\n// 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n// 2) mkdir api_examples\n// 3) cd api_examples\n// 4) create a file Branding_get_information_for_applications.live.php and put this code into that file.\n// 5) In your browser login to a cPanel account.\n// 6) Manually change the url from: .../frontend/<theme-name>/\n//    to .../frontend/<theme-name>/api_examples/Branding_get_information_for_applications.live.php\n//--------------------------------------------------------------------------------------\n\n// Instantiate the CPANEL object.\nrequire_once \"/usr/local/cpanel/php/cpanel.php\";\n\n// Print the header\nheader('Content-Type: text/plain');\n\n// Connect to cPanel - only do this once.\n$cpanel = new CPANEL();\n\n// Call the API\n$response = $cpanel->uapi(\n    'Branding',\n    'get_information_for_applications',\n    array (\n        'docroot' => '/usr/local/cpanel/base/webmail/jupiter',\n    )\n);\n\n// Handle the response\nif ($response['cpanelresult']['result']['status']) {\n    $data = $response['cpanelresult']['result']['data'];\n    // Do something with the $data\n    // So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    // Report errors:\n    print to_json($response['cpanelresult']['result']['errors']);\n}\n\n// Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n//--------------------------------------------------------------------------------------\n// Helper function to convert a PHP value to html printable json\n//--------------------------------------------------------------------------------------\nfunction to_json($data) {\n    return json_encode($data, JSON_PRETTY_PRINT);\n}"
+      x-cpanel-api-version: UAPI
+      x-cpanel-available-version: cPanel 11.52
+  /Branding/include:
+    get:
+      x-readonly: true
+      description: 'This function retrieves and renders a branding file from the active theme.
+
+        The file may be a Template Toolkit (`.tt`) file or a standard HTML/image
+
+        file. When the file is a Template Toolkit file, the system processes it
+
+        and returns the rendered output. Otherwise, the system returns the file''s
+
+        raw or HTML-encoded content.'
+      operationId: Branding-include
+      parameters:
+      - description: The relative path to the branding file within the theme directory.
+        examples:
+          tt_file:
+            summary: Include a Template Toolkit branding file.
+            value: header.tt
+          html_file:
+            summary: Include a standard HTML branding file.
+            value: header.html
+        in: query
+        name: file
+        required: true
+        schema:
+          example: header.tt
+          type: string
+      - description: 'A JSON-encoded object containing additional variables to pass to the
+
+          Template Toolkit template when rendering a `.tt` file. This parameter
+
+          is ignored for non-template files.'
+        in: query
+        name: data
+        required: false
+        schema:
+          example: '{"logoColor":"blue","showBanner":1}'
+          format: json
+          type: string
+      - description: 'Whether to return the raw file content without HTML encoding.
+
+
+          * `1` — Return the raw file content.
+
+          * `0` — Return HTML-encoded content. This is the default behavior.
+
+
+          This parameter has no effect when the file is a Template Toolkit (`.tt`) file.'
+        in: query
+        name: raw
+        required: false
+        schema:
+          default: 0
+          enum:
+          - 0
+          - 1
+          example: 0
+          type: integer
+      - description: "Whether to skip the default branding fallback.\n\n* `1` — Do not fall back to the default branding file if the theme-specific\n  file does not exist. This parameter has no effect for accounts that do not\n  have a branding package assigned; the theme fallback is always applied in\n  that case.\n* `0` — Fall back to the default branding file. This is the default behavior."
+        in: query
+        name: skip_default
+        required: false
+        schema:
+          default: 0
+          enum:
+          - 0
+          - 1
+          example: 0
+          type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  apiversion:
+                    description: The version of the API.
+                    example: 3
+                    type: integer
+                  func:
+                    description: The name of the method called.
+                    example: include
+                    type: string
+                  module:
+                    description: The name of the module called.
+                    example: Branding
+                    type: string
+                  result:
+                    properties:
+                      data:
+                        description: 'The rendered or retrieved content of the requested branding file.
+
+                          For Template Toolkit files, this is the processed template output.
+
+                          For other files, this is the raw or HTML-encoded file content.'
+                        example: <div class="header">Welcome</div>
+                        type:
+                        - string
+                        - 'null'
+                      errors:
+                        description: List of errors if the API failed.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      messages:
+                        description: List of messages generated by the API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      metadata:
+                        properties: {}
+                      status:
+                        description: '- 1 - Success.
+
+                          - 0 - Failed. Check the `errors` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      warnings:
+                        description: List of warnings generated by the API. Warnings describe non-critical failures or other problematic conditions noted while running a API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                    type: object
+                type: object
+          description: HTTP Request was successful.
+      summary: Return branding file content from the active theme
+      tags:
+      - Branding
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "uapi --output=jsonpretty \\\n  --user=username \\\n  Branding \\\n  include \\\n  file='header.tt'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2083/cpsess##########/execute/Branding/include?file=header.tt
+      - label: LiveAPI Perl
+        lang: Perl
+        source: "#--------------------------------------------------------------------------------------\n# Instructions:\n#--------------------------------------------------------------------------------------\n# <theme-name> is the theme assigned to cPanel account.\n# 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n# 2) mkdir api_examples\n# 3) cd api_examples\n# 4) create a file Branding_include.live.pl and put this code into that file.\n# 5) In your browser login to a cPanel account.\n# 6) Manually change the url from: .../frontend/<theme-name>/\n#    to .../frontend/<theme-name>/api_examples/Branding_include.live.pl\n#--------------------------------------------------------------------------------------\n\nuse strict;\n\nuse Cpanel::LiveAPI ();\n\nmy $cpanel = Cpanel::LiveAPI->new(); # Connect to cPanel - only do this once.\n\n# Print the header\nprint \"Content-type: text/plain\\r\\n\\r\\n\";\n\n# Call the API\nmy $response = $cpanel->uapi(\n    q/Branding/,\n    q/include/,\n    {\n        'file' => 'header.tt',\n    }\n);\n\n# Handle the response\nif ($response->{cpanelresult}{result}{status}) {\n    my $data = $response->{cpanelresult}{result}{data};\n    # Do something with the $data\n    # So you can see the data shape we print it here.\n    print $data;\n}\nelse {\n    # Report errors:\n    use JSON;\n    print to_json($response->{cpanelresult}{result}{errors});\n}\n\n# Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n#--------------------------------------------------------------------------------------\n# Helper function to convert a perl object to html printable json\n#--------------------------------------------------------------------------------------\nsub to_json {\n    require JSON;\n    my $str = JSON->new->pretty->encode($_[0]);\n    return $str;\n}\n"
+      - label: LiveAPI PHP
+        lang: PHP
+        source: "<?php\n//--------------------------------------------------------------------------------------\n// Instructions:\n//--------------------------------------------------------------------------------------\n// <theme-name> is the theme assigned to cPanel account.\n// 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n// 2) mkdir api_examples\n// 3) cd api_examples\n// 4) create a file Branding_include.live.php and put this code into that file.\n// 5) In your browser login to a cPanel account.\n// 6) Manually change the url from: .../frontend/<theme-name>/\n//    to .../frontend/<theme-name>/api_examples/Branding_include.live.php\n//--------------------------------------------------------------------------------------\n\n// Instantiate the CPANEL object.\nrequire_once \"/usr/local/cpanel/php/cpanel.php\";\n\n// Print the header\nheader('Content-Type: text/plain');\n\n// Connect to cPanel - only do this once.\n$cpanel = new CPANEL();\n\n// Call the API\n$response = $cpanel->uapi(\n    'Branding',\n    'include',\n    array (\n        'file' => 'header.tt',\n    )\n);\n\n// Handle the response\nif ($response['cpanelresult']['result']['status']) {\n    $data = $response['cpanelresult']['result']['data'];\n    // Do something with the $data\n    // So you can see the data shape we print it here.\n    print $data;\n}\nelse {\n    // Report errors:\n    print json_encode($response['cpanelresult']['result']['errors'], JSON_PRETTY_PRINT);\n}\n\n// Disconnect from cPanel - only do this once.\n$cpanel->end();"
+      x-cpanel-api-version: UAPI
+      x-cpanel-available-version: cPanel 11.42
+components:
+  securitySchemes:
+    BasicAuth:
+      scheme: basic
+      type: http
+externalDocs:
+  url: https://cpanel.net/developers/
+x-tagGroups:
+- name: API Development Tools
+  tags:
+  - API Token Management
+  - Batch
+  - SSE Task Management
+  - URL Parsing
+- name: Authentication
+  tags:
+  - External Authentication
+  - Two-Factor Settings
+- name: Backup Information
+  tags:
+  - BackupInfo
+  - BackupInfo Status
+- name: Block Ip Addresses
+  tags:
+  - Block IP
+- name: Commerce Integration
+  tags:
+  - Market Integration
+  - SSL Certificates
+- name: Contact Information
+  tags:
+  - Contact Information
+- name: cPanel Account
+  tags:
+  - Account Enhancements
+  - Account Information
+  - Account Management
+  - AuditLog
+  - Contact Information
+  - cPanel Features
+  - Disk Quotas
+  - DomainRecommendations
+  - Personalization
+  - Resource Usage and Statistics
+  - Subaccount Management
+  - Team Roles
+  - Team Users
+- name: cPanel Account Backups
+  tags:
+  - Backup
+  - File Restoration
+- name: cPanel Plugin Framework
+  tags:
+  - Formbricks
+  - Plugins
+- name: cPanel Theme Management
+  tags:
+  - Application Information
+  - Brand Management
+  - Branding Files
+  - Browser Cache Management
+  - Language
+  - Theme Settings
+- name: Directory Management
+  tags:
+  - Directory Indexes
+  - Directory Privacy
+  - Directory Protection
+- name: DNS
+  tags:
+  - DNS
+  - DNS Information
+  - DNS Security
+  - Dynamic DNS
+  - Email DNS Settings
+  - ZoneEdit
+- name: Domain
+  tags:
+  - Domain
+- name: Domain Management
+  tags:
+  - AddonDomain
+  - Direct Link Protection (Hotlink)
+  - Domain
+  - Domain Information
+  - Domain Redirection
+  - DomainLookup
+  - Park
+  - SubDomain
+  - Virtual Host Information
+- name: Domains
+  tags:
+  - Subdomains
+- name: Email
+  tags:
+  - Email Accounts
+  - Email Filtering
+  - Email Forwarding
+  - Email Server Information
+  - Email Suspensions
+  - Mail Server Information
+  - Mailbox Management
+  - Mailing Lists
+  - Signing and Encryption (GnuPG Keys)
+  - Spam Filtering (Greylisting)
+  - Spam Management
+  - Spam Prevention (BoxTrapper)
+  - Webmail Applications
+  - Webmail Sessions
+- name: Extract Information
+  tags:
+  - ExtractInfo
+  - ExtractInfo Status
+- name: File Manager
+  tags:
+  - Trash
+- name: Files
+  tags:
+  - FTP Accounts
+  - FTP Server Settings
+  - Image Tools
+  - Jodit
+  - Manage Files
+  - Manage Files
+  - WebDisk Settings
+- name: GIT Management
+  tags:
+  - Deployment Settings
+  - Repository Management
+- name: InProductSurvey
+  tags:
+  - InProductSurvey
+- name: MySQL and MariaDB
+  tags:
+  - Database Information
+  - Database Management
+  - Remote Databases
+  - User Management
+- name: Notifications
+  tags:
+  - Pushbullet
+- name: Optional Applications
+  tags:
+  - Antivirus Protection (ClamAV)
+  - Calendar and Contacts (DAV)
+  - Calendar and Contacts Server
+  - WordPress Manager Backups
+- name: PostgreSQL
+  tags:
+  - PostgreSQL Database Management
+  - PostgreSQL User Management
+- name: Retrieve bandwidth information
+  tags:
+  - Bandwidth
+- name: Security
+  tags:
+  - Known SSH Hosts Management
+  - Login Information
+- name: Server Information
+  tags:
+  - cPanel Server Information
+  - Notifications
+  - Password Strength
+  - SSH
+  - WebPros MCP
+  - WebProsMCP
+- name: ServiceProxy
+  tags:
+  - ServiceProxy
+- name: Site Quality Monitoring
+  tags:
+  - SiteQuality
+- name: SSL Certificates
+  tags:
+  - Auto-generated SSL Certificates
+  - cPanel Account SSL Management
+  - SNI Email Settings
+  - SSL Certificate Management
+  - Verify Domain Ownership
+- name: Statistics
+  tags:
+  - Domain Statistics
+  - Weblog Settings
+- name: UserData
+  tags:
+  - UserData
+- name: Web Server Configuration
+  tags:
+  - EA4
+  - EasyApache Settings
+  - PHP
+- name: Web Server Management
+  tags:
+  - Application Manager
+  - ModSecurity
+  - NginxCaching
+  - PHP Settings
+  - Web Apps
+- name: Website Configuration
+  tags:
+  - Handler Management
+  - Logs
+  - Mime Type Management
+  - Nova
+  - Site Information
+  - Site Installation
+  - Sitejet
+  - WPX

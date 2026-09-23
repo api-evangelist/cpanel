@@ -1,0 +1,1166 @@
+openapi: 3.2.0
+info:
+  contact:
+    email: cs@cpanel.net
+    name: WebPros International, LLC
+    url: https://cpanel.net/support/
+  description: WHM API.
+  license:
+    name: cPanel License
+    url: https://cpanel.net/legal-notices/
+  termsOfService: https://cpanel.net/legal-notices/
+  title: WHM SSH Keys and Connections API
+  version: 11.137.9999.106
+  x-api-evangelist-provenance: 'Harvested verbatim from cPanel''s developer portal on 2026-09-05 via the MCP tool get-full-api-description at https://api.docs.cpanel.net/mcp. ONE mechanical change was made before storage: example values containing PEM private-key or certificate blocks, and AWS-access-key-shaped example strings, were replaced with REDACTED_* placeholders so the file can be stored in a public git repository without tripping secret scanning. No path, operation, parameter, schema or description was altered, added or removed.'
+servers:
+- description: A server running WHM.
+  url: https://{host}:{port}/json-api
+  variables:
+    host:
+      default: whm-server.tld
+      description: The hostname of a server running WHM.
+    port:
+      default: '2087'
+      description: The WHM port.
+security:
+- BasicAuth: []
+tags:
+- description: Authentication / SSH Keys and Connections
+  name: SSH Keys and Connections
+paths:
+  /accesshash:
+    get:
+      deprecated: true
+      description: 'This function regenerates or retrieves a user''s access hash. For more information about access hashes, read our Remote Access Key documentation.
+
+
+        **Warning:**
+
+
+        We **deprecated** this function. We **strongly** suggest that you use the WHM API 1 `api_token_create` function.'
+      operationId: Resellers-accesshash
+      parameters:
+      - description: 'Whether to regenerate the access hash.
+
+          * `1` — Regenerate the access hash.
+
+          * `0` — Do **not** regenerate the access hash.'
+        in: query
+        name: generate
+        required: true
+        schema:
+          enum:
+          - 0
+          - 1
+          example: 0
+          type: integer
+      - description: The user's name.
+        in: query
+        name: user
+        required: true
+        schema:
+          example: root
+          format: username
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      accesshash:
+                        description: The user's access hash.
+                        example: cb523f89e9a31123fde7c6f93b580ac05bf00a2804d4febe6667ab9917a14baa1c4914da209bf55c862999ea51983a117a4d2f238140200b1e5b270b94b2c52492747e5ebfdeddb8abf4e1b0c428c6c68b701b48e13dbe39da49450e7a8e5422e18ab3b6290b5b6556bd82ee21d9c1103e7a51d1e94f2ac0c4dcc6a10954b8634c6db16a541660c3c89e10254f05583f4167adfcff7781090ea930647b46e5b981f3e16c7723ca4e12dc4b54a778dc66a28df73632a0d3a8e01e207b9fd6b555b72936a903af014f30061d712d736176a87fb5333c5b90cf0bb4f3c6735f2b45929ac79fb1184045a5f4c20bfcc553f5ab760eec077c0d6096e54d02724201281e441e7b0f642370a63f61c68766e224c8510bc32b0316780660c34352cbfeeccfee9d4f02e20ba7b664d3e84e9419ca386c41df07613f8af252aba8626a8b54796bbe616f41af1e6f11a3d0327f7608d23666fca64e6ebe899f7479a5fb0aea008b1e7a41890c9c58037682450febf91b7aa1c080d31d834b0ae466f8533df838ab271b26a7fb7de96402ad4a818d6b786af92c38414d2ef6c88deb7c685a1e60c3cbcfbf20cf6d2a00dd50d2be9bc1824d91284ec6842dd7db42564dfc3ecb75c1a9bc775c45c5f08784b9e2885c2d
+                        type: string
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: accesshash
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Return cPanel account access hash
+      tags:
+      - SSH Keys and Connections
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  accesshash \\\n  user='root' \\\n  generate='0'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/accesshash?api.version=1&user=root&generate=0
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11'
+  /authorizesshkey:
+    get:
+      description: 'This function authorizes a public SSH key to access the server.
+
+        When you call this function, it adds the key to the `/root/.ssh/authorized_keys` file.
+
+
+        **Warning:**
+
+
+        * Do **not** transfer private keys over insecure ports.
+
+        * Only `root` and `root`-enabled resellers can use this function, and it only affects
+
+        the `root` public SSH keys. To perform this function on a regular user account, call
+
+        the cPanel API 2 `SSH::authkey` function via the WHM API. For more information, read our
+
+        Use WHM API to Call cPanel API and UAPI
+
+        documentation.'
+      operationId: SSH-authorizesshkey
+      parameters:
+      - description: 'Whether to authorize the public SSH key to access the server.
+
+
+          * `1` — Authorize.
+
+          * `0` — Do **not** authorize.'
+        in: query
+        name: authorize
+        required: true
+        schema:
+          enum:
+          - 1
+          - 0
+          example: 1
+          type: integer
+      - description: 'The public SSH key file''s name.
+
+
+          **Note:**
+
+
+          * This file **must** exist in the `/root/.ssh` directory.
+
+          * If you call **both** the `file` and the `text` parameters, the function **ignores**
+
+          the `file` parameter.'
+        in: query
+        name: file
+        required: true
+        schema:
+          example: sshkey.pub
+          type: string
+      - description: 'The text of the SSH public key file.
+
+
+          **Note:**
+
+
+          * If you call **both** the `file` and the `text` parameters, the function **ignores**
+
+          the `file` parameter.'
+        in: query
+        name: text
+        required: true
+        schema:
+          example: ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCys7JbGhkAZ8E4Pmq8D4EBm1UedKK2oMhs3RVIEFRJX6S86Itw6Qmhds62LNGrxuVL11W6v25+maIiBhXnslyQpd838tHyAC7J/SJojDid8acovX/4xgJQaJHLAh9tLgyQXnNhIxIGJ4nVZ+8OqM2Vb1Cps+E5H17ivG07PXnVPEvwMaeWkm2DnGgSy5kmjVpNKlj9GWFCn/SJd7up7QnbGKoz87pxKDs3esp+ziuPEAJHLeXnKHWPVukQgtRUpUBdqkCvu5hUkhpaiWmBR8yxajkxbSObPw+ZkELhmm+fQseOfEbrwToMRJCO7gAKwBtNi7OhyFM7YFrvdo0xh6cn
+          type: string
+      - description: 'A comma-separated list of options to include with the public SSH key.
+
+          For a list of options, read the
+
+          [OpenBSD manaual](https://man.openbsd.org/sshd.8#AUTHORIZED_KEYS_FILE_FORMAT).
+
+
+          This parameter defaults to no options.'
+        in: query
+        name: options
+        required: false
+        schema:
+          example: agent-forwarding,cert-authority
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      authorized:
+                        description: 'Whether the public SSH key has authorization.
+
+                          * `1` — Authorized.
+
+                          * `0` — **Not** authorized.'
+                        enum:
+                        - 1
+                        - 0
+                        example: 1
+                        type: integer
+                      file:
+                        description: The public SSH key file's name.
+                        example: sshkey.pub
+                        type: string
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: authorizesshkey
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 1
+                        - 0
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Enable SSH key for server
+      tags:
+      - SSH Keys and Connections
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  authorizesshkey \\\n  file='sshkey.pub' \\\n  text='ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCys7JbGhkAZ8E4Pmq8D4EBm1UedKK2oMhs3RVIEFRJX6S86Itw6Qmhds62LNGrxuVL11W6v25+maIiBhXnslyQpd838tHyAC7J/SJojDid8acovX/4xgJQaJHLAh9tLgyQXnNhIxIGJ4nVZ+8OqM2Vb1Cps+E5H17ivG07PXnVPEvwMaeWkm2DnGgSy5kmjVpNKlj9GWFCn/SJd7up7QnbGKoz87pxKDs3esp+ziuPEAJHLeXnKHWPVukQgtRUpUBdqkCvu5hUkhpaiWmBR8yxajkxbSObPw+ZkELhmm+fQseOfEbrwToMRJCO7gAKwBtNi7OhyFM7YFrvdo0xh6cn' \\\n  authorize='1'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/authorizesshkey?api.version=1&file=sshkey.pub&text=ssh-rsa%20AAAAB3NzaC1yc2EAAAADAQABAAABAQCys7JbGhkAZ8E4Pmq8D4EBm1UedKK2oMhs3RVIEFRJX6S86Itw6Qmhds62LNGrxuVL11W6v25%2bmaIiBhXnslyQpd838tHyAC7J%2fSJojDid8acovX%2f4xgJQaJHLAh9tLgyQXnNhIxIGJ4nVZ%2b8OqM2Vb1Cps%2bE5H17ivG07PXnVPEvwMaeWkm2DnGgSy5kmjVpNKlj9GWFCn%2fSJd7up7QnbGKoz87pxKDs3esp%2bziuPEAJHLeXnKHWPVukQgtRUpUBdqkCvu5hUkhpaiWmBR8yxajkxbSObPw%2bZkELhmm%2bfQseOfEbrwToMRJCO7gAKwBtNi7OhyFM7YFrvdo0xh6cn&authorize=1
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11'
+  /check_remote_ssh_connection:
+    get:
+      description: This function tests an SSH connection to another server.
+      operationId: SSH-check_remote_ssh_connection
+      parameters:
+      - description: The remote server's hostname.
+        in: query
+        name: host
+        required: true
+        schema:
+          example: example.com
+          format: domain
+          type: string
+      - description: The remote server's port number.
+        in: query
+        name: port
+        required: false
+        schema:
+          default: 22
+          example: 22
+          minimum: 1
+          type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      comment:
+                        description: 'The remote connection''s comment section.
+
+                          * A valid string.
+
+                          * `undef` - If the local and remote servers connect successfully.'
+                        example: 'null'
+                        type: string
+                      protocol_versions:
+                        description: 'The available SSH protocol versions.
+
+                          * A valid string.
+
+                          * `undef` - If the local and remote servers connect successfully.'
+                        items:
+                          example: '2.0'
+                          type: string
+                        type: array
+                      received:
+                        description: The raw data from the remote server.
+                        example: SSH-2.0-OpenSSH_5.3
+                        type: string
+                      server_software:
+                        description: 'The version of the remote server''s SSH server software.
+
+                          * A valid string.
+
+                          * `undef` - If the local and remote servers connect successfully.'
+                        example: OpenSSH_5.3
+                        type: string
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: check_remote_ssh_connection
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` - Success.
+
+                          * `0` - Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Validate SSH connection to another server
+      tags:
+      - SSH Keys and Connections
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  check_remote_ssh_connection \\\n  host='example.com'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/check_remote_ssh_connection?api.version=1&host=example.com
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11'
+  /convertopensshtoputty:
+    get:
+      description: 'This function converts an OpenSSH private key to a PuTTY key.
+
+
+        **Warning:**
+
+
+        Do **not** transfer private keys over insecure ports.'
+      operationId: SSH-convertopensshtoputty
+      parameters:
+      - description: The private key file's name.
+        in: query
+        name: file
+        required: true
+        schema:
+          example: KeyFile
+          type: string
+      - description: 'Whether to keep the OpenSSH file on the server after conversion.
+
+          * `1` — Keep the file.
+
+          * `0` — Delete the file.'
+        in: query
+        name: keep_file
+        required: false
+        schema:
+          default: 1
+          enum:
+          - 0
+          - 1
+          example: 0
+          type: integer
+      - description: The private key file's passphrase.
+        in: query
+        name: passphrase
+        required: false
+        schema:
+          default: ''
+          example: 12345luggage
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      key:
+                        description: The converted key file's text.
+                        example: 'PuTTY-User-Key-File-2: ssh-rsa Encryption: aes256-cbc Comment: imported-openssh-key Public-Lines: 12 AAAAB3NzaC1yc2EAAAABIwAAAgEAuuth41YYyWABsRKexJXgSMD8FvIBFCptUfZP 4U/6R41FvL/RS+99kq1WL/KASsKRoEA5uc0axM+iNgZtKuemQYGUZNvN+8X8sC/l E6GF7X3Pvj2Ml4AlD7TQv0WQZUp9xn+SlOti+3pYh+S56vzNjvdifO7U5mPGW/81 9N4vGhG3ThaAgETwkL33CM2LeNRuvoWpeQcuzEVX2aOvHQZqOvV15fTjZ64ZGL3i UDtKmeaHs4tMqgNIUXgn1P1V4TgPvTIfopH8FBX3g1pD15XD3vn+XHLwia0505c5 +QM+jElS3HHb0vrrDo3S+8koXLWp07wu/GYrvBd5+MlsSV7bpr7lmWj8uMQjc0ap eZe+eb/MteadWnqIPeOVuracssCvDLqXEPK2KjhFMPqBTepNhZaJHRfvkodPm43C 50nhqzrNoxFvXb1rfCjPPqGfhuSZhlCmo2FDiZPKdl0X7bhzDIvMVikyqJP06bqK y9iclyQv0VPfyCIx/VDcVclIoUa8A49nAinXHKeUx9QUNBHv8wXdyz7W41jQa+++ Ih3Yc4o9rpV95DDmKp7iF6kFk4aVjIWDgEsPTaL28wlvUyazoW5TAGPHDrRJoedU ag8KDRNPrGbKYu3CvoINiz0sshyCvr1gjKNG75Cwe+L4hXIkaw8wlCpwFq8VSX70 RS9Pei8= Private-Lines: 28 bb31s+xsiAv1+pclnmvreEYdxvuVmbeWMjUWJd4Y4TKIAyLEItsXNs078qn1QAZ+ Wj6t+0HcnhuUVICHyCyJrp++1g4OtzTAHRczaD5ybhb9ktSe1qlnszKD1Rg5/o+B 61h6kvMcZyuNSjtPkmqQ3XIh8OFYybB2oJXY7gJQzfRuRwk8dx9YWtIR4438Nbv5 ecTzGUDWvx+AfYzC4X/UIGiRy8AftfiBQyA+c1OFyg37qM1SLYnZYmIpSf5GsQ3A MaEGlB9P9hE2uoqZ4yT/A0aHj7w8DGEzYZqxNbMlCIJhLEO3vKZvMvaq7Q8ramG6 BzYwUz+8NPgCBUp1qyIcN2vvEHEq57pMMHYNfJMVfG9o0ijo+xxGCPV3MosmmvRI 1nxH0nrgdA2o6SJp/dJrKm3Hicbbxak/Kz4m8BROcnlCgptdjHp9V/cBnFq/UUHv or32gShGWmnG6+XyQs4LxpbLC4koz8EjPwg3/3W2Qn6Drn3i98omvZpmnX466i7e GUiHaiKTpBkqZkHmHFxNBAbbs85yngeo8o3RGUsmN69RupTqSkkLDuDFOMwgfsZG TWexWg/qBe+8Xrbshd9HphxvWv+Q3YcSeg+mm8Bc50Q5saLKYdQQsbfV5wtIpvLj 0eyjoTSh+FkPGBw/iB1MDzYV5OoIIgiDBndP2bOK2zFsLElSbbv/r3i//wL98316DgJWmJiQDqKxly4MEij8TfIVDAsdeyJJKvg6iGahonHbEBkZ9g9wcCpxlg8iMtTf /7eb8SmcPwe1NGdgB7PR1dU/RQ/kBbLaaBfo/1jQEnCC8VmksVu7B9ULImfLEOEm +A4J4NpKKlQocgCvJAtMogL+uRS5GpojJIElVqP12jnb7Ij3AYY3Zb4qotlprLeK 7dJslpNnrD/MSvbJZ/ZoAX+xyDxUMeq/83Xv30i5/wh00QBY4Cv5NTDU4rPoVmQm EWGW5aQx34in4JHY5bK3F4BvVYm7MscKLHoU8/OeKVAgzNcatUgPlN43FG9SX0AE pP3EYlVADSfULdbfBn9dZDidAiDMXnCv9259J65zA64tuT9XluinHXVs5PA/f5vm rZPQhAzGThw7h9L6rGYGfSKd9KYoTwf8kSOA6WU7OEyhfTvCdaW76vPi4CRW2M/Y RHX0IUdv3VxfKb4WnXFeQl6LshmGB1T2mbMyfThlqUCGAvPJyWDtZ6OpOUl3CK87 3jhFzO7t5wruhuWZ3RcISVsrdqcjgCrKy6Q9y+HbLJoNY40BkJm7f6WeV+hHn7o1 od7JiqDGq3Qk+ECEdexvqdRQS7BWgO7xudGFk+WFY02zoGvq5DMviNfsxqhM06P+ JgEinB8xPPCOPzi6q8T1y1Pz44gmluM15/QRX4z0Mwz6UQasVC/NsZxdfoNGtCy0 c2DAscy4zsiKhZMlLr0loPYycO2bOit6E5eYkrACJR2115/ZgVwzvzdmc/INJCxG3TvKYbeuv/tkolt56uJWGfMF2ZrfLJaaQ0iAiUyMep/keLP2bJ4Y97o+03BtQszZ zixXvzeQAX97WdBaUJU0C3mCKDOtkv4RWZ8hXV5v0m2tm7xbXVBzF22Pej2iHDKx GQkciskBRwQM4bDZorkcO+WnGn6uPbtw5v/AuIUqB1UNAcehWN6UTiFNveP4hLYu iRGWnZZ+uTbip91PNXSxXzb9yMWV2qSVIsZvud8kpR8ttL26Z4ySUKkFuPrgUeTeELnOF3GP6Ixk+IkwxU575w== Private-MAC: 1dfa6a4c8297d31e4cfadbf61aac8b4c5ca75584'
+                        type: string
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: convertopensshtoputty
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` - Success.
+
+                          * `0` - Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Migrate OpenSSH key to PuTTY format
+      tags:
+      - SSH Keys and Connections
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  convertopensshtoputty \\\n  file='KeyFile'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/convertopensshtoputty?api.version=1&file=KeyFile
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11.32'
+  /deletesshkey:
+    get:
+      description: 'This function function deletes an SSH key from the server.
+
+
+        **Warning:**
+
+
+        Only the `root` account can use this function, and it only affects
+
+        the `root` keys. To perform this function on a cPanel user account, call the
+
+        cPanel API 2 `SSH::authkey` function through the WHM API.'
+      operationId: SSH-deletesshkey
+      parameters:
+      - description: The SSH key file's name.
+        in: query
+        name: file
+        required: true
+        schema:
+          example: /root/.ssh/test
+          type: string
+      - description: 'Whether to authorize the SSH key to access the server.
+
+
+          * `1` — Leave authorized.
+
+          * `0` — Do **not** leave authorized.'
+        in: query
+        name: leave_authorized
+        required: false
+        schema:
+          default: 1
+          enum:
+          - 0
+          - 1
+          example: 0
+          type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      file:
+                        description: The SSH key file's name.
+                        example: /root/.ssh/test
+                        type: string
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: deletesshkey
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` - Success.
+
+                          * `0` - Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Delete SSH key
+      tags:
+      - SSH Keys and Connections
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  deletesshkey \\\n  file='/root/.ssh/test'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/deletesshkey?api.version=1&file=%2froot%2f.ssh%2ftest
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11'
+  /generatesshkeypair:
+    get:
+      description: This function generates an SSH key pair.
+      operationId: SSH-generatesshkeypair
+      parameters:
+      - description: 'Whether to abort the function if the user already has a key with the same name.
+
+
+          * `1` — Abort.
+
+          * `0` — Continue.'
+        in: query
+        name: abort_on_existing_key
+        required: false
+        schema:
+          default: 1
+          enum:
+          - 0
+          - 1
+          example: 1
+          type: integer
+      - description: The key's encryption algorithm. The parameter defaults to the system's default algorithm.
+        in: query
+        name: algorithm
+        required: false
+        schema:
+          enum:
+          - rsa2
+          - dsa
+          example: dsa
+          type: string
+      - description: 'The key''s bits:
+
+
+          * `1024` — The DSA algorithm''s default value.
+
+          * `2048`
+
+          * `4096` — The RSA algorithm''s default value.'
+        in: query
+        name: bits
+        required: false
+        schema:
+          enum:
+          - 1024
+          - 2048
+          - 4096
+          example: 2048
+          type: integer
+      - description: A comment.
+        in: query
+        name: comment
+        required: false
+        schema:
+          default: ''
+          example: NoComment
+          type: string
+      - description: 'The key''s filename.
+
+
+          This parameter defaults to `id_rsa` if the algorithm is RSA, and `id_dsa`
+
+          if the algorithm is DSA.'
+        in: query
+        name: name
+        required: false
+        schema:
+          default: id_rsa
+          example: KeyFile
+          type: string
+      - description: The key's secure passphrase.
+        in: query
+        name: passphrase
+        required: false
+        schema:
+          default: ''
+          example: 123456luggage
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      fingerprint:
+                        description: The key's [MD5](https://en.wikipedia.org/wiki/MD5) fingerprint.
+                        example: null
+                        format: md5
+                        type:
+                        - string
+                        - 'null'
+                      name:
+                        description: The key's filename.
+                        example: KeyFile
+                        type: string
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: generatesshkeypair
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Create SSH key pair
+      tags:
+      - SSH Keys and Connections
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  generatesshkeypair\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/generatesshkeypair?api.version=1
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11.32'
+  /importsshkey:
+    get:
+      description: This function imports an SSH key.
+      operationId: SSH-importsshkey
+      parameters:
+      - description: The key's contents.
+        in: query
+        name: key
+        required: true
+        schema:
+          example: REDACTED_PRIVATE_KEY_EXAMPLE
+          type: string
+      - description: The key's name.
+        in: query
+        name: name
+        required: true
+        schema:
+          example: TestKey
+          type: string
+      - description: 'Whether to extract and save only the private key.
+
+          * `1` — Private key only.
+
+          * `0` — All data.
+
+
+          **Note:**
+
+
+          This parameter defaults to `1` for
+
+          PPK [(PuTTY Key Generator)](https://www.puttygen.com/)
+
+          files and `0` for all other imports.'
+        in: query
+        name: extract_private
+        required: false
+        schema:
+          enum:
+          - 0
+          - 1
+          example: 0
+          type: integer
+      - description: 'Whether to extract and save only the public key.
+
+          * `1` — Public key only.
+
+          * `0` — All data.
+
+
+          **Note:**
+
+
+          This parameter defaults to `1` for
+
+          PPK [(PuTTY Key Generator)](https://www.puttygen.com/)
+
+          files and `0` for all other imports.'
+        in: query
+        name: extract_public
+        required: false
+        schema:
+          enum:
+          - 0
+          - 1
+          example: 0
+          type: integer
+      - description: 'The key''s passphrase.
+
+
+          **Note:**
+
+
+          This parameter is **required** whenever you import a PPK file.'
+        in: query
+        name: passphrase
+        required: false
+        schema:
+          default: null
+          example: 123456luggage
+          type:
+          - string
+          - 'null'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: importsshkey
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Import SSH key
+      tags:
+      - SSH Keys and Connections
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: REDACTED_PRIVATE_KEY_EXAMPLE
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/importsshkey?api.version=1&name=TestKey&key=-----BEGIN%20RSA%20PRIVATE%20KEY-----%20hPH%2bo4NgZrky7iGBb5iUg8R4aQzLPexpYfet25bLESvHOtutsBkbN7UWAaoM0pgM%20hytunlM8UU4BArJWlJyY6AD59aluZowBbuowKeU%2bf%2bTRaeJNJvkxTCOAipzp6LyG%20nrSVJ5hxSN%2fRPfntho1MEsdWYewVI4eLayuiZJyD%2bVONCYJh%2fvPLaZ9AVUJuMerl%20s%2fZJ24AwCW8cILG%2bC3TWJRCjl4Ji%2bsJ9A5P29p%2fad18cyJc1F%2bwmAzMULWitCaB7%20mmE0i1nkiZRygQzzKjqdBYWCjujxfoE2%2bnPufAJg8ZdIEI1xSVBe5jKnj8DRX67w%20NAnNjXANMRePo39%2fRbDOSEXsD62h1qH93SnPsAhYT1JE6xHKV85AVIVOe8ktTA8t%20jMBBioCudBFngqPHknUrIJZ2QfUm0fkKBZaoKW4yr3JjGk%2b5y6kg02gSDIA7%2fjGc%208rs3iKN%2bQJ%2fug2x%2fv7Xe0OozVqpl5QTltEMGJzJ1jFh9WnqgsgLTiJWlE7x5VSv8%20fV8A5WTafOhBHnKuOpmpjAel1GD5DT1jNx3LhWXMHOayawC0WY04lT5kkLLWhuN2%20pNqY6UBk6Z3m1ifPINq85RdnHriJiD3H%2f%2b6P%2bcUyGSOznni8yqU764LId4nNClWd%20Xc%2bVvM1Udw0Sm7xF7err9CKHYUg3HfFYQPBQOfI0ib9wqOi7zWq2vhH21B5OgcTg%20Bsw%2fHJUQ%2fIVnTbsqgZSn0sckaRguv%2fifmwbISO1aQ4Yxcohe%2f4miOw05r6ihbYGW%20LO5kP0I8SBMCibkGFh5AxVnNgoGAW0l33hOPPSIVUTkE%2b8d3zYXLzupTFXCvmohl%20jq0it7uIGOxSglf7XH3eXlNKaZjK7pBJgS5HeXM80JI8FCfifqnkaik8XTE66Ll0%20s1ySaGevGkPpX5Rhbgsm4IqddAeFvlmKIND8Zvh%2fwfT%2b%2bbbD7bbFwFlrWCU3chce%208KaNVUP%2bwhCAlaS7oGcs38ygaRFXIE3vug4Ra8Xiy%2fqfyp4YR67sMg46avHyoVky%20uFbVv2n7HphZb7g3WS3ns3%2fgCQQv9TYcdBoRnKW2yEqbzOQb9Fdt7EjgMohT%2fbdS%20pM6nRWFNdmWoihLzLbSi3bnc9iDwXZA8KyE3mpVi4QFfijR4dfrVWxEz5Ln2l9HC%20SZA6VPGzEOwOVVND98%2fHTu3oViJUV1gyDIWlyggSUDTyhfo%2fZ%2bc3tTHa%2bcv0f7xY%20oL63hWLgZQD2m%2fg6rKpsN3NhC77tCyCNZavdKy7usvZyCsoH%2fmPR2129LcwAwbJ3%20u2Ec7qLncztSePHOmfmCTTED00a0YzFhKIQoJf7GrgLCMapYN%2fYPu0vgTDMPSi11%20RH0rdyzd6MuPVDZwLnWO%2bSltjX85yz1ba%2fQ199HZwQOw6ZyejDaPSWJHOndD3k%2br%20Q0T38gci9k4D87EwmfpK7zOaCoaiGiRQ6%2bDdYOv6hlzQ6Fdb2FOtlGQZharQ9WTC%20jOJBEj2oGUruc6P3fqhfUVllWi4cck0GgWZwcsmG1dDr8W6K9lrGA1dPbXoOns1B%20l58ghMGtHG7D0VlHs6SIqFmHr5kUgSQ4jJ2KZkVU8CrPBZ2HRtHQJJyjZWW2AbrE%20-----END%20RSA%20PRIVATE%20KEY-----
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11'
+  /listsshkeys:
+    get:
+      description: 'This function lists the server''s SSH keys.
+
+
+        **Warning:**
+
+
+        Only the `root` account can use this function, and it only affects the `root`
+
+        keys. To perform this function on a regular user account, call the cPanel API
+
+        2 `SSH::listkeys` function through the WHM API.'
+      operationId: SSH-listsshkeys
+      parameters:
+      - description: A filename, to limit the results to keys that have that filename.
+        in: query
+        name: files
+        required: false
+        schema:
+          example: TestKey
+          type: string
+      - description: 'Whether to display only private keys.
+
+
+          * `1` — Display only private keys.
+
+          * `0` — Display all keys.'
+        in: query
+        name: private
+        required: false
+        schema:
+          default: 1
+          enum:
+          - 0
+          - 1
+          example: 0
+          type: integer
+      - description: 'Whether to include private key text.
+
+
+          * `1` — Include private key text.
+
+          * `0` — Do **not** include private key text.'
+        in: query
+        name: private_texts
+        required: false
+        schema:
+          default: 1
+          enum:
+          - 0
+          - 1
+          example: 0
+          type: integer
+      - description: 'Whether to display only public keys.
+
+
+          * `1` — Display only public keys.
+
+          * `0` — Display all keys.'
+        in: query
+        name: public
+        required: false
+        schema:
+          enum:
+          - 0
+          - 1
+          example: 0
+          type: integer
+      - description: 'Whether to include public key text.
+
+
+          * `1` — Include public key text.
+
+          * `0` — Do **not** include public key text.'
+        in: query
+        name: public_texts
+        required: false
+        schema:
+          default: 0
+          enum:
+          - 0
+          - 1
+          example: 0
+          type: integer
+      - description: 'Whether to synchronize the keys that can access the server.
+
+
+          * `1` — Synchronize the keys.
+
+          * `0` — Do **not** synchronize the keys.'
+        in: query
+        name: sync_authorized
+        required: false
+        schema:
+          default: 0
+          enum:
+          - 0
+          - 1
+          example: 0
+          type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      keys:
+                        description: An array of objects of each key's information.
+                        items:
+                          properties:
+                            authorized:
+                              description: 'Whether the key is authorized to access the server.
+
+
+                                * `1` — Authorized.
+
+                                * `0` — **Not** authorized.'
+                              enum:
+                              - 0
+                              - 1
+                              example: 0
+                              type: integer
+                            comment:
+                              description: The key's comment.
+                              example: REPO username@example.com
+                              type: string
+                            ctime:
+                              description: 'The date that the key was created, in
+
+                                [Unix time format](http://en.wikipedia.org/wiki/Unix_time).'
+                              example: 1416596824
+                              format: unix_timestamp
+                              type: integer
+                            file:
+                              description: The key's filename.
+                              example: TestKey
+                              type: string
+                            mtime:
+                              description: The date that the key will expire, in Unix time format.
+                              example: 1416596824
+                              format: unix_timestamp
+                              type: integer
+                            private:
+                              description: 'Whether the private key is stored on the server.
+
+
+                                * `1` — The private key is on the server.
+
+                                * `0` — The private key is **not** on the server.'
+                              enum:
+                              - 0
+                              - 1
+                              example: 1
+                              type: integer
+                            text:
+                              description: The key's text.
+                              example: ssh-rsaXXXXX3XXXX1XX2XXXXXXXXXXXXXXxXXXX6XXXXX90X41X7XXXXX02XXXXX8XXXX54XXXXXXXXXXX2X07XXXXXXXXXXX7XXXX4XXX2X98XXXX98X80XXXXXXX7X/X4XXXXxX1XXXXXXXXXXXxXXXXXXXXX6+4XXXX36XXXXX3XXXXXX1XXXXXXX/X7+XX1XX6XXXX0XXXXXXX0XXXXXXXX+XxX99X7X2XXXXXX03xXXXXX0XXXXXXXXXX9XXXXXXX9XXXXXXXXXXXX/XXXXX07XXXXX3XXXXXX5XXX+/XXXXXXXXXXXXX3XxXXXXXXXXXXXX6XXXXXXXXXXXX2XXXXXXXXXXXXXXXXX3XX+XXXX3XXXXXXX== REPO username@example.com
+                              type: string
+                          type: object
+                        type: array
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: listsshkeys
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Return SSH keys list
+      tags:
+      - SSH Keys and Connections
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  listsshkeys\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/listsshkeys?api.version=1
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11'
+components:
+  securitySchemes:
+    BasicAuth:
+      scheme: basic
+      type: http
+externalDocs:
+  url: https://cpanel.net/developers/
+x-tagGroups:
+- name: Account Restoration
+  tags:
+  - Restore Account
+  - Restore Queue Management
+  - Restore Queue Reporting
+- name: Accounts
+  tags:
+  - Account Creation
+  - Account Enhancements
+  - Account Management
+  - Bandwidth and Disk Quotas
+  - Domain Information
+  - Passwords
+  - Styles
+  - Suspensions
+- name: API Development Tools
+  tags:
+  - API Execution
+  - API Statistics
+  - API Token Management
+  - Applications
+  - Session
+- name: Authentication
+  tags:
+  - Authentication Providers
+  - External Authentication
+  - Login URL
+  - SSH Keys and Connections
+  - Two-Factor Authentication
+- name: Backups
+  tags:
+  - Backup Destination
+  - Backup or Restore
+  - Backup Settings
+  - Legacy Migration
+- name: Commerce Integration
+  tags:
+  - Market Integration
+  - Sitejet
+- name: cPanel Market
+  tags:
+  - Product Management
+  - Provider Management
+- name: cPanel Support Tickets
+  tags:
+  - Support Access
+  - Ticket Management
+- name: Customizations
+  tags:
+  - Brand
+  - Customizations
+- name: Databases
+  tags:
+  - Manage MySQL Server
+  - MySQL Databases
+  - PostgreSQL Databases
+  - Remote MySQL Databases
+- name: DNS
+  tags:
+  - DNS Cluster Settings
+  - DNS Security
+  - DNS Zones
+  - Domain Management
+  - Domain Management
+  - Resolvers
+  - Service Records
+- name: Hosting Plans
+  tags:
+  - Feature Access
+  - Feature Lists
+  - Hosting Plan Extensions
+  - Hosting Plans
+- name: InProductSurvey
+  tags:
+  - InProductSurvey
+- name: Integrations
+  tags:
+  - API Authentication
+  - Links
+  - Scripts Hooks
+- name: IP Address Management
+  tags:
+  - IPv4 Address Settings
+  - IPv6 Address Settings
+  - Network Address Translation
+- name: Login Security (cPHulk)
+  tags:
+  - Management
+  - Reporting
+  - Settings
+- name: Logs
+  tags:
+  - Web Log Retention
+- name: Mail
+  tags:
+  - cPanel Account Mail Management
+  - Mail DNS Settings
+  - Mail Server Settings
+  - Spam Management
+  - Spam Protection (Greylisting)
+- name: Monitoring
+  tags:
+  - 360 Monitoring
+- name: NGINX Manager
+  tags:
+  - NGINX Manager
+- name: Resellers
+  tags:
+  - Account Enhancement Limit
+  - Account Limits
+  - Account Permissions
+  - Account Settings
+  - Reseller Account Management
+- name: Security
+  tags:
+  - WHM Access
+- name: Server Administration
+  tags:
+  - Configuration Clusters
+  - Configurations
+  - Connected Applications
+  - Connections
+  - cPanel Analytics
+  - License Management
+  - Notifications
+  - Plugin-Based Features
+  - Security
+  - Server Nodes
+  - Server Profiles
+  - Services
+  - System Information
+  - Updates
+- name: SSL Certificates
+  tags:
+  - Auto-Generated Certificates
+  - cPanel Account Settings
+  - SSL Server Settings
+- name: System Package Management
+  tags:
+  - Install or Uninstall Package
+  - List Package Information
+  - Package Manager Settings
+- name: Transfers
+  tags:
+  - cPanel Account Transfer
+  - Transfer Configuration
+  - Transfer Monitoring
+- name: UserData
+  tags:
+  - UserData
+- name: Web Server Configuration
+  tags:
+  - EasyApache Settings
+  - PHP
+  - PHP-FPM
+- name: Web Server Security (ModSecurity)
+  tags:
+  - Rule Settings
+  - Rule Vendor Settings
+  - Server Settings

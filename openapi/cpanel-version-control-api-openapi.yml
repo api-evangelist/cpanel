@@ -1,0 +1,1677 @@
+openapi: 3.2.0
+info:
+  contact:
+    email: cs@cpanel.net
+    name: WebPros International, LLC
+    url: https://cpanel.net/support/
+  description: UAPI accesses the cPanel interface's features. Use this API to access and modify cPanel account data and settings.
+  license:
+    name: cPanel License
+    url: https://cpanel.net/legal-notices/
+  termsOfService: https://cpanel.net/legal-notices/
+  title: cPanel U Version Control API
+  version: 11.137.9999.106
+  x-api-evangelist-provenance: 'Harvested verbatim from cPanel''s developer portal on 2026-09-05 via the MCP tool get-full-api-description at https://api.docs.cpanel.net/mcp. ONE mechanical change was made before storage: example values containing PEM private-key or certificate blocks, and AWS-access-key-shaped example strings, were replaced with REDACTED_* placeholders so the file can be stored in a public git repository without tripping secret scanning. No path, operation, parameter, schema or description was altered, added or removed.'
+servers:
+- description: A server running cPanel.
+  url: https://{host}:{port}/execute
+  variables:
+    host:
+      default: cpanel-server.tld
+      description: The hostname of a server running cPanel.
+    port:
+      default: '2083'
+      description: The cPanel port.
+security:
+- BasicAuth: []
+tags:
+- description: The VersionControl module for UAPI.
+  name: Version Control
+paths:
+  /VersionControl/create:
+    get:
+      x-readonly: false
+      x-rollback: none
+      description: 'This function creates a new Git™ repository on a cPanel account.
+
+
+        * For more information about support for version control in cPanel & WHM, read our
+
+        Git Version Control and
+
+        Guide to Git documentation.
+
+        * For a list of configuration changes, repository restrictions, and troubleshooting steps,
+
+        read our Guide to Git - For System Administrators documentation.
+
+
+        **Important:**
+
+
+        The system logs errors for this function in the `~/.cpanel/logs/vc_TIMESTAMP_git_create.log`
+
+        file, where `TIMESTAMP` represents the time of the error in Unix epoch time.'
+      operationId: VersionControl-create
+      parameters:
+      - description: The new repository's display name.
+        in: query
+        name: name
+        required: true
+        schema:
+          example: example
+          type: string
+      - description: 'The absolute path to the directory in which to store the repository, relative to the
+
+          user''s `home` directory.
+
+
+          **Note:**
+
+
+          * If the directory does **not** exist, the system will create it.
+
+          * If the specified directory already contains a repository, the system will
+
+          automatically add it to the list of cPanel-managed repositories.
+
+          * This feature enforces several restrictions on repository paths. For more information,
+
+          read our [Guide to Git - For System Administrators](https://go.cpanel.net/GuidetoGitForSystemAdministrators) documentation.'
+        in: query
+        name: repository_root
+        required: true
+        schema:
+          example: /home/user/public_html/example
+          format: path
+          type: string
+      - description: 'The repository type.
+
+
+          * `git` — A [Git](https://git-scm.com/) repository.
+
+
+          **Note:**
+
+
+          `git` is the only possible value.'
+        in: query
+        name: type
+        required: true
+        schema:
+          enum:
+          - git
+          example: git
+          type: string
+      - content:
+          application/json:
+            schema:
+              example:
+                remote_name: origin
+                url: ssh://clone.domain.com/cloneme
+              properties:
+                remote_name:
+                  default: origin
+                  description: The source repository's name.
+                  type: string
+                url:
+                  description: The source repository's clone URL.
+                  type: string
+              required:
+              - url
+        description: 'A JSON-formatted object containing information about the source repository that the
+
+          system will clone.
+
+
+          **Note:**
+
+
+          If you do **not** include source repository data, the function creates an empty repository.'
+        in: query
+        name: source_repository
+        required: false
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  apiversion:
+                    description: The version of the API.
+                    example: 3
+                    type: integer
+                  func:
+                    description: The name of the method called.
+                    example: create
+                    type: string
+                  module:
+                    description: The name of the module called.
+                    example: VersionControl
+                    type: string
+                  result:
+                    properties:
+                      data:
+                        properties:
+                          available_branches:
+                            description: An list of available branches for the cloned or existing repository, if any exist.
+                            example:
+                            - master
+                            - olive
+                            items:
+                              type: string
+                            type: array
+                          branch:
+                            description: 'The repository''s current branch.
+
+
+                              * `null` — The system has **not** finished the clone process for
+
+                              the repository, or no local branches exist.'
+                            example: master
+                            type:
+                            - string
+                            - 'null'
+                          clone_urls:
+                            description: An object containing URLs to use to clone the repository.
+                            properties:
+                              read_only:
+                                description: 'A list of clone URLs with read-only permissions. The function
+
+                                  returns a blank array if the account does **not** include the
+
+                                  *Shell Access* setting.
+
+
+                                  **Important:**
+
+
+                                  If the server uses a [nonstandard SSH port](https://go.cpanel.net/firewall),
+
+                                  the system returns a clone URL that includes the port number.'
+                                items:
+                                  example: https://user@example.com/home/user/example
+                                  format: url
+                                  type: string
+                                type: array
+                              read_write:
+                                description: 'A list of of clone URLs with read-write permissions. The function
+
+                                  returns a blank array if the account does **not** include the
+
+                                  *Shell Access* setting.
+
+
+                                  **Important:**
+
+
+                                  If the server uses a [nonstandard SSH port](https://go.cpanel.net/firewall),
+
+                                  the system returns a clone URL that includes the port number.'
+                                items:
+                                  example: ssh://user@example.com/home/user/example
+                                  type: string
+                                type: array
+                            type: object
+                          last_update:
+                            description: 'Information about the most-recent (HEAD) commit for the current branch.
+
+
+                              **Note:**
+
+
+                              * The system may require a large amount of time to clone large
+
+                              repositories. Until this process finishes, HEAD information is unavailable.
+
+                              * `null` is the only possible value.'
+                            enum:
+                            - null
+                          name:
+                            description: The repository's display name.
+                            example: example
+                            type: string
+                          repository_root:
+                            description: The absolute path of the directory that contains the repository in the user's `home` directory.
+                            example: /home/user/public_html/example
+                            format: path
+                            type: string
+                          source_repository:
+                            description: 'A object containing information about a cloned repository''s source
+
+                              repository.
+
+
+                              **Note:**
+
+
+                              The function **only** returns this object if it will clone a
+
+                              repository.'
+                            properties:
+                              remote_name:
+                                description: The source repository's name.
+                                example: remote
+                                type: string
+                              url:
+                                description: The source repository's clone URL.
+                                example: http://user@domain.com/home/user/domain
+                                format: url
+                                type: string
+                            type: object
+                          tasks:
+                            description: 'An array of objects containing information about the
+
+                              [Task Queue](https://go.cpanel.net/whmdocsTaskQueueMonitor)
+
+                              system''s process that will clone the repository.
+
+
+                              **Note:**
+
+
+                              The function **only** returns this value if it will clone a
+
+                              repository.'
+                            items:
+                              properties:
+                                action:
+                                  description: 'The task''s action.
+
+
+                                    * `create`
+
+
+                                    **Note:**
+
+
+                                    `create` is the only possible value.'
+                                  enum:
+                                  - create
+                                  example: create
+                                  type: string
+                                args:
+                                  description: 'A list of arguments for the
+
+                                    [Task Queue](https://go.cpanel.net/whmdocsTaskQueueMonitor)
+
+                                    system''s process.'
+                                  properties:
+                                    log_file:
+                                      description: 'The absolute path to the process''s log file.
+
+
+                                        **Note:**
+
+
+                                        The function **only** returns this value if the process
+
+                                        generated a log file.'
+                                      example: /home/username/.cpanel/logs/vc_1234567890.123456_git_deploy.log
+                                      type: string
+                                    repository_root:
+                                      description: The absolute path to the repository's directory within the user's `home` directory.
+                                      example: /home/user/example
+                                      format: path
+                                      type: string
+                                  type: object
+                                id:
+                                  description: 'The [Task Queue](https://go.cpanel.net/whmdocsTaskQueueMonitor)
+
+                                    system''s task ID number.'
+                                  example: 00000000/5a9ec8dd4c345d
+                                  type: string
+                                sse_url:
+                                  description: The SSE interface to track the progress of the process.
+                                  example: /sse/UserTasks/B3A27B96-51F7-11E8-92E3-CC90C4F823F0
+                                  type: string
+                                subsystem:
+                                  description: 'The [Task Queue](https://go.cpanel.net/whmdocsTaskQueueMonitor)
+
+                                    subsystem that will handle the task.
+
+
+                                    * `VersionControl`
+
+
+                                    **Note:**
+
+
+                                    `VersionControl` is the only possible value.'
+                                  enum:
+                                  - VersionControl
+                                  example: VersionControl
+                                  type: string
+                              type: object
+                            type: array
+                          type:
+                            description: 'The repository type.
+
+
+                              * `git` — A Git repostiory.
+
+
+                              **Note:**
+
+
+                              `git` is the only possible value.'
+                            example: git
+                            type: string
+                        type: object
+                      errors:
+                        description: List of errors if the API failed.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      messages:
+                        description: List of messages generated by the API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      metadata:
+                        properties: {}
+                      status:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the `errors` field for more details.'
+                        enum:
+                        - 1
+                        - 0
+                        example: 1
+                        type: integer
+                      warnings:
+                        description: List of warnings generated by the API. Warnings describe non-critical failures or other problematic conditions noted while running a API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                    type: object
+                type: object
+          description: HTTP Request was successful.
+      summary: Create Git repository
+      tags:
+      - Version Control
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "uapi --output=jsonpretty \\\n  --user=username \\\n  VersionControl \\\n  create \\\n  type='git' \\\n  name='example' \\\n  repository_root='/home/user/public_html/example'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2083/cpsess##########/execute/VersionControl/create?type=git&name=example&repository_root=%2fhome%2fuser%2fpublic_html%2fexample
+      - label: LiveAPI Perl
+        lang: Perl
+        source: "#--------------------------------------------------------------------------------------\n# Instructions:\n#--------------------------------------------------------------------------------------\n# <theme-name> is the theme assigned to cPanel account.\n# 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n# 2) mkdir api_examples\n# 3) cd api_examples\n# 4) create a file VersionControl_create.live.pl and put this code into that file.\n# 5) In your browser login to a cPanel account.\n# 6) Manually change the url from: .../frontend/<theme-name>/\n#    to .../frontend/<theme-name>/api_examples/VersionControl_create.live.pl\n#--------------------------------------------------------------------------------------\n\nuse strict;\n\nuse Cpanel::LiveAPI ();\n\nmy $cpanel = Cpanel::LiveAPI->new(); # Connect to cPanel - only do this once.\n\n# Print the header\nprint \"Content-type: text/plain\\r\\n\\r\\n\";\n\n# Call the API\nmy $response = $cpanel->uapi(\n    q/VersionControl/,\n    q/create/,\n    {\n        'type' => 'git',\n        'name' => 'example',\n        'repository_root' => '/home/user/public_html/example',\n    }\n);\n\n# Handle the response\nif ($response->{cpanelresult}{result}{status}) {\n    my $data = $response->{cpanelresult}{result}{data};\n    # Do something with the $data\n    # So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    # Report errors:\n    print to_json($response->{cpanelresult}{result}{errors});\n}\n\n# Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n#--------------------------------------------------------------------------------------\n# Helper function to convert a perl object to html printable json\n#--------------------------------------------------------------------------------------\nsub to_json {\n    require JSON;\n    my $str = JSON->new->pretty->encode($_[0]);\n    return $str;\n}\n"
+      - label: LiveAPI PHP
+        lang: PHP
+        source: "<?php\n//--------------------------------------------------------------------------------------\n// Instructions:\n//--------------------------------------------------------------------------------------\n// <theme-name> is the theme assigned to cPanel account.\n// 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n// 2) mkdir api_examples\n// 3) cd api_examples\n// 4) create a file VersionControl_create.live.php and put this code into that file.\n// 5) In your browser login to a cPanel account.\n// 6) Manually change the url from: .../frontend/<theme-name>/\n//    to .../frontend/<theme-name>/api_examples/VersionControl_create.live.php\n//--------------------------------------------------------------------------------------\n\n// Instantiate the CPANEL object.\nrequire_once \"/usr/local/cpanel/php/cpanel.php\";\n\n// Print the header\nheader('Content-Type: text/plain');\n\n// Connect to cPanel - only do this once.\n$cpanel = new CPANEL();\n\n// Call the API\n$response = $cpanel->uapi(\n    'VersionControl',\n    'create',\n    array (\n        'type' => 'git',\n        'name' => 'example',\n        'repository_root' => '/home/user/public_html/example',\n    )\n);\n\n// Handle the response\nif ($response['cpanelresult']['result']['status']) {\n    $data = $response['cpanelresult']['result']['data'];\n    // Do something with the $data\n    // So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    // Report errors:\n    print to_json($response['cpanelresult']['result']['errors']);\n}\n\n// Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n//--------------------------------------------------------------------------------------\n// Helper function to convert a PHP value to html printable json\n//--------------------------------------------------------------------------------------\nfunction to_json($data) {\n    return json_encode($data, JSON_PRETTY_PRINT);\n}"
+      x-cpanel-api-version: UAPI
+      x-cpanel-available-version: cPanel 72
+  /VersionControl/delete:
+    get:
+      x-readonly: false
+      x-rollback: none
+      description: 'This function deletes a cPanel account''s Git™ repository. For more information about
+
+        support for version control in cPanel & WHM, read our
+
+        Git Version Control and
+
+        Guide to Git documentation.
+
+
+        **Warning:**
+
+
+        * When you call this function, the system **permanently deletes** the entire contents
+
+        of the specified directory. You **cannot** recover this data after deletion.
+
+        * You **cannot** use this function to delete any repositories that do not appear in
+
+        the cache of repositories (for example, repositories that contain invalid characters or
+
+        exist within cPanel-controlled directories).'
+      operationId: VersionControl-delete
+      parameters:
+      - description: The absolute directory path in the user's `home` directory containing the repository to delete.
+        in: query
+        name: repository_root
+        required: true
+        schema:
+          example: /home/user/example
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  apiversion:
+                    description: The version of the API.
+                    example: 3
+                    type: integer
+                  func:
+                    description: The name of the method called.
+                    example: delete
+                    type: string
+                  module:
+                    description: The name of the module called.
+                    example: VersionControl
+                    type: string
+                  result:
+                    properties:
+                      data:
+                        default: null
+                        type:
+                        - object
+                        - 'null'
+                      errors:
+                        description: List of errors if the API failed.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      messages:
+                        description: List of messages generated by the API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      metadata:
+                        properties: {}
+                      status:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the `errors` field for more details.'
+                        enum:
+                        - 1
+                        - 0
+                        example: 1
+                        type: integer
+                      warnings:
+                        description: List of warnings generated by the API. Warnings describe non-critical failures or other problematic conditions noted while running a API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                type: object
+          description: HTTP Request was successful.
+      summary: Delete Git repository
+      tags:
+      - Version Control
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "uapi --output=jsonpretty \\\n  --user=username \\\n  VersionControl \\\n  delete \\\n  repository_root='/home/user/example'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2083/cpsess##########/execute/VersionControl/delete?repository_root=%2fhome%2fuser%2fexample
+      - label: LiveAPI Perl
+        lang: Perl
+        source: "#--------------------------------------------------------------------------------------\n# Instructions:\n#--------------------------------------------------------------------------------------\n# <theme-name> is the theme assigned to cPanel account.\n# 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n# 2) mkdir api_examples\n# 3) cd api_examples\n# 4) create a file VersionControl_delete.live.pl and put this code into that file.\n# 5) In your browser login to a cPanel account.\n# 6) Manually change the url from: .../frontend/<theme-name>/\n#    to .../frontend/<theme-name>/api_examples/VersionControl_delete.live.pl\n#--------------------------------------------------------------------------------------\n\nuse strict;\n\nuse Cpanel::LiveAPI ();\n\nmy $cpanel = Cpanel::LiveAPI->new(); # Connect to cPanel - only do this once.\n\n# Print the header\nprint \"Content-type: text/plain\\r\\n\\r\\n\";\n\n# Call the API\nmy $response = $cpanel->uapi(\n    q/VersionControl/,\n    q/delete/,\n    {\n        'repository_root' => '/home/user/example',\n    }\n);\n\n# Handle the response\nif ($response->{cpanelresult}{result}{status}) {\n    my $data = $response->{cpanelresult}{result}{data};\n    # Do something with the $data\n    # So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    # Report errors:\n    print to_json($response->{cpanelresult}{result}{errors});\n}\n\n# Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n#--------------------------------------------------------------------------------------\n# Helper function to convert a perl object to html printable json\n#--------------------------------------------------------------------------------------\nsub to_json {\n    require JSON;\n    my $str = JSON->new->pretty->encode($_[0]);\n    return $str;\n}\n"
+      - label: LiveAPI PHP
+        lang: PHP
+        source: "<?php\n//--------------------------------------------------------------------------------------\n// Instructions:\n//--------------------------------------------------------------------------------------\n// <theme-name> is the theme assigned to cPanel account.\n// 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n// 2) mkdir api_examples\n// 3) cd api_examples\n// 4) create a file VersionControl_delete.live.php and put this code into that file.\n// 5) In your browser login to a cPanel account.\n// 6) Manually change the url from: .../frontend/<theme-name>/\n//    to .../frontend/<theme-name>/api_examples/VersionControl_delete.live.php\n//--------------------------------------------------------------------------------------\n\n// Instantiate the CPANEL object.\nrequire_once \"/usr/local/cpanel/php/cpanel.php\";\n\n// Print the header\nheader('Content-Type: text/plain');\n\n// Connect to cPanel - only do this once.\n$cpanel = new CPANEL();\n\n// Call the API\n$response = $cpanel->uapi(\n    'VersionControl',\n    'delete',\n    array (\n        'repository_root' => '/home/user/example',\n    )\n);\n\n// Handle the response\nif ($response['cpanelresult']['result']['status']) {\n    $data = $response['cpanelresult']['result']['data'];\n    // Do something with the $data\n    // So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    // Report errors:\n    print to_json($response['cpanelresult']['result']['errors']);\n}\n\n// Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n//--------------------------------------------------------------------------------------\n// Helper function to convert a PHP value to html printable json\n//--------------------------------------------------------------------------------------\nfunction to_json($data) {\n    return json_encode($data, JSON_PRETTY_PRINT);\n}"
+      x-cpanel-api-version: UAPI
+      x-cpanel-available-version: cPanel 72
+  /VersionControl/retrieve:
+    get:
+      x-readonly: false
+      x-rollback: none
+      description: 'This function lists Git™ repositories on a cPanel account. For more information
+
+        about support for version control in cPanel & WHM, read our
+
+        Git Version Control and
+
+        Guide to Git documentation.
+
+
+        **Important:**
+
+
+        * This feature does **not** allow the following characters in repository paths:
+
+        ``\ * | " '' & @ ` $ { } [ ] ( ) ; ? : = % #``
+
+        * This function does **not** allow repositories that exist in the following
+
+        cPanel-controlled directories:
+
+
+        * `.cpanel`
+
+        * `.htpasswds`
+
+        * `.ssh`
+
+        * `.trash`
+
+        * `access-logs`
+
+        * `cgi-bin`
+
+        * `etc`
+
+        * `logs`
+
+        * `perl5`
+
+        * `mail`
+
+        * `spamassassin`
+
+        * `ssl`
+
+        * `tmp`
+
+        * `var`
+
+
+        Users can create repositories in some of these directories on the command line.
+
+        They may appear in the list of repositories in Gitweb, but users may see an error
+
+        message if they try to access them.'
+      operationId: VersionControl-retrieve
+      parameters:
+      - description: 'A comma-separated list of desired return values.
+
+
+          **Note:**
+
+
+          Use a wildcard (`*`) to list all possible return values.'
+        in: query
+        name: fields
+        required: false
+        schema:
+          default: '*'
+          example: name,type,branch,last_update
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  apiversion:
+                    description: The version of the API.
+                    example: 3
+                    type: integer
+                  func:
+                    description: The name of the method called.
+                    example: retrieve
+                    type: string
+                  module:
+                    description: The name of the module called.
+                    example: VersionControl
+                    type: string
+                  result:
+                    properties:
+                      data:
+                        description: An array of objects containing repository data.
+                        example:
+                        - available_branches:
+                          - master
+                          branch: master
+                          clone_urls:
+                            read_only:
+                            - https://user@example.com/home/user/example
+                            read_write:
+                            - ssh://user@example.com/home/user/example
+                          deployable: 1
+                          last_deployment:
+                            deployment_date: 1598774400
+                            repository_state:
+                              author: User Name <user.name@example.com>
+                              date: 1598774400
+                              identifier: 2fd4e1c67a2d28fced849ee1bb76e7391b93eb12
+                              message: I'm committing some particularly cromulent code.
+                          last_update:
+                            author: Jane Doe <jane.doe@example.com>
+                            date: 1598774400
+                            identifier: 2fd4e1c67a2d28fced849ee1bb76e7391b93eb12
+                            message: I'm committing some particularly cromulent code.
+                          name: example
+                          repository_root: /home/user/example
+                          tasks:
+                          - action: create
+                            args:
+                              log_file: /home/user/.cpanel/logs/vc_1526305129.123456_git_create.log
+                              repository_root: /home/user/example
+                            id: 00000000/5a9ec8dd4c345d
+                            sse_url: /sse/UserTasks/B3A27B96-51F7-11E8-92E3-CC90C4F823F0
+                            subsystem: VersionControl
+                          type: git
+                        - available_branches:
+                          - master
+                          branch: master
+                          deployable: 1
+                          last_update:
+                            author: June Due <june.due@example2.com>
+                            clone_urls:
+                              read_only:
+                              - https://user@example.com/home/user/example
+                              read_write:
+                              - ssh://user@example.com/home/user/example
+                            date: 1599730200
+                            identifier: 4ee0b73ddf78213c41fcc185acfab68ced99046d
+                            last_deployment:
+                              deployment_date: 1599730200
+                              repository_state:
+                                author: User Name <user.name@example.com>
+                                date: 1599730200
+                                identifier: 2fd4e1c67a2d28fced849ee1bb76e7391b93eb12
+                                message: I'm committing some particularly cromulent code.
+                            message: My code makes more sense, actually.
+                            tasks:
+                            - action: create
+                              args:
+                                log_file: /home/user/.cpanel/logs/vc_1526305129.123456_git_create.log
+                                repository_root: /home/user/example
+                              id: 00000000/5a9ec8dd4c345d
+                              sse_url: /sse/UserTasks/B3A27B96-51F7-11E8-92E3-CC90C4F823F0
+                              subsystem: VersionControl
+                          name: example2
+                          repository_root: /home/user/example2
+                          type: git
+                        items:
+                          properties:
+                            available_branches:
+                              description: 'A list of available local and remote branches for the cloned
+
+                                or existing repository.
+
+
+                                * An empty array — No branches exist.
+
+                                * `null` — The repository is a bare repository.'
+                              items:
+                                type: string
+                              type:
+                              - array
+                              - 'null'
+                            branch:
+                              description: 'The repository''s current branch.
+
+
+                                * `null` — The system has not finished the clone process for the
+
+                                repository, no local branches exist, or the repository is a bare
+
+                                repository.'
+                              type:
+                              - string
+                              - 'null'
+                            clone_urls:
+                              description: An array of objects containing URLS to use to clone the repository.
+                              properties:
+                                read_only:
+                                  description: 'A list of clone URLs with read-only permissions.
+
+
+                                    This function returns a blank array if the account does
+
+                                    not include the *Shell Access* setting.
+
+
+                                    **Important:**
+
+
+                                    If the server uses a nonstandard SSH port, the system returns a
+
+                                    clone URL that includes the port number.'
+                                  items:
+                                    type: string
+                                  type: array
+                                read_write:
+                                  description: 'A list of clone URLs with read-write permissions.
+
+
+                                    This function returns a blank array if the account does
+
+                                    not include the *Shell Access* setting.
+
+
+                                    **Important:**
+
+
+                                    If the server uses a nonstandard SSH port, the system returns a
+
+                                    clone URL that includes the port number.'
+                                  items:
+                                    type: string
+                                  type: array
+                              type: object
+                            deployable:
+                              description: 'Whether the system could deploy the repository.
+
+
+                                * `1` — Can deploy.
+
+                                * `0` — Cannot deploy.'
+                              enum:
+                              - 1
+                              - 0
+                              type: integer
+                            last_deployment:
+                              description: 'An object containing information about the commit that the system
+
+                                most recently deployed.
+
+
+                                **Note:**
+
+
+                                The system **only** returns this object if deployment information
+
+                                exists.'
+                              properties:
+                                deployment_date:
+                                  description: The timestamp for the most-recent deployment.
+                                  format: unix_timestamp
+                                  type: integer
+                                repository_state:
+                                  description: A object containing information about the state of the repository at the time of the most recent deployment.
+                                  properties:
+                                    author:
+                                      description: The author's name and email address for the commit that the system most recently deployed.
+                                      type: string
+                                    date:
+                                      description: The timestamp for the commit that the system most recently deployed.
+                                      format: unix_timestamp
+                                      type: integer
+                                    identifier:
+                                      description: The identifier (SHA-1 value) for the commit that the system most recently deployed.
+                                      type: string
+                                    message:
+                                      description: The commit message for the commit that the system most recently deployed.
+                                      type: string
+                                  type: object
+                              type: object
+                            last_update:
+                              description: "An object containing information about the most-recent (HEAD) commit\nfor the current branch. \n\n**Note:**\n\nThis object's information resembles the output of the `git log -1`\ncommand.\n\n**Important:**\n\n* If the repository does not include any commits, the function returns\na `null` value instead of an object.\n* The system may require a large amount of time to clone larger\nrepositories. Until this process finishes, HEAD information is\nunavailable."
+                              properties:
+                                author:
+                                  description: The most-recent commit's author's name and email address.
+                                  example: Jane Doe <jane.doe@example.com>
+                                  type: string
+                                date:
+                                  description: The timestamp for the most-recent commit.
+                                  example: 1569844800
+                                  format: unix_timestamp
+                                  type: integer
+                                identifier:
+                                  description: The identifier (SHA-1 value) for the most-recent commit.
+                                  example: 2fd4e1c67a2d28fced849ee1bb76e7391b93eb12
+                                  type: string
+                                message:
+                                  description: The commit message.
+                                  example: I'm committing some particularly cromulent code.
+                                  type: string
+                              type:
+                              - object
+                              - 'null'
+                            name:
+                              description: The repository's display name.
+                              example: example
+                              type: string
+                            repository_root:
+                              description: The absolute directory path in the user's `home` directory containing the repository.
+                              example: /home/user/public_html/example
+                              format: path
+                              type: string
+                            source_repository:
+                              description: 'An object containing information about the source repository.
+
+
+                                **Note:**
+
+
+                                The function **only** returns this object if you cloned a source
+
+                                repository.'
+                              properties:
+                                remote_name:
+                                  description: The source repository's name.
+                                  example: origin
+                                  type: string
+                                url:
+                                  description: The source repository's clone URL.
+                                  example: ssh://clone.domain.com/cloneme
+                                  type: string
+                              type: object
+                            tasks:
+                              description: 'An array of objects containing information about the
+
+                                [Task Queue](https://go.cpanel.net/whmdocsTaskQueueMonitor)
+
+                                system''s process that will clone the repository.
+
+
+                                **Note:**
+
+
+                                The function only returns this value if the clone process is
+
+                                **not** finished.'
+                              items:
+                                properties:
+                                  action:
+                                    description: 'The task''s action.
+
+
+                                      * `create` — Create the repository.
+
+                                      * `deploy` — Deploy the repository.'
+                                    enum:
+                                    - create
+                                    - deploy
+                                    type: string
+                                  args:
+                                    description: A list of arguments for the Task Queue system's process.
+                                    properties:
+                                      log_file:
+                                        description: 'The absolute path to the process''s log file.
+
+
+                                          **Note:**
+
+
+                                          The function only returns this value if the process generated
+
+                                          a log file.'
+                                        example: /home/username/.cpanel/logs/vc_1234567890.123456_git_deploy.log
+                                        format: path
+                                        type: string
+                                      repository_root:
+                                        description: The absolute path to the repository's directory in the user's `home` directory.
+                                        example: /home/user/example
+                                        type: string
+                                    type: object
+                                  id:
+                                    description: The Task Queue system's task ID number.
+                                    example: 00000000/5a9ec8dd4c345d
+                                    type: string
+                                  sse_url:
+                                    description: The Secure Server Events (SSE) interface URL to track the progress of the process.
+                                    example: /sse/UserTasks/B3A27B96-51F7-11E8-92E3-CC90C4F823F0
+                                    type: string
+                                  subsystem:
+                                    description: 'The Task Queue subsystem that will handle the task.
+
+
+                                      * `VersionControl` is the only possible value.'
+                                    enum:
+                                    - VersionControl
+                                    example: VersionControl
+                                    type: string
+                                type: object
+                              type: array
+                            type:
+                              description: 'The repository type.
+
+
+                                * `git` is the only possible value.'
+                              enum:
+                              - git
+                              example: git
+                              type: string
+                          type: object
+                        type: array
+                      errors:
+                        description: List of errors if the API failed.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      messages:
+                        description: List of messages generated by the API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      metadata:
+                        properties:
+                          transformed:
+                            description: Post-processing may have transformed the data.
+                            enum:
+                            - 1
+                            example: 1
+                            type: integer
+                      status:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the `errors` field for more details.'
+                        enum:
+                        - 1
+                        - 0
+                        example: 1
+                        type: integer
+                      warnings:
+                        description: List of warnings generated by the API. Warnings describe non-critical failures or other problematic conditions noted while running a API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                    type: object
+                type: object
+          description: HTTP Request was successful.
+      summary: Return Git repositories
+      tags:
+      - Version Control
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "uapi --output=jsonpretty \\\n  --user=username \\\n  VersionControl \\\n  retrieve\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2083/cpsess##########/execute/VersionControl/retrieve
+      - label: LiveAPI Perl
+        lang: Perl
+        source: "#--------------------------------------------------------------------------------------\n# Instructions:\n#--------------------------------------------------------------------------------------\n# <theme-name> is the theme assigned to cPanel account.\n# 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n# 2) mkdir api_examples\n# 3) cd api_examples\n# 4) create a file VersionControl_retrieve.live.pl and put this code into that file.\n# 5) In your browser login to a cPanel account.\n# 6) Manually change the url from: .../frontend/<theme-name>/\n#    to .../frontend/<theme-name>/api_examples/VersionControl_retrieve.live.pl\n#--------------------------------------------------------------------------------------\n\nuse strict;\n\nuse Cpanel::LiveAPI ();\n\nmy $cpanel = Cpanel::LiveAPI->new(); # Connect to cPanel - only do this once.\n\n# Print the header\nprint \"Content-type: text/plain\\r\\n\\r\\n\";\n\n# Call the API\nmy $response = $cpanel->uapi(\n    q/VersionControl/,\n    q/retrieve/\n);\n\n# Handle the response\nif ($response->{cpanelresult}{result}{status}) {\n    my $data = $response->{cpanelresult}{result}{data};\n    foreach my $item (@{$data}) {\n        # Do something with the $item\n    }\n\n    # So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    # Report errors:\n    print to_json($response->{cpanelresult}{result}{errors});\n}\n\n# Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n#--------------------------------------------------------------------------------------\n# Helper function to convert a perl object to html printable json\n#--------------------------------------------------------------------------------------\nsub to_json {\n    require JSON;\n    my $str = JSON->new->pretty->encode($_[0]);\n    return $str;\n}\n"
+      - label: LiveAPI PHP
+        lang: PHP
+        source: "<?php\n//--------------------------------------------------------------------------------------\n// Instructions:\n//--------------------------------------------------------------------------------------\n// <theme-name> is the theme assigned to cPanel account.\n// 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n// 2) mkdir api_examples\n// 3) cd api_examples\n// 4) create a file VersionControl_retrieve.live.php and put this code into that file.\n// 5) In your browser login to a cPanel account.\n// 6) Manually change the url from: .../frontend/<theme-name>/\n//    to .../frontend/<theme-name>/api_examples/VersionControl_retrieve.live.php\n//--------------------------------------------------------------------------------------\n\n// Instantiate the CPANEL object.\nrequire_once \"/usr/local/cpanel/php/cpanel.php\";\n\n// Print the header\nheader('Content-Type: text/plain');\n\n// Connect to cPanel - only do this once.\n$cpanel = new CPANEL();\n\n// Call the API\n$response = $cpanel->uapi(\n    'VersionControl',\n    'retrieve'\n);\n\n// Handle the response\nif ($response['cpanelresult']['result']['status']) {\n    $data = $response['cpanelresult']['result']['data'];\n    foreach ($data as $item) {\n        // Do something with the $item\n    }\n\n    // So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    // Report errors:\n    print to_json($response['cpanelresult']['result']['errors']);\n}\n\n// Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n//--------------------------------------------------------------------------------------\n// Helper function to convert a PHP value to html printable json\n//--------------------------------------------------------------------------------------\nfunction to_json($data) {\n    return json_encode($data, JSON_PRETTY_PRINT);\n}"
+      x-cpanel-api-version: UAPI
+      x-cpanel-available-version: cPanel 72
+  /VersionControl/update:
+    get:
+      x-readonly: false
+      x-rollback: none
+      description: 'This function modifies a Git™ repository''s basic settings. For more information about support
+
+        for version control in cPanel & WHM, read our
+
+        Git Version Control
+
+        and Guide to Git documentation.
+
+
+        **Note:**
+
+
+        * This function **only** pulls changes from the remote repository if you specify a `branch` value.
+
+        * You **cannot** modify the `type`, `repository_root`, or `url` values for existing repositories.
+
+        * You **must** include the `repository_root` parameter in order to identify the repository to
+
+        update.
+
+        * All other input parameters are **optional**. Use them to assign the **new** values to the
+
+        account. If you do not include a parameter or specify its existing value, no change will occur.'
+      operationId: VersionControl-update
+      parameters:
+      - description: The absolute directory path that contains the repository to update.
+        in: query
+        name: repository_root
+        required: true
+        schema:
+          example: /home/user/public_html/example
+          format: path
+          type: string
+      - description: 'The new branch to use.
+
+
+          If you do not specify a value, the function does **not** update this parameter.
+
+
+          **Remember:**
+
+
+          This function **only** pulls changes from the remote repository if you specify
+
+          this value.'
+        in: query
+        name: branch
+        required: false
+        schema:
+          example: master
+          type: string
+      - description: 'The repository''s new display name.
+
+
+          If you do not specify a value, the function does **not** update this parameter.'
+        in: query
+        name: name
+        required: false
+        schema:
+          example: example
+          type: string
+      - content:
+          application/json:
+            schema:
+              example:
+                remote_name: origin
+              properties:
+                remote_name:
+                  description: The source repository's name. If you do not specify a value, the function does **not** update this parameter.
+                  type: string
+              type: object
+        description: 'A JSON-encoded object containing information about the source repository.
+
+
+          If you do not specify a value, the function does **not** update this parameter.
+
+
+          **Important:**
+
+
+          * You **cannot** modify the source repository''s URL.
+
+          * You **must** JSON-encode the contents of this object.'
+        in: query
+        name: source_repository
+        required: false
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  apiversion:
+                    description: The version of the API.
+                    example: 3
+                    type: integer
+                  func:
+                    description: The name of the method called.
+                    example: update
+                    type: string
+                  module:
+                    description: The name of the module called.
+                    example: VersionControl
+                    type: string
+                  result:
+                    properties:
+                      data:
+                        example:
+                          available_branches:
+                          - master
+                          branch: master
+                          clone_urls:
+                            read_only:
+                            - https://user@example.com/home/user/example
+                            read_write:
+                            - ssh://user@example.com/home/user/example
+                          deployable: 1
+                          last_deployment:
+                            deployment_date: 1569844800
+                            repository_state:
+                              author: User Name <user.name@example.com>
+                              date: 1569844800
+                              identifier: 2fd4e1c67a2d28fced849ee1bb76e7391b93eb121
+                              message: I'm committing some particularly cromulent code.
+                          last_update:
+                            author: Jane Doe <jane.doe@example.com>
+                            date: 1569844800
+                            identifier: 2fd4e1c67a2d28fced849ee1bb76e7391b93eb12
+                            message: I'm committing some particularly cromulent code.
+                          name: example
+                          repository_root: /home/user/example
+                          tasks:
+                          - action: create
+                            args:
+                              repository_root: /home/user/example
+                            id: 00000000/5a9ec8dd4c345d
+                            subsystem: VersionControl
+                          type: git
+                        properties:
+                          available_branches:
+                            description: 'A list of local and remote branches available for the cloned or
+
+                              existing repository.
+
+
+                              * An empty array, if no branches exist.
+
+                              * `null` — The repository is a bare repository.'
+                            items:
+                              type:
+                              - string
+                              - 'null'
+                            type: array
+                          branch:
+                            description: 'The repository''s current branch.
+
+
+                              * `null` — The system has not finished the clone process for the
+
+                              repository, no local branches exist, or the repository is a bare
+
+                              repository.'
+                            type:
+                            - string
+                            - 'null'
+                          clone_urls:
+                            description: 'An object containing the URLs to use to clone the repository.
+
+
+                              The function returns an empty object if the account does **not**
+
+                              include the *Shell Access* setting.
+
+
+                              **Important:**
+
+
+                              If the server uses a nonstandard SSH port, the system returns a
+
+                              clone URL that includes the port number. '
+                            properties:
+                              read_only:
+                                description: 'A list of clone URLs with read-only permissions.
+
+
+                                  This function returns an empty list if the account does
+
+                                  **not** include the *Shell Access* setting.
+
+
+                                  **Important:**
+
+
+                                  If the server uses a nonstandard SSH port, the system returns a
+
+                                  clone URL that includes the port number.'
+                                items:
+                                  format: url
+                                  type: string
+                                type: array
+                              read_write:
+                                description: 'A list of clone URLs with read-write permissions.
+
+
+                                  This function returns an empty list if the account does
+
+                                  **not** include the *Shell Access* setting.
+
+
+                                  **Important:**
+
+
+                                  If the server uses a nonstandard SSH port, the system returns a
+
+                                  clone URL that includes the port number.'
+                                items:
+                                  type: string
+                                type: array
+                            type: object
+                          deployable:
+                            description: 'Whether the system could deploy the repository.
+
+
+                              * `1` — Can deploy.
+
+                              * `0` — Cannot deploy.'
+                            enum:
+                            - 1
+                            - 0
+                            type: integer
+                          last_deployment:
+                            description: 'An object containing information about the commit that the system
+
+                              most recently deployed.
+
+
+                              **Note:**
+
+
+                              If no deployment information exists, the function returns a `null` value.'
+                            properties:
+                              deployment_date:
+                                description: The timestamp for the most recent deployment.
+                                format: unix_timestamp
+                                type: integer
+                              repository_state:
+                                description: A object containing information about the state of the repository at the time of the most recent deployment.
+                                properties:
+                                  author:
+                                    description: The author's name and email address for the commit that the system most recently deployed.
+                                    type: string
+                                  date:
+                                    description: The timestamp for the commit that the system most recently deployed.
+                                    format: unix_timestamp
+                                    type: integer
+                                  identifier:
+                                    description: The identifier (SHA-1 value) for the commit that the system most recently deployed.
+                                    type: string
+                                  message:
+                                    description: The commit message for the commit that the system most recently deployed.
+                                    type: string
+                                type: object
+                            type:
+                            - object
+                            - 'null'
+                          last_update:
+                            description: 'An object containing information about the most recent (HEAD) commit for
+
+                              the current branch.
+
+
+                              **Note:**
+
+
+                              This object''s information resembles the output of the `git log -1`
+
+                              command.
+
+
+                              **Important:**
+
+
+                              * If the repository does **not** include any commits, the function
+
+                              returns a `null` value instead of an object.
+
+                              * The system may require a large amount of time to clone larger repositories.
+
+                              Until this process finishes, HEAD information is unavailable.'
+                            properties:
+                              author:
+                                description: The most recent commit's author name and email address.
+                                type: string
+                              date:
+                                description: The timestamp for the most recent commit.
+                                format: unix_timestamp
+                                type: integer
+                              identifier:
+                                description: The identifier (SHA-1 value) for the most recent commit.
+                                type: string
+                              message:
+                                description: The commit message.
+                                type: string
+                            type:
+                            - object
+                            - 'null'
+                          name:
+                            description: The repository's display name.
+                            type: string
+                          repository_root:
+                            description: The directory path that exists in the user's `home` directory containing the repository.
+                            type: string
+                          source_repository:
+                            description: 'An object containing information about the source repository.
+
+
+                              **Note:**
+
+
+                              The function **only** returns this object if you cloned a source
+
+                              repository.'
+                            properties:
+                              remote_name:
+                                description: The source repository's name.
+                                type: string
+                              url:
+                                description: The source repository's clone URL.
+                                type: string
+                            type: object
+                          tasks:
+                            description: 'An array of objects containing information about the
+
+                              [Task Queue](https://go.cpanel.net/whmdocsTaskQueueMonitor)
+
+                              system''s process that will clone the repository.
+
+
+                              **Note:**
+
+
+                              The function **only** returns this value if the clone process is
+
+                              not finished.'
+                            items:
+                              properties:
+                                action:
+                                  description: 'The task''s action.
+
+
+                                    * `create` — Create the repository.
+
+                                    * `deploy` — Deploy the repository.'
+                                  enum:
+                                  - create
+                                  - deploy
+                                  type: string
+                                args:
+                                  description: An object containing arguments for the Task Queue system's process.
+                                  properties:
+                                    log_file:
+                                      description: 'The absolute path to the process log file in the user''s
+
+                                        `home` directory.
+
+
+                                        **Note:**
+
+
+                                        The function **only** returns this value if the process
+
+                                        generated a log file.'
+                                      type: string
+                                    repository_root:
+                                      description: The repository's absolute directory path in the user's `home` directory.
+                                      type: string
+                                  type: object
+                                id:
+                                  description: The Task Queue system's task ID number.
+                                  type: string
+                                subsystem:
+                                  description: 'The Task Queue subsystem that will handle the task.
+
+
+                                    * `VersionControl`
+
+
+                                    **Note:**
+
+
+                                    * `VersionControl` is the only possible value.'
+                                  enum:
+                                  - VersionControl
+                                  type: string
+                              type: object
+                            type: array
+                          type:
+                            description: 'The repository type.
+
+
+                              * `git` — A [Git](https://git-scm.com/) repository.
+
+
+                              **Note:**
+
+
+                              * `git` is the only possible value.'
+                            enum:
+                            - git
+                            type: string
+                        type: object
+                      errors:
+                        description: List of errors if the API failed.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      messages:
+                        description: List of messages generated by the API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      metadata:
+                        properties: {}
+                      status:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the `errors` field for more details.'
+                        enum:
+                        - 1
+                        - 0
+                        example: 1
+                        type: integer
+                      warnings:
+                        description: List of warnings generated by the API. Warnings describe non-critical failures or other problematic conditions noted while running a API.
+                        example: null
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                    type: object
+                type: object
+          description: HTTP Request was successful.
+      summary: Update Git repository settings
+      tags:
+      - Version Control
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "uapi --output=jsonpretty \\\n  --user=username \\\n  VersionControl \\\n  update \\\n  repository_root='/home/user/public_html/example'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2083/cpsess##########/execute/VersionControl/update?repository_root=%2fhome%2fuser%2fpublic_html%2fexample
+      - label: LiveAPI Perl
+        lang: Perl
+        source: "#--------------------------------------------------------------------------------------\n# Instructions:\n#--------------------------------------------------------------------------------------\n# <theme-name> is the theme assigned to cPanel account.\n# 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n# 2) mkdir api_examples\n# 3) cd api_examples\n# 4) create a file VersionControl_update.live.pl and put this code into that file.\n# 5) In your browser login to a cPanel account.\n# 6) Manually change the url from: .../frontend/<theme-name>/\n#    to .../frontend/<theme-name>/api_examples/VersionControl_update.live.pl\n#--------------------------------------------------------------------------------------\n\nuse strict;\n\nuse Cpanel::LiveAPI ();\n\nmy $cpanel = Cpanel::LiveAPI->new(); # Connect to cPanel - only do this once.\n\n# Print the header\nprint \"Content-type: text/plain\\r\\n\\r\\n\";\n\n# Call the API\nmy $response = $cpanel->uapi(\n    q/VersionControl/,\n    q/update/,\n    {\n        'repository_root' => '/home/user/public_html/example',\n    }\n);\n\n# Handle the response\nif ($response->{cpanelresult}{result}{status}) {\n    my $data = $response->{cpanelresult}{result}{data};\n    # Do something with the $data\n    # So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    # Report errors:\n    print to_json($response->{cpanelresult}{result}{errors});\n}\n\n# Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n#--------------------------------------------------------------------------------------\n# Helper function to convert a perl object to html printable json\n#--------------------------------------------------------------------------------------\nsub to_json {\n    require JSON;\n    my $str = JSON->new->pretty->encode($_[0]);\n    return $str;\n}\n"
+      - label: LiveAPI PHP
+        lang: PHP
+        source: "<?php\n//--------------------------------------------------------------------------------------\n// Instructions:\n//--------------------------------------------------------------------------------------\n// <theme-name> is the theme assigned to cPanel account.\n// 1) cd /usr/local/cpanel/base/frontend/<theme-name>\n// 2) mkdir api_examples\n// 3) cd api_examples\n// 4) create a file VersionControl_update.live.php and put this code into that file.\n// 5) In your browser login to a cPanel account.\n// 6) Manually change the url from: .../frontend/<theme-name>/\n//    to .../frontend/<theme-name>/api_examples/VersionControl_update.live.php\n//--------------------------------------------------------------------------------------\n\n// Instantiate the CPANEL object.\nrequire_once \"/usr/local/cpanel/php/cpanel.php\";\n\n// Print the header\nheader('Content-Type: text/plain');\n\n// Connect to cPanel - only do this once.\n$cpanel = new CPANEL();\n\n// Call the API\n$response = $cpanel->uapi(\n    'VersionControl',\n    'update',\n    array (\n        'repository_root' => '/home/user/public_html/example',\n    )\n);\n\n// Handle the response\nif ($response['cpanelresult']['result']['status']) {\n    $data = $response['cpanelresult']['result']['data'];\n    // Do something with the $data\n    // So you can see the data shape we print it here.\n    print to_json($data);\n}\nelse {\n    // Report errors:\n    print to_json($response['cpanelresult']['result']['errors']);\n}\n\n// Disconnect from cPanel - only do this once.\n$cpanel->end();\n\n//--------------------------------------------------------------------------------------\n// Helper function to convert a PHP value to html printable json\n//--------------------------------------------------------------------------------------\nfunction to_json($data) {\n    return json_encode($data, JSON_PRETTY_PRINT);\n}"
+      x-cpanel-api-version: UAPI
+      x-cpanel-available-version: cPanel 72
+components:
+  securitySchemes:
+    BasicAuth:
+      scheme: basic
+      type: http
+externalDocs:
+  url: https://cpanel.net/developers/
+x-tagGroups:
+- name: API Development Tools
+  tags:
+  - API Token Management
+  - Batch
+  - SSE Task Management
+  - URL Parsing
+- name: Authentication
+  tags:
+  - External Authentication
+  - Two-Factor Settings
+- name: Backup Information
+  tags:
+  - BackupInfo
+  - BackupInfo Status
+- name: Block Ip Addresses
+  tags:
+  - Block IP
+- name: Commerce Integration
+  tags:
+  - Market Integration
+  - SSL Certificates
+- name: Contact Information
+  tags:
+  - Contact Information
+- name: cPanel Account
+  tags:
+  - Account Enhancements
+  - Account Information
+  - Account Management
+  - AuditLog
+  - Contact Information
+  - cPanel Features
+  - Disk Quotas
+  - DomainRecommendations
+  - Personalization
+  - Resource Usage and Statistics
+  - Subaccount Management
+  - Team Roles
+  - Team Users
+- name: cPanel Account Backups
+  tags:
+  - Backup
+  - File Restoration
+- name: cPanel Plugin Framework
+  tags:
+  - Formbricks
+  - Plugins
+- name: cPanel Theme Management
+  tags:
+  - Application Information
+  - Brand Management
+  - Branding Files
+  - Browser Cache Management
+  - Language
+  - Theme Settings
+- name: Directory Management
+  tags:
+  - Directory Indexes
+  - Directory Privacy
+  - Directory Protection
+- name: DNS
+  tags:
+  - DNS
+  - DNS Information
+  - DNS Security
+  - Dynamic DNS
+  - Email DNS Settings
+  - ZoneEdit
+- name: Domain
+  tags:
+  - Domain
+- name: Domain Management
+  tags:
+  - AddonDomain
+  - Direct Link Protection (Hotlink)
+  - Domain
+  - Domain Information
+  - Domain Redirection
+  - DomainLookup
+  - Park
+  - SubDomain
+  - Virtual Host Information
+- name: Domains
+  tags:
+  - Subdomains
+- name: Email
+  tags:
+  - Email Accounts
+  - Email Filtering
+  - Email Forwarding
+  - Email Server Information
+  - Email Suspensions
+  - Mail Server Information
+  - Mailbox Management
+  - Mailing Lists
+  - Signing and Encryption (GnuPG Keys)
+  - Spam Filtering (Greylisting)
+  - Spam Management
+  - Spam Prevention (BoxTrapper)
+  - Webmail Applications
+  - Webmail Sessions
+- name: Extract Information
+  tags:
+  - ExtractInfo
+  - ExtractInfo Status
+- name: File Manager
+  tags:
+  - Trash
+- name: Files
+  tags:
+  - FTP Accounts
+  - FTP Server Settings
+  - Image Tools
+  - Jodit
+  - Manage Files
+  - Manage Files
+  - WebDisk Settings
+- name: GIT Management
+  tags:
+  - Deployment Settings
+  - Repository Management
+- name: InProductSurvey
+  tags:
+  - InProductSurvey
+- name: MySQL and MariaDB
+  tags:
+  - Database Information
+  - Database Management
+  - Remote Databases
+  - User Management
+- name: Notifications
+  tags:
+  - Pushbullet
+- name: Optional Applications
+  tags:
+  - Antivirus Protection (ClamAV)
+  - Calendar and Contacts (DAV)
+  - Calendar and Contacts Server
+  - WordPress Manager Backups
+- name: PostgreSQL
+  tags:
+  - PostgreSQL Database Management
+  - PostgreSQL User Management
+- name: Retrieve bandwidth information
+  tags:
+  - Bandwidth
+- name: Security
+  tags:
+  - Known SSH Hosts Management
+  - Login Information
+- name: Server Information
+  tags:
+  - cPanel Server Information
+  - Notifications
+  - Password Strength
+  - SSH
+  - WebPros MCP
+  - WebProsMCP
+- name: ServiceProxy
+  tags:
+  - ServiceProxy
+- name: Site Quality Monitoring
+  tags:
+  - SiteQuality
+- name: SSL Certificates
+  tags:
+  - Auto-generated SSL Certificates
+  - cPanel Account SSL Management
+  - SNI Email Settings
+  - SSL Certificate Management
+  - Verify Domain Ownership
+- name: Statistics
+  tags:
+  - Domain Statistics
+  - Weblog Settings
+- name: UserData
+  tags:
+  - UserData
+- name: Web Server Configuration
+  tags:
+  - EA4
+  - EasyApache Settings
+  - PHP
+- name: Web Server Management
+  tags:
+  - Application Manager
+  - ModSecurity
+  - NginxCaching
+  - PHP Settings
+  - Web Apps
+- name: Website Configuration
+  tags:
+  - Handler Management
+  - Logs
+  - Mime Type Management
+  - Nova
+  - Site Information
+  - Site Installation
+  - Sitejet
+  - WPX

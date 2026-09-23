@@ -1,0 +1,627 @@
+openapi: 3.2.0
+info:
+  contact:
+    email: cs@cpanel.net
+    name: WebPros International, LLC
+    url: https://cpanel.net/support/
+  description: WHM API.
+  license:
+    name: cPanel License
+    url: https://cpanel.net/legal-notices/
+  termsOfService: https://cpanel.net/legal-notices/
+  title: WHM Security API
+  version: 11.137.9999.106
+  x-api-evangelist-provenance: 'Harvested verbatim from cPanel''s developer portal on 2026-09-05 via the MCP tool get-full-api-description at https://api.docs.cpanel.net/mcp. ONE mechanical change was made before storage: example values containing PEM private-key or certificate blocks, and AWS-access-key-shaped example strings, were replaced with REDACTED_* placeholders so the file can be stored in a public git repository without tripping secret scanning. No path, operation, parameter, schema or description was altered, added or removed.'
+servers:
+- description: A server running WHM.
+  url: https://{host}:{port}/json-api
+  variables:
+    host:
+      default: whm-server.tld
+      description: The hostname of a server running WHM.
+    port:
+      default: '2087'
+      description: The WHM port.
+security:
+- BasicAuth: []
+tags:
+- description: The Security module for WHM API 1.
+  name: Security
+paths:
+  /fetch_security_advice:
+    get:
+      description: 'This function returns the cPanel Security Advisor''s security scan data. It advises you of how to resolve any security issues that it finds.
+
+
+        **Note:**
+
+
+        For more information, read the cPanel Security Advisor documentation at the WebPros International, LLC GitHub® repository.'
+      operationId: Security-fetch_security_advice
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                advice_with_module_error:
+                  value:
+                    data:
+                      payload:
+                      - advice:
+                          key: SSH_direct_root_login_permitted
+                          suggestion: Manually edit /etc/ssh/sshd_config and change PermitRootLogin to “without-password” or “no”, then restart SSH …
+                          summary: SSH direct root logins are permitted.
+                          type: ADVISE_BAD
+                        module: Cpanel::Security::Advisor::Assessors::SSH
+                        type: mod_advice
+                      - advice:
+                          key: SSH_is_current
+                          suggestion: null
+                          summary: 'Current SSH version is up to date: 11.22p33-44'
+                          type: ADVISE_GOOD
+                        module: Cpanel::Security::Advisor::Assessors::SSH
+                        type: mod_advice
+                      - message: Anvil not found at /usr/local/cpanel/Cpanel/Security/Advisor/Assessors/ACME.pm line 6.
+                        module: Cpanel::Security::Advisor::Assessors::ACME
+                        type: mod_load
+                    metadata:
+                      command: fetch_security_advice
+                      reason: OK
+                      result: 1
+                      version: 1
+              schema:
+                properties:
+                  data:
+                    properties:
+                      payload:
+                        description: "**Note:**\n\n * This function only returns the the `advice` array of objects when the `type` return is the `mod_advice` value.\n * This function only returns the `message` return when the `type` return is the `mod_load` or `mod_run` value."
+                        items:
+                          properties:
+                            advice:
+                              description: "**Note:**\n\n  This function only returns this object when the `type` return is the `mod_advice` value."
+                              properties:
+                                key:
+                                  description: A unique check identifier in the module that returns a status message.
+                                  example: ClamAV_not_installed
+                                  type: string
+                                suggestion:
+                                  description: A message that suggests how to resolve the security issue.
+                                  example: Install ClamAV within "<a target=\"_blank\" href=\"https://example.com:2087/scripts2/manage_plugins\">Manage Plugins</a>".
+                                  format: HTML
+                                  type:
+                                  - string
+                                  - 'null'
+                                summary:
+                                  description: A summary about the module's current security status.
+                                  example: ClamAV is not installed.
+                                  format: HTML
+                                  type: string
+                                type:
+                                  description: 'The level at which the module returns a specific security message.
+
+                                    * `ADVISE_BAD` - The object contains a security issue.
+
+                                    * `ADVISE_GOOD` - There are no security issues.
+
+                                    * `ADVISE_INFO` - The object contains an informational message.
+
+                                    * `ADVISE_WARN` - The object contains a warning.'
+                                  enum:
+                                  - ADVISE_BAD
+                                  - ADVISE_GOOD
+                                  - ADVISE_INFO
+                                  - ADVISE_WARN
+                                  example: ADVISE_BAD
+                                  type: string
+                              type: object
+                            message:
+                              description: "A message that describes an error.\n\n**Note:**\n\n  This function only returns this value for the `type` return's `mod_load` and `mod_run` values."
+                              example: Can't call method "get_raw_conf" on an undefined value at /usr/local/cpanel/Whostmgr/Services/SSH/Config.pm line 160.
+                              type: string
+                            module:
+                              description: The name of a module that the Security Advisor checked.
+                              example: Cpanel::Security::Advisor::Assessors::ClamAV
+                              type: string
+                            type:
+                              description: 'The type of security message.
+
+
+                                * `mod_advice` - There is a message from the Security Advisor module.
+
+                                * `mod_load` - There was an error preventing the loading of the module.
+
+                                * `mod_run` - There was an error preventing the system from completing one of the module''s checks.'
+                              enum:
+                              - mod_advice
+                              - mod_load
+                              - mod_run
+                              example: mod_advice
+                              type: string
+                          type: object
+                        type: array
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: fetch_security_advice
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` - Success
+
+                          * `0` - Failed: Check the reason field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Return Security Advisor results
+      tags:
+      - Security
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  fetch_security_advice\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/fetch_security_advice?api.version=1
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '80'
+  /getminimumpasswordstrengths:
+    get:
+      description: This function retrieves the minimum password strength for cPanel & WHM accounts.
+      operationId: Security-getminimumpasswordstrengths
+      parameters:
+      - description: 'The service for which to display the minimum password value.
+
+          If you do not use this parameter, this function returns the minimum password
+
+          setting for all values.
+
+          * `default` - All services
+
+          * `createacct` - New cPanel accounts
+
+          * `list` - Mailing lists
+
+          * `mysql` - MySQL® database users
+
+          * `passwd` - WHM user or system accounts
+
+          * `postgres` -  PostgreSQL database users
+
+          * `sshkey` - SSH keys
+
+          * `virtual` - Mail, FTP, Web Disk, and WebDAV accounts'
+        in: query
+        name: name
+        required: false
+        schema:
+          enum:
+          - default
+          - createacct
+          - ftp
+          - list
+          - mysql
+          - passwd
+          - postgres
+          - sshkey
+          - virtual
+          example: default
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      createacct:
+                        description: The minimum password strength for new cPanel accounts.
+                        example: 50
+                        maximum: 100
+                        minimum: 0
+                        type: integer
+                      default:
+                        description: The minimum password strength for **all** services.
+                        example: 50
+                        maximum: 100
+                        minimum: 0
+                        type: integer
+                      ftp:
+                        description: The minimum password strength for FTP accounts.
+                        example: 50
+                        maximum: 100
+                        minimum: 0
+                        type: integer
+                      list:
+                        description: The minimum password strength for mailing lists.
+                        example: 50
+                        maximum: 100
+                        minimum: 0
+                        type: integer
+                      mysql:
+                        description: The minimum password strength for MySQL® database users.
+                        example: 50
+                        maximum: 100
+                        minimum: 0
+                        type: integer
+                      passwd:
+                        description: The minimum password strength for WHM user or system accounts.
+                        example: 50
+                        maximum: 100
+                        minimum: 0
+                        type: integer
+                      postgres:
+                        description: The minimum password strength for PostgreSQL database users.
+                        example: 50
+                        maximum: 100
+                        minimum: 0
+                        type: integer
+                      sshkey:
+                        description: The minimum password strength for SSH keys.
+                        example: 50
+                        maximum: 100
+                        minimum: 0
+                        type: integer
+                      virtual:
+                        description: The minimum password strength for mail, FTP, Web Disk, and WebDAV accounts.
+                        example: 50
+                        maximum: 100
+                        minimum: 0
+                        type: integer
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: getminimumpasswordstrengths
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` - Success
+
+                          * `0` - Failed: Check the reason field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Return minimum password strength
+      tags:
+      - Security
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  getminimumpasswordstrengths\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/getminimumpasswordstrengths?api.version=1
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '82'
+  /setminimumpasswordstrengths:
+    get:
+      description: 'This function sets the minimum password strength for cPanel & WHM
+
+        accounts.
+
+
+        **Note**
+
+
+        If you do **not** specify a value for a parameter, the system will retain the existing setting.'
+      operationId: Security-setminimumpasswordstrengths
+      parameters:
+      - description: The minimum password strength for new cPanel accounts.
+        in: query
+        name: createacct
+        required: false
+        schema:
+          example: 50
+          maximum: 100
+          minimum: 1
+          type: integer
+      - description: The minimum password strength for all services.
+        in: query
+        name: default
+        required: false
+        schema:
+          example: 50
+          maximum: 100
+          minimum: 1
+          type: integer
+      - description: The minimum password strength for FTP accounts.
+        in: query
+        name: ftp
+        required: false
+        schema:
+          example: 50
+          maximum: 100
+          minimum: 1
+          type: integer
+      - description: The minimum password strength for mailing lists.
+        in: query
+        name: list
+        required: false
+        schema:
+          example: 50
+          maximum: 100
+          minimum: 1
+          type: integer
+      - description: The minimum password strength for MySQL® database users.
+        in: query
+        name: mysql
+        required: false
+        schema:
+          example: 50
+          maximum: 100
+          minimum: 1
+          type: integer
+      - description: The minimum password strength for WHM user or system accounts.
+        in: query
+        name: passwd
+        required: false
+        schema:
+          example: 50
+          maximum: 100
+          minimum: 1
+          type: integer
+      - description: The minimum password strength for PostgreSQL® database users.
+        in: query
+        name: postgres
+        required: false
+        schema:
+          example: 50
+          maximum: 100
+          minimum: 1
+          type: integer
+      - description: The minimum password strength for SSH keys.
+        in: query
+        name: sshkey
+        required: false
+        schema:
+          example: 50
+          maximum: 100
+          minimum: 1
+          type: integer
+      - description: The minimum password strength for mail, FTP, Web Disk, and WebDAV accounts.
+        in: query
+        name: virtual
+        required: false
+        schema:
+          example: 50
+          maximum: 100
+          minimum: 1
+          type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: setminimumpasswordstrengths
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` - Success
+
+                          * `0` - Failed: Check the `reason` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Update minimum password strength
+      tags:
+      - Security
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  setminimumpasswordstrengths\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/setminimumpasswordstrengths?api.version=1
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11'
+components:
+  securitySchemes:
+    BasicAuth:
+      scheme: basic
+      type: http
+externalDocs:
+  url: https://cpanel.net/developers/
+x-tagGroups:
+- name: Account Restoration
+  tags:
+  - Restore Account
+  - Restore Queue Management
+  - Restore Queue Reporting
+- name: Accounts
+  tags:
+  - Account Creation
+  - Account Enhancements
+  - Account Management
+  - Bandwidth and Disk Quotas
+  - Domain Information
+  - Passwords
+  - Styles
+  - Suspensions
+- name: API Development Tools
+  tags:
+  - API Execution
+  - API Statistics
+  - API Token Management
+  - Applications
+  - Session
+- name: Authentication
+  tags:
+  - Authentication Providers
+  - External Authentication
+  - Login URL
+  - SSH Keys and Connections
+  - Two-Factor Authentication
+- name: Backups
+  tags:
+  - Backup Destination
+  - Backup or Restore
+  - Backup Settings
+  - Legacy Migration
+- name: Commerce Integration
+  tags:
+  - Market Integration
+  - Sitejet
+- name: cPanel Market
+  tags:
+  - Product Management
+  - Provider Management
+- name: cPanel Support Tickets
+  tags:
+  - Support Access
+  - Ticket Management
+- name: Customizations
+  tags:
+  - Brand
+  - Customizations
+- name: Databases
+  tags:
+  - Manage MySQL Server
+  - MySQL Databases
+  - PostgreSQL Databases
+  - Remote MySQL Databases
+- name: DNS
+  tags:
+  - DNS Cluster Settings
+  - DNS Security
+  - DNS Zones
+  - Domain Management
+  - Domain Management
+  - Resolvers
+  - Service Records
+- name: Hosting Plans
+  tags:
+  - Feature Access
+  - Feature Lists
+  - Hosting Plan Extensions
+  - Hosting Plans
+- name: InProductSurvey
+  tags:
+  - InProductSurvey
+- name: Integrations
+  tags:
+  - API Authentication
+  - Links
+  - Scripts Hooks
+- name: IP Address Management
+  tags:
+  - IPv4 Address Settings
+  - IPv6 Address Settings
+  - Network Address Translation
+- name: Login Security (cPHulk)
+  tags:
+  - Management
+  - Reporting
+  - Settings
+- name: Logs
+  tags:
+  - Web Log Retention
+- name: Mail
+  tags:
+  - cPanel Account Mail Management
+  - Mail DNS Settings
+  - Mail Server Settings
+  - Spam Management
+  - Spam Protection (Greylisting)
+- name: Monitoring
+  tags:
+  - 360 Monitoring
+- name: NGINX Manager
+  tags:
+  - NGINX Manager
+- name: Resellers
+  tags:
+  - Account Enhancement Limit
+  - Account Limits
+  - Account Permissions
+  - Account Settings
+  - Reseller Account Management
+- name: Security
+  tags:
+  - WHM Access
+- name: Server Administration
+  tags:
+  - Configuration Clusters
+  - Configurations
+  - Connected Applications
+  - Connections
+  - cPanel Analytics
+  - License Management
+  - Notifications
+  - Plugin-Based Features
+  - Security
+  - Server Nodes
+  - Server Profiles
+  - Services
+  - System Information
+  - Updates
+- name: SSL Certificates
+  tags:
+  - Auto-Generated Certificates
+  - cPanel Account Settings
+  - SSL Server Settings
+- name: System Package Management
+  tags:
+  - Install or Uninstall Package
+  - List Package Information
+  - Package Manager Settings
+- name: Transfers
+  tags:
+  - cPanel Account Transfer
+  - Transfer Configuration
+  - Transfer Monitoring
+- name: UserData
+  tags:
+  - UserData
+- name: Web Server Configuration
+  tags:
+  - EasyApache Settings
+  - PHP
+  - PHP-FPM
+- name: Web Server Security (ModSecurity)
+  tags:
+  - Rule Settings
+  - Rule Vendor Settings
+  - Server Settings

@@ -1,0 +1,5103 @@
+openapi: 3.2.0
+info:
+  contact:
+    email: cs@cpanel.net
+    name: WebPros International, LLC
+    url: https://cpanel.net/support/
+  description: WHM API.
+  license:
+    name: cPanel License
+    url: https://cpanel.net/legal-notices/
+  termsOfService: https://cpanel.net/legal-notices/
+  title: WHM Accounts API
+  version: 11.137.9999.106
+  x-api-evangelist-provenance: 'Harvested verbatim from cPanel''s developer portal on 2026-09-05 via the MCP tool get-full-api-description at https://api.docs.cpanel.net/mcp. ONE mechanical change was made before storage: example values containing PEM private-key or certificate blocks, and AWS-access-key-shaped example strings, were replaced with REDACTED_* placeholders so the file can be stored in a public git repository without tripping secret scanning. No path, operation, parameter, schema or description was altered, added or removed.'
+servers:
+- description: A server running WHM.
+  url: https://{host}:{port}/json-api
+  variables:
+    host:
+      default: whm-server.tld
+      description: The hostname of a server running WHM.
+    port:
+      default: '2087'
+      description: The WHM port.
+security:
+- BasicAuth: []
+tags:
+- description: The Accounts module for WHM API 1.
+  name: Accounts
+paths:
+  /accountsummary:
+    get:
+      description: 'This function retrieves a summary of a user''s account.
+
+
+        **Note:**
+
+
+        You must use either the user or domain parameters.'
+      operationId: Accounts-accountsummary
+      parameters:
+      - description: The account's main domain.
+        in: query
+        name: domain
+        required: false
+        schema:
+          example: example.com
+          type: string
+      - description: The search term.
+        in: query
+        name: search
+        required: false
+        schema:
+          example: example.com
+          type: string
+      - description: The search method to use.
+        in: query
+        name: searchmethod
+        required: false
+        schema:
+          example: exact
+          type: string
+      - description: The type of search to perform.
+        in: query
+        name: searchtype
+        required: false
+        schema:
+          example: domain
+          type: string
+      - description: The account's username.
+        in: query
+        name: user
+        required: false
+        schema:
+          example: username
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      acct:
+                        description: An array of objects of account data.
+                        items:
+                          properties:
+                            backup:
+                              description: 'Whether backups are enabled.
+
+                                * `1` Enabled.
+
+                                * `0` Disabled.'
+                              enum:
+                              - 0
+                              - 1
+                              example: 0
+                              type: integer
+                            child_nodes:
+                              description: An array that contains the the workload and alias values for each of the child nodes.
+                              items:
+                                properties:
+                                  alias:
+                                    description: The alias of the child node
+                                    type: string
+                                    example: nodealias
+                                  workload:
+                                    description: The workload delegated to the child node
+                                    enum:
+                                    - Mail
+                                    example: Mail
+                                    type: string
+                              type: array
+                            disklimit:
+                              description: 'The account''s disk space quota.
+
+                                * `unlimited`
+
+                                * A maximum amount of disk space, in mebibyte (MiB).'
+                              example: unlimited
+                              oneOf:
+                              - enum:
+                                - unlimited
+                                type: string
+                              - minimum: 0
+                                type: integer
+                            diskused:
+                              description: The account's current disk space usage. An integer that represents an amount of disk space, in mebibyte (MiB). For example, 14M represents 14 MiB of disk space.
+                              example: 14M
+                              format: mebibyte-short
+                              type: string
+                            domain:
+                              description: The account's main domain. A valid domain name on the account.
+                              example: example.com
+                              format: fqdn
+                              type: string
+                            email:
+                              description: The account's contact email address. A valid email address.
+                              example: username@example.com
+                              format: email
+                              type: string
+                            inodeslimit:
+                              description: 'The limit on the number of files that the account owns.
+
+                                * `unlimited`
+
+                                * A maximum amount of files as an integer.'
+                              example: unlimited
+                              oneOf:
+                              - enum:
+                                - unlimited
+                                type: string
+                              - minimum: 0
+                                type: integer
+                            inodesused:
+                              description: The number of files that the account owns.
+                              example: 1
+                              minimum: 0
+                              type: integer
+                            ip:
+                              description: The account's main domain's IP address.
+                              example: 192.168.0.128
+                              format: ipv4
+                              type: string
+                            ipv6:
+                              description: The account's main domain's IPv6 addresses.
+                              items:
+                                example: 0101:ca75:0101:ca75:0101:ca75:0101:ca77
+                                format: ipv6
+                                type: string
+                              type: array
+                            is_locked:
+                              description: 'Whether the account is currently locked.
+
+                                * `1` Locked.
+
+                                * `0` Not locked.'
+                              enum:
+                              - 0
+                              - 1
+                              example: 0
+                              type: integer
+                            legacy_backup:
+                              description: 'Whether legacy backups are enabled.
+
+                                * `1` Enabled.
+
+                                * `0` Disabled.'
+                              enum:
+                              - 0
+                              - 1
+                              example: 0
+                              type: integer
+                            mailbox_format:
+                              description: 'The storage format that the account''s email mailboxes use.
+
+                                * `maildir` The account''s mail is stored in `maildir` format.
+
+                                * `mbox` The account''s mail is stored in `mbox` format.'
+                              enum:
+                              - maildir
+                              - mbox
+                              example: maildir
+                              format: mailbox_format
+                              type: string
+                            max_defer_fail_percentage:
+                              description: 'The percentage of failed or deferred email messages that the account
+
+                                can send per hour before outgoing mail is rate-limited.
+
+                                * `unlimited`
+
+                                * An integer that represents a percentage of messages.'
+                              example: unlimited
+                              oneOf:
+                              - enum:
+                                - unlimited
+                                type: string
+                              - minimum: 0
+                                type: integer
+                            max_email_per_hour:
+                              description: 'The maximum number of emails that the account can send in one hour.
+
+                                * `unlimited`
+
+                                * An integer that represents a number of sent emails.'
+                              example: unlimited
+                              oneOf:
+                              - enum:
+                                - unlimited
+                                type: string
+                              - minimum: 0
+                                type: integer
+                            max_emailacct_quota:
+                              description: 'The maximum size that the cPanel account can define when it creates an email account.
+
+                                * `unlimited`
+
+                                * A positive integer that represents the allowable maximum size of an email account, in mebibyte (MiB).'
+                              example: unlimited
+                              oneOf:
+                              - enum:
+                                - unlimited
+                                type: string
+                              - minimum: 0
+                                type: integer
+                            maxaddons:
+                              description: 'The account''s maximum number of addon domains.
+
+                                * `unlimited`
+
+                                * `*unknown*`  The account cannot use any addon domains.
+
+                                * An integer that represents a number of addon domains.'
+                              example: unlimited
+                              oneOf:
+                              - enum:
+                                - unlimited
+                                type: string
+                              - minimum: 0
+                                type: integer
+                            maxftp:
+                              description: 'The account''s maximum number of FTP accounts.
+
+                                * `unlimited`
+
+                                * An integer that represents a number of FTP accounts.'
+                              example: unlimited
+                              oneOf:
+                              - enum:
+                                - unlimited
+                                type: string
+                              - minimum: 0
+                                type: integer
+                            maxlst:
+                              description: 'The account''s maximum number of mailing lists.
+
+                                * `unlimited`
+
+                                * An integer that represents a number of mailing lists.'
+                              example: unlimited
+                              oneOf:
+                              - enum:
+                                - unlimited
+                                type: string
+                              - minimum: 0
+                                type: integer
+                            maxparked:
+                              description: 'The account''s maximum number of parked domains (aliases).
+
+                                * `unlimited`
+
+                                * `*unknown*` The account cannot use any parked domains.
+
+                                * An integer that represents a number of parked domains.'
+                              example: unlimited
+                              oneOf:
+                              - enum:
+                                - unlimited
+                                type: string
+                              - minimum: 0
+                                type: integer
+                            maxpop:
+                              description: 'The account''s maximum number of email addresses.
+
+                                * `unlimited`
+
+                                * An integer that represents a number of email accounts.'
+                              example: unlimited
+                              oneOf:
+                              - enum:
+                                - unlimited
+                                type: string
+                              - minimum: 0
+                                type: integer
+                            maxsql:
+                              description: 'The account''s maximum number of SQL databases.
+
+                                * `unlimited`
+
+                                * An integer that represents a number of SQL databases.'
+                              example: unlimited
+                              oneOf:
+                              - enum:
+                                - unlimited
+                                type: string
+                              - minimum: 0
+                                type: integer
+                            maxsub:
+                              description: 'The account''s maximum number of subdomains.
+
+                                * `unlimited`
+
+                                * `*unknown*` The account cannot use any subdomains.
+
+                                * An integer that represents a number of subdomains.'
+                              example: unlimited
+                              oneOf:
+                              - enum:
+                                - unlimited
+                                type: string
+                              - minimum: 0
+                                type: integer
+                            min_defer_fail_to_trigger_protection:
+                              description: 'The minimum number of failed or deferred messages that the account can send before
+
+                                outgoing mail is subject to rate-limiting.
+
+                                * `unlimited`
+
+                                * An integer that represents a number of failed or deferred messages.'
+                              example: '5'
+                              oneOf:
+                              - enum:
+                                - unlimited
+                                type: string
+                              - minimum: 0
+                                type: integer
+                            outgoing_mail_hold:
+                              description: 'Whether to retain outgoing mail in the mail queue for the account''s users.
+
+                                * `1` Suspend and force failure of outgoing email.
+
+                                * `0` Unsuspend outgoing email.'
+                              enum:
+                              - 0
+                              - 1
+                              example: 0
+                              type: integer
+                            outgoing_mail_suspended:
+                              description: 'Whether to suspend outgoing email from the account''s users and force failure of any of their mail currently in the mail queue.
+
+                                * `1` - Suspend and force failure of outgoing email.
+
+                                * `0` - Unsuspend outgoing email.
+
+
+                                **Note:**
+
+
+                                If mail for a cPanel user''s account is suspended, the system will reject their email before the system puts it in the mail server queue.'
+                              enum:
+                              - 0
+                              - 1
+                              example: 0
+                              type: integer
+                            owner:
+                              description: 'The account''s owner.
+
+                                * root
+
+                                * A reseller account''s username.'
+                              example: root
+                              format: username
+                              type: string
+                            partition:
+                              description: The partition that contains the account's home directory. The name of a partition on the server.
+                              example: home
+                              type: string
+                            plan:
+                              description: The account's hosting package. The name of a package on the server.
+                              example: packagename
+                              format: plan
+                              type: string
+                            shell:
+                              description: The account's shell. A shell location on the server.
+                              example: /bin/bash
+                              format: shell
+                              type: string
+                            startdate:
+                              description: 'The account creation date. The date in YY-Mon-DD HH-mm human-readable format, where:- YY represents the year.
+
+                                * `Mon` represents the month.
+
+                                * `DD` represents the date.
+
+                                * `HH` represents the hour.
+
+                                * `mm` represents the minute.'
+                              example: 13 May 22 16:03
+                              format: YY-Mon-DD-HH-MM
+                              type: string
+                            suspended:
+                              description: 'Whether the account is currently suspended.
+
+                                * `1`  Suspended.
+
+                                * `0`  Not suspended.'
+                              enum:
+                              - 0
+                              - 1
+                              example: 0
+                              type: integer
+                            suspendreason:
+                              description: 'The reason for account suspension, if one was provided.
+
+                                * `null` The account is not currently suspended.
+
+                                * A blank value, if the suspender did not provide a reason.
+
+                                * A message that explains the suspension.'
+                              example: not suspended
+                              type:
+                              - string
+                              - 'null'
+                            suspendtime:
+                              description: 'The time of suspension.
+
+                                * `null` The account is not currently suspended.
+
+                                * The time at which the account became suspended.'
+                              example: null
+                              type:
+                              - string
+                              - 'null'
+                            temporary:
+                              description: 'Whether the Customer Support Ticket process created this user for temporary access to the system.
+
+                                * `1` - Temporary user.
+
+                                * `0` - Regular user.'
+                              enum:
+                              - 0
+                              - 1
+                              example: 0
+                              type: integer
+                            is_temporary_domain:
+                              description: 'Whether the main domain is a temporary domain.
+
+                                * `1` - The account''s main domain is a temporary domain.
+
+                                * `0` - The account''s main domain is not a temporary domain.
+
+
+                                **Note:**
+
+
+                                For more information about temporary domains, read our [Temporary Domains](https://go.cpanel.net/cp-temporary-domain) documentation.'
+                              enum:
+                              - 0
+                              - 1
+                              example: 0
+                              type: integer
+                            theme:
+                              description: 'The account''s cPanel interface theme.
+
+                                * Any valid theme on the server.'
+                              example: jupiter
+                              format: theme
+                              type: string
+                            uid:
+                              description: The account's user ID on the system.
+                              type: integer
+                            unix_startdate:
+                              description: The account creation date. The account creation date and time, in Unix time format.
+                              example: 1369256589
+                              format: unix_timestamp
+                              type: integer
+                            user:
+                              description: The account username. A cPanel account or reseller username on the server.
+                              example: username
+                              format: username
+                              type: string
+                          type: object
+                        type: array
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: accountsummary
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` Success
+
+                          * `0` Failed: Check the reason field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Return cPanel account summary
+      tags:
+      - Accounts
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  accountsummary \\\n  user='username'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/accountsummary?api.version=1&user=username
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11.32'
+  /get_upgrade_opportunities:
+    get:
+      description: 'This function lists accounts that could benefit from upgrading to a different package.
+
+        The listed accounts may be nearing (or exceeding) resource usage thresholds.'
+      operationId: Accounts-get_upgrade_opportunities
+      parameters:
+      - description: A fixed number of blocks to use as an alternative disk usage threshold.
+        in: query
+        name: disk_threshold_blocks
+        required: false
+        schema:
+          default: 2097152
+          example: 8388608
+          minimum: 0
+          type: integer
+      - description: The fraction of 1 at which to consider usage "near".
+        in: query
+        name: nearness_fraction
+        required: false
+        schema:
+          default: 0.8
+          example: 0.6
+          type: number
+          exclusiveMinimum: 0
+          exclusiveMaximum: 1
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      upgrade_opportunities:
+                        additionalProperties:
+                          description: The property name is the cPanel account.
+                          properties:
+                            bw_limit:
+                              description: Upgrade opportunities related to bandwidth limits.
+                              properties:
+                                last_month:
+                                  allOf:
+                                  - description: Bandwidth usage for last month.
+                                    type: object
+                                  - $ref: '#/components/schemas/nearReachedBaseSchema'
+                                messages:
+                                  description: An array of human-readable messages representing the facts listed in the other structured data in the `bw_limit` object.
+                                  items:
+                                    example: This account has used 54% of its bandwidth quota for this month.
+                                    type: string
+                                  type: array
+                                this_month:
+                                  allOf:
+                                  - description: Bandwidth usage for this month.
+                                    type: object
+                                  - $ref: '#/components/schemas/nearReachedBaseSchema'
+                              type: object
+                            disk_usage:
+                              description: Upgrade opportunities related to disk usage.
+                              properties:
+                                messages:
+                                  description: An array of human-readable messages representing the facts listed in the other structured data in the `disk_usage` object.
+                                  items:
+                                    example: This account has used 94% of its disk quota.
+                                    type: string
+                                  type: array
+                                relative_to_fixed_amount:
+                                  allOf:
+                                  - description: Relative to a preset fixed amount (customizable).
+                                    type: object
+                                  - $ref: '#/components/schemas/diskSchema'
+                                relative_to_quota:
+                                  allOf:
+                                  - description: Relative to the account's quota, if applicable.
+                                    type: object
+                                  - $ref: '#/components/schemas/diskSchema'
+                              type: object
+                            messages:
+                              description: An array of human-readable messages representing the facts listed in the other structured data.
+                              example:
+                              - This account has used 54% of its bandwidth quota for this month.
+                              - This account has used 94% of its disk quota.
+                              items:
+                                type: string
+                              type: array
+                        description: The collection of accounts and information about their upgrade opportunities.
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: get_upgrade_opportunities
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Get upgrade opportunities
+      tags:
+      - Accounts
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  get_upgrade_opportunities\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/get_upgrade_opportunities?api.version=1
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11'
+  /has_digest_auth:
+    get:
+      description: 'This function checks whether Digest Authentication is enabled for
+
+        a cPanel user. Windows® Vista, Windows® 7, and Windows® 8 require Digest Authentication
+
+        support in order to access Web Disk over an unencrypted connection.'
+      operationId: Sys-has_digest_auth
+      parameters:
+      - description: The cPanel account username.
+        in: query
+        name: user
+        required: true
+        schema:
+          example: username
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      digestauth:
+                        description: 'Whether Digest Authentication support is enabled.
+
+                          * `1` — Enabled.
+
+                          * `0` — Disabled.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: has_digest_auth
+                        type: string
+                      reason:
+                        description: 'The reason the API function failed when the `metadata.result`
+
+                          field is `0`. This field may display a success message when
+
+                          a function succeeds.'
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Validate cPanel account Digest Authentication
+      tags:
+      - Accounts
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  has_digest_auth \\\n  user='username'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/has_digest_auth?api.version=1&user=username
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11.34'
+  /has_mycnf_for_cpuser:
+    get:
+      description: 'This function checks whether a cPanel user''s home directory contains
+
+        a valid .my.cnf file.'
+      operationId: Sys-has_mycnf_for_cpuser
+      parameters:
+      - description: The cPanel account username.
+        in: query
+        name: user
+        required: true
+        schema:
+          example: user
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      has_mycnf_for_cpuser:
+                        description: 'Whether a valid .my.cnf file exists in the account''s home directory.
+
+                          - `1` -  Exists.
+
+                          - `0` -  Does not exist.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: has_mycnf_for_cpuser
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is 0. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '- `1` - Success
+
+                          - `0` - Failed: Check the reason field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Validate MySQL Configuration file
+      tags:
+      - Accounts
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  has_mycnf_for_cpuser \\\n  user='user'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/has_mycnf_for_cpuser?api.version=1&user=user
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11.40'
+  /listaccts:
+    get:
+      description: This function lists the accounts on the server.
+      operationId: Accounts-listaccts
+      parameters:
+      - description: "A [Perl Compatible Regular Expression (PCRE)](https://en.wikipedia.org/wiki/Perl_Compatible_Regular_Expressions) that filters the results.\n\n**Note:**\n * The system matches the PCRE against the `searchtype` parameter's specified type.\n * If you do not specify a value for both the `searchtype` and `search` parameters,\n   the function returns all of the server's accounts."
+        in: query
+        name: search
+        required: false
+        schema:
+          example: username
+          type: string
+      - description: 'The function''s search method.
+
+          * `exact` - The matched value and the `search` value **must** be identical.
+
+          * `regex` - The matched value must contain the `search` value.'
+        in: query
+        name: searchmethod
+        required: false
+        schema:
+          enum:
+          - exact
+          - regex
+          example: exact
+          type: string
+      - description: 'The account information to query. If you do not specify a value
+
+          for both the `searchtype` and `search` parameters, the function returns all
+
+          of the server''s accounts.
+
+          * `domain` - Match domains against the `search` regular expression.
+
+          * `owner` - Match the WHM user who owns the account against the `search` regular expression.
+
+          * `user` - Match usernames against the `search` regular expression.
+
+          * `ip` - Match IP addresses against the `search` regular expression.
+
+          * `package` - Match hosting plans (packages) against the `search` regular expression.'
+        in: query
+        name: searchtype
+        required: false
+        schema:
+          enum:
+          - domain
+          - owner
+          - user
+          - ip
+          - package
+          example: domain
+          type: string
+      - description: 'The returns to include in the output for each account.
+
+
+          If you do not specify a value, the function''s output includes all of its returns.'
+        in: query
+        name: want
+        required: false
+        schema:
+          example: domain,diskused
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      acct:
+                        description: An array of objects containing account data.
+                        items:
+                          properties:
+                            backup:
+                              description: 'Whether backups are enabled.
+
+                                * `1` - Enabled.
+
+                                * `0` - Disabled.'
+                              enum:
+                              - 0
+                              - 1
+                              example: 0
+                              type: integer
+                            child_nodes:
+                              description: An array that contains the the workload and alias values for each of the child nodes.
+                              items:
+                                properties:
+                                  alias:
+                                    description: The alias of the child node
+                                    type: string
+                                    example: nodealias
+                                  workload:
+                                    description: The workload delegated to the child node
+                                    enum:
+                                    - Mail
+                                    example: Mail
+                                    type: string
+                              type: array
+                            disklimit:
+                              description: 'The account''s disk space quota.
+
+                                * `unlimited` — The account has unlimited disk space quota.
+
+                                * A maximum amount of disk space, in megabytes (MB).'
+                              oneOf:
+                              - enum:
+                                - unlimited
+                                type: string
+                              - minimum: 0
+                                type: integer
+                            diskused:
+                              description: 'The account''s current disk space usage, in megabytes (MB), appended with `M`.
+
+
+                                For example, `14M` represents 14 megabytes of current disk space usage.'
+                              example: 14M
+                              type: string
+                            domain:
+                              description: The account's main domain.
+                              example: example.com
+                              format: domain
+                              type: string
+                            email:
+                              description: The account's contact email address.
+                              example: username@example.com
+                              format: email
+                              type: string
+                            has_backup:
+                              description: 'Whether a backup of the account exists.
+
+                                * `1` - A backup of the account exists.
+
+                                * `0` - A backup of the account does **not** exist.'
+                              enum:
+                              - 0
+                              - 1
+                              example: 1
+                              type: integer
+                            inodeslimit:
+                              description: 'The limit on the number of files that the account owns.
+
+                                * `unlimited` — The account can own an unlimited number files.
+
+                                * A positive integer.'
+                              oneOf:
+                              - enum:
+                                - unlimited
+                                type: string
+                              - minimum: 0
+                                type: integer
+                            inodesused:
+                              description: The number of files that the account owns.
+                              example: 1
+                              minimum: 0
+                              type: integer
+                            ip:
+                              description: The IPv4 address of the account's main domain.
+                              example: 192.168.0.128
+                              format: ipv4
+                              type: string
+                            ipv6:
+                              description: The IPv6 address of the account's main domain.
+                              items:
+                                example: 0101:ca75:0101:ca75:0101:ca75:0101:ca77
+                                format: ipv6
+                                type: string
+                              type: array
+                            is_locked:
+                              description: 'Whether the account is currently locked.
+
+                                * `1` - The account is locked.
+
+                                * `0` - The account is **not** locked.'
+                              enum:
+                              - 0
+                              - 1
+                              example: 0
+                              type: integer
+                            is_temporary_domain:
+                              description: 'Whether the main domain is a temporary domain.
+
+                                * `1` - The account''s main domain is a temporary domain.
+
+                                * `0` - The account''s main domain is not a temporary domain.
+
+
+                                **Note:**
+
+
+                                For more information about temporary domains, read our [Temporary Domains](https://go.cpanel.net/cp-temporary-domain) documentation.'
+                              enum:
+                              - 0
+                              - 1
+                              example: 0
+                              type: integer
+                            legacy_backup:
+                              description: 'Whether legacy backups are enabled.
+
+                                * `1` - Enabled.
+
+                                * `0` - Disabled.'
+                              enum:
+                              - 0
+                              - 1
+                              example: 0
+                              type: integer
+                            mailbox_format:
+                              description: 'The type of mailbox the account uses.
+
+
+                                * `mdbox`
+
+                                * `maildir`'
+                              enum:
+                              - mdbox
+                              - maildir
+                              example: mdbox
+                              type: string
+                            max_defer_fail_percentage:
+                              description: 'The [percentage of failed or deferred email
+
+                                messages](https://go.cpanel.net/howtopreventspam)
+
+                                that the account can send per hour before outgoing
+
+                                mail is rate-limited.
+
+                                * `unlimited` — The account can send unlimited emails per hour.
+
+                                * An integer that represents a precentage of messages.'
+                              oneOf:
+                              - enum:
+                                - unlimited
+                                type: string
+                              - minimum: 0
+                                type: integer
+                            max_email_per_hour:
+                              description: 'The [maximum number of emails](https://go.cpanel.net/howtopreventspam)
+
+                                that the account can send in one hour.
+
+                                * `unlimited` — The account can send unlimited emails per hour.
+
+                                * An integer that represents a number of sent emails.'
+                              oneOf:
+                              - enum:
+                                - unlimited
+                                type: string
+                              - minimum: 0
+                                type: integer
+                            max_emailacct_quota:
+                              description: 'The maximum size, in megabytes (MB), that the account
+
+                                can define when it creates an email account.
+
+
+                                * `unlimited` — The account can set unlimited quotas.
+
+                                * A positive integer that represents the allowable maximum
+
+                                size of an email account, in megabytes (MB).'
+                              oneOf:
+                              - enum:
+                                - unlimited
+                                type: string
+                              - minimum: 0
+                                type: integer
+                            maxaddons:
+                              description: 'The account''s maximum number of addon domains.
+
+                                * `unlimited` — The account can create unlimited addon domains.
+
+                                * `*unknown*` — The account cannot create addon domains.
+
+                                * An integer that represents a number of addon domains.'
+                              oneOf:
+                              - enum:
+                                - unlimited
+                                - '*unknown*'
+                                type: string
+                              - minimum: 0
+                                type: integer
+                            maxftp:
+                              description: 'The account''s maximum number of FTP accounts.
+
+                                * `unlimited` — The account can create unlimited FTP accounts.
+
+                                * An integer that represents a number of FTP accounts.'
+                              oneOf:
+                              - enum:
+                                - unlimited
+                                type: string
+                              - minimum: 0
+                                type: integer
+                            maxlst:
+                              description: 'The account''s maximum number of mailing lists.
+
+                                * `unlimited` — The account can create unlimited mailing lists.
+
+                                * An integer that represents a number of mailing lists.'
+                              oneOf:
+                              - enum:
+                                - unlimited
+                                type: string
+                              - minimum: 0
+                                type: integer
+                            maxparked:
+                              description: 'The account''s maximum number of parked domains (aliases).
+
+                                * `unlimited` — The account can create unlimited parked domains.
+
+                                * `*unknown*` — The account cannot use parked domains.
+
+                                * An integer that represents a number of parked domains.'
+                              oneOf:
+                              - enum:
+                                - unlimited
+                                - '*unknown*'
+                                type: string
+                              - minimum: 0
+                                type: integer
+                            maxpop:
+                              description: 'The account''s maximum number of email addresses.
+
+                                * `unlimited` — The account can create unlimited email addresses.
+
+                                * An integer that represents a number of email accounts.'
+                              oneOf:
+                              - enum:
+                                - unlimited
+                                type: string
+                              - minimum: 0
+                                type: integer
+                            maxsql:
+                              description: 'The account''s maximum number of each available type of SQL database.
+
+
+                                For example, if you set this value to `5` and the system administrator allows MySQL® and PostgreSQL®
+
+                                databases, users can create up to five MySQL databases and up to five PostgreSQL databases.
+
+
+                                * `unlimited` — The account can create unlimited SQL databases.
+
+                                * An integer that represents a number of SQL databases.'
+                              oneOf:
+                              - enum:
+                                - unlimited
+                                type: string
+                              - minimum: 0
+                                type: integer
+                            maxsub:
+                              description: 'The account''s maximum number of subdomains.
+
+                                * `unlimited` — The account can create unlimited subdomains.
+
+                                * `*unknown*` - The account cannot use subdomains.
+
+                                * An integer that represents a number of subdomains.'
+                              oneOf:
+                              - enum:
+                                - unlimited
+                                - '*unknown*'
+                                type: string
+                              - minimum: 0
+                                type: integer
+                            min_defer_fail_to_trigger_protection:
+                              description: 'The [minimum number of failed or deferred messages](https://go.cpanel.net/howtopreventspam) that the
+
+                                account can send before outgoing mail is subject to rate-limiting.
+
+                                * `unlimited` — The account can send unlimited emails.
+
+                                * An integer that represents a number of failed or deferred messages.'
+                              oneOf:
+                              - enum:
+                                - unlimited
+                                type: string
+                              - minimum: 0
+                                type: integer
+                            outgoing_mail_hold:
+                              description: 'Whether to retain outgoing mail in the mail queue for the account''s users.
+
+                                * `1` - Hold outgoing email in the mail queue.
+
+                                * `0` - Do **not** hold outgoingemail in the mail queue.'
+                              enum:
+                              - 1
+                              - 0
+                              example: 1
+                              type: integer
+                            outgoing_mail_suspended:
+                              description: 'Whether to suspend outgoing email from the account''s users and force failure of any of their mail currently in the mail queue.
+
+                                * `1` - Suspend and forcefailure of outgoing email.
+
+                                * `0` - Do **not** suspend and forcefailure of outgoing email.
+
+
+                                **Note:**
+
+
+                                If mail for a cPanel user''s account is suspended, the system will reject their email before the system puts it in the mail server queue.'
+                              enum:
+                              - 0
+                              - 1
+                              example: 0
+                              type: integer
+                            owner:
+                              description: The reseller account username or `root` user that owns the account.
+                              example: root
+                              type: string
+                            partition:
+                              description: The partition that contains the account's home directory.
+                              example: home
+                              type: string
+                            plan:
+                              description: The account's hosting package.
+                              example: packagename
+                              type: string
+                            shell:
+                              description: The absolute path of the account's shell location.
+                              example: /bin/bash
+                              type: string
+                            startdate:
+                              description: The account creation date, in `YY Mon DD HH:mm` format.
+                              example: 13 May 22 16:03
+                              type: string
+                            suspended:
+                              description: 'Whether the account is currently suspended.
+
+                                * `1` - Suspended.
+
+                                * `0` - **Not** suspended.'
+                              enum:
+                              - 0
+                              - 1
+                              example: 0
+                              type: integer
+                            suspendreason:
+                              description: The reason for account suspension, if one was provided.
+                              oneOf:
+                              - description: If the account is **not** suspended, `suspendreason` will return `not suspended`.
+                                enum:
+                                - not suspended
+                                type: string
+                              - description: 'If the account is suspended, `suspendreason` will return either:
+
+                                  * A blank value, if the suspender did not provide a reason.
+
+                                  * A message that explains the suspension.'
+                                example: suspended for non-payment
+                                type:
+                                - string
+                                - 'null'
+                            suspendtime:
+                              description: 'The time of suspension.
+
+                                * `null` - The account is not currently suspended.
+
+                                * The time at which the account became suspended.'
+                              example: 1594040856
+                              format: unix_timestamp
+                              type:
+                              - integer
+                              - 'null'
+                            temporary:
+                              description: 'Whether the Customer Support Ticket process created this user for temporary access to the system.
+
+                                * `1` - Temporary user.
+
+                                * `0` - Regular user.'
+                              enum:
+                              - 0
+                              - 1
+                              example: 0
+                              type: integer
+                            theme:
+                              description: The account's cPanel interface theme.
+                              example: jupiter
+                              type: string
+                            uid:
+                              description: The account's user ID on the system.
+                              example: 1001
+                              minimum: 0
+                              type: integer
+                            unix_startdate:
+                              description: The account creation date.
+                              example: 1369256589
+                              format: unix_timestamp
+                              type: integer
+                            user:
+                              description: The account username.
+                              example: username
+                              format: username
+                              type: string
+                            standalone_feature:
+                              description: 'The unique ID of the standalone feature associated with the account''s package, if any.
+
+                                * An empty string if the package has no standalone features.'
+                              example: standalone-nova
+                              type: string
+                            standalone_feature_name:
+                              description: 'The name of the standalone feature associated with the account''s package, if any.
+
+                                * An empty string if the package has no standalone features.
+
+                                * The feature''s name if a standalone feature exists.'
+                              example: AI App Builder
+                              type: string
+                          type: object
+                        type: array
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: listaccts
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is 0. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` - Success
+
+                          * `0` - Failed: Check the reason field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Return cPanel accounts
+      tags:
+      - Accounts
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  listaccts\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/listaccts?api.version=1
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11'
+  /massmodifyacct:
+    get:
+      description: 'This function modifies multiple cPanel accounts.
+
+
+        **Warning:**
+
+
+        * We **strongly** recommend that you do not modify a cPanel account''s settings
+
+        if that account uses a hosting plan (package). If the package values change, the
+
+        system will overwrite any of your custom values with the package''s new values.
+
+        * This function uses case-sensitive parameters. You **must** enter parameters in
+
+        the correct case format. If you do not, the function will ignore that parameter.
+
+
+        **Note:**
+
+
+        On servers that run CentOS 7, you may see a `named` warning about the absence of
+
+        SPF resource records on DNS.
+
+        * This warning is **not** relevant on CentOS 7 servers, because
+
+        RFC 7208 deprecated SPF records. CentOS 7
+
+        servers use TXT records instead of SPF records.
+
+        * Red Hat 7.1 and CentOS 7.1 both contain `bind-9.9.4-23.el7`, which is an updated
+
+        version of BIND that complies with RFC 7208. To resolve this issue, update your
+
+        operating system to a version that contains the updated version of BIND. For more
+
+        information, read the Red Hat Bugzilla case about SPF record errors.'
+      operationId: Accounts-massmodifyacct
+      parameters:
+      - description: 'The account''s current username.
+
+
+          **Note:**
+
+
+          To modify multiple users, duplicate or increment the parameter name. For example,
+
+          the `user-1`, `user-2`, and `user-3` parameters.'
+        examples:
+          multiple:
+            summary: Modify multiple users.
+            value: user-0=username user-1=username1 user-2=username2 user-3=username3
+          multiple-alternative:
+            summary: Modify multiple users.
+            value: user=username user=username1 user=username2 user=username3
+          single:
+            summary: Modify a single user.
+            value: username
+        in: query
+        name: user
+        required: true
+        schema:
+          format: username
+          type: string
+      - description: 'Whether backups are enabled for the account.
+
+
+          * `1` — Enabled.
+
+          * `0` — Disabled.
+
+
+          This parameter defaults to the defined system value.
+
+
+          **Note:**
+
+
+          This parameter **requires** `root` privileges.'
+        example: 1
+        in: query
+        name: BACKUP
+        required: false
+        schema:
+          enum:
+          - 1
+          - 0
+      - description: 'The account''s maximum bandwidth use, in bytes.
+
+
+          * `0`, `null` or `unlimited` — The account can use unlimited bandwidth.
+
+
+          This parameter defaults to the defined system value.'
+        in: query
+        name: BWLIMIT
+        required: false
+        schema:
+          $ref: '#/components/schemas/IntPosNullOrUnlimited'
+      - description: 'The account''s contact email address.
+
+
+          This parameter defaults to the defined system value.'
+        in: query
+        name: CONTACTEMAIL
+        required: false
+        schema:
+          example: username@example.com
+          format: email
+          type: string
+      - description: 'The owner of the account''s MySQL® databases.
+
+
+          This parameter defaults to the defined system value.'
+        in: query
+        name: DBOWNER
+        required: false
+        schema:
+          example: example
+          format: username
+          type: string
+      - description: 'The number of disk blocks for the account, in kilobytes (KB).
+
+
+          This parameter defaults to the defined system value.'
+        in: query
+        name: DISK_BLOCK_LIMIT
+        required: false
+        schema:
+          example: 100000000
+          minimum: 1
+          type: integer
+      - description: 'Whether CGI access is enabled for the account.
+
+
+          * `1` — Enabled.
+
+          * `0` — Disabled.
+
+
+          This parameter defaults to the defined system value.
+
+
+          **Note:**
+
+
+          When a [server profile](https://go.cpanel.net/whmdocsServerProfile) disables the
+
+          [Web Server](https://go.cpanel.net/serverroles#roles) role, you **cannot** enable
+
+          CGI access.'
+        in: query
+        name: HASCGI
+        required: false
+        schema:
+          enum:
+          - 1
+          - 0
+          example: 1
+          type: integer
+      - description: 'Whether DomainKeys Identified Mail (DKIM) is enabled for the account.
+
+
+          * `1` — Enabled.
+
+          * `0` — Disabled.
+
+
+          This parameter defaults to the defined system value.'
+        in: query
+        name: HASDKIM
+        required: false
+        schema:
+          enum:
+          - 1
+          - 0
+          type: integer
+      - description: 'Whether Domain-based Message Authentication, Reporting, and Conformance (DMARC) is enabled for the account.
+
+
+          * `1` — Enabled.
+
+          * `0` — Disabled.
+
+
+          This parameter defaults to the defined system value.'
+        in: query
+        name: HASDMARC
+        required: false
+        schema:
+          enum:
+          - 1
+          - 0
+          type: integer
+      - description: 'Whether shell (SSH) access is enabled for the account.
+
+
+          * `1` — Enabled.
+
+          * `0` — Disabled.
+
+
+          This parameter defaults to the defined system value.
+
+
+          **Note:**
+
+
+          We **strongly** recommend that you use the `shell` parameter to specify a shell for
+
+          SSH access.'
+        in: query
+        name: HASSHELL
+        required: false
+        schema:
+          enum:
+          - 1
+          - 0
+          example: 1
+          type: integer
+      - description: 'Whether Sender Policy Framework (SPF) is enabled for the account.
+
+
+          * `1` — Enabled.
+
+          * `0` — Disabled.
+
+
+          This parameter defaults to the defined system value.'
+        in: query
+        name: HASSPF
+        required: false
+        schema:
+          enum:
+          - 1
+          - 0
+          example: 1
+          type: integer
+      - description: 'The account''s display language.
+
+
+          This parameter defaults to the defined system value.'
+        in: query
+        name: LANG
+        required: false
+        schema:
+          example: english-utf8
+          type: string
+      - description: 'The account''s default locale.
+
+
+          This parameter defaults to the defined system value.'
+        in: query
+        name: LOCALE
+        required: false
+        schema:
+          example: en
+          format: ISO-3166-1 (alpha-2)
+          type: string
+      - description: 'The storage format that the account''s mailboxes use.
+
+
+          * `maildir`
+
+          * `mbox`
+
+
+          This parameter defaults to the defined system value.'
+        in: query
+        name: MAILBOX_FORMAT
+        required: false
+        schema:
+          enum:
+          - maildir
+          - mbox
+      - description: 'The percentage of failed or deferred email messages that the account can send per hour
+
+          before outgoing mail is rate-limited.
+
+
+          * `0` or `unlimited` — The account can send an unlimited number of failed or deferred
+
+          messages.
+
+
+          This parameter defaults to the defined system value.'
+        in: query
+        name: MAX_DEFER_FAIL_PERCENTAGE
+        required: false
+        schema:
+          $ref: '#/components/schemas/IntPosOrUnlimited'
+      - description: 'The maximum number of emails that the account can send in one hour.
+
+
+          * `0` or `unlimited` — The account can send an unlimited number of emails.
+
+
+          This parameter defaults to the defined system value.'
+        in: query
+        name: MAX_EMAIL_PER_HOUR
+        required: false
+        schema:
+          $ref: '#/components/schemas/IntPosOrUnlimited'
+      - description: 'The maximum size, in megabytes (MB), that the account can define when it creates an
+
+          email account.
+
+
+          * `unlimited` — The account possesses an unlimited quota.
+
+
+          **Important:**
+
+
+          * This value applies to each email account, **not** each cPanel account.
+
+          * If you specify a `MAX_EMAILACCT_QUOTA` value, the function will **overwrite** the
+
+          plan''s defined value for that cPanel account.
+
+          * This parameter does **not** affect any existing email accounts
+
+          * We recommend that you allow the account''s plan to determine this value.
+
+          * `MAX_EMAIL_PER_HOUR` will define to unlimited if you do **not** define either the plan
+
+          or `MAX_EMAILACCT_QUOTA` parameters.
+
+
+          This parameter defaults to the defined system value. It will default to `unlimited` if
+
+          you do **not** define either the `plan` or `MAX_EMAILACCT_QUOTA` parameters.'
+        in: query
+        name: MAX_EMAILACCT_QUOTA
+        required: false
+        schema:
+          example: unlimited
+          oneOf:
+          - enum:
+            - unlimited
+            type: string
+          - maximum: 4294967296
+            minimum: 1
+            type: integer
+      - description: 'The account''s maximum number of addon domains.
+
+
+          * `0`, `null`, or `unlimited` — The account possesses unlimited addon domains.
+
+
+          This parameter defaults to the defined system value.'
+        in: query
+        name: MAXADDON
+        required: false
+        schema:
+          $ref: '#/components/schemas/Int0-999999NullOrUnlimited'
+      - description: 'The account''s maximum number of FTP accounts.
+
+
+          * `null` or `unlimited` — The account possesses unlimited FTP accounts.
+
+
+          This parameter defaults to the defined system value.'
+        in: query
+        name: MAXFTP
+        required: false
+        schema:
+          $ref: '#/components/schemas/Int0-999999NullOrUnlimited'
+      - description: 'The account''s maximum number of mailing lists.
+
+
+          * `0`, `null`, or `unlimited` — The account possesses unlimited mailing lists.
+
+
+          This parameter defaults to the defined system value.'
+        in: query
+        name: MAXLST
+        required: false
+        schema:
+          $ref: '#/components/schemas/Int0-999999NullOrUnlimited'
+      - description: 'The account''s maximum number of parked domains (aliases).
+
+
+          * `null` or `unlimited` — The account possesses unlimited mailing lists.
+
+
+          This parameter defaults to the defined system value.'
+        in: query
+        name: MAXPARK
+        required: false
+        schema:
+          $ref: '#/components/schemas/Int0-999999NullOrUnlimited'
+      - description: 'The account''s maximum number of Ruby applications.
+
+
+          * `null` or `unlimited` — The account possesses unlimited Ruby applications.
+
+
+          This parameter defaults to the defined system value.'
+        in: query
+        name: MAXPASSENGERAPPS
+        required: false
+        schema:
+          $ref: '#/components/schemas/Int0-999999NullOrUnlimited'
+      - description: 'The maximum number of email accounts for the account.
+
+
+          * `null` or `unlimited` — The account possesses unlimited email accounts.
+
+
+          This parameter defaults to the defined system value.'
+        in: query
+        name: MAXPOP
+        required: false
+        schema:
+          $ref: '#/components/schemas/Int0-999999NullOrUnlimited'
+      - description: 'The maximum number of each available type of SQL database for the account.
+
+
+          For example, if you set this value to `5` and the system administrator allows MySQL®
+
+          and PostgreSQL® databases, users can create up to five MySQL databases and up to five
+
+          PostgreSQL databases.
+
+
+          * `null` or `unlimited` — The account possesses unlimited databases.
+
+
+          This parameter defaults to the defined system value.'
+        in: query
+        name: MAXSQL
+        required: false
+        schema:
+          $ref: '#/components/schemas/Int0Max999999NullOrUnlimited'
+      - description: 'The maximum number of subdomains for the account.
+
+
+          * `null` or `unlimited` — The account possesses unlimited subdomains.
+
+
+          This parameter defaults to the defined system value.'
+        in: query
+        name: MAXSUB
+        required: false
+        schema:
+          $ref: '#/components/schemas/Int0-999999NullOrUnlimited'
+      - description: 'Whether to modify the firewall rules as part of the account modification.
+
+
+          * `1` – Modify the firewall rules.
+
+          * `0` – Do **not** modify the firewall rules.
+
+
+          **NOTE:**
+
+
+          If you do not set this parameter, the system will modify the firewall based on the *Do not make changes to the firewall during account modification.* setting in WHM''s [*Tweak Settings*](https://docs.cpanel.net/whm/server-configuration/tweak-settings/) interface (*WHM >> Home >> Server Configuration >> Tweak Settings*).'
+        in: query
+        name: modify_firewall
+        required: false
+        schema:
+          default: 1
+          enum:
+          - 0
+          - 1
+          example: 0
+          type: integer
+      - description: 'The priority of the account''s primary mail exchanger.
+
+
+          **Note:**
+
+
+          The parameter name consists of `MXCHECK`, a hyphen, and the primary domain of the
+
+          account.
+
+
+          Example key and value:
+
+          * `MXCHECK-example.com=10`
+
+
+          This parameter defaults to the define system value.'
+        in: query
+        name: MXCHECK-*
+        required: false
+        schema:
+          example: 1
+          minimum: 0
+          type: integer
+      - description: 'Whether to send a notification when someone links the account to an external
+
+          authentication account.
+
+
+          * `1` — Enabled.
+
+          * `0` — Disabled.
+
+
+          This parameter defaults to the defined system value.'
+        in: query
+        name: notify_account_authn_link
+        required: false
+        schema:
+          enum:
+          - 1
+          - 0
+          example: 0
+          type: integer
+      - description: 'Whether to send a notification when someone disables notifications for external
+
+          authentication account links.
+
+
+          * `1` — Enabled.
+
+          * `0` — Disabled.
+
+
+          This parameter defaults to the defined system value.'
+        in: query
+        name: notify_account_authn_link_notification_disabled
+        required: false
+        schema:
+          enum:
+          - 1
+          - 0
+          example: 0
+          type: integer
+      - description: 'Whether to send a notification when an AutoSSL certificate expires.
+
+
+          * `1` — Enabled.
+
+          * `0` — Disabled.
+
+
+          This parameter defaults to the defined system value.'
+        in: query
+        name: notify_autossl_expiry
+        required: false
+        schema:
+          enum:
+          - 1
+          - 0
+          example: 0
+          type: integer
+      - description: 'Whether to send a notification AutoSSL cannot renew a certificate because domains
+
+          that fail Domain Control Validation (DCV) exist on the current certificate.
+
+
+          * `1` — Enabled.
+
+          * `0` — Disabled.
+
+
+          This parameter defaults to the defined system value.'
+        in: query
+        name: notify_autossl_expiry_coverage
+        required: false
+        schema:
+          enum:
+          - 1
+          - 0
+          example: 0
+          type: integer
+      - description: 'Whether to send a notification when AutoSSL renews a certificate.
+
+
+          * `1` — Enabled.
+
+          * `0` — Disabled.
+
+
+          This parameter defaults to the defined system value.'
+        in: query
+        name: notify_autossl_renewal
+        required: false
+        schema:
+          enum:
+          - 1
+          - 0
+          example: 0
+          type: integer
+      - description: 'Whether to send a notification when AutoSSL renews a certificate but the new
+
+          certificate lacks at least one domain that the previous certificate secured.
+
+
+          * `1` — Enabled.
+
+          * `0` — Disabled.
+
+
+          This parameter defaults to the defined system value.'
+        in: query
+        name: notify_autossl_renewal_coverage
+        required: false
+        schema:
+          enum:
+          - 1
+          - 0
+          example: 0
+          type: integer
+      - description: 'Whether to send a notification when someone changes the contact address for the account.
+
+
+          * `1` — Enabled.
+
+          * `0` — Disabled.
+
+
+          This parameter defaults to the defined system value.'
+        in: query
+        name: notify_contact_address_change
+        required: false
+        schema:
+          enum:
+          - 1
+          - 0
+          example: 0
+          type: integer
+      - description: "Whether to send a notification when disables the notification for contact address\n changes.\n\n* `1` — Enabled.\n* `0` — Disabled.\n\nThis parameter defaults to the defined system value."
+        in: query
+        name: notify_contact_address_change_notification_disabled
+        required: false
+        schema:
+          enum:
+          - 1
+          - 0
+          example: 0
+          type: integer
+      - description: 'Whether to send a notification when the account reaches its disk usage limit.
+
+
+          * `1` — Enabled.
+
+          * `0` — Disabled.
+
+
+          This parameter defaults to the defined system value.'
+        in: query
+        name: notify_disk_limit
+        required: false
+        schema:
+          enum:
+          - 1
+          - 0
+          example: 0
+          type: integer
+      - description: 'Whether to send a notification when someone changes the account''s password.
+
+
+          * `1` — Enabled.
+
+          * `0` — Disabled.
+
+
+          This parameter defaults to the defined system value.'
+        in: query
+        name: notify_password_change
+        required: false
+        schema:
+          enum:
+          - 1
+          - 0
+          example: 0
+          type: integer
+      - description: 'Whether to send a notification when someone disables notifications for password changes.
+
+
+          * `1` — Enabled.
+
+          * `0` — Disabled.
+
+
+          This parameter defaults to the defined system value.'
+        in: query
+        name: notify_password_change_notification_disabled
+        required: false
+        schema:
+          enum:
+          - 1
+          - 0
+          example: 0
+          type: integer
+      - description: 'Whether to send a notification when an SSL certificate on the account expires.
+
+
+          * `1` — Enabled.
+
+          * `0` — Disabled.
+
+
+          This parameter defaults to the defined system value.'
+        in: query
+        name: notify_ssl_expiry
+        required: false
+        schema:
+          enum:
+          - 1
+          - 0
+          example: 0
+          type: integer
+      - description: 'Whether to suspend outgoing email on the account.
+
+
+          * `1` — Suspend outgoing email.
+
+          * `0` — Do **not** suspend outgoing email.
+
+
+          This parameter defaults to the defined system value.'
+        in: query
+        name: OUTGOING_EMAIL_SUSPENDED
+        required: false
+        schema:
+          enum:
+          - 1
+          - 0
+          example: 0
+          type: integer
+      - description: 'A new owner''s username or the `root` user, to change the account''s owner.
+
+
+          This parameter defaults to the defined system value.
+
+
+          **Note:**
+
+
+          The authenticated user **must** have `root` privileges in order to assign the account
+
+          to a reseller other than that account.'
+        in: query
+        name: OWNER
+        required: false
+        schema:
+          example: reseller
+          format: username
+          type: string
+      - description: 'An access token for the account''s [Pushbullet](https://www.pushbullet.com/)™
+
+          notifications.
+
+
+          This parameter defaults to the defined system value.'
+        in: query
+        name: PUSHBULLET_ACCESS_TOKEN
+        required: false
+        schema:
+          example: '1234567890'
+          type: string
+      - description: 'The account''s disk space quota, in multiples of 1,048,576 bytes.
+
+
+          * `0`, `null`, or `unlimited` — The account''s disk space is unlimited.
+
+
+          This parameter defaults to the defined system value.'
+        in: query
+        name: QUOTA
+        required: false
+        schema:
+          $ref: '#/components/schemas/IntPosNullOrUnlimited'
+      - description: 'A space-separated list of removed, missing, or uninstalled extensions.
+
+
+          This parameter defaults to the defined system value.
+
+
+          **Warning:**
+
+
+          This parameter removes all of the extensions that you list from
+
+          the `_PACKAGE_EXTENSIONS` variable in the user file. It will **not** remove the
+
+          extensions'' variables. For more information, read our
+
+          [Guide to Package Extensions](https://go.cpanel.net/GuidetoPackageExtensions).'
+        in: query
+        name: remove_missing_extensions
+        required: false
+        schema:
+          example: packageext1 packageext2
+          type: string
+      - description: 'Whether to rename the cPanel account''s database objects to use a new username''s
+
+          database prefix. This parameter **only** applies to servers that use database prefixing.
+
+
+          * `1` — Rename the cPanel account''s database objects.
+
+          * `0` — Do **not** rename the cPanel account''s database objects.
+
+
+          **Warning:**
+
+
+          * The account owner **must** update any applications to use the new database object names.
+
+          * **Use this parameter carefully**. It can cause confusion for system administrators.
+
+
+          MySQL does **not** allow you to rename a database. When cPanel & WHM "renames" a database,
+
+          the system performs the following steps:
+
+
+          1. The system creates a new database.
+
+          1. The system moves data from the old database to the new database.
+
+          1. The system recreates grants and stored code in the new database.
+
+          1. The system deletes the old database and its grants.
+
+
+          **Warning:**
+
+
+          * If **any** of the first three steps fail, the system returns an error and attempts to
+
+          restore the database''s original state. If the restoration process fails, the API function''s
+
+          error response describes these additional failures.
+
+          * In rare cases, the system creates the second database successfully, but fails to delete
+
+          the old database or grants. The system treats the rename action as a success; however, the
+
+          API function returns warnings that describe the failure to delete the old database or grants.'
+        in: query
+        name: rename_database_objects
+        required: false
+        schema:
+          enum:
+          - 1
+          - 0
+          example: 0
+          type: integer
+      - description: 'Whether to grant reseller privileges to the account.
+
+
+          * `1` — Grant reseller privileges.
+
+          * `0` — Do **not** grant reseller privileges.'
+        in: query
+        name: reseller
+        required: false
+        schema:
+          default: 0
+          enum:
+          - 1
+          - 0
+          example: 1
+          type: integer
+      - description: 'The account''s cPanel interface theme.
+
+
+          This parameter defaults to the defined system value.'
+        in: query
+        name: RS
+        required: false
+        schema:
+          example: jupiter
+          type: string
+      - description: 'The absolute file path to the shell''s location.
+
+
+          This parameter defaults to the defined system value.'
+        in: query
+        name: shell
+        required: false
+        schema:
+          example: /bin/bash
+          format: path
+          type: string
+      - description: 'Whether Apache SpamAssassin™ is enabled for the account.
+
+
+          * `1` — Enabled.
+
+          * `0` — Disabled.
+
+
+          This parameter defaults to the defined system value.'
+        in: query
+        name: spamassassin
+        required: false
+        schema:
+          enum:
+          - 1
+          - 0
+          example: 1
+          type: integer
+      - description: 'A timestamp for which to use as the account''s creation date.
+
+
+          This parameter defaults to the defined system value.'
+        in: query
+        name: STARTDATE
+        required: false
+        schema:
+          example: 1549471343
+          format: unix_timestamp
+          type: integer
+      - description: 'The account''s cPanel interface style.
+
+
+          This parameter defaults to the defined system value.'
+        in: query
+        name: STYLE
+        required: false
+        schema:
+          example: Glass
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      payload:
+                        description: 'An array of objects containing data for each modified user.
+
+
+                          **Note:**
+
+
+                          If an account uses [linked cPanel server nodes](https://go.cpanel.net/whmdocsLinkServerNodes),
+
+                          this object contains a return for each server on which the account exists.'
+                        example:
+                        - reason: Unable to fetch the cPanel user file for username
+                          result: 0
+                          user: username
+                        - extended:
+                            cpuser:
+                              BACKUP: '1'
+                              BWLIMIT: unlimited
+                              CONTACTEMAIL: username1@example.com
+                              CONTACTEMAIL2: ''
+                              DBOWNER: username1
+                              DEADDOMAINS:
+                              - example.example1.com
+                              DEMO: '0'
+                              DISK_BLOCK_LIMIT: 0
+                              DOMAIN: example1.com
+                              DOMAINS: []
+                              FEATURELIST: default
+                              HASCGI: '1'
+                              HASDKIM: '1'
+                              HASDMARC: '1'
+                              HASSPF: '1'
+                              HOMEDIRLINKS: []
+                              IP: 172.16.1.3
+                              LANG: english-utf8
+                              LEGACY_BACKUP: '0'
+                              LOCALE: en
+                              MAILBOX_FORMAT: maildir
+                              MAXADDON: '0'
+                              MAXFTP: '234'
+                              MAXLST: unlimited
+                              MAXPARK: '0'
+                              MAXPOP: '123'
+                              MAXSQL: '345'
+                              MAXSUB: unlimited
+                              MAX_DEFER_FAIL_PERCENTAGE: unlimited
+                              MAX_EMAILACCT_QUOTA: unlimited
+                              MAX_EMAIL_PER_HOUR: unlimited
+                              MTIME: '1584509675'
+                              MXCHECK-example1.com: remote
+                              OWNER: username1
+                              PLAN: extended
+                              RS: jupiter
+                              STARTDATE: '765435600'
+                              USER: username1
+                              UTF8MAILBOX: '1'
+                              WORKER_NODE-Mail: example1:6L3ZJZ8LPAAOMC8CA31325O8EKGJ5YV5
+                              _PACKAGE_EXTENSIONS: custom
+                              __CACHE_DATA_VERSION: '0.81'
+                            domain: example1.com
+                            setshell: unmodified
+                            user: username1
+                          messages: []
+                          reason: Account Modified
+                          result: 1
+                          user: username1
+                          warnings: []
+                        - extended:
+                            cpuser:
+                              BACKUP: '1'
+                              BWLIMIT: unlimited
+                              CONTACTEMAIL: ''
+                              CONTACTEMAIL2: ''
+                              DBOWNER: username2
+                              DEADDOMAINS: []
+                              DEMO: '0'
+                              DISK_BLOCK_LIMIT: 0
+                              DOMAIN: example2.com
+                              DOMAINS: []
+                              FEATURELIST: default
+                              HASCGI: '0'
+                              HASDKIM: '1'
+                              HASDMARC: '1'
+                              HASSPF: '1'
+                              HOMEDIRLINKS: []
+                              IP: 10.0.0.1
+                              LANG: null
+                              LEGACY_BACKUP: '0'
+                              LOCALE: cs
+                              MAILBOX_FORMAT: maildir
+                              MAXADDON: '0'
+                              MAXFTP: '234'
+                              MAXLST: unlimited
+                              MAXPARK: '0'
+                              MAXPOP: '123'
+                              MAXSQL: '345'
+                              MAXSUB: unlimited
+                              MAX_DEFER_FAIL_PERCENTAGE: unlimited
+                              MAX_EMAILACCT_QUOTA: unlimited
+                              MAX_EMAIL_PER_HOUR: unlimited
+                              MTIME: '1583966719'
+                              MXCHECK-example2.com: '0'
+                              OWNER: root
+                              PLAN: extended
+                              RS: jupiter
+                              STARTDATE: '728719200'
+                              USER: username2
+                              UTF8MAILBOX: '1'
+                              WORKER_NODE-Mail: example2:BXE4LIAXF4X9N0B0TG69AAQ64DGR1XPU
+                              _PACKAGE_EXTENSIONS: ''
+                              __CACHE_DATA_VERSION: '0.81'
+                            domain: example2.com
+                            setshell: unmodified
+                            user: username2
+                          messages: []
+                          proxied_from:
+                          - example.com
+                          reason: Account Modified
+                          result: 1
+                          user: username2
+                          warnings: []
+                        - extended:
+                            cpuser:
+                              BACKUP: '1'
+                              BWLIMIT: unlimited
+                              CONTACTEMAIL: ''
+                              CONTACTEMAIL2: ''
+                              DBOWNER: username2
+                              DEADDOMAINS: []
+                              DEMO: 0
+                              DISK_BLOCK_LIMIT: 0
+                              DOMAIN: example2.com
+                              DOMAINS: []
+                              FEATURELIST: default
+                              HASCGI: '1'
+                              HASDKIM: '1'
+                              HASDMARC: '1'
+                              HASSPF: '1'
+                              HOMEDIRLINKS: []
+                              IP: 172.16.1.3
+                              LANG: english-utf8
+                              LEGACY_BACKUP: '0'
+                              LOCALE: en
+                              MAILBOX_FORMAT: maildir
+                              MAXADDON: unlimited
+                              MAXFTP: '234'
+                              MAXLST: unlimited
+                              MAXPARK: unlimited
+                              MAXPOP: '123'
+                              MAXSQL: '345'
+                              MAXSUB: unlimited
+                              MAX_DEFER_FAIL_PERCENTAGE: unlimited
+                              MAX_EMAILACCT_QUOTA: unlimited
+                              MAX_EMAIL_PER_HOUR: unlimited
+                              MTIME: '1584509675'
+                              MXCHECK-example2.com: remote
+                              OWNER: username2
+                              PLAN: default
+                              RS: jupiter
+                              STARTDATE: '765435600'
+                              USER: username2
+                              UTF8MAILBOX: '1'
+                              WORKER_NODE-Mail: example2:H99IZWY3OH9Q1DQNR58L55WUBXAENPDP
+                              _PACKAGE_EXTENSIONS: ''
+                              __CACHE_DATA_VERSION: '0.81'
+                            domain: example2.com
+                            setshell: unmodified
+                            user: username2
+                          messages: []
+                          reason: Account Modified
+                          result: 1
+                          user: username2
+                          warnings: []
+                        - extended:
+                            cpuser:
+                              BACKUP: '1'
+                              BWLIMIT: unlimited
+                              CONTACTEMAIL: ''
+                              CONTACTEMAIL2: ''
+                              DBOWNER: username2
+                              DEADDOMAINS: []
+                              DEMO: 0
+                              DISK_BLOCK_LIMIT: 0
+                              DOMAIN: example2.com
+                              DOMAINS: []
+                              FEATURELIST: default
+                              HASCGI: '0'
+                              HASDKIM: '1'
+                              HASDMARC: '1'
+                              HASSPF: '1'
+                              HOMEDIRLINKS: []
+                              IP: 10.0.0.2
+                              LANG: english-utf8
+                              LEGACY_BACKUP: '0'
+                              LOCALE: en
+                              MAILBOX_FORMAT: maildir
+                              MAXADDON: unlimited
+                              MAXFTP: '234'
+                              MAXLST: unlimited
+                              MAXPARK: unlimited
+                              MAXPOP: '123'
+                              MAXSQL: '345'
+                              MAXSUB: unlimited
+                              MAX_DEFER_FAIL_PERCENTAGE: unlimited
+                              MAX_EMAILACCT_QUOTA: unlimited
+                              MAX_EMAIL_PER_HOUR: unlimited
+                              MTIME: '1583966717'
+                              MXCHECK-example2.com: '0'
+                              OWNER: linked
+                              PLAN: default
+                              RS: jupiter
+                              STARTDATE: '765435600'
+                              USER: username2
+                              UTF8MAILBOX: '1'
+                              _PACKAGE_EXTENSIONS: ''
+                              __CACHE_DATA_VERSION: '0.81'
+                            domain: example2.com
+                            setshell: noshell
+                            user: username2
+                          messages:
+                          - Shell changed
+                          proxied_from:
+                          - example.com
+                          reason: Account Modified
+                          result: 1
+                          user: username2
+                          warnings: []
+                        items:
+                          properties:
+                            extended:
+                              description: An object containing the account's modified settings.
+                              properties:
+                                cpuser:
+                                  additionalProperties:
+                                    description: The complete attributes of the cPanel account.
+                                  description: 'An object containing the output of an account''s `cpuser`
+
+                                    file. The system stores this file in the `/var/cpanel/users`
+
+                                    directory.
+
+
+                                    **Note:**
+
+
+                                    If the account or its hosting plan use
+
+                                    [package extensions](https://go.cpanel.net/GuidetoPackageExtensions),
+
+                                    the `cpuser` object will also include the extension''s variables.'
+                                  type: object
+                                domain:
+                                  description: The account's main domain.
+                                  format: domain
+                                  type: string
+                                setshell:
+                                  anyOf:
+                                  - description: The updated shell's absolute file path.
+                                    format: path
+                                    type: string
+                                  - description: The shell's absolute filepath did not change.
+                                    enum:
+                                    - unmodified
+                                    - noshell
+                                    type: string
+                                  description: 'The absolute file path to the account''s updated shell location.
+
+
+                                    * `unmodified` — The shell''s absolute filepath did not change.'
+                                  format: path
+                                  type: string
+                                user:
+                                  description: 'The cPanel account''s username.
+
+
+                                    **Note:**
+
+
+                                    If you changed the cPanel account''s username, the function
+
+                                    returns the new value.'
+                                  format: username
+                                  type: string
+                              type: object
+                            messages:
+                              description: A list containing account modification messages.
+                              items:
+                                type: string
+                              type: array
+                            proxied_from:
+                              description: 'The hostnames of the
+
+                                [linked cPanel server nodes](https://go.cpanel.net/serverroles)
+
+                                from which the function proxied the return. The function returns
+
+                                the hostnames in their proxied order.
+
+
+                                **Note:**
+
+
+                                The function **only** returns this value for
+
+                                [distributed cPanel accounts](https://go.cpanel.net/cPanelGlossary#distributed-cpanel-account).'
+                              items:
+                                format: domain
+                                type: string
+                              type: array
+                            reason:
+                              description: The account's modification status.
+                              type: string
+                            result:
+                              description: 'Whether the account modification succeeded.
+
+                                * `1` — Success.
+
+                                * `0` — Failure.'
+                              enum:
+                              - 1
+                              - 0
+                              type: integer
+                            user:
+                              description: The modified account's username.
+                              format: username
+                              type: string
+                            warnings:
+                              description: A list of warning messages for the modified account, if any exist.
+                              items:
+                                type: string
+                              type: array
+                          type: object
+                        type: array
+                    type: object
+                  metadata:
+                    example:
+                      command: massmodifyacct
+                      messages:
+                      - 'From example1.com: Restarting apache'
+                      reason: Failed to modify one or more users.
+                      result: 0
+                      version: 1
+                      warnings: []
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: massmodifyacct
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is 0. This field may display a success message when a function succeeds.
+                        example: Failed to modify one or more users.
+                        type: string
+                      result:
+                        description: '* `1` - Success
+
+                          * `0` - Failed: Check the reason field for more details.'
+                        enum:
+                        - 1
+                        - 0
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Update multiple cPanel accounts
+      tags:
+      - Accounts
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  massmodifyacct \\\n  user='username'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/massmodifyacct?api.version=1&username=username
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '88'
+  /modifyacct:
+    get:
+      description: 'This function modifies a cPanel account.
+
+
+        **Warning:**
+
+
+        We **strongly** recommend that you **do not** modify a single cPanel account''s settings if that cPanel account uses a hosting plan (package). If the package values change, **the system will overwrite any of your custom values with the package''s new values**.
+
+
+        **Note:**
+
+
+        On servers that run CentOS 7, you may see a `named` warning about the absence of SPF resource records on DNS.
+
+        * This warning is **not** relevant on CentOS 7 servers, because RFC 7208 deprecated SPF records. CentOS 7 servers use TXT records instead of SPF records.
+
+        * Red Hat 7.1 and CentOS 7.1 both contain `bind-9.9.4-23.el7`, which is an updated version of BIND that complies with RFC 7208. To resolve this issue, update your operating system to a version that contains the updated version of BIND. For more information, read the Red Hat Bugzilla case about SPF record errors.'
+      operationId: Accounts-modifyacct
+      parameters:
+      - description: The cPanel account's current username.
+        in: query
+        name: user
+        required: true
+        schema:
+          example: example
+          format: username
+          type: string
+      - description: "A list of names for [Account Enhancements](https://go.cpanel.net/account-enhancements) to assign to the cPanel account.\n To view your server's Account Enhancements, run WHM API 1's `list_account_enhancements` function.\n\n**Warning:**\n\nYou must provide a complete list of Account Enhancements for the cPanel account. The parameter will add or remove Account Enhancements\nbased on the names that you provide."
+        examples:
+          multiple:
+            summary: Assign multiple enhancements
+            value:
+            - My Custom Enhancement
+            - Sample Enhancement
+          single:
+            summary: Assign one enhancement
+            value: My Custom Enhancement
+        in: query
+        name: account_enhancements
+        schema:
+          type: string
+      - description: 'Whether backups are enabled for the cPanel account.
+
+
+          * `1` — Enable backups.
+
+          * `0` — Disable backups.
+
+
+          This parameter defaults to the defined system value.
+
+
+          **Note:**
+
+
+          You **must** have `root`-level privileges to set this parameter.'
+        in: query
+        name: BACKUP
+        required: false
+        schema:
+          enum:
+          - 0
+          - 1
+          example: 1
+          type: integer
+      - description: 'The cPanel account''s maximum bandwidth use, in bytes.
+
+
+          * `0` or `unlimited` — The cPanel account can use unlimited bandwidth.
+
+
+          This parameter defaults to the defined system value.'
+        in: query
+        name: BWLIMIT
+        required: false
+        schema:
+          example: unlimited
+          oneOf:
+          - enum:
+            - unlimited
+            type: string
+          - minimum: 0
+            type: integer
+      - description: 'The cPanel account''s contact email address.
+
+
+          This parameter defaults to the defined system value.'
+        in: query
+        name: contactemail
+        required: false
+        schema:
+          example: username@example.com
+          format: email
+          type: string
+      - description: 'The owner of the cPanel account''s MySQL databases.
+
+
+          This parameter defaults to the defined system value.'
+        in: query
+        name: DBOWNER
+        required: false
+        schema:
+          example: example
+          type: string
+      - description: 'The number of disk blocks for the cPanel account, in kilobytes (KB).
+
+
+          This parameter defaults to the defined system value.'
+        in: query
+        name: DISK_BLOCK_LIMIT
+        required: false
+        schema:
+          example: 100000000
+          type: integer
+      - description: 'The cPanel account''s main domain.
+
+
+          This parameter is an alias of `domain`. If you set both
+
+          the `DNS` and `domain` parameters, the `DNS` parameter will
+
+          override the `domain` parameter.
+
+
+          This parameter defaults to the defined system value.'
+        in: query
+        name: DNS
+        required: false
+        schema:
+          example: example.com
+          format: domain
+          type: string
+      - description: 'The cPanel account''s main domain.
+
+
+          This parameter is an alias of `DNS`. If you set both
+
+          the `DNS` and `domain` parameters, the `DNS` parameter will
+
+          override the `domain` parameter.
+
+
+          This parameter defaults to the defined system value.'
+        in: query
+        name: domain
+        required: false
+        schema:
+          example: example.com
+          format: domain
+          type: string
+      - description: 'Whether CGI access is enabled for the cPanel account.
+
+
+          * `1` — Enable CGI access.
+
+          * `0` — Disable CGI access.
+
+
+          This parameter defaults to the defined system value.
+
+
+          **Note:**
+
+
+          When a [server profile](https://go.cpanel.net/howtouseserverprofiles) disables the Web Server role, you **cannot** enable CGI access.'
+        in: query
+        name: HASCGI
+        required: false
+        schema:
+          enum:
+          - 0
+          - 1
+          example: 1
+          type: integer
+      - description: 'Whether DKIM is enabled for the cPanel account.
+
+
+          * `1` — Enable DKIM.
+
+          * `0` — Disable DKIM.
+
+
+          This parameter defaults to the defined system value.'
+        in: query
+        name: HASDKIM
+        required: false
+        schema:
+          enum:
+          - 0
+          - 1
+          example: 1
+          type: integer
+      - description: 'Whether DMARC is enabled for the cPanel account.
+
+
+          * `1` — Enable DMARC.
+
+          * `0` — Disable DMARC.
+
+
+          This parameter defaults to the defined system value.'
+        in: query
+        name: HASDMARC
+        required: false
+        schema:
+          enum:
+          - 0
+          - 1
+          example: 1
+          type: integer
+      - description: 'Whether shell (SSH) access is enabled for the cPanel account.
+
+
+          * `1` — Enable shell access.
+
+          * `0` — Disable shell access.
+
+
+          This parameter defaults to the defined system value.
+
+
+          **Note:**
+
+
+          We **strongly** recommend that you use the `shell` parameter to specify a shell for SSH access.'
+        in: query
+        name: HASSHELL
+        required: false
+        schema:
+          enum:
+          - 0
+          - 1
+          example: 1
+          type: integer
+      - description: 'Whether SPF is enabled for the cPanel account.
+
+
+          * `1` — Enable SPF.
+
+          * `0` — Disable SPF.
+
+
+          This parameter defaults to the defined system value.'
+        in: query
+        name: HASSPF
+        required: false
+        schema:
+          enum:
+          - 0
+          - 1
+          example: 1
+          type: integer
+      - description: 'The cPanel account''s display language.
+
+
+          This parameter defaults to the defined system value.'
+        in: query
+        name: LANG
+        required: false
+        schema:
+          example: english-utf8
+          type: string
+      - description: 'The cPanel account''s default locale, in two-letter [ISO-3166 code](https://www.iso.org/iso-3166-country-codes.html) format.
+
+
+          This parameter defaults to the defined system value.'
+        in: query
+        name: LOCALE
+        required: false
+        schema:
+          example: en
+          format: ISO-3166-1 (alpha-2)
+          type: string
+      - description: "The server that will manage the cPanel account's mail.\n\n* `.local` — Make the local server manage the cPanel account’s mail. If the account currently uses a [child node](https://go.cpanel.net/cPanelGlossary#child-node) for its mail, this will transfer the account’s mail to the local server.\n* The alias (friendly name) of a child node that should manage the cPanel account’s mail.\n\n  When you distribute an account’s mail, the function adds a `LINK` entry to the\n  [`/var/cpanel/accounting.log`](https://go.cpanel.net/ThecPanelLogFiles) file.\n\nThis parameter defaults to the account’s current mail node, or `.local` if the account’s mail is on the local server."
+        in: query
+        name: mail_node_alias
+        required: false
+        schema:
+          example: mailnode
+          oneOf:
+          - description: A mail node alias.
+            example: mailnode
+            type: string
+          - description: Transfer a user’s mail from an existing mail node to the local server.
+            enum:
+            - .local
+            type: string
+      - description: 'The storage format that the cPanel account''s mailboxes use.
+
+
+          * `maildir`
+
+          * `mbox`
+
+
+          This parameter defaults to the defined system value.'
+        in: query
+        name: MAILBOX_FORMAT
+        required: false
+        schema:
+          enum:
+          - maildir
+          - mbox
+          example: maildir
+          type: string
+      - description: 'The percentage of failed or deferred email messages that the
+
+          cPanel account can send per hour before outgoing mail is rate-limited.
+
+
+          * `0` or `unlimited` — The cPanel account can send an unlimited number of failed or deferred messages.
+
+
+          This parameter defaults to the defined system value.'
+        in: query
+        name: MAX_DEFER_FAIL_PERCENTAGE
+        required: false
+        schema:
+          $ref: '#/components/schemas/IntPosOrUnlimited'
+      - description: 'The maximum number of emails that the cPanel account can send in one hour.
+
+
+          * `0` or `unlimited` — The cPanel account can send an unlimited number of emails.
+
+
+          This parameter defaults to the defined system value.'
+        in: query
+        name: MAX_EMAIL_PER_HOUR
+        required: false
+        schema:
+          $ref: '#/components/schemas/IntPosOrUnlimited'
+      - description: 'The maximum quota, in megabytes (MB), that the cPanel account can define
+
+          when it creates an email account.
+
+
+          * `unlimited` — The cPanel account can set unlimited quotas.
+
+
+          This parameter defaults to the defined system value, or to `unlimited` if you do not define either the `plan` or `MAX_EMAILACCT_QUOTA` parameters.
+
+
+          **Important:**
+
+
+          * This value applies to each email account, **not** each cPanel account.
+
+          * If you specify a `MAX_EMAILACCT_QUOTA` value, the function will overwrite the plan''s defined value for that cPanel
+
+          account.
+
+          * We recommend that you allow the cPanel account''s plan to determine this value.'
+        in: query
+        name: MAX_EMAILACCT_QUOTA
+        required: false
+        schema:
+          example: unlimited
+          oneOf:
+          - enum:
+            - unlimited
+            type: string
+          - maximum: 4294967296
+            minimum: 0
+            type: integer
+      - description: 'The maximum number of Team users for this account.
+
+          This parameter should be a number between 0 and the server''s default value, inclusively.
+
+          This parameter can not be a number greater than the server''s default value.'
+        in: query
+        name: max_team_users
+        required: false
+        schema:
+          example: 7
+          maximum: 7
+          minimum: 0
+          type: integer
+      - description: 'The cPanel account''s maximum number of addon domains.
+
+
+          * `0` or `unlimited` — The cPanel account can use unlimited addon domains.
+
+
+          This parameter defaults to the defined system value.'
+        in: query
+        name: MAXADDON
+        required: false
+        schema:
+          $ref: '#/components/schemas/Int999999OrUnlimited'
+      - description: 'The cPanel account''s maximum number of FTP accounts.
+
+
+          * `unlimited` — The cPanel account can create unlimited FTP accounts.
+
+
+          This parameter defaults to the defined system value.'
+        in: query
+        name: MAXFTP
+        required: false
+        schema:
+          $ref: '#/components/schemas/Int999999OrUnlimited'
+      - description: 'The cPanel account''s maximum number of mailing lists.
+
+
+          * `0` or `unlimited` — The cPanel account can create unlimited mailing lists.
+
+
+          This parameter defaults to the defined system value.'
+        in: query
+        name: MAXLST
+        required: false
+        schema:
+          $ref: '#/components/schemas/Int999999OrUnlimited'
+      - description: 'The cPanel account''s maximum number of parked domains (aliases).
+
+
+          * `unlimited` — The cPanel account can use unlimited parked domains.
+
+
+          This parameter defaults to the defined system value.'
+        in: query
+        name: MAXPARK
+        required: false
+        schema:
+          $ref: '#/components/schemas/Int999999OrUnlimited'
+      - description: 'The cPanel account''s maximum number of Ruby applications.
+
+
+          * `unlimited` — The cPanel account can use unlimited Ruby applications.
+
+
+          This parameter defaults to the defined system value.'
+        in: query
+        name: MAXPASSENGERAPPS
+        required: false
+        schema:
+          $ref: '#/components/schemas/Int999999OrUnlimited'
+      - description: 'The maximum number of email accounts for the cPanel account.
+
+
+          * `unlimited` — The cPanel account can create unlimited email accounts.
+
+
+          This parameter defaults to the defined system value.'
+        in: query
+        name: MAXPOP
+        required: false
+        schema:
+          $ref: '#/components/schemas/Int999999OrUnlimited'
+      - description: 'The maximum number of each available type of SQL database for
+
+          the cPanel account. For example, if you set this value to `5`
+
+          and the system administrator allows MySQL® and PostgreSQL®
+
+          databases, users can create up to five MySQL databases and up
+
+          to five PostgreSQL databases.
+
+
+          * `unlimited` — The cPanel account can create unlimited databases.
+
+
+          This parameter defaults to the defined system value.'
+        in: query
+        name: MAXSQL
+        required: false
+        schema:
+          $ref: '#/components/schemas/Int999999OrUnlimited'
+      - description: 'The maximum number of subdomains for the cPanel account.
+
+
+          * `unlimited` — The cPanel account can create unlimited subdomains.
+
+
+          This parameter defaults to the defined system value.'
+        in: query
+        name: MAXSUB
+        required: false
+        schema:
+          $ref: '#/components/schemas/Int999999OrUnlimited'
+      - description: 'Whether to modify the firewall rules as part of the cPanel account modification.
+
+
+          * `1` — Modify the firewall rules.
+
+          * `0` — Do **not** modify the firewall rules.
+
+
+          **Note:**
+
+
+          If you do not set this parameter, the system will modify the firewall based on the *Do not make changes to the firewall during cPanel account modification.* setting in WHM''s [*Tweak Settings*](https://go.cpanel.net/whmdocsTweakSettings) interface (*WHM >> Home >> Server Configuration >> Tweak Settings*).'
+        in: query
+        name: modify_firewall
+        required: false
+        schema:
+          default: 1
+          enum:
+          - 0
+          - 1
+          example: 0
+          type: integer
+      - description: 'The priority of the cPanel account''s primary mail exchanger.
+
+
+          This parameter defaults to the defined system value.
+
+
+          **Note:**
+
+
+          The parameter name consists of `MXCHECK`, a hyphen, and the primary domain name of
+
+          the cPanel account. For example, `MXCHECK-example.com=10`.'
+        in: query
+        name: MXCHECK-*
+        required: false
+        schema:
+          type: integer
+      - description: 'The cPanel account''s new username.
+
+
+          This parameter defaults to the defined system value.
+
+
+          **Note:**
+
+
+          * Usernames **cannot** begin with a number or the string `test`.
+
+          * Usernames can contain 16 characters or fewer if database prefixes are enabled.
+
+          * The first eight characters of usernames **must** be unique. MySQL requires this due to potential conflicts with cPanel account transfers. However, this limit requirement does **not** exist on servers that use MariaDB.
+
+          * If you rename the cPanel account and database prefixing is enabled, you can also use the `rename_database_objects` parameter.'
+        in: query
+        name: newuser
+        required: false
+        schema:
+          example: example1
+          format: username
+          type: string
+      - description: 'Whether to send a notification when someone links the cPanel
+
+          account to an external authentication account.
+
+
+          * `1` — Enabled.
+
+          * `0` — Disabled.
+
+
+          This parameter defaults to the defined system value.'
+        in: query
+        name: notify_account_authn_link
+        required: false
+        schema:
+          enum:
+          - 0
+          - 1
+          example: 0
+          type: integer
+      - description: 'Whether to send a notification when someone disables notifications
+
+          for external authentication account links.
+
+
+          * `1` — Enabled.
+
+          * `0` — Disabled.
+
+
+          This parameter defaults to the defined system value.'
+        in: query
+        name: notify_account_authn_link_notification_disabled
+        required: false
+        schema:
+          enum:
+          - 0
+          - 1
+          example: 0
+          type: integer
+      - description: 'Whether to send a notification when an AutoSSL certificate expires.
+
+
+          * `1` — Enabled.
+
+          * `0` — Disabled.
+
+
+          This parameter defaults to the defined system value.'
+        in: query
+        name: notify_autossl_expiry
+        required: false
+        schema:
+          enum:
+          - 0
+          - 1
+          example: 0
+          type: integer
+      - description: 'Whether to send a notification AutoSSL cannot renew a certificate
+
+          because domains that fail Domain Control Validation (DCV) exist on the current
+
+          certificate.
+
+
+          * `1` — Enabled.
+
+          * `0` — Disabled.
+
+
+          This parameter defaults to the defined system value.'
+        in: query
+        name: notify_autossl_expiry_coverage
+        required: false
+        schema:
+          enum:
+          - 0
+          - 1
+          example: 0
+          type: integer
+      - description: 'Whether to send a notification when AutoSSL renews a certificate.
+
+
+          * `1` — Enabled.
+
+          * `0` — Disabled.
+
+
+          This parameter defaults to the defined system value.'
+        in: query
+        name: notify_autossl_renewal
+        required: false
+        schema:
+          enum:
+          - 0
+          - 1
+          example: 0
+          type: integer
+      - description: 'Whether to send a notification when AutoSSL renews a certificate
+
+          but the new certificate lacks at least one domain that the previous certificate
+
+          secured.
+
+
+          * `1` — Enabled.
+
+          * `0` — Disabled.
+
+
+          This parameter defaults to the defined system value.'
+        in: query
+        name: notify_autossl_renewal_coverage
+        required: false
+        schema:
+          enum:
+          - 0
+          - 1
+          example: 0
+          type: integer
+      - description: 'Whether to send a notification when someone changes the contact
+
+          address for the cPanel account.
+
+
+          * `1` — Enabled.
+
+          * `0` — Disabled.
+
+
+          This parameter defaults to the defined system value.'
+        in: query
+        name: notify_contact_address_change
+        required: false
+        schema:
+          enum:
+          - 0
+          - 1
+          example: 0
+          type: integer
+      - description: 'Whether to send a notification when disables the notification
+
+          for contact address changes.
+
+
+          * `1` — Enabled.
+
+          * `0` — Disabled.
+
+
+          This parameter defaults to the defined system value.'
+        in: query
+        name: notify_contact_address_change_notification_disabled
+        required: false
+        schema:
+          enum:
+          - 0
+          - 1
+          example: 0
+          type: integer
+      - description: 'Whether to send a notification when the cPanel account reaches its disk usage limit.
+
+
+          * `1` — Enabled.
+
+          * `0` — Disabled.
+
+
+          This parameter defaults to the defined system value.'
+        in: query
+        name: notify_disk_limit
+        required: false
+        schema:
+          enum:
+          - 0
+          - 1
+          example: 0
+          type: integer
+      - description: 'Whether to send a notification when someone changes the cPanel account''s
+
+          password.
+
+
+          * `1` — Enabled.
+
+          * `0` — Disabled.
+
+
+          This parameter defaults to the defined system value.'
+        in: query
+        name: notify_password_change
+        required: false
+        schema:
+          enum:
+          - 0
+          - 1
+          example: 0
+          type: integer
+      - description: 'Whether to send a notification when someone disables notifications
+
+          for password changes.
+
+
+          * `1` — Enabled.
+
+          * `0` — Disabled.
+
+
+          This parameter defaults to the defined system value.'
+        in: query
+        name: notify_password_change_notification_disabled
+        required: false
+        schema:
+          enum:
+          - 0
+          - 1
+          example: 0
+          type: integer
+      - description: 'Whether to send a notification when an SSL certificate on the
+
+          cPanel account expires.
+
+
+          * `1` — Enabled.
+
+          * `0` — Disabled.
+
+
+          This parameter defaults to the defined system value.'
+        in: query
+        name: notify_ssl_expiry
+        required: false
+        schema:
+          enum:
+          - 0
+          - 1
+          example: 0
+          type: integer
+      - description: 'Whether to suspend outgoing email on the cPanel account.
+
+
+          * `1` — Suspend outgoing email.
+
+          * `0` — Do **not** suspend outgoing email.
+
+
+          This parameter defaults to the defined system value.'
+        in: query
+        name: OUTGOING_EMAIL_SUSPENDED
+        required: false
+        schema:
+          enum:
+          - 0
+          - 1
+          example: 0
+          type: integer
+      - description: 'A new owner''s username or the `root` user, to change the cPanel account''s owner.
+
+
+          This parameter defaults to the defined system value.
+
+
+          **Note:**
+
+
+          The authenticated user must have `root` privileges in order to assign the cPanel account to a reseller other than that cPanel account.'
+        in: query
+        name: owner
+        required: false
+        schema:
+          example: reseller_name
+          format: username
+          type: string
+      - description: 'An access token for the cPanel account''s Pushbullet™ notifications.
+
+
+          This parameter defaults to the defined system value.'
+        in: query
+        name: PUSHBULLET_ACCESS_TOKEN
+        required: false
+        schema:
+          type: string
+      - description: 'The cPanel account''s disk space quota.
+
+
+          * An integer in multiples of 1,048,576 bytes.
+
+          * `0` or `unlimited` — The cPanel account''s disk space is unlimited.
+
+
+          This parameter defaults to the defined system value.'
+        in: query
+        name: QUOTA
+        required: false
+        schema:
+          $ref: '#/components/schemas/IntPosOrUnlimited'
+      - description: 'A space-separated list of removed, missing, or uninstalled package extensions.
+
+
+          **Warning:**
+
+
+          This parameter removes all of the extensions that you list from the `_PACKAGE_EXTENSIONS` variable in the user file. It will **not** remove the extensions'' variables. For more information, read our [Guide to Package Extensions](https://go.cpanel.net/GuidetoPackageExtensions).'
+        in: query
+        name: remove_missing_extensions
+        required: false
+        schema:
+          default: ''
+          example: packageext1 packageext2
+          type: string
+      - description: 'Whether to rename the cPanel account''s database objects to use a new username''s database prefix.
+
+
+          * `1` — Rename the cPanel account''s database objects.
+
+          * `0` — Do **not** rename the cPanel account''s database objects.
+
+
+          **Warning:**
+
+
+          * The cPanel account owner must update any applications to use the new database object names.
+
+          * **Use this parameter carefully**, as it may cause confusion for system administrators.
+
+
+          MySQL does not allow you to rename a database. When cPanel & WHM "renames" a database, the system performs the following steps:
+
+
+          1. The system creates a new database.
+
+          1. The system moves data from the old database to the new database.
+
+          1. The system recreates grants and stored code in the new database.
+
+          1. The system deletes the old database and its grants.
+
+
+          **Warning:**
+
+
+          * If any of the first three steps fail, the system returns an error and attempts to restore the database''s original state. If the restoration process fails, the API function''s error response describes these additional failures.
+
+          * In rare cases, the system creates the second database successfully, but fails to delete the old database or grants. The system treats the rename action as a success; however, the API function returns warnings that describe the failure to delete the old database or grants.
+
+
+          **Note:**
+
+
+          This parameter **only** applies to servers that use database prefixing.'
+        in: query
+        name: rename_database_objects
+        required: false
+        schema:
+          default: 1
+          enum:
+          - 0
+          - 1
+          example: 0
+          type: integer
+      - description: 'Whether to grant reseller privileges to the cPanel account.
+
+
+          * `1` — Grant reseller privileges.
+
+          * `0` — Do **not** grant reseller privileges.
+
+
+          **Note:**
+
+
+          You **must** have `root`-level privileges to use this parameter.'
+        in: query
+        name: reseller
+        required: false
+        schema:
+          default: 0
+          enum:
+          - 0
+          - 1
+          example: 1
+          type: integer
+      - description: 'The cPanel account''s cPanel theme.
+
+
+          This parameter defaults to the defined system value.'
+        in: query
+        name: RS
+        required: false
+        schema:
+          example: jupiter
+          type: string
+      - description: 'The absolute filepath to the shell''s location.
+
+
+          This parameter defaults to the defined system value.'
+        in: query
+        name: shell
+        required: false
+        schema:
+          example: /bin/bash
+          format: path
+          type: string
+      - description: 'Whether Apache SpamAssassin™ is enabled for the cPanel account.
+
+
+          This parameter defaults to the defined system value.'
+        in: query
+        name: spamassassin
+        required: false
+        schema:
+          enum:
+          - 0
+          - 1
+          example: 0
+          type: integer
+      - description: 'A timestamp to use as the cPanel account''s creation date.
+
+
+          This parameter defaults to the defined system value.
+
+
+          **Note:**
+
+
+          This parameter does **not** provide user access controls. For example, you cannot modify a
+
+          cPanel account''s date to prevent a user from logging in to the server.'
+        in: query
+        name: STARTDATE
+        required: false
+        schema:
+          example: 1549471343
+          format: unix_timestamp
+          type: integer
+      - description: 'The cPanel account''s cPanel interface theme style.
+
+
+          This parameter defaults to the defined system value.'
+        in: query
+        name: STYLE
+        required: false
+        schema:
+          example: Glass
+          type: string
+      - description: 'Whether to update the quota for existing email accounts to match the value of `MAX_EMAILACCT_QUOTA` setting.
+
+
+          * `1` — Update quota for existing email accounts.
+
+          * `0` — Do not update quota for existing email accounts.
+
+
+          **Important:**
+
+
+          To use this parameter, you **must** also use the `MAX_EMAILACCT_QUOTA` parameter.'
+        in: query
+        name: update_existing_email_account_quotas
+        required: false
+        schema:
+          default: 0
+          enum:
+          - 0
+          - 1
+          example: 1
+          type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      cpuser:
+                        additionalProperties:
+                          description: The complete attributes of the cPanel account.
+                        description: 'An object that contains the cPanel account''s modified information.
+
+
+                          **Note:**
+
+
+                          * The possible properties in this section are the same as the possible query parameters (the attributes of the cPanel account).
+
+                          * These properties show up even if the query did **not** modify them.
+
+                          * Some of these properties **only** appear under certain other conditions.
+
+                          * If the cPanel account or its hosting plan use package extensions, the `cpuser` object will also include the extension''s variables.'
+                        example:
+                          BACKUP: '1'
+                          BWLIMIT: '0'
+                          CONTACTEMAIL: example@example.com
+                          CONTACTEMAIL2: ''
+                          DBOWNER: example
+                          DEADDOMAINS: []
+                          DEMO: '0'
+                          DISK_BLOCK_LIMIT: '0'
+                          DOMAIN: example.com
+                          DOMAINS:
+                          - subdomain.example.com
+                          FEATURELIST: default
+                          HASCGI: '1'
+                          HASDKIM: '1'
+                          HASDMARC: '1'
+                          HASSPF: '1'
+                          HOMEDIRLINKS: []
+                          IP: 172.16.1.13
+                          LEGACY_BACKUP: '0'
+                          LOCALE: en
+                          MAILBOX_FORMAT: maildir
+                          MAXADDON: '0'
+                          MAXFTP: unlimited
+                          MAXLST: unlimited
+                          MAXPARK: '0'
+                          MAXPOP: unlimited
+                          MAXSQL: unlimited
+                          MAXSUB: unlimited
+                          MAX_DEFER_FAIL_PERCENTAGE: unlimited
+                          MAX_EMAILACCT_QUOTA: unlimited
+                          MAX_EMAIL_PER_HOUR: unlimited
+                          MTIME: '1560518791'
+                          MXCHECK-example.com: '0'
+                          OWNER: example
+                          PLAN: default
+                          PUSHBULLET_ACCESS_TOKEN: ''
+                          RS: jupiter
+                          STARTDATE: '1554919365'
+                          USER: example
+                          UTF8MAILBOX: '1'
+                          _PACKAGE_EXTENSIONS: ''
+                          __CACHE_DATA_VERSION: '0.81'
+                          modify_firewall: '1'
+                          notify_account_authn_link: '0'
+                          notify_account_authn_link_notification_disabled: '0'
+                          notify_autossl_expiry: '0'
+                          notify_autossl_expiry_coverage: '0'
+                          notify_autossl_renewal_coverage: '0'
+                          notify_autossl_renewal_coverage_reduced: '0'
+                          notify_autossl_renewal_uncovered_domains: '0'
+                          notify_bandwidth_limit: '0'
+                          notify_contact_address_change: '0'
+                          notify_contact_address_change_notification_disabled: '0'
+                          notify_disk_limit: '0'
+                          notify_password_change: '0'
+                          notify_password_change_notification_disabled: '0'
+                          notify_ssl_expiry: '0'
+                        type: object
+                      domain:
+                        description: The cPanel account's main domain.
+                        example: example.com
+                        format: domain
+                        type: string
+                      setshell:
+                        description: The absolute path to the cPanel account's shell.
+                        example: /bin/bash
+                        format: path
+                        type: string
+                      user:
+                        description: 'The cPanel account username.
+
+
+                          **Note:**
+
+
+                          If you changed the cPanel account''s username, the function returns the new value.'
+                        example: example1
+                        format: username
+                        type: string
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: modifyacct
+                        type: string
+                      output:
+                        description: Output of the operation.
+                        properties:
+                          messages:
+                            description: Any messages that the system generated.
+                            example:
+                            - Reseller data updated
+                            - '0 rows updated in eximstats sends database.
+
+                              0 rows updated in eximstats smtp database.
+
+                              0 rows updated in eximstats failures database.
+
+                              0 rows updated in eximstats defers database.
+
+                              '
+                            - Username changed from example to example1
+                            - Restarting apache
+                            items:
+                              type: string
+                            type: array
+                          warnings:
+                            description: Any warnings that the system generated.
+                            example:
+                            - Changing the cPanel account username from “example” to “example1” requires Digest Authentication to be disabled.
+                            - Use the Web Disk Accounts page in cPanel to re-enable Digest Authentication.
+                            items:
+                              type: string
+                            type: array
+                        type: object
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: Account Modified
+                        type: string
+                      result:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Update cPanel account
+      tags:
+      - Accounts
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  modifyacct \\\n  user='example'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/modifyacct?api.version=1&user=example
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11'
+  /myprivs:
+    get:
+      description: This function retrieves the current user's Access Control List (ACL) privileges.
+      operationId: ACLS-myprivs
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      privileges:
+                        description: An array of objects that contains the privileges available to the user, including any third-party ACL privileges.
+                        items:
+                          properties:
+                            acct-summary:
+                              description: 'Allows the user to view an account summary.
+
+                                * `1` — Enabled.
+
+                                * `0` — Disabled.'
+                              enum:
+                              - 0
+                              - 1
+                              example: 0
+                              type: integer
+                            add-pkg:
+                              description: 'Allows the user to create packages.
+
+                                * `1` — Enabled.
+
+                                * `0` — Disabled.'
+                              enum:
+                              - 0
+                              - 1
+                              example: 0
+                              type: integer
+                            add-pkg-ip:
+                              description: 'Allows the user to create packages with dedicated IP addresses.
+
+                                * `1` — Enabled.
+
+                                * `0` — Disabled.'
+                              enum:
+                              - 0
+                              - 1
+                              example: 0
+                              type: integer
+                            add-pkg-shell:
+                              description: 'Allows the user to create packages with shell access.
+
+                                * `1` — Enabled.
+
+                                * `0` — Disabled.'
+                              enum:
+                              - 0
+                              - 1
+                              example: 0
+                              type: integer
+                            all:
+                              description: 'Provides all access privileges to the user.
+
+                                * `1` — Enabled.
+
+                                * `0` — Disabled.
+
+
+                                **Warning:**
+
+
+                                If this value is set to `1` , the user has `root` access.'
+                              enum:
+                              - 0
+                              - 1
+                              example: 0
+                              type: integer
+                            allow-addoncreate:
+                              description: 'Allows the user to create packages with addon domains.
+
+                                * `1` — Enabled.
+
+                                * `0` — Disabled.'
+                              enum:
+                              - 0
+                              - 1
+                              example: 0
+                              type: integer
+                            allow-emaillimits-pkgs:
+                              description: 'Allows the user to create packages with custom email limits.
+
+                                * `1` — Enabled.
+
+                                * `0` — Disabled.'
+                              enum:
+                              - 0
+                              - 1
+                              example: 0
+                              type: integer
+                            allow-parkedcreate:
+                              description: 'Allows the user to create packages with parked domains (aliases).
+
+                                * `1` — Enabled.
+
+                                * `0` — Disabled.'
+                              enum:
+                              - 0
+                              - 1
+                              example: 0
+                              type: integer
+                            allow-shell:
+                              description: 'Allows the user to create an account with shell access.
+
+                                * `1` — Enabled.
+
+                                * `0` — Disabled.'
+                              type: integer
+                            allow-unlimited-bw-pkgs:
+                              description: 'Allows the user to create packages with unlimited bandwidth.
+
+                                * `1` — Enabled.
+
+                                * `0` — Disabled.'
+                              enum:
+                              - 0
+                              - 1
+                              example: 0
+                              type: integer
+                            allow-unlimited-disk-pkgs:
+                              description: 'Allows the user to create packages with unlimited disk space quotas.
+
+                                * `1` — Enabled.
+
+                                * `0` — Disabled.'
+                              enum:
+                              - 0
+                              - 1
+                              example: 0
+                              type: integer
+                            allow-unlimited-pkgs:
+                              description: 'Allows the user to create packages with unlimited values for features (for example, unlimited email accounts).
+
+                                * `1` — Enabled.
+
+                                * `0` — Disabled.'
+                              enum:
+                              - 0
+                              - 1
+                              example: 0
+                              type: integer
+                            basic-system-info:
+                              description: 'Allows the user to retrieve basic system information.
+
+                                * `1` — Enabled.
+
+                                * `0` — Disabled.'
+                              enum:
+                              - 0
+                              - 1
+                              example: 0
+                              type: integer
+                            basic-whm-functions:
+                              description: 'Whether to give the reseller access to basic cPanel & WHM options.
+
+                                * `1` — Enabled.
+
+                                * `0` — Disabled.'
+                              enum:
+                              - 0
+                              - 1
+                              example: 0
+                              type: integer
+                            clustering:
+                              description: 'Allows the user to configure DNS clusters.
+
+                                * `1` — Enabled.
+
+                                * `0` — Disabled.'
+                              enum:
+                              - 0
+                              - 1
+                              example: 0
+                              type: integer
+                            cors-proxy-get:
+                              description: 'Allows the user to perform Cross-Origin Resource Sharing (CORS) HTTP requests.
+
+                                * `1` — Enabled.
+
+                                * `0` — Disabled.'
+                              enum:
+                              - 0
+                              - 1
+                              example: 0
+                              type: integer
+                            cpanel-api:
+                              description: 'Allows the reseller to execute cPanel [UAPI](https://go.cpanel.net/uapi) functions via WHM.
+
+                                * `1` — Enabled.
+
+                                * `0` — Disabled.'
+                              enum:
+                              - 0
+                              - 1
+                              example: 0
+                              type: integer
+                            cpanel-integration:
+                              description: 'Allows the user to manage how their server and its services connect to other servers and services.
+
+                                * `1` — Enabled.
+
+                                * `0` — Disabled.'
+                              enum:
+                              - 0
+                              - 1
+                              example: 0
+                              type: integer
+                            create-acct:
+                              description: 'Allows the user to create accounts.
+
+                                * `1` — Enabled.
+
+                                * `0` — Disabled.'
+                              enum:
+                              - 0
+                              - 1
+                              example: 0
+                              type: integer
+                            create-dns:
+                              description: 'Allows the user to create DNS zones.
+
+                                * `1` — Enabled.
+
+                                * `0` — Disabled.'
+                              enum:
+                              - 0
+                              - 1
+                              example: 0
+                              type: integer
+                            create-user-session:
+                              description: 'Allows the user to create a new temporary user session for a specified service.
+
+                                * `1` — Enabled.
+
+                                * `0` — Disabled.
+
+
+                                **Note:**
+
+
+                                This privilege allows an API token user to bypass any restrictions that you set on the API token. For more information, read our [Manage API Tokens](https://go.cpanel.net/whmdocsManageasisAPITokens) documentation.'
+                              enum:
+                              - 0
+                              - 1
+                              example: 0
+                              type: integer
+                            demo-setup:
+                              description: 'Allows the user to enable demo mode on accounts.
+
+                                * `1` — Enabled.
+
+                                * `0` — Disabled.'
+                              enum:
+                              - 0
+                              - 1
+                              example: 0
+                              type: integer
+                            digest-auth:
+                              description: 'Allows the user to manage Digest Authentication support.
+
+                                * `1` — Enabled.
+
+                                * `0` — Disabled.'
+                              enum:
+                              - 0
+                              - 1
+                              example: 0
+                              type: integer
+                            edit-account:
+                              description: 'Allows the user to modify accounts.
+
+                                * `1` — Enabled.
+
+                                * `0` — Disabled.
+
+
+                                **Warning:**
+
+
+                                This privilege allows circumvention of account creation limits, gives shell access unless explicitly disallowed, and provides access to dedicated IP addresses, among other features.'
+                              enum:
+                              - 0
+                              - 1
+                              example: 0
+                              type: integer
+                            edit-dns:
+                              description: 'Allows the user to edit DNS zones.
+
+                                * `1` — Enabled.
+
+                                * `0` — Disabled.'
+                              enum:
+                              - 0
+                              - 1
+                              example: 0
+                              type: integer
+                            edit-mx:
+                              description: 'Allows the user to edit MX entries.
+
+                                * `1` — Enabled.
+
+                                * `0` — Disabled.'
+                              enum:
+                              - 0
+                              - 1
+                              example: 0
+                              type: integer
+                            edit-pkg:
+                              description: 'Allows the user to create and delete packages.
+
+                                * `1` — Enabled.
+
+                                * `0` — Disabled.'
+                              enum:
+                              - 0
+                              - 1
+                              example: 0
+                              type: integer
+                            file-restore:
+                              description: 'Allows the user to restore specific files and directories from a backup.
+
+                                * `1` — Enabled.
+
+                                * `0` — Disabled.'
+                              enum:
+                              - 0
+                              - 1
+                              example: 0
+                              type: integer
+                            generate-email-config:
+                              description: 'Allows the user to generate a mobile configuration profile for an email account.
+
+                                * `1` — Enabled.
+
+                                * `0` — Disabled.'
+                              enum:
+                              - 0
+                              - 1
+                              example: 0
+                              type: integer
+                            kill-acct:
+                              description: 'Allows the user to delete their customers'' accounts.
+
+                                * `1` — Enabled.
+
+                                * `0` — Disabled.'
+                              enum:
+                              - 0
+                              - 1
+                              example: 0
+                              type: integer
+                            kill-dns:
+                              description: 'Allows the user to delete DNS zones.
+
+                                * `1` — Enabled.
+
+                                * `0` — Disabled.'
+                              enum:
+                              - 0
+                              - 1
+                              example: 0
+                              type: integer
+                            limit-bandwidth:
+                              description: "Allows the user to modify bandwidth limits on their accounts.\n* `1` — Enabled.\n* `0` — Disabled.\n\n**Warning:**\n\n This will allow circumvention of account package limits if you do not use resource limits."
+                              enum:
+                              - 0
+                              - 1
+                              example: 0
+                              type: integer
+                            list-accts:
+                              description: 'Allows the user to list owned accounts.
+
+                                * `1` — Enabled.
+
+                                * `0` — Disabled.'
+                              enum:
+                              - 0
+                              - 1
+                              example: 0
+                              type: integer
+                            list-pkgs:
+                              description: 'Allows the user to view existing hosting plans (packages).
+
+                                * `1` — Enabled.
+
+                                * `0` — Disabled.'
+                              type: integer
+                            locale-edit:
+                              description: 'Allows the user to create and modify locales on the server.
+
+                                * `1` — Enabled.
+
+                                * `0` — Disabled.'
+                              enum:
+                              - 0
+                              - 1
+                              example: 0
+                              type: integer
+                            mailcheck:
+                              description: 'Allows the user to access WHM''s [_Mail Troubleshooter_](https://go.cpanel.net/whmdocsMailTroubleshooter) interface (_WHM >> Home >> Mail >> Mail Troubleshooter_).
+
+                                * `1` — Enabled.
+
+                                * `0` — Disabled.'
+                              enum:
+                              - 0
+                              - 1
+                              example: 0
+                              type: integer
+                            manage-api-tokens:
+                              description: 'Allows the user to manage API tokens.
+
+                                * `1` — Enabled.
+
+                                * `0` — Disabled.
+
+
+                                **Note:**
+
+
+                                This ACL privilege allows an API token user to bypass any restrictions that you set on the API token.'
+                              enum:
+                              - 0
+                              - 1
+                              example: 0
+                              type: integer
+                            manage-dns-records:
+                              description: 'Allows the user to manage DNS records.
+
+                                * `1` — Enabled.
+
+                                * `0` — Disabled.'
+                              enum:
+                              - 0
+                              - 1
+                              example: 0
+                              type: integer
+                            manage-oidc:
+                              description: 'Allows the user to manage external authentication for their accounts.
+
+                                * `1` — Enabled.
+
+                                * `0` — Disabled.'
+                              enum:
+                              - 0
+                              - 1
+                              example: 0
+                              type: integer
+                            manage-styles:
+                              description: 'Allows the user to manage their server''s cPanel styles.
+
+                                * `1` — Enabled.
+
+                                * `0` — Disabled.'
+                              enum:
+                              - 0
+                              - 1
+                              example: 0
+                              type: integer
+                            mysql-info:
+                              description: 'Allows the user to retrieve MySQL® database and user data.
+
+                                * `1` — Enabled.
+
+                                * `0` — Disabled.'
+                              enum:
+                              - 0
+                              - 1
+                              example: 0
+                              type: integer
+                            news:
+                              description: 'Allows the user to send news messages to customers'' accounts.
+
+                                * `1` — Enabled.
+
+                                * `0` — Disabled.'
+                              enum:
+                              - 0
+                              - 1
+                              example: 0
+                              type: integer
+                            ns-config:
+                              description: 'Allows the user to manage nameservers.
+
+                                * `1` — Enabled.
+
+                                * `0` — Disabled.'
+                              enum:
+                              - 0
+                              - 1
+                              example: 0
+                              type: integer
+                            park-dns:
+                              description: 'Allows the user to park domains within WHM.
+
+                                * `1` — Enabled.
+
+                                * `0` — Disabled.'
+                              enum:
+                              - 0
+                              - 1
+                              example: 0
+                              type: integer
+                            passwd:
+                              description: "Allows the user to modify passwords for customers' accounts.\n* `1` — Enabled.\n* `0` — Disabled.\n\n**Note:**\n\n This privilege allows an API token user to change account passwords and log in with a new password. For more information, read our [Manage API Tokens](https://go.cpanel.net/whmdocsManageasisAPITokens) documentation."
+                              enum:
+                              - 0
+                              - 1
+                              example: 0
+                              type: integer
+                            quota:
+                              description: "Allows the user to modify disk space quotas for accounts.\n* `1` — Enabled.\n* `0` — Disabled.\n\n**Warning:**\n\n This ACL privilege allows circumvention of account package limits if you do not use resource limits."
+                              enum:
+                              - 0
+                              - 1
+                              example: 0
+                              type: integer
+                            rearrange-accts:
+                              description: 'Allows the user to rearrange the locations of customer accounts in order to free up disk space.
+
+                                * `1` — Enabled.
+
+                                * `0` — Disabled.'
+                              enum:
+                              - 0
+                              - 1
+                              example: 0
+                              type: integer
+                            resftp:
+                              description: 'Allows the user to re-sync FTP account passwords.
+
+                                * `1` — Enabled.
+
+                                * `0` — Disabled.'
+                              enum:
+                              - 0
+                              - 1
+                              example: 0
+                              type: integer
+                            restart:
+                              description: 'Allows the user to restart services on the server, such as Apache® or Exim.
+
+                                * `1` — Enabled.
+
+                                * `0` — Disabled.'
+                              enum:
+                              - 0
+                              - 1
+                              example: 0
+                              type: integer
+                            show-bandwidth:
+                              description: 'Allows the user to view the bandwidth usage of accounts.
+
+                                * `1` — Enabled.
+
+                                * `0` — Disabled.'
+                              enum:
+                              - 0
+                              - 1
+                              example: 0
+                              type: integer
+                            ssl:
+                              description: 'Allows the user to manage the SSL certificates installed on domains.
+
+                                * `1` — Enabled.
+
+                                * `0` — Disabled.'
+                              enum:
+                              - 0
+                              - 1
+                              example: 0
+                              type: integer
+                            ssl-buy:
+                              description: 'Allows the user to use WHM''s [_Purchase and Install an SSL Certificate_](https://go.cpanel.net/whmdocsPurchaseandInstallanSSLCertificate) interface (_WHM >> Home >> SSL/TLS >> Purchase and Install an SSL Certificate_).
+
+                                * `1` — Enabled.
+
+                                * `0` — Disabled.'
+                              enum:
+                              - 0
+                              - 1
+                              example: 0
+                              type: integer
+                            ssl-gencrt:
+                              description: 'Allows the user to use the SSL CSR/CRT generator.
+
+                                * `1` — Enabled.
+
+                                * `0` — Disabled.'
+                              enum:
+                              - 0
+                              - 1
+                              example: 0
+                              type: integer
+                            ssl-info:
+                              description: 'Allows the user to view their server''s SSL information.
+
+                                * `1` — Enabled.
+
+                                * `0` — Disabled.'
+                              enum:
+                              - 0
+                              - 1
+                              example: 0
+                              type: integer
+                            stats:
+                              description: 'Allows the user to view WHM''s [_Server Information_](https://go.cpanel.net/whmdocsServerInformation) interface (_WHM >> Home >> Server Status >> Server Information_).
+
+                                * `1` — Enabled.
+
+                                * `0` — Disabled.'
+                              enum:
+                              - 0
+                              - 1
+                              example: 0
+                              type: integer
+                            status:
+                              description: 'Allows the user to view WHM''s [_Service Status_](https://go.cpanel.net/whmdocsServiceStatus) interface (_WHM >> Home >> Server Status >> Service Status_).
+
+                                * `1` — Enabled.
+
+                                * `0` — Disabled.'
+                              enum:
+                              - 0
+                              - 1
+                              example: 0
+                              type: integer
+                            suspend-acct:
+                              description: 'Allows the user to suspend customers'' accounts.
+
+                                * `1` — Enabled.
+
+                                * `0` — Disabled.'
+                              enum:
+                              - 0
+                              - 1
+                              example: 0
+                              type: integer
+                            thirdparty:
+                              description: 'Allows the user to manage third-party service offerings.
+
+                                * `1` — Enabled.
+
+                                * `0` — Disabled.'
+                              enum:
+                              - 0
+                              - 1
+                              example: 0
+                              type: integer
+                            track-email:
+                              description: 'Allows the user to view reports about email message delivery attempts from their account.
+
+                                * `1` — Enabled.
+
+                                * `0` — Disabled.'
+                              enum:
+                              - 0
+                              - 1
+                              example: 0
+                              type: integer
+                            upgrade-account:
+                              description: 'Allows the user to upgrade and downgrade customers'' domain accounts.
+
+                                * `1` — Enabled.
+
+                                * `0` — Disabled.'
+                              enum:
+                              - 0
+                              - 1
+                              example: 0
+                              type: integer
+                            viewglobalpackages:
+                              description: 'Whether to allow the reseller to use all global packages. For more information, read our [reseller packages](https://go.cpanel.net/resellerpackages) documentation.
+
+                                * `1` — Enabled.
+
+                                * `0` — Disabled.'
+                              enum:
+                              - 0
+                              - 1
+                              example: 0
+                              type: integer
+                          type: object
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: myprivs
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is 0. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` - Success
+
+                          * `0` - Failed: Check the reason field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Return cPanel account system privileges
+      tags:
+      - Accounts
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  myprivs\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/myprivs?api.version=1
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11'
+  /set_digest_auth:
+    get:
+      description: 'This function enables or disables Digest Authentication for an account. Windows Vista®,
+
+        Windows® 7, and Windows® 8 requires that you enable Digest Authentication support in order
+
+        to access your Web Disk over a clear text,
+
+        unencrypted connection.
+
+
+        **Note:**
+
+
+        If the server has an SSL certificate that a recognized certificate authority signed and you
+
+        can make an SSL connection over port `2078`, you do **not** need to enable Digest Authentication.'
+      operationId: Sys-set_digest_auth
+      parameters:
+      - description: 'Whether to enable Digest Authentication for the account.
+
+
+          * `1` — Enable.
+
+          * `0` — Disable.'
+        in: query
+        name: enabledigest
+        required: true
+        schema:
+          enum:
+          - 0
+          - 1
+          example: 1
+          type: integer
+      - description: The account's password.
+        in: query
+        name: password
+        required: true
+        schema:
+          example: 123456luggage
+          type: string
+      - description: The account's username.
+        in: query
+        name: user
+        required: true
+        schema:
+          example: username
+          type: string
+      - description: 'Whether to enable Digest Authentication for the account. This is an alias for the `enabledigest` parameter.
+
+
+          * `1` — Enable.
+
+          * `0` — Disable.'
+        in: query
+        name: digestauth
+        required: false
+        schema:
+          enum:
+          - 0
+          - 1
+          example: 1
+          type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: set_digest_auth
+                        type: string
+                      reason:
+                        description: 'The reason the API function failed when the `metadata.result`
+
+                          field is `0`. This field may display a success message when
+
+                          a function succeeds.'
+                        example: Digest Authentication enabled.
+                        type: string
+                      result:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the reason field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Enable or disable Digest Authentication
+      tags:
+      - Accounts
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  set_digest_auth \\\n  user='username' \\\n  password='123456luggage' \\\n  enabledigest='1'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/set_digest_auth?api.version=1&user=username&password=123456luggage&enabledigest=1
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11'
+  /untrack_acct_id:
+    get:
+      description: 'This function removes a user identification number (UID) or group
+
+        identification number (GID) from the tracked ID list.'
+      operationId: Accounts-untrack_acct_id
+      parameters:
+      - description: 'Whether to prevent removal of user or group IDs currently in use.
+
+
+          * `1` — Prevent removal.
+
+          * `0` — Do **not** prevent removal.'
+        in: query
+        name: check_exists
+        required: false
+        schema:
+          default: 1
+          enum:
+          - 0
+          - 1
+          example: 1
+          type: integer
+      - description: 'Whether to prevent removal of the user ID if the quota system tracks associated files.
+
+
+          * `1` — Prevent removal.
+
+          * `0` — Do **not** prevent removal.
+
+
+          **Note:**
+
+
+          * This parameter **only** applies to user IDs and **not** group IDs.
+
+          * You cannot check filesystems if the quota system does **not** track them.'
+        in: query
+        name: check_quota
+        required: false
+        schema:
+          default: 1
+          enum:
+          - 0
+          - 1
+          example: 1
+          type: integer
+      - description: "The group ID to remove from the track list.\n\n**Note:**\n\n You **must** include the `uid` parameter, the `gid` parameter, or both."
+        in: query
+        name: gid
+        required: false
+        schema:
+          example: 1012
+          type: integer
+      - description: 'Whether to prevent removal of system user or group IDs.
+
+
+          * `1` — Prevent removal.
+
+          * `0` — Do **not** prevent removal.'
+        in: query
+        name: protect_system
+        required: false
+        schema:
+          default: 1
+          enum:
+          - 0
+          - 1
+          example: 1
+          type: integer
+      - description: "The user ID to remove from the track list.\n\n**Note:**\n\n You **must** include the `uid` parameter, the `gid` parameter, or both."
+        in: query
+        name: uid
+        required: false
+        schema:
+          example: 1012
+          type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: untrack_acct_id
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Remove UID or GID from tracked list
+      tags:
+      - Accounts
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  untrack_acct_id \\\n  uid='1012'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/untrack_acct_id?api.version=1&uid=1012
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '58'
+components:
+  schemas:
+    diskSchema:
+      allOf:
+      - $ref: '#/components/schemas/nearReachedBaseSchema'
+      - properties:
+          fraction:
+            type:
+            - number
+            - 'null'
+          near:
+            enum:
+            - 0
+            - 1
+            type:
+            - integer
+            - 'null'
+          reached:
+            enum:
+            - 0
+            - 1
+            type:
+            - integer
+            - 'null'
+          threshold_blocks:
+            description: The block threshold used for the resource limit check.
+            example: 10485760
+            type:
+            - integer
+            - 'null'
+    IntPosOrUnlimited:
+      example: unlimited
+      oneOf:
+      - enum:
+        - unlimited
+        type: string
+      - minimum: 0
+        type: integer
+    Int0Max999999NullOrUnlimited:
+      example: unlimited
+      oneOf:
+      - enum:
+        - null
+      - enum:
+        - unlimited
+        type: string
+      - maximum: 999999
+        minimum: 1
+        type: integer
+    Int0-999999NullOrUnlimited:
+      example: unlimited
+      oneOf:
+      - enum:
+        - null
+      - enum:
+        - unlimited
+        type: string
+      - maximum: 999999
+        minimum: 0
+        type: integer
+    IntPosNullOrUnlimited:
+      example: unlimited
+      oneOf:
+      - enum:
+        - null
+      - enum:
+        - unlimited
+        type: string
+      - minimum: 0
+        type: integer
+    nearReachedBaseSchema:
+      properties:
+        fraction:
+          description: A fractional number ranging from 0.00 to 1.00 indicating the fraction of the resource limit that was consumed.
+          example: 0.54
+          type: number
+        near:
+          description: 'Whether the account is near this resource limit. Nearness is defined according to `nearness_fraction`.
+
+
+            * `1` — Near.
+
+            * `0` — Not near.'
+          enum:
+          - 0
+          - 1
+          example: 1
+          type: integer
+        reached:
+          description: 'Whether the account has reached this resource limit.
+
+
+            * `1` — Reached.
+
+            * `0` — Not reached.'
+          enum:
+          - 0
+          - 1
+          example: 1
+          type: integer
+      type: object
+    Int999999OrUnlimited:
+      example: unlimited
+      oneOf:
+      - enum:
+        - unlimited
+        type: string
+      - maximum: 999999
+        minimum: 0
+        type: integer
+  securitySchemes:
+    BasicAuth:
+      scheme: basic
+      type: http
+externalDocs:
+  url: https://cpanel.net/developers/
+x-tagGroups:
+- name: Account Restoration
+  tags:
+  - Restore Account
+  - Restore Queue Management
+  - Restore Queue Reporting
+- name: Accounts
+  tags:
+  - Account Creation
+  - Account Enhancements
+  - Account Management
+  - Bandwidth and Disk Quotas
+  - Domain Information
+  - Passwords
+  - Styles
+  - Suspensions
+- name: API Development Tools
+  tags:
+  - API Execution
+  - API Statistics
+  - API Token Management
+  - Applications
+  - Session
+- name: Authentication
+  tags:
+  - Authentication Providers
+  - External Authentication
+  - Login URL
+  - SSH Keys and Connections
+  - Two-Factor Authentication
+- name: Backups
+  tags:
+  - Backup Destination
+  - Backup or Restore
+  - Backup Settings
+  - Legacy Migration
+- name: Commerce Integration
+  tags:
+  - Market Integration
+  - Sitejet
+- name: cPanel Market
+  tags:
+  - Product Management
+  - Provider Management
+- name: cPanel Support Tickets
+  tags:
+  - Support Access
+  - Ticket Management
+- name: Customizations
+  tags:
+  - Brand
+  - Customizations
+- name: Databases
+  tags:
+  - Manage MySQL Server
+  - MySQL Databases
+  - PostgreSQL Databases
+  - Remote MySQL Databases
+- name: DNS
+  tags:
+  - DNS Cluster Settings
+  - DNS Security
+  - DNS Zones
+  - Domain Management
+  - Domain Management
+  - Resolvers
+  - Service Records
+- name: Hosting Plans
+  tags:
+  - Feature Access
+  - Feature Lists
+  - Hosting Plan Extensions
+  - Hosting Plans
+- name: InProductSurvey
+  tags:
+  - InProductSurvey
+- name: Integrations
+  tags:
+  - API Authentication
+  - Links
+  - Scripts Hooks
+- name: IP Address Management
+  tags:
+  - IPv4 Address Settings
+  - IPv6 Address Settings
+  - Network Address Translation
+- name: Login Security (cPHulk)
+  tags:
+  - Management
+  - Reporting
+  - Settings
+- name: Logs
+  tags:
+  - Web Log Retention
+- name: Mail
+  tags:
+  - cPanel Account Mail Management
+  - Mail DNS Settings
+  - Mail Server Settings
+  - Spam Management
+  - Spam Protection (Greylisting)
+- name: Monitoring
+  tags:
+  - 360 Monitoring
+- name: NGINX Manager
+  tags:
+  - NGINX Manager
+- name: Resellers
+  tags:
+  - Account Enhancement Limit
+  - Account Limits
+  - Account Permissions
+  - Account Settings
+  - Reseller Account Management
+- name: Security
+  tags:
+  - WHM Access
+- name: Server Administration
+  tags:
+  - Configuration Clusters
+  - Configurations
+  - Connected Applications
+  - Connections
+  - cPanel Analytics
+  - License Management
+  - Notifications
+  - Plugin-Based Features
+  - Security
+  - Server Nodes
+  - Server Profiles
+  - Services
+  - System Information
+  - Updates
+- name: SSL Certificates
+  tags:
+  - Auto-Generated Certificates
+  - cPanel Account Settings
+  - SSL Server Settings
+- name: System Package Management
+  tags:
+  - Install or Uninstall Package
+  - List Package Information
+  - Package Manager Settings
+- name: Transfers
+  tags:
+  - cPanel Account Transfer
+  - Transfer Configuration
+  - Transfer Monitoring
+- name: UserData
+  tags:
+  - UserData
+- name: Web Server Configuration
+  tags:
+  - EasyApache Settings
+  - PHP
+  - PHP-FPM
+- name: Web Server Security (ModSecurity)
+  tags:
+  - Rule Settings
+  - Rule Vendor Settings
+  - Server Settings

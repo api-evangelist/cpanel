@@ -1,0 +1,2902 @@
+openapi: 3.2.0
+info:
+  contact:
+    email: cs@cpanel.net
+    name: WebPros International, LLC
+    url: https://cpanel.net/support/
+  description: WHM API.
+  license:
+    name: cPanel License
+    url: https://cpanel.net/legal-notices/
+  termsOfService: https://cpanel.net/legal-notices/
+  title: WHM Databases API
+  version: 11.137.9999.106
+  x-api-evangelist-provenance: 'Harvested verbatim from cPanel''s developer portal on 2026-09-05 via the MCP tool get-full-api-description at https://api.docs.cpanel.net/mcp. ONE mechanical change was made before storage: example values containing PEM private-key or certificate blocks, and AWS-access-key-shaped example strings, were replaced with REDACTED_* placeholders so the file can be stored in a public git repository without tripping secret scanning. No path, operation, parameter, schema or description was altered, added or removed.'
+servers:
+- description: A server running WHM.
+  url: https://{host}:{port}/json-api
+  variables:
+    host:
+      default: whm-server.tld
+      description: The hostname of a server running WHM.
+    port:
+      default: '2087'
+      description: The WHM port.
+security:
+- BasicAuth: []
+tags:
+- description: The Databases module for WHM API 1.
+  name: Databases
+paths:
+  /background_mysql_upgrade_checker_run:
+    get:
+      description: 'This function checks your MySQL configuration file and table engine before an upgrade to MySQL 8.0.
+
+
+        **Important:**
+
+
+        When you disable the
+
+        MySQL/MariaDB role
+
+        **and** remote MySQL is **not** already configured, the system **disables** this function.'
+      operationId: Mysql-background_mysql_upgrade_checker_run
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      log_entry:
+                        description: 'The upgrade log''s location, relative to the
+
+                          [`/var/cpanel/logs/`](https://docs.cpanel.net/knowledge-base/cpanel-product/the-cpanel-log-files/#/var-cpanel-logs)
+
+                          directory.'
+                        example: mysql_upgrade.20200202-172923
+                        type: string
+                      pid:
+                        description: The upgrade check's process ID.
+                        example: 23456
+                        minimum: 1
+                        type: integer
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: background_mysql_upgrade_checker_run
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 1
+                        - 0
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Validate MySQL status before upgrade
+      tags:
+      - Databases
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  background_mysql_upgrade_checker_run\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/background_mysql_upgrade_checker_run?api.version=1
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '88'
+  /background_mysql_upgrade_status:
+    get:
+      description: 'This function retrieves the status of a background MySQL® or MariaDB® upgrade.
+
+
+        **Important:**
+
+
+        When you disable the MySQL/MariaDB role and remote MySQL is **not** already configured, the system **disables** this function.'
+      operationId: Mysql-background_mysql_upgrade_status
+      parameters:
+      - description: "The logfile's name.\n\n**Note:**\n\n  Log files exist in the `/var/cpanel/logs/` directory."
+        in: query
+        name: upgrade_id
+        required: true
+        schema:
+          example: mysql_upgrade.20141108-172923
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      error:
+                        description: 'An error code.
+
+                          * `0` — Successful upgrade.
+
+                          * `-1` — Child process died from a signal.
+
+                          * `4` — MySQL upgrade failed error code.'
+                        example: 0
+                        type: integer
+                      error_log:
+                        description: "The upgrade's error log file.\n\n**Note:**\n\n You can review MySQL upgrade error logs in the following location, where $TIME represents the time in [Unix epoch time](https://en.wikipedia.org/wiki/Unix_time) format: `/var/cpanel/logs/mysql_upgrade.$TIME/unattended_background_upgrade.error`."
+                        example: Starting The system failed to update MYSQL,\n------------------------------------\n
+                        type: string
+                      log:
+                        description: The upgrade's log file.
+                        example: "Starting process with log file at /var/cpanel/logs/mysql_upgrade.20141108-172923/unattended_background_upgrade.log\nBeginning MariaDB 10.0 upgrade...\nObtained version information from system.\nEnsuring the MariaDB100 repository is available and working.\ncheckyum version 22.3\nEnsuring that the package MariaDB-client with version matching 10.0 is available.\nEnsuring that the package MariaDB-common with version matching 10.0 is available.\nEnsuring that the package MariaDB-devel with version matching 10.0 is available.\nEnsuring that the package MariaDB-server with version matching 10.0 is available.\nEnsuring that the package MariaDB-shared with version matching 10.0 is available.\nEnsuring that the package coreutils is available.\nEnsuring that the package grep is available.\nEnsuring that the package perl-DBI is available.\n your MariaDB server version for the right syntax to use near ''.`netcopya0I5KfqYTfHqJr` FOR UPGRADE'' at line 1 when executing ''CHECK TABLE ... FOR UPGRADE''\nFATAL ERROR: Upgrade failed\nDone building configuration.\nHooks system enabled.\nChecking for and running RPM::Versions ''post'' hooks for any RPMs about to be installed\nAll required ''post'' hooks have been run\nRunning: /usr/local/cpanel/scripts/check_cpanel_pkgs --targets=MySQL41,MySQL50,MySQL51,MySQL55,MySQL56,MariaDB100,MariaDB101 --fix\nRestarting mysql service.\nWaiting for mysql to restart waiting for mysql to initialize finished.\n[1;32mMariaDB upgrade completed successfully[0m\n------------------------------------\n"
+                        type: string
+                      state:
+                        description: 'The upgrade''s state.
+
+                          * success
+
+                          * failed
+
+                          * in progress'
+                        enum:
+                        - success
+                        - failed
+                        - in progress
+                        example: success
+                        type: string
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: background_mysql_upgrade_status
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Return MySQL or MariaDB upgrade status
+      tags:
+      - Databases
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  background_mysql_upgrade_status \\\n  upgrade_id='mysql_upgrade.20141108-172923'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/background_mysql_upgrade_status?api.version=1&upgrade_id=mysql_upgrade.20141108-172923
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: cPanel 11.48
+  /current_mysql_version:
+    get:
+      description: 'This function retrieves the server''s version of MySQL® or MariaDB®.
+
+
+        **Important:**
+
+
+        When you disable the MySQL/MariaDB role **and** remote MySQL is **not** already configured, the system **disables** this function.'
+      operationId: Mysql-current_mysql_version
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      server:
+                        default: mysql
+                        description: 'The server''s database engine.
+
+                          * `mysql`
+
+                          * `mariadb`'
+                        enum:
+                        - mysql
+                        - mariadb
+                        example: mysql
+                        type: string
+                      version:
+                        description: The version number, in `major`.`minor` format.
+                        example: '8.0'
+                        type: string
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: current_mysql_version
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is 0. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` - Success
+
+                          * `0` - Failed: Check the reason field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Return MySQL version
+      tags:
+      - Databases
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  current_mysql_version\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/current_mysql_version?api.version=1
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: cPanel 11.48
+  /get_database_optimizations:
+    get:
+      description: 'This function retrieves available database optimizations.
+
+
+        **Warning:**
+
+
+        On some servers, this function may return a large amount of output. We strongly suggest that you filter and sort the output.
+
+
+        **Important:**
+
+
+        The system **disables** this function when you have **not** configured remote MySQL, and you''ve disabled the MySQL/MariaDB and PostgreSQL roles.'
+      operationId: DB-get_database_optimizations
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      payload:
+                        description: An array of objects that contain my.cnf options and their recommended values.
+                        items:
+                          properties:
+                            name:
+                              description: The name of the option.
+                              example: innodb_sort_buffer_size
+                              type: string
+                            reason:
+                              description: A justification for why the option should be adjusted.
+                              example: Your system's peak theoretical memory allocation is too high and may cause instability.
+                              type: string
+                            value:
+                              description: The recommended option value.
+                              example: 2M
+                              type: string
+                          type: object
+                        type: array
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: get_database_optimizations
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Return MySQL database optimizations
+      tags:
+      - Databases
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  get_database_optimizations\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/get_database_optimizations?api.version=1
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11.44'
+  /installable_mysql_versions:
+    get:
+      description: 'This function lists all available versions of MySQL® and MariaDB.
+
+
+        **Important:**
+
+
+        When you disable the MySQL/MariaDB role **and** remote MySQL is **not** already configured, the system disables this function.'
+      operationId: Mysql-installable_mysql_versions
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      versions:
+                        description: An array of objects that contain information about the database version information.
+                        items:
+                          properties:
+                            server:
+                              description: 'The server''s database engine.
+
+                                * `mysql`
+
+                                * `mariadb`'
+                              enum:
+                              - mysql
+                              - mariadb
+                              example: mariadb
+                              type: string
+                            version:
+                              description: The version number in `major.minor` format.
+                              example: '10.0'
+                              type: string
+                          type: object
+                        type: array
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: installable_mysql_versions
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` — Success
+
+                          * `0` — Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Return available MySQL versions
+      tags:
+      - Databases
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  installable_mysql_versions\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/installable_mysql_versions?api.version=1
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: cPanel 11.48
+  /latest_available_mysql_version:
+    get:
+      description: 'This function retrieves the latest available version of MySQL® or MariaDB®.
+
+
+        **Important:**
+
+
+        When you disable the MySQL/MariaDB role and remote MySQL is **not** already configured, the system **disables** this function.'
+      operationId: Mysql-latest_available_mysql_version
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      server:
+                        description: 'The server''s database engine.
+
+                          * `mysql`
+
+                          * `mariadb`'
+                        enum:
+                        - mysql
+                        - mariadb
+                        example: mariadb
+                        type: string
+                      version:
+                        description: The version number in `major.minor` format.
+                        example: '10.0'
+                        type: string
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: latest_available_mysql_version
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` - Success
+
+                          * `0` - Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Return latest MySQL version
+      tags:
+      - Databases
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  latest_available_mysql_version\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/latest_available_mysql_version?api.version=1
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: cPanel 11.48
+  /list_database_users:
+    get:
+      description: 'This function lists the server''s database users.
+
+
+        **Warning:**
+
+
+        On most servers, this function returns a large amount of output. We **strongly** suggest that you filter and sort the output.
+
+
+        **Important:**
+
+
+        When you disable the MySQL/MariaDB and PostgreSQL roles and remote MySQL is not already configured, the system **disables** this function.'
+      operationId: DB-list_database_users
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      payload:
+                        description: An array of database data objects.
+                        items:
+                          properties:
+                            cpuser:
+                              description: The database user's owner.
+                              example: example
+                              type: string
+                            engine:
+                              description: 'The database user''s database engine.
+
+                                * `mysql`
+
+                                * `postgresql`'
+                              enum:
+                              - mysql
+                              - postgresql
+                              example: postgresql
+                              type: string
+                            name:
+                              description: The database user's name.
+                              example: example_user1
+                              type: string
+                          type: object
+                        type: array
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: list_database_users
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` — Success
+
+                          * `0` — Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Return MySQL users
+      tags:
+      - Databases
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  list_database_users\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/list_database_users?api.version=1
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11.44'
+  /list_databases:
+    get:
+      description: 'This function lists the server''s databases.
+
+
+        **Warning:**
+
+
+        On most servers, this function returns a large amount of output. We strongly suggest that you filter and sort the output.
+
+
+        **Important:**
+
+
+        When you disable the MySQL/MariaDB and PostgreSQL roles and remote MySQL is **not** already configured, the system **disables** this function.'
+      operationId: DB-list_databases
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      payload:
+                        description: An array of objects that contain of database data.
+                        items:
+                          properties:
+                            cpuser:
+                              description: The database's owner.
+                              example: example
+                              format: username
+                              type: string
+                            engine:
+                              description: 'The database''s engine.
+
+                                - `mysql`
+
+                                - `postgresql`'
+                              enum:
+                              - mysql
+                              - postgresql
+                              example: postgresql
+                              type: string
+                            name:
+                              description: The database's name.
+                              example: example_db0
+                              type: string
+                          type: object
+                        type: array
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: list_databases
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Return MySQL databases
+      tags:
+      - Databases
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  list_databases\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/list_databases?api.version=1
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11.44'
+  /list_mysql_databases_and_users:
+    get:
+      description: 'This function retrieves the MySQL® database and user data for the specified account.
+
+
+        **Important:**
+
+
+        When you disable the MySQL/MariaDB role **and** remote MySQL is **not** already configured, the system **disables** this function.'
+      operationId: DB-list_mysql_databases_and_users
+      parameters:
+      - description: The username for a specified account.
+        in: query
+        name: user
+        required: true
+        schema:
+          example: username
+          format: username
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      mysql_config:
+                        description: An object that contains the user's MySQL database configuration settings.
+                        properties:
+                          mysql-version:
+                            description: The MySQL version installed on the server.
+                            example: '5.5'
+                            type: string
+                          prefix_length:
+                            description: The maximum number of characters allowed for the prefix on this server.
+                            enum:
+                            - 8
+                            - 16
+                            example: 8
+                            type: integer
+                          use_db_prefix:
+                            description: 'Whether database prefixing is enabled on the server.
+
+                              * `1` — Enabled.
+
+                              * `0` — Disabled.'
+                            enum:
+                            - 0
+                            - 1
+                            example: 1
+                            type: integer
+                        type: object
+                      mysql_databases:
+                        additionalProperties:
+                          description: The database's name is the key's name.
+                          items:
+                            description: A database username with permissions on the database.
+                            type: string
+                          type: array
+                        description: An object that contains database names and users.
+                        example:
+                          user1_database1:
+                          - user1_user1
+                          user2_database2:
+                          - user2_user2
+                        type: object
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: list_mysql_databases_and_users
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Return MySQL databases and users for account
+      tags:
+      - Databases
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  list_mysql_databases_and_users \\\n  user='username'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/list_mysql_databases_and_users?api.version=1&user=username
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '56'
+  /remote_mysql_create_profile:
+    get:
+      description: This function creates a profile to access a remote MySQL® server.
+      operationId: RemoteMySQL-remote_mysql_create_profile
+      parameters:
+      - description: The MySQL server's IP address or hostname.
+        in: query
+        name: mysql_host
+        required: true
+        schema:
+          example: 192.168.0.1
+          oneOf:
+          - format: ipv4
+            type: string
+          - format: hostname
+            type: string
+      - description: The MySQL server's password.
+        in: query
+        name: mysql_pass
+        required: true
+        schema:
+          example: 12345luggage
+          type: string
+      - description: The MySQL server's port.
+        in: query
+        name: mysql_port
+        required: true
+        schema:
+          example: 3306
+          maximum: 65535
+          minimum: 1
+          type: integer
+      - description: The MySQL server's username.
+        in: query
+        name: mysql_user
+        required: true
+        schema:
+          example: username
+          type: string
+      - description: The new profile's name.
+        in: query
+        name: name
+        required: true
+        schema:
+          example: MyProfile
+          type: string
+      - description: 'Whether the remote database profile is a cPanel Cloud deployment.
+
+
+          * `1` — Is cPanel Cloud.
+
+          * `0` — **Not** cPanel Cloud.'
+        in: query
+        name: cpcloud
+        required: false
+        schema:
+          example: 1
+          type: integer
+          default: 0
+      - description: 'A description of the profile data.
+
+
+          **Note:**
+
+
+          This parameter defaults to `User provided
+
+          MySQL credentials`.'
+        in: query
+        name: setup_via
+        required: false
+        schema:
+          example: Main terminal
+          maxLength: 255
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      profile_details:
+                        description: An object containing the new profile's data.
+                        properties:
+                          active:
+                            description: 'Whether the system uses this profile to access the MySQL server.
+
+                              * `1` — Active.
+
+                              * `0` — **Not** active.'
+                            enum:
+                            - 0
+                            - 1
+                            example: 0
+                            type: integer
+                          cpcloud:
+                            default: '0'
+                            description: 'Whether the remote database profile is a cPanel Cloud deployment.
+
+
+                              * `1` — Is cPanel Cloud.
+
+                              * `0` — **Not** cPanel Cloud.'
+                            enum:
+                            - 0
+                            - 1
+                            example: 0
+                            type: integer
+                          mysql_host:
+                            description: The MySQL server's IP address or hostname.
+                            example: 192.168.0.1
+                            oneOf:
+                            - format: ipv4
+                              type: string
+                            - format: hostname
+                              type: string
+                          mysql_pass:
+                            description: The MySQL server's password.
+                            example: 12345luggage
+                            type: string
+                          mysql_port:
+                            description: The MySQL server's port.
+                            example: 3306
+                            maximum: 65535
+                            minimum: 1
+                            type: integer
+                          mysql_user:
+                            description: The MySQL server's username.
+                            example: username
+                            type: string
+                          setup_via:
+                            description: A description of the profile data.
+                            example: Main terminal
+                            maxLength: 255
+                            type: string
+                        type: object
+                      profile_saved:
+                        description: The new profile's name.
+                        example: MyProfile
+                        type: string
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: remote_mysql_create_profile
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Create remote MySQL profile
+      tags:
+      - Databases
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  remote_mysql_create_profile \\\n  name='MyProfile' \\\n  mysql_host='192.168.0.1' \\\n  mysql_user='username' \\\n  mysql_pass='12345luggage' \\\n  mysql_port='3306'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/remote_mysql_create_profile?api.version=1&name=MyProfile&mysql_host=192.168.0.1&mysql_user=username&mysql_pass=12345luggage&mysql_port=3306
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11.52'
+  /remote_mysql_create_profile_via_ssh:
+    get:
+      description: This function uses SSH to create a profile to access a remote MySQL® server.
+      operationId: RemoteMySQL-remote_mysql_create_profile_via_ssh
+      parameters:
+      - description: The MySQL server's IP address or hostname.
+        in: query
+        name: host
+        required: true
+        schema:
+          example: 192.168.0.1
+          oneOf:
+          - format: ipv4
+            type: string
+          - format: hostname
+            type: string
+      - description: The new profile's name.
+        in: query
+        name: name
+        required: true
+        schema:
+          example: MyProfileSSH
+          type: string
+      - description: The SSH server's port.
+        in: query
+        name: port
+        required: true
+        schema:
+          example: 22
+          maximum: 65535
+          minimum: 1
+          type: integer
+      - description: The SSH username.
+        in: query
+        name: user
+        required: true
+        schema:
+          example: SSHuser
+          type: string
+      - description: 'Whether the remote database profile is a cPanel Cloud deployment.
+
+
+          * `1` — Is cPanel Cloud.
+
+          * `0` — **Not** cPanel Cloud.'
+        in: query
+        name: cpcloud
+        required: false
+        schema:
+          default: 0
+          example: 1
+          type: integer
+      - description: "The SSH username's password.\n\n**Warning:**\n\n You **must** specify either the `password` or the `sshkey_name` parameter."
+        in: query
+        name: password
+        required: false
+        schema:
+          example: 12345luggage
+          type: string
+      - description: "The escalation method to use to authenticate the account.\n\n**Warning:**\n\n This parameter is **required** if the user parameter's value is not `root`."
+        in: query
+        name: root_escalation_method
+        required: false
+        schema:
+          enum:
+          - sudo
+          - su
+          example: su
+          type: string
+      - description: "The MySQL server's root user's password.\n\n**Warning:**\n\n This parameter is **required** if the `root_escalation_method` parameter's value is `su`."
+        in: query
+        name: root_password
+        required: false
+        schema:
+          example: username
+          type: string
+      - description: "The name of the SSH key.\n\n**Warning:**\n\n You **must** specify either the `password` or the `sshkey_name` parameter."
+        in: query
+        name: sshkey_name
+        required: false
+        schema:
+          example: VinzClortho
+          type: string
+      - description: "The SSH key's passphrase.\n\n**Warning:**\n\n This parameter is **required** if the `sshkey_name` value is password-protected."
+        in: query
+        name: sshkey_passphrase
+        required: false
+        schema:
+          example: Gozer
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      profile_details:
+                        description: An object containing the new profile's data.
+                        properties:
+                          cpcloud:
+                            default: '0'
+                            description: 'Whether the remote database profile is a cPanel Cloud deployment.
+
+
+                              * `1` — Is cPanel Cloud.
+
+                              * `0` — **Not** cPanel Cloud.'
+                            enum:
+                            - 0
+                            - 1
+                            example: 0
+                            type: integer
+                          mysql_host:
+                            description: The MySQL server's IP address or hostname.
+                            example: 192.168.0.1
+                            oneOf:
+                            - format: ipv4
+                              type: string
+                            - format: hostname
+                              type: string
+                          mysql_pass:
+                            description: The MySQL server's password.
+                            example: 12345luggage
+                            type: string
+                          mysql_port:
+                            description: The MySQL server's port.
+                            example: 3306
+                            maximum: 65535
+                            minimum: 1
+                            type: integer
+                          mysql_user:
+                            description: The MySQL server's username.
+                            example: username
+                            type: string
+                          setup_via:
+                            description: description of the profile data.
+                            example: Created via SSH
+                            maxLength: 255
+                            type: string
+                        type: object
+                      profile_saved:
+                        description: The new profile's name.
+                        example: MyProfileSSH
+                        type: string
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: remote_mysql_create_profile_via_ssh
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Create remote MySQL profile via SSH
+      tags:
+      - Databases
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  remote_mysql_create_profile_via_ssh \\\n  name='MyProfileSSH' \\\n  user='SSHuser' \\\n  host='192.168.0.1' \\\n  port='22'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/remote_mysql_create_profile_via_ssh?api.version=1&name=MyProfileSSH&user=SSHuser&host=192.168.0.1&port=22
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11.52'
+  /remote_mysql_delete_profile:
+    get:
+      description: This function deletes a specified remote MySQL® profile.
+      operationId: RemoteMySQL-remote_mysql_delete_profile
+      parameters:
+      - description: The profile's name.
+        in: query
+        name: name
+        required: true
+        schema:
+          example: MyProfile
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      profile_deleted:
+                        description: The deleted profile's name. A valid string.
+                        example: MyProfile
+                        type: string
+                      profile_details:
+                        description: hash of the deleted profile's data. This hash includes the name , mysql_host , mysql_user , mysql_pass , mysql_port , setup_via , and active returns.
+                        properties:
+                          active:
+                            description: 'Whether the system uses this profile to access the MySQL server.
+
+                              - 1  Active.
+
+                              - 0  Not active.'
+                            enum:
+                            - 0
+                            - 1
+                            example: 0
+                            type: integer
+                          mysql_host:
+                            description: The MySQL server's IP address or hostname. A valid IP address or hostname.
+                            example: 192.168.0.1
+                            type: string
+                          mysql_pass:
+                            description: The MySQL server's password. A valid string.
+                            example: 12345luggage
+                            type: string
+                          mysql_port:
+                            description: The MySQL server's port. A valid positive integer.
+                            example: 3306
+                            type: integer
+                          mysql_user:
+                            description: The MySQL server's username. A valid string.
+                            example: username
+                            type: string
+                          setup_via:
+                            description: description of the profile data. A valid string with a maximum length of 255 characters.
+                            example: Main terminal
+                            type: string
+                        type: object
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: remote_mysql_delete_profile
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is 0. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` - Success
+
+                          * `0` - Failed: Check the reason field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Delete remote MySQL profile
+      tags:
+      - Databases
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  remote_mysql_delete_profile \\\n  name='MyProfile'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/remote_mysql_delete_profile?api.version=1&name=MyProfile
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11.52'
+  /remote_mysql_initiate_profile_activation:
+    get:
+      description: This function initiates the activation process for a remote MySQL® profile.
+      operationId: RemoteMySQL-remote_mysql_initiate_profile_activation
+      parameters:
+      - description: The profile's name.
+        in: query
+        name: name
+        required: true
+        schema:
+          example: MyProfile
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      activation_job_started:
+                        description: The profile activation's process ID.
+                        example: 8093
+                        minimum: 1
+                        type: integer
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: remote_mysql_initiate_profile_activation
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` — Success
+
+                          * `0` — Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Start remote MySQL profile activation
+      tags:
+      - Databases
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  remote_mysql_initiate_profile_activation \\\n  name='MyProfile'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/remote_mysql_initiate_profile_activation?api.version=1&name=MyProfile
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11.52'
+  /remote_mysql_monitor_profile_activation:
+    get:
+      description: This function reports the current status of the remote MySQL® profile activation process. The activation process contains several steps that take some time to complete, so so you may need to call this function multiple times multiple times to monitor the progress.
+      operationId: RemoteMySQL-remote_mysql_monitor_profile_activation
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      job_in_progress:
+                        description: An object containing the profile activation that is currently in progress.
+                        properties:
+                          profile_name:
+                            description: The the name of the activated profile.
+                            example: remote_server
+                            type: string
+                          start_time:
+                            description: The time when the job started.
+                            example: 1432064519
+                            format: unix_timestamp
+                            type: integer
+                          status:
+                            description: 'The job''s current status.
+
+                              * `DONE` — The process completed successfully.
+
+                              * `INPROGRESS` — The process is currently active.
+
+                              * `FAILED` — The process failed to complete successfully.'
+                            enum:
+                            - DONE
+                            - INPROGRESS
+                            - FAILED
+                            example: INPROGRESS
+                            type: string
+                          steps:
+                            description: An array of objects containing the completed or active processes for the current profile activation.
+                            items:
+                              properties:
+                                end_time:
+                                  description: The time when the process finished.
+                                  example: 1432064520
+                                  format: unix_timestamp
+                                  type: integer
+                                name:
+                                  description: The name of the process.
+                                  example: Updating /root/.my.cnf
+                                  type: string
+                                start_time:
+                                  description: The time when the process began.
+                                  example: 1432064519
+                                  format: unix_timestamp
+                                  type: integer
+                                status:
+                                  description: 'The process''s current status.
+
+                                    * `DONE` — The process completed successfully.
+
+                                    * `INPROGRESS` — The process is currently active.
+
+                                    * `FAILED` — The process failed to complete successfully.'
+                                  enum:
+                                  - DONE
+                                  - INPROGRESS
+                                  - FAILED
+                                  example: DONE
+                                  type: string
+                              type: object
+                            type: array
+                        type: object
+                      last_job_details:
+                        description: An object containing the most recently completed profile activation's data.
+                        properties:
+                          end_time:
+                            description: The time when the job finished.
+                            example: 1432220941
+                            format: unix_timestamp
+                            type: integer
+                          profile_name:
+                            description: The the name of the activated profile.
+                            example: MyProfile
+                            type: string
+                          start_time:
+                            description: The time when the job started.
+                            example: 1432064519
+                            format: unix_timestamp
+                            type: integer
+                          status:
+                            description: 'The job''s current status.
+
+                              * `DONE` — The process completed successfully.
+
+                              * `INPROGRESS` — The process is currently active.
+
+                              * `FAILED` - The process failed to complete successfully.'
+                            enum:
+                            - DONE
+                            - INPROGRESS
+                            - FAILED
+                            example: DONE
+                            type: string
+                          steps:
+                            description: An array of objects containing the completed processes for the most recent profile activation.
+                            items:
+                              properties:
+                                end_time:
+                                  description: The time when the process finished.
+                                  example: 1432220941
+                                  format: unix_timestamp
+                                  type: integer
+                                name:
+                                  description: The name of the process.
+                                  type: string
+                                start_time:
+                                  description: The time when the process began.
+                                  example: 1432220941
+                                  format: unix_timestamp
+                                  type: integer
+                                status:
+                                  description: 'The process''s current status.
+
+                                    * `DONE` — The process completed successfully.
+
+                                    * `INPROGRESS` - The process is currently active.
+
+                                    * `FAILED` - The process failed to complete successfully.'
+                                  example: DONE
+                                  type: string
+                              type: object
+                            type: array
+                        type: object
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: remote_mysql_monitor_profile_activation
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is 0. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` - Success
+
+                          * `0` - Failed: Check the reason field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Return remote MySQL profile activation
+      tags:
+      - Databases
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  remote_mysql_monitor_profile_activation\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/remote_mysql_monitor_profile_activation?api.version=1
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11.52'
+  /remote_mysql_read_profile:
+    get:
+      description: This function displays the details of a specified remote MySQL® profile.
+      operationId: RemoteMySQL-remote_mysql_read_profile
+      parameters:
+      - description: The MySQL profile's name.
+        in: query
+        name: name
+        required: true
+        schema:
+          example: MyProfile
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      profile_details:
+                        description: An object containing the profile's data.
+                        properties:
+                          active:
+                            description: 'Whether the system uses this profile to access the MySQL server.
+
+
+                              * `1` — The system uses the profile.
+
+                              * `0` — The system does **not** use the profile.'
+                            enum:
+                            - 1
+                            - 0
+                            example: 0
+                            type: integer
+                          mysql_host:
+                            description: The MySQL server's IP address or hostname.
+                            oneOf:
+                            - description: A valid IP address.
+                              example: 192.168.0.1
+                              format: ipv4
+                              type: string
+                            - description: A valid hostname.
+                              example: hostname.example.com
+                              format: hostname
+                              type: string
+                            type: string
+                          mysql_pass:
+                            description: The MySQL server's password.
+                            example: 123456luggage
+                            type: string
+                          mysql_port:
+                            description: The MySQL server's port number.
+                            example: 3306
+                            maximum: 65535
+                            minimum: 1
+                            type: integer
+                          mysql_user:
+                            description: The MySQL server's username.
+                            example: username
+                            type: string
+                          setup_via:
+                            description: A description of the MySQL profile data.
+                            example: Main terminal
+                            maxLength: 255
+                            type: string
+                        type: object
+                      profile_name:
+                        description: The MySQL profile's name.
+                        example: MyProfile
+                        type: string
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: remote_mysql_read_profile
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Return remote MySQL profile
+      tags:
+      - Databases
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  remote_mysql_read_profile \\\n  name='MyProfile'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/remote_mysql_read_profile?api.version=1&name=MyProfile
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11.52'
+  /remote_mysql_read_profiles:
+    get:
+      description: This function displays the details of all remote MySQL® profiles available in WHM.
+      operationId: RemoteMySQL-remote_mysql_read_profiles
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    example:
+                      MyProfile:
+                        active: 0
+                        is_localhost_profile: 1
+                        mysql_host: 192.168.0.1
+                        mysql_pass: 123456luggage
+                        mysql_port: 3306
+                        mysql_user: username
+                        mysql_version_is_supported: 0
+                        setup_via: Main terminal
+                      MyProfile2:
+                        active: 0
+                        is_localhost_profile: '1'
+                        mysql_host: 192.168.0.2
+                        mysql_pass: 123456luggage
+                        mysql_port: 3306
+                        mysql_user: username
+                        mysql_version_is_supported: '0'
+                        setup_via: Main terminal
+                      localhost:
+                        active: 1
+                        is_localhost_profile: 1
+                        mysql_host: localhost
+                        mysql_pass: '#1mpll-C'
+                        mysql_port: 3306
+                        mysql_user: root
+                        mysql_version_is_supported: 0
+                        setup_via: Auto-Migrated active profile
+                    properties:
+                      additionalProperties:
+                        description: 'An object containing the MySQL profile''s data.
+
+
+                          **Note:**
+
+
+                          The profile''s name is the return''s name.'
+                        properties:
+                          active:
+                            description: 'Whether the system uses this profile to access the MySQL server.
+
+
+                              * `1` — Accesses the MySQL server.
+
+                              * `0` — Does **not** access the MySQL server.'
+                            enum:
+                            - 1
+                            - 0
+                            example: 0
+                            type: integer
+                          is_localhost_profile:
+                            description: 'Whether the system''s MySQL profile functions with the server''s
+
+                              local MySQL instance.
+
+
+                              **Note:**
+
+
+                              * `1` — Functions with the local MySQL instance.
+
+                              * `0` — Does **not** function with the local MySQL instance.'
+                            enum:
+                            - 1
+                            - 0
+                            example: 1
+                            type: integer
+                          mysql_host:
+                            description: The MySQL server's IP address or hostname.
+                            oneOf:
+                            - description: A valid hostname.
+                              example: hostname.example.com
+                              format: hostname
+                              type: string
+                            - description: A valid IP address.
+                              example: 192.168.0.1
+                              type: string
+                          mysql_pass:
+                            description: The MySQL server's password.
+                            example: 123456luggage
+                            type: string
+                          mysql_port:
+                            description: The MySQL server's port.
+                            example: 3306
+                            maximum: 65535
+                            minimum: 1
+                            type: integer
+                          mysql_user:
+                            description: The MySQL server's username.
+                            example: username
+                            format: username
+                            type: string
+                          mysql_version_is_supported:
+                            description: 'Whether the system supports the server''s MySQL version.
+
+
+                              * `1` — Supported.
+
+                              * `0` — **Not** supported.'
+                            enum:
+                            - 1
+                            - 0
+                            example: 0
+                            type: integer
+                          setup_via:
+                            description: A description of the MySQL profile data.
+                            example: Main terminal
+                            maxLength: 255
+                            type: string
+                        type: object
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: remote_mysql_read_profiles
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 1
+                        - 0
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Return remote MySQL profiles
+      tags:
+      - Databases
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  remote_mysql_read_profiles\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/remote_mysql_read_profiles?api.version=1
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11.52'
+  /remote_mysql_update_profile:
+    get:
+      description: 'This function updates one or more parameters for a remote MySQL®
+
+        profile.
+
+
+        **Note:**
+
+        This function requires the `name` parameter **and** one of more of the `mysql_host` , `mysql_user`, `mysql_pass`, `mysql_port`, or `setup_via` parameters.'
+      operationId: RemoteMySQL-remote_mysql_update_profile
+      parameters:
+      - description: The profile's name.
+        in: query
+        name: name
+        required: true
+        schema:
+          example: MyProfile
+          type: string
+      - description: The MySQL server's IP address or hostname.
+        in: query
+        name: mysql_host
+        required: false
+        schema:
+          example: 192.168.0.1
+          oneOf:
+          - format: ipv4
+            type: string
+          - format: hostname
+            type: string
+      - description: The MySQL server's password.
+        in: query
+        name: mysql_pass
+        required: false
+        schema:
+          example: 12345luggage
+          type: string
+      - description: The MySQL server's port.
+        in: query
+        name: mysql_port
+        required: false
+        schema:
+          example: 3306
+          maximum: 65535
+          minimum: 1
+          type: integer
+      - description: The MySQL server's username.
+        in: query
+        name: mysql_user
+        required: false
+        schema:
+          example: username
+          type: string
+      - description: A description of the profile data.
+        in: query
+        name: setup_via
+        required: false
+        schema:
+          example: Main terminal
+          maxLength: 255
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      profile_details:
+                        description: An object containing the updated profile's data.
+                        properties:
+                          active:
+                            description: 'Whether the system uses this profile to access the MySQL server.
+
+                              * `1` — Active.
+
+                              * `0` — Not active.'
+                            enum:
+                            - 0
+                            - 1
+                            example: 0
+                            type: integer
+                          mysql_host:
+                            description: The MySQL server's IP address or hostname.
+                            example: 192.168.0.1
+                            oneOf:
+                            - format: ipv4
+                              type: string
+                            - format: hostname
+                              type: string
+                          mysql_pass:
+                            description: The MySQL server's password.
+                            example: 12345luggage
+                            type: string
+                          mysql_port:
+                            description: The MySQL server's port.
+                            example: 3306
+                            maximum: 65535
+                            minimum: 1
+                            type: integer
+                          mysql_user:
+                            description: The MySQL server's username.
+                            example: username
+                            type: string
+                          setup_via:
+                            description: A description of the profile data.
+                            example: Main terminal
+                            maxLength: 255
+                            type: string
+                        type: object
+                      profile_saved:
+                        description: The updated profile's name.
+                        example: MyProfile
+                        type: string
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: remote_mysql_update_profile
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Update remote MySQL profile
+      tags:
+      - Databases
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  remote_mysql_update_profile \\\n  name='MyProfile'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/remote_mysql_update_profile?api.version=1&name=MyProfile
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11.52'
+  /remote_mysql_validate_profile:
+    get:
+      description: This function validates a specified remote MySQL® profile's connection details.
+      operationId: RemoteMySQL-remote_mysql_validate_profile
+      parameters:
+      - description: The profile's name.
+        in: query
+        name: name
+        required: true
+        schema:
+          example: MyProfile
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      profile_validated:
+                        description: The validated profile's name.
+                        example: MyProfile
+                        type: string
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: remote_mysql_validate_profile
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` — Success
+
+                          * `0` — Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Validate remote MySQL profile connection
+      tags:
+      - Databases
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  remote_mysql_validate_profile \\\n  name='MyProfile'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/remote_mysql_validate_profile?api.version=1&name=MyProfile
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11.52'
+  /rename_mysql_database:
+    get:
+      description: 'This function changes a MySQL® database''s name. MySQL does **not** allow you to rename a database. When cPanel & WHM "renames" a database, the system performs the following steps:
+
+        1. The system creates a new database.
+
+        2. The system moves data from the old database to the new database.
+
+        3. The system recreates grants and stored code in the new database.
+
+        4. The system deletes the old database and its grants.
+
+
+        **Warning:**
+
+
+        * If **any** of the first three steps fail, the system returns an error and attempts to restore the database''s original state. If the restoration process fails, the API function''s error response describes these additional failures.
+
+        * In rare cases, the system creates the second database successfully but fails to delete the old database or grants. The system treats the rename action as a success; however, the API function returns warnings that describe the failure to delete the old database or grants.
+
+
+        **Important:**
+
+
+        When you disable the *MySQL/MariaDB role* **and** remote MySQL is **not** already configured, the system **disables** this function.'
+      operationId: DB-rename_mysql_database
+      parameters:
+      - description: 'The database''s new name.
+
+
+          **Warning:**
+
+
+          * If database prefixing is enabled, this parameter **must** include the database prefix for the account.
+
+          * The maximum length of the database name is 64 characters. However, due to the method that cPanel & WHM uses to store MySQL database names, each underscore character (_) requires **two** characters of that limit. Therefore, if you enable database prefixing, the maximum length of the database name is **63 characters**, which includes both the database prefix and the underscore character. Each additional underscore **requires** another **two** characters of that limit.'
+        in: query
+        name: newname
+        required: true
+        schema:
+          example: database2
+          maxLength: 64
+          type: string
+      - description: The database's current name.
+        in: query
+        name: oldname
+        required: true
+        schema:
+          example: database
+          type: string
+      - description: The database's owner.
+        in: query
+        name: cpuser
+        required: false
+        schema:
+          example: username
+          format: username
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: rename_mysql_database
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the reason field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Update MySQL database name
+      tags:
+      - Databases
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  rename_mysql_database \\\n  oldname='database' \\\n  newname='database2'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/rename_mysql_database?api.version=1&oldname=database&newname=database2
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11.44'
+  /rename_mysql_user:
+    get:
+      description: 'This function changes a MySQL® database user''s name.
+
+
+        **Important:**
+
+
+        When you disable the *MySQL/MariaDB role* **and** remote MySQL is **not** already configured, the system **disables** this function.'
+      operationId: DB-rename_mysql_user
+      parameters:
+      - description: 'The database user''s new name.
+
+
+          **Warning:**
+
+
+          If database prefix is enabled, this parameter **must** include the database prefix for the account.'
+        in: query
+        name: newname
+        required: true
+        schema:
+          example: username2
+          type: string
+      - description: The database user's current name.
+        in: query
+        name: oldname
+        required: true
+        schema:
+          example: username
+          type: string
+      - description: The database user's owner.
+        in: query
+        name: cpuser
+        required: false
+        schema:
+          example: example
+          format: username
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: rename_mysql_user
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Update MySQL username
+      tags:
+      - Databases
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  rename_mysql_user \\\n  oldname='username' \\\n  newname='username2'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/rename_mysql_user?api.version=1&oldname=username&newname=username2
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11.44'
+  /rename_postgresql_database:
+    get:
+      description: 'This function changes a PostgreSQL® database''s name.
+
+
+        **Warning:**
+
+
+        The system requires more time to rename larger and more complex databases.
+
+
+        **Important:**
+
+
+        When you disable the *PostgreSQL role*, the system **disables** this function.'
+      operationId: DB-rename_postgresql_database
+      parameters:
+      - description: 'The database''s new name.
+
+
+          **Warning:**
+
+          If database prefixing is enabled, this parameter **must** include the database prefix for the account.'
+        in: query
+        name: newname
+        required: true
+        schema:
+          example: database2
+          type: string
+      - description: The database's current name.
+        in: query
+        name: oldname
+        required: true
+        schema:
+          example: database
+          type: string
+      - description: The database's owner.
+        in: query
+        name: cpuser
+        required: false
+        schema:
+          example: username
+          format: username
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: rename_postgresql_database
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the reason field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Update PostgreSQL database name
+      tags:
+      - Databases
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  rename_postgresql_database \\\n  oldname='database' \\\n  newname='database2'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/rename_postgresql_database?api.version=1&oldname=database&newname=database2
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11.44'
+  /rename_postgresql_user:
+    get:
+      description: 'This function changes a PostgreSQL® database user''s name.
+
+
+        **Important:**
+
+
+        When you disable the *PostgreSQL role*, the system **disables** this function.'
+      operationId: DB-rename_postgresql_user
+      parameters:
+      - description: 'The database user''s new name.
+
+
+          **Warning:**
+
+          If database prefix is enabled, this parameter **must** include the database prefix for the account.'
+        in: query
+        name: newname
+        required: true
+        schema:
+          example: username2
+          type: string
+      - description: The database user's current name.
+        in: query
+        name: oldname
+        required: true
+        schema:
+          example: username
+          format: username
+          type: string
+      - description: The database user's new password.
+        in: query
+        name: password
+        required: true
+        schema:
+          example: 12345luggage
+          type: string
+      - description: The database user's owner.
+        in: query
+        name: cpuser
+        required: false
+        schema:
+          example: example
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: rename_postgresql_user
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Update PostgreSQL username
+      tags:
+      - Databases
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  rename_postgresql_user \\\n  oldname='username' \\\n  newname='username2' \\\n  password='12345luggage'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/rename_postgresql_user?api.version=1&oldname=username&newname=username2&password=12345luggage
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11.44'
+  /set_local_mysql_root_password:
+    get:
+      description: 'This function resets the root user''s password on the local MySQL® server.
+
+
+        **Important:**
+
+
+        When you disable the *MySQL/MariaDB role* **and** remote MySQL is **not** already configured, the system **disables** this function.'
+      operationId: LocalMySQL-set_local_mysql_root_password
+      parameters:
+      - description: The new MySQL root user's password.
+        in: query
+        name: password
+        required: true
+        schema:
+          example: 12345luggage
+          type: string
+      - description: "Whether to update the configuration files.\n\n* `1` — Update.\n* `0` — Do **not** update.\n\n**Note:**\n\nThis value is always enabled when *localhost* is the active profile, and must be specified explicitly when a remote profile is active.\n\n**Warning:**\n\nThis parameter updates the `/root/.my.cnf` file with the new password, which could cause problems with the MySQL configuration on the server. If you are unsure, do **not** specify this parameter.\n\n * If you set this parameter to `0` when *localhost* is the active profile, it will stop communication with the remote MySQL server until you update the profile's password.\n * If you set this parameter to `1` when a remote host is the active profile, it will stop communication with the remote MySQL server until you update the profile's password."
+        in: query
+        name: update_config
+        required: false
+        schema:
+          enum:
+          - 0
+          - 1
+          example: 1
+          type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      configs_updated:
+                        description: "Whether the system updated the configuration settings.\n\n**Note:**\n\n This return **only** appears when the function includes the `update_config` parameter or when the *localhost* MySQL profile is active.\n* `1` — Updated.\n* `0` — **Not** updated."
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      password_reset:
+                        description: 'Whether the system reset the password.
+
+                          * `1` — Reset.
+
+                          * `0` — **Not** reset.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      profile_updated:
+                        description: "Whether the system updated the profile.\n\n**Note:**\n\n This return **only** appears when the *localhost* MySQL profile is active.\n* `1` — Updated.\n* `0` — **Not** updated."
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: set_local_mysql_root_password
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Update MySQL root password
+      tags:
+      - Databases
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  set_local_mysql_root_password \\\n  password='12345luggage'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/set_local_mysql_root_password?api.version=1&password=12345luggage
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11.52'
+  /set_mysql_password:
+    get:
+      description: 'This function changes a MySQL® database user''s password.
+
+
+        **Important:**
+
+
+        When you disable the
+
+        MySQL/MariaDB role **and**
+
+        remote MySQL is **not** already configured, the system **disables** this function.'
+      operationId: DB-set_mysql_password
+      parameters:
+      - description: The database user's new password.
+        in: query
+        name: password
+        required: true
+        schema:
+          example: 123456luggage
+          type: string
+      - description: 'The database username. For information about database username
+
+          restrictions, read the
+
+          [MySQL](https://dev.mysql.com/) and [MariaDB](https://mariadb.org/)
+
+          documentation.'
+        in: query
+        name: user
+        required: true
+        schema:
+          example: username
+          format: username
+          type: string
+      - description: The cPanel user that controls the database user.
+        in: query
+        name: cpuser
+        required: false
+        schema:
+          example: example
+          format: username
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: set_mysql_password
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 1
+                        - 0
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Update MySQL user password
+      tags:
+      - Databases
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  set_mysql_password \\\n  user='username' \\\n  password='123456luggage'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/set_mysql_password?api.version=1&user=username&password=123456luggage
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11.44'
+  /set_postgresql_password:
+    get:
+      description: 'This function changes a PostgreSQL® database user''s password.
+
+
+        **Important:**
+
+
+        When you disable the PostgreSQL role, the system **disables** this function.'
+      operationId: DB-set_postgresql_password
+      parameters:
+      - description: The database user's new password.
+        in: query
+        name: password
+        required: true
+        schema:
+          example: 12345luggage
+          type: string
+      - description: The account's username.
+        in: query
+        name: user
+        required: true
+        schema:
+          example: username
+          type: string
+      - description: The database user's owner.
+        in: query
+        name: cpuser
+        required: false
+        schema:
+          example: example
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: set_postgresql_password
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Update PostgreSQL user password
+      tags:
+      - Databases
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  set_postgresql_password \\\n  user='username' \\\n  password='12345luggage'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/set_postgresql_password?api.version=1&user=username&password=12345luggage
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11.44'
+  /start_background_mysql_upgrade:
+    get:
+      description: 'This function upgrades MySQL® or MariaDB® in the background. This will reinstall MySQL® or MariaDB® if the version given is the installed version.
+
+
+        **Important:**
+
+
+        When you disable the MySQL/MariaDB server role and remote MySQL® is **not** already configured, the system **disables** this function.'
+      operationId: Mysql-start_background_mysql_upgrade
+      parameters:
+      - description: The desired MySQL® or MariaDB® version. Must contain one decimal.
+        in: query
+        name: version
+        required: true
+        schema:
+          example: 5.7
+          type: number
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      upgrade_id:
+                        description: The upgrade log's location, relative to the `/var/cpanel/logs/` directory.
+                        example: mysql_upgrade.20200202-172923
+                        type: string
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: start_background_mysql_upgrade
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` — Success
+
+                          * `0` — Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Start background MySQL upgrade
+      tags:
+      - Databases
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  start_background_mysql_upgrade \\\n  version='5.7'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/start_background_mysql_upgrade?api.version=1&version=5.7
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: cPanel 11.48
+  /update_sql_config:
+    post:
+      description: 'This function updates the database configuration file for MySQL® or MariaDB®.
+
+
+        **Important:**
+
+
+        When you disable the MySQL/MariaDB role and remote MySQL is **not** already configured, the system **disables** this function.'
+      operationId: Mysql-update_sql_config
+      requestBody:
+        content:
+          application/json:
+            schema:
+              properties:
+                data:
+                  description: Array of objects that contains the requested updates to the sql configuration.
+                  items:
+                    example:
+                      name: max_allowed_packet
+                      section: mysqld
+                      value: '268435456'
+                    properties:
+                      name:
+                        type: string
+                      remove:
+                        type: boolean
+                      section:
+                        type: string
+                      value:
+                        type: string
+                    type: object
+                  type: array
+              required:
+              - data
+              type: object
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: update_sql_config
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` - Success
+
+                          * `0` - Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Update the servers SQL configuration
+      tags:
+      - Databases
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "echo '{\"data\" : [{ \"name\" : \"open_files_limit\", \"value\" : \"9999\", \"section\" : \"mysqld\" }]}' | \\\nwhmapi1 --input=json --output=jsonpretty \\\n  update_sql_config\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/update_sql_config?api.version=1
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: cPanel 11.100
+components:
+  securitySchemes:
+    BasicAuth:
+      scheme: basic
+      type: http
+externalDocs:
+  url: https://cpanel.net/developers/
+x-tagGroups:
+- name: Account Restoration
+  tags:
+  - Restore Account
+  - Restore Queue Management
+  - Restore Queue Reporting
+- name: Accounts
+  tags:
+  - Account Creation
+  - Account Enhancements
+  - Account Management
+  - Bandwidth and Disk Quotas
+  - Domain Information
+  - Passwords
+  - Styles
+  - Suspensions
+- name: API Development Tools
+  tags:
+  - API Execution
+  - API Statistics
+  - API Token Management
+  - Applications
+  - Session
+- name: Authentication
+  tags:
+  - Authentication Providers
+  - External Authentication
+  - Login URL
+  - SSH Keys and Connections
+  - Two-Factor Authentication
+- name: Backups
+  tags:
+  - Backup Destination
+  - Backup or Restore
+  - Backup Settings
+  - Legacy Migration
+- name: Commerce Integration
+  tags:
+  - Market Integration
+  - Sitejet
+- name: cPanel Market
+  tags:
+  - Product Management
+  - Provider Management
+- name: cPanel Support Tickets
+  tags:
+  - Support Access
+  - Ticket Management
+- name: Customizations
+  tags:
+  - Brand
+  - Customizations
+- name: Databases
+  tags:
+  - Manage MySQL Server
+  - MySQL Databases
+  - PostgreSQL Databases
+  - Remote MySQL Databases
+- name: DNS
+  tags:
+  - DNS Cluster Settings
+  - DNS Security
+  - DNS Zones
+  - Domain Management
+  - Domain Management
+  - Resolvers
+  - Service Records
+- name: Hosting Plans
+  tags:
+  - Feature Access
+  - Feature Lists
+  - Hosting Plan Extensions
+  - Hosting Plans
+- name: InProductSurvey
+  tags:
+  - InProductSurvey
+- name: Integrations
+  tags:
+  - API Authentication
+  - Links
+  - Scripts Hooks
+- name: IP Address Management
+  tags:
+  - IPv4 Address Settings
+  - IPv6 Address Settings
+  - Network Address Translation
+- name: Login Security (cPHulk)
+  tags:
+  - Management
+  - Reporting
+  - Settings
+- name: Logs
+  tags:
+  - Web Log Retention
+- name: Mail
+  tags:
+  - cPanel Account Mail Management
+  - Mail DNS Settings
+  - Mail Server Settings
+  - Spam Management
+  - Spam Protection (Greylisting)
+- name: Monitoring
+  tags:
+  - 360 Monitoring
+- name: NGINX Manager
+  tags:
+  - NGINX Manager
+- name: Resellers
+  tags:
+  - Account Enhancement Limit
+  - Account Limits
+  - Account Permissions
+  - Account Settings
+  - Reseller Account Management
+- name: Security
+  tags:
+  - WHM Access
+- name: Server Administration
+  tags:
+  - Configuration Clusters
+  - Configurations
+  - Connected Applications
+  - Connections
+  - cPanel Analytics
+  - License Management
+  - Notifications
+  - Plugin-Based Features
+  - Security
+  - Server Nodes
+  - Server Profiles
+  - Services
+  - System Information
+  - Updates
+- name: SSL Certificates
+  tags:
+  - Auto-Generated Certificates
+  - cPanel Account Settings
+  - SSL Server Settings
+- name: System Package Management
+  tags:
+  - Install or Uninstall Package
+  - List Package Information
+  - Package Manager Settings
+- name: Transfers
+  tags:
+  - cPanel Account Transfer
+  - Transfer Configuration
+  - Transfer Monitoring
+- name: UserData
+  tags:
+  - UserData
+- name: Web Server Configuration
+  tags:
+  - EasyApache Settings
+  - PHP
+  - PHP-FPM
+- name: Web Server Security (ModSecurity)
+  tags:
+  - Rule Settings
+  - Rule Vendor Settings
+  - Server Settings

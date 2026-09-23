@@ -1,0 +1,551 @@
+openapi: 3.2.0
+info:
+  contact:
+    email: cs@cpanel.net
+    name: WebPros International, LLC
+    url: https://cpanel.net/support/
+  description: WHM API.
+  license:
+    name: cPanel License
+    url: https://cpanel.net/legal-notices/
+  termsOfService: https://cpanel.net/legal-notices/
+  title: WHM Suspensions API
+  version: 11.137.9999.106
+  x-api-evangelist-provenance: 'Harvested verbatim from cPanel''s developer portal on 2026-09-05 via the MCP tool get-full-api-description at https://api.docs.cpanel.net/mcp. ONE mechanical change was made before storage: example values containing PEM private-key or certificate blocks, and AWS-access-key-shaped example strings, were replaced with REDACTED_* placeholders so the file can be stored in a public git repository without tripping secret scanning. No path, operation, parameter, schema or description was altered, added or removed.'
+servers:
+- description: A server running WHM.
+  url: https://{host}:{port}/json-api
+  variables:
+    host:
+      default: whm-server.tld
+      description: The hostname of a server running WHM.
+    port:
+      default: '2087'
+      description: The WHM port.
+security:
+- BasicAuth: []
+tags:
+- description: Accounts / Suspensions
+  name: Suspensions
+paths:
+  /listlockedaccounts:
+    get:
+      description: 'This function lists locked accounts on the server. **Only** WHM users with
+
+        `root`-level privileges can unsuspend locked accounts.'
+      operationId: Accounts-listlockedaccounts
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      account:
+                        description: A list of locked accounts on the server.
+                        example:
+                        - account1
+                        - account2
+                        items:
+                          type: string
+                        type: array
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: listlockedaccounts
+                        type: string
+                      reason:
+                        description: 'The reason the API function failed when the `metadata.result`
+
+                          field is `0`. This field may display a success message when
+
+                          a function succeeds.'
+                        example: OK
+                        type: string
+                      result:
+                        description: '- `1` — Success.
+
+                          - `0` — Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Return suspended cPanel accounts
+      tags:
+      - Suspensions
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  listlockedaccounts\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/listlockedaccounts?api.version=1
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11.40'
+  /listsuspended:
+    get:
+      description: This function lists suspended accounts on the server.
+      operationId: Accounts-listsuspended
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      account:
+                        description: A list of objects containing suspended account data.
+                        items:
+                          properties:
+                            is_locked:
+                              description: 'Whether the account is locked.
+
+                                * `1` - Locked.
+
+                                * `0` - Not locked.'
+                              enum:
+                              - 0
+                              - 1
+                              example: 0
+                              type: integer
+                            owner:
+                              description: 'The cPanel account''s owner.
+
+                                - `root`
+
+                                - A reseller''s username.
+
+                                - The account''s username.'
+                              example: root
+                              type: string
+                            reason:
+                              description: The reason why the account is suspended, if one exists.
+                              example: Suspended for nonpayment.
+                              type: string
+                            time:
+                              description: 'The current date and time in `Day Mon DD HH:mm:SS YYYY` human-readable format, where:
+
+                                * `Day` - represents the day of the week as a three-letter abbreviation.
+
+                                * `Mon` - represents the month''s three-letter abbreviation.
+
+                                * `DD` - represents the date.
+
+                                * `HH` - represents the hour.
+
+                                * `mm` - represents the minute.
+
+                                * `SS` - represents the second.
+
+                                * `YYYY` - represents the year.'
+                              example: Thu Nov 18 10:34:34 2014
+                              type: string
+                            unixtime:
+                              description: The current date and time.
+                              example: 1416306874
+                              format: unix_timestamp
+                              type: integer
+                            user:
+                              description: The cPanel account's username.
+                              example: username
+                              type: string
+                          type: object
+                        type: array
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: listsuspended
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is 0. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` - Success
+
+                          * `0` - Failed: Check the reason field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Return suspended cPanel accounts and information
+      tags:
+      - Suspensions
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  listsuspended\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/listsuspended?api.version=1
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11'
+  /suspendacct:
+    get:
+      description: This function suspends an account.
+      operationId: Accounts-suspendacct
+      parameters:
+      - description: The account to suspend.
+        in: query
+        name: user
+        required: true
+        schema:
+          example: username
+          type: string
+      - description: 'Whether to allow only the `root` user to unsuspend the account.
+
+          * `1` - **Only** the `root` user can unsuspend the account.
+
+          * `0` - The `root` user or the account''s owner can unsuspend the account.'
+        in: query
+        name: disallowun
+        required: false
+        schema:
+          default: 0
+          enum:
+          - 0
+          - 1
+          example: 1
+          type: integer
+      - description: 'Whether to skip suspension of the account''s FTP accounts.
+
+          * `1` - Do **not** suspend the FTP accounts.
+
+          * `0` - Suspend the FTP accounts.'
+        in: query
+        name: leave-ftp-accts-enabled
+        required: false
+        schema:
+          default: 0
+          enum:
+          - 0
+          - 1
+          example: 0
+          type: integer
+      - description: "The reason for suspension.\n\n**Important:**\n\n We strongly recommend that you provide a reason for suspension whenever you suspend an account."
+        in: query
+        name: reason
+        required: false
+        schema:
+          default: Unknown
+          example: Nonpayment
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: suspendacct
+                        type: string
+                      output:
+                        description: System messages generated while suspending the account.
+                        properties:
+                          raw:
+                            description: The raw system message.
+                            example: 'Changing Shell to /bin/false...Changing shell for username. Warning: "/bin/false" is not listed in /etc/shells. Shell changed. Done Locking Password...Locking password for user username. passwd: Success Done Suspending mysql users Using Universal Quota Support (quota=0) Suspending websites... Using Universal Quota Support (quota=0) Suspending FTP accounts... Updating FTP passwords for username FTP password files updated. FTP vhost passwords synced username''s account has been suspended
+
+                              '
+                            type: string
+                        type: object
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is 0. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` - Success
+
+                          * `0` - Failed: Check the reason field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Suspend cPanel account
+      tags:
+      - Suspensions
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  suspendacct \\\n  user='username'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/suspendacct?api.version=1&user=username
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11'
+  /unsuspendacct:
+    get:
+      description: 'This function unsuspends an account.
+
+
+        **Note:**
+
+
+        **Only** the `root` account and `root`-enabled resellers can unsuspend a locked account.'
+      operationId: Accounts-unsuspendacct
+      parameters:
+      - description: The account to unsuspend.
+        in: query
+        name: user
+        required: true
+        schema:
+          example: username
+          type: string
+      - description: 'Whether to retain any [service proxies](https://go.cpanel.net/serviceproxyglossary) on an account.
+
+          * `1` — Retain service proxies.
+
+          * `0` — Do **not** retain service proxies.'
+        in: query
+        name: retain-service-proxies
+        required: false
+        schema:
+          default: 0
+          enum:
+          - 0
+          - 1
+          example: 0
+          type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: unsuspendacct
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Unsuspend cPanel account
+      tags:
+      - Suspensions
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  unsuspendacct \\\n  user='username'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/unsuspendacct?api.version=1&user=username
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11'
+components:
+  securitySchemes:
+    BasicAuth:
+      scheme: basic
+      type: http
+externalDocs:
+  url: https://cpanel.net/developers/
+x-tagGroups:
+- name: Account Restoration
+  tags:
+  - Restore Account
+  - Restore Queue Management
+  - Restore Queue Reporting
+- name: Accounts
+  tags:
+  - Account Creation
+  - Account Enhancements
+  - Account Management
+  - Bandwidth and Disk Quotas
+  - Domain Information
+  - Passwords
+  - Styles
+  - Suspensions
+- name: API Development Tools
+  tags:
+  - API Execution
+  - API Statistics
+  - API Token Management
+  - Applications
+  - Session
+- name: Authentication
+  tags:
+  - Authentication Providers
+  - External Authentication
+  - Login URL
+  - SSH Keys and Connections
+  - Two-Factor Authentication
+- name: Backups
+  tags:
+  - Backup Destination
+  - Backup or Restore
+  - Backup Settings
+  - Legacy Migration
+- name: Commerce Integration
+  tags:
+  - Market Integration
+  - Sitejet
+- name: cPanel Market
+  tags:
+  - Product Management
+  - Provider Management
+- name: cPanel Support Tickets
+  tags:
+  - Support Access
+  - Ticket Management
+- name: Customizations
+  tags:
+  - Brand
+  - Customizations
+- name: Databases
+  tags:
+  - Manage MySQL Server
+  - MySQL Databases
+  - PostgreSQL Databases
+  - Remote MySQL Databases
+- name: DNS
+  tags:
+  - DNS Cluster Settings
+  - DNS Security
+  - DNS Zones
+  - Domain Management
+  - Domain Management
+  - Resolvers
+  - Service Records
+- name: Hosting Plans
+  tags:
+  - Feature Access
+  - Feature Lists
+  - Hosting Plan Extensions
+  - Hosting Plans
+- name: InProductSurvey
+  tags:
+  - InProductSurvey
+- name: Integrations
+  tags:
+  - API Authentication
+  - Links
+  - Scripts Hooks
+- name: IP Address Management
+  tags:
+  - IPv4 Address Settings
+  - IPv6 Address Settings
+  - Network Address Translation
+- name: Login Security (cPHulk)
+  tags:
+  - Management
+  - Reporting
+  - Settings
+- name: Logs
+  tags:
+  - Web Log Retention
+- name: Mail
+  tags:
+  - cPanel Account Mail Management
+  - Mail DNS Settings
+  - Mail Server Settings
+  - Spam Management
+  - Spam Protection (Greylisting)
+- name: Monitoring
+  tags:
+  - 360 Monitoring
+- name: NGINX Manager
+  tags:
+  - NGINX Manager
+- name: Resellers
+  tags:
+  - Account Enhancement Limit
+  - Account Limits
+  - Account Permissions
+  - Account Settings
+  - Reseller Account Management
+- name: Security
+  tags:
+  - WHM Access
+- name: Server Administration
+  tags:
+  - Configuration Clusters
+  - Configurations
+  - Connected Applications
+  - Connections
+  - cPanel Analytics
+  - License Management
+  - Notifications
+  - Plugin-Based Features
+  - Security
+  - Server Nodes
+  - Server Profiles
+  - Services
+  - System Information
+  - Updates
+- name: SSL Certificates
+  tags:
+  - Auto-Generated Certificates
+  - cPanel Account Settings
+  - SSL Server Settings
+- name: System Package Management
+  tags:
+  - Install or Uninstall Package
+  - List Package Information
+  - Package Manager Settings
+- name: Transfers
+  tags:
+  - cPanel Account Transfer
+  - Transfer Configuration
+  - Transfer Monitoring
+- name: UserData
+  tags:
+  - UserData
+- name: Web Server Configuration
+  tags:
+  - EasyApache Settings
+  - PHP
+  - PHP-FPM
+- name: Web Server Security (ModSecurity)
+  tags:
+  - Rule Settings
+  - Rule Vendor Settings
+  - Server Settings

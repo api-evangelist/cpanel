@@ -1,0 +1,418 @@
+openapi: 3.2.0
+info:
+  contact:
+    email: cs@cpanel.net
+    name: WebPros International, LLC
+    url: https://cpanel.net/support/
+  description: WHM API.
+  license:
+    name: cPanel License
+    url: https://cpanel.net/legal-notices/
+  termsOfService: https://cpanel.net/legal-notices/
+  title: WHM Configurations API
+  version: 11.137.9999.106
+  x-api-evangelist-provenance: 'Harvested verbatim from cPanel''s developer portal on 2026-09-05 via the MCP tool get-full-api-description at https://api.docs.cpanel.net/mcp. ONE mechanical change was made before storage: example values containing PEM private-key or certificate blocks, and AWS-access-key-shaped example strings, were replaced with REDACTED_* placeholders so the file can be stored in a public git repository without tripping secret scanning. No path, operation, parameter, schema or description was altered, added or removed.'
+servers:
+- description: A server running WHM.
+  url: https://{host}:{port}/json-api
+  variables:
+    host:
+      default: whm-server.tld
+      description: The hostname of a server running WHM.
+    port:
+      default: '2087'
+      description: The WHM port.
+security:
+- BasicAuth: []
+tags:
+- description: Server Administration / Configurations
+  name: Configurations
+paths:
+  /get_tweaksetting:
+    get:
+      description: 'This function retrieves values from the
+
+        `/var/cpanel/cpanel.config`
+
+        file and the server''s Exim configuration.'
+      operationId: Cpanel-get_tweaksetting
+      parameters:
+      - description: The [*Tweak Settings*](https://go.cpanel.net/whmdocsTweakSettings) option.
+        in: query
+        name: key
+        required: true
+        schema:
+          example: defaultmailaction
+          type: string
+      - description: 'One of the following *Tweak Settings* module names:
+
+          * `Apache`
+
+          * `Basic`
+
+          * `Mail`
+
+          * `Main`'
+        in: query
+        name: module
+        required: false
+        schema:
+          default: Main
+          enum:
+          - Apache
+          - Basic
+          - Mail
+          - Main
+          example: Main
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      tweaksetting:
+                        description: A list of the *Tweak Settings* option's information.
+                        properties:
+                          key:
+                            description: A key name in the `cpanel.config` file.
+                            example: defaultmailaction
+                            type: string
+                          value:
+                            description: The value. This value depends on the `key` value's requirements.
+                            example: localuser
+                            type: string
+                        type: object
+                    type: object
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: get_tweaksetting
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Return Tweak Settings option's value
+      tags:
+      - Configurations
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  get_tweaksetting \\\n  key='defaultmailaction'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/get_tweaksetting?api.version=1&key=defaultmailaction
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11'
+  /set_tweaksetting:
+    get:
+      description: 'This function sets an option''s value in WHM''s
+
+        *Tweak Settings*
+
+        interface (*WHM >> Home >> Server Configuration >> Tweak Settings*). The
+
+        system stores the keys and values that this function updates in
+
+        the
+
+        `/var/cpanel/cpanel.config`
+
+        file.'
+      operationId: Cpanel-set_tweaksetting
+      parameters:
+      - description: 'The `cpanel.config` setting name that corresponds to the desired
+
+          setting in WHM''s
+
+          [*Tweak Settings*](https://docs.cpanel.net/whm/server-configuration/tweak-settings/)
+
+          interface (*WHM >>Home >> Server Configuration >> Tweak Settings*).'
+        in: query
+        name: key
+        required: true
+        schema:
+          example: proxysubdomains
+          type: string
+      - description: 'The
+
+          [*Tweak Settings*](https://docs.cpanel.net/whm/server-configuration/tweak-settings/)
+
+          interface section.
+
+
+          **Note:**
+
+
+          The possible section names are:
+
+          * `Apache`
+
+          * `Basic`
+
+          * `Mail`
+
+          * `Main`'
+        in: query
+        name: module
+        required: false
+        schema:
+          default: Main
+          enum:
+          - Apache
+          - Basic
+          - Mail
+          - Main
+          example: Main
+          type: string
+      - description: 'The value to assign to the setting. If you include this parameter in the call but
+
+          do **not** set a value, the value defaults to an empty value.
+
+
+          **Note:**
+
+
+          For more information about the requirements for values in the `cpanel.config`
+
+          file settings, read our
+
+          [`cpanel.config` file](https://docs.cpanel.net/knowledge-base/cpanel-product/the-cpanel-config-file/)
+
+          documentation.'
+        in: query
+        name: value
+        required: false
+        schema:
+          example: 0
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: set_tweaksetting
+                        type: string
+                      reason:
+                        description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` — Success.
+
+                          * `0` — Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Update Tweak Settings option
+      tags:
+      - Configurations
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  set_tweaksetting \\\n  key='proxysubdomains'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/set_tweaksetting?api.version=1&key=proxysubdomains
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11'
+components:
+  securitySchemes:
+    BasicAuth:
+      scheme: basic
+      type: http
+externalDocs:
+  url: https://cpanel.net/developers/
+x-tagGroups:
+- name: Account Restoration
+  tags:
+  - Restore Account
+  - Restore Queue Management
+  - Restore Queue Reporting
+- name: Accounts
+  tags:
+  - Account Creation
+  - Account Enhancements
+  - Account Management
+  - Bandwidth and Disk Quotas
+  - Domain Information
+  - Passwords
+  - Styles
+  - Suspensions
+- name: API Development Tools
+  tags:
+  - API Execution
+  - API Statistics
+  - API Token Management
+  - Applications
+  - Session
+- name: Authentication
+  tags:
+  - Authentication Providers
+  - External Authentication
+  - Login URL
+  - SSH Keys and Connections
+  - Two-Factor Authentication
+- name: Backups
+  tags:
+  - Backup Destination
+  - Backup or Restore
+  - Backup Settings
+  - Legacy Migration
+- name: Commerce Integration
+  tags:
+  - Market Integration
+  - Sitejet
+- name: cPanel Market
+  tags:
+  - Product Management
+  - Provider Management
+- name: cPanel Support Tickets
+  tags:
+  - Support Access
+  - Ticket Management
+- name: Customizations
+  tags:
+  - Brand
+  - Customizations
+- name: Databases
+  tags:
+  - Manage MySQL Server
+  - MySQL Databases
+  - PostgreSQL Databases
+  - Remote MySQL Databases
+- name: DNS
+  tags:
+  - DNS Cluster Settings
+  - DNS Security
+  - DNS Zones
+  - Domain Management
+  - Domain Management
+  - Resolvers
+  - Service Records
+- name: Hosting Plans
+  tags:
+  - Feature Access
+  - Feature Lists
+  - Hosting Plan Extensions
+  - Hosting Plans
+- name: InProductSurvey
+  tags:
+  - InProductSurvey
+- name: Integrations
+  tags:
+  - API Authentication
+  - Links
+  - Scripts Hooks
+- name: IP Address Management
+  tags:
+  - IPv4 Address Settings
+  - IPv6 Address Settings
+  - Network Address Translation
+- name: Login Security (cPHulk)
+  tags:
+  - Management
+  - Reporting
+  - Settings
+- name: Logs
+  tags:
+  - Web Log Retention
+- name: Mail
+  tags:
+  - cPanel Account Mail Management
+  - Mail DNS Settings
+  - Mail Server Settings
+  - Spam Management
+  - Spam Protection (Greylisting)
+- name: Monitoring
+  tags:
+  - 360 Monitoring
+- name: NGINX Manager
+  tags:
+  - NGINX Manager
+- name: Resellers
+  tags:
+  - Account Enhancement Limit
+  - Account Limits
+  - Account Permissions
+  - Account Settings
+  - Reseller Account Management
+- name: Security
+  tags:
+  - WHM Access
+- name: Server Administration
+  tags:
+  - Configuration Clusters
+  - Configurations
+  - Connected Applications
+  - Connections
+  - cPanel Analytics
+  - License Management
+  - Notifications
+  - Plugin-Based Features
+  - Security
+  - Server Nodes
+  - Server Profiles
+  - Services
+  - System Information
+  - Updates
+- name: SSL Certificates
+  tags:
+  - Auto-Generated Certificates
+  - cPanel Account Settings
+  - SSL Server Settings
+- name: System Package Management
+  tags:
+  - Install or Uninstall Package
+  - List Package Information
+  - Package Manager Settings
+- name: Transfers
+  tags:
+  - cPanel Account Transfer
+  - Transfer Configuration
+  - Transfer Monitoring
+- name: UserData
+  tags:
+  - UserData
+- name: Web Server Configuration
+  tags:
+  - EasyApache Settings
+  - PHP
+  - PHP-FPM
+- name: Web Server Security (ModSecurity)
+  tags:
+  - Rule Settings
+  - Rule Vendor Settings
+  - Server Settings

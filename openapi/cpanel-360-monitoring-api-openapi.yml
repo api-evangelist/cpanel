@@ -1,0 +1,420 @@
+openapi: 3.2.0
+info:
+  contact:
+    email: cs@cpanel.net
+    name: WebPros International, LLC
+    url: https://cpanel.net/support/
+  description: WHM API.
+  license:
+    name: cPanel License
+    url: https://cpanel.net/legal-notices/
+  termsOfService: https://cpanel.net/legal-notices/
+  title: WHM 360 Monitoring API
+  version: 11.137.9999.106
+  x-api-evangelist-provenance: 'Harvested verbatim from cPanel''s developer portal on 2026-09-05 via the MCP tool get-full-api-description at https://api.docs.cpanel.net/mcp. ONE mechanical change was made before storage: example values containing PEM private-key or certificate blocks, and AWS-access-key-shaped example strings, were replaced with REDACTED_* placeholders so the file can be stored in a public git repository without tripping secret scanning. No path, operation, parameter, schema or description was altered, added or removed.'
+servers:
+- description: A server running WHM.
+  url: https://{host}:{port}/json-api
+  variables:
+    host:
+      default: whm-server.tld
+      description: The hostname of a server running WHM.
+    port:
+      default: '2087'
+      description: The WHM port.
+security:
+- BasicAuth: []
+tags:
+- description: The 360 Monitoring module for WHM API 1.
+  name: 360 Monitoring
+paths:
+  /360Monitoring/register_server_with_360_monitoring:
+    get:
+      description: 'This function registers the server with 360 Monitoring.
+
+
+        If the server is not already associated with a 360 Monitoring account,
+
+        the function creates a new account on the user''s behalf and configures
+
+        the local agent. If the server is already registered, the function is
+
+        a no-op and returns the existing identifier.
+
+
+        The system persists the credentials required by the local agent server-side
+
+        and does not return them in the response. Inspect the `metadata.result`
+
+        field (`1` for success, `0` for failure) and `metadata.reason` for
+
+        any failure details.'
+      operationId: register_server_with_360_monitoring
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      user_id:
+                        description: The unique identifier for the 360 Monitoring user account associated with this server.
+                        example: 12345
+                        type: string
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: register_server_with_360_monitoring
+                        type: string
+                      namespace:
+                        description: The namespace used in the API call.
+                        example: 360Monitoring
+                        type: string
+                      reason:
+                        description: 'The reason the API function failed when the `metadata.result`
+
+                          field is `0`. This field may display a success message when
+
+                          a function succeeds.'
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` - Success.
+
+                          * `0` - Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: The HTTP Request succeeded.
+      summary: Register the server with 360 Monitoring
+      tags:
+      - 360 Monitoring
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  360Monitoring/register_server_with_360_monitoring\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/360Monitoring/register_server_with_360_monitoring?api.version=1
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11.132'
+  /360Monitoring/set_360_agent_polling:
+    get:
+      description: 'This function updates `agent360` polling settings.
+
+
+        Provide at least one of the following parameters: `interval` or `max_data_span`.
+
+
+        The `interval` parameter sets the individual polling interval for each plugin. If you
+
+        provide `interval` without any section filters, the function updates all core
+
+        (`global`, `agent`, `data`, and `execution`) and default plugin
+
+        (`cpu`, `iostat`, and `network`) sections.
+
+
+        The `global_sections` and `plugin_sections` parameters are only valid
+
+        if you provide the `interval` parameter.
+
+
+        The `max_data_span` parameter is global. The agent collects metrics from multiple
+
+        plugins and sends them together as a single batch.
+
+
+        If the requested values already match the current configuration, the function does not
+
+        make changes or restart the `agent360` process.'
+      operationId: set_360_agent_polling
+      parameters:
+      - description: 'A comma-separated list of core sections to update.
+
+
+          It must be one of the following:
+
+          * `global`
+
+          * `agent`
+
+          * `data`
+
+          * `execution`
+
+
+          This parameter only applies to the `interval` parameter.'
+        in: query
+        name: global_sections
+        required: false
+        schema:
+          example: global,agent
+          type: string
+      - description: The polling interval in seconds. Must be a positive integer.
+        in: query
+        name: interval
+        required: false
+        schema:
+          example: 300
+          minimum: 1
+          type: integer
+      - description: The maximum number of seconds between batches of metrics sent for analysis. Must be a positive integer.
+        in: query
+        name: max_data_span
+        required: false
+        schema:
+          example: 120
+          minimum: 1
+          type: integer
+      - description: 'A comma-separated list of plugin sections to update.
+
+
+          Each value must match a plugin section loaded in the agent
+
+          configuration (for example, `cpu`, `iostat`, or `network`).
+
+
+          This parameter only applies to the `interval` parameter.'
+        in: query
+        name: plugin_sections
+        required: false
+        schema:
+          example: cpu,network
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      status:
+                        description: '* `1` - Success.'
+                        enum:
+                        - 1
+                        example: 1
+                        type: integer
+                  metadata:
+                    properties:
+                      command:
+                        description: The method name called.
+                        example: set_360_agent_polling
+                        type: string
+                      namespace:
+                        description: The namespace used in the API call.
+                        example: 360Monitoring
+                        type: string
+                      reason:
+                        description: 'The reason the API function failed when the `metadata.result`
+
+                          field is `0`. This field may display a success message when
+
+                          a function succeeds.'
+                        example: OK
+                        type: string
+                      result:
+                        description: '* `1` - Success.
+
+                          * `0` - Failed. Check the `reason` field for more details.'
+                        enum:
+                        - 0
+                        - 1
+                        example: 1
+                        type: integer
+                      version:
+                        description: The version of the API function.
+                        example: 1
+                        type: integer
+                type: object
+          description: HTTP Request was successful.
+      summary: Update 360 Monitoring agent polling settings
+      tags:
+      - 360 Monitoring
+      x-codeSamples:
+      - label: CLI
+        lang: Shell
+        source: "whmapi1 --output=jsonpretty \\\n  360Monitoring/set_360_agent_polling \\\n  interval=300 \\\n  max_data_span=120 \\\n  global_sections='global,agent' \\\n  plugin_sections='cpu,network'\n"
+      - label: URL
+        lang: HTTP
+        source: https://hostname.example.com:2087/cpsess##########/json-api/360Monitoring/set_360_agent_polling?api.version=1&interval=300&max_data_span=120&global_sections=global,agent&plugin_sections=cpu,network
+      x-cpanel-api-version: WHM API 1
+      x-cpanel-available-version: '11.132'
+components:
+  securitySchemes:
+    BasicAuth:
+      scheme: basic
+      type: http
+externalDocs:
+  url: https://cpanel.net/developers/
+x-tagGroups:
+- name: Account Restoration
+  tags:
+  - Restore Account
+  - Restore Queue Management
+  - Restore Queue Reporting
+- name: Accounts
+  tags:
+  - Account Creation
+  - Account Enhancements
+  - Account Management
+  - Bandwidth and Disk Quotas
+  - Domain Information
+  - Passwords
+  - Styles
+  - Suspensions
+- name: API Development Tools
+  tags:
+  - API Execution
+  - API Statistics
+  - API Token Management
+  - Applications
+  - Session
+- name: Authentication
+  tags:
+  - Authentication Providers
+  - External Authentication
+  - Login URL
+  - SSH Keys and Connections
+  - Two-Factor Authentication
+- name: Backups
+  tags:
+  - Backup Destination
+  - Backup or Restore
+  - Backup Settings
+  - Legacy Migration
+- name: Commerce Integration
+  tags:
+  - Market Integration
+  - Sitejet
+- name: cPanel Market
+  tags:
+  - Product Management
+  - Provider Management
+- name: cPanel Support Tickets
+  tags:
+  - Support Access
+  - Ticket Management
+- name: Customizations
+  tags:
+  - Brand
+  - Customizations
+- name: Databases
+  tags:
+  - Manage MySQL Server
+  - MySQL Databases
+  - PostgreSQL Databases
+  - Remote MySQL Databases
+- name: DNS
+  tags:
+  - DNS Cluster Settings
+  - DNS Security
+  - DNS Zones
+  - Domain Management
+  - Domain Management
+  - Resolvers
+  - Service Records
+- name: Hosting Plans
+  tags:
+  - Feature Access
+  - Feature Lists
+  - Hosting Plan Extensions
+  - Hosting Plans
+- name: InProductSurvey
+  tags:
+  - InProductSurvey
+- name: Integrations
+  tags:
+  - API Authentication
+  - Links
+  - Scripts Hooks
+- name: IP Address Management
+  tags:
+  - IPv4 Address Settings
+  - IPv6 Address Settings
+  - Network Address Translation
+- name: Login Security (cPHulk)
+  tags:
+  - Management
+  - Reporting
+  - Settings
+- name: Logs
+  tags:
+  - Web Log Retention
+- name: Mail
+  tags:
+  - cPanel Account Mail Management
+  - Mail DNS Settings
+  - Mail Server Settings
+  - Spam Management
+  - Spam Protection (Greylisting)
+- name: Monitoring
+  tags:
+  - 360 Monitoring
+- name: NGINX Manager
+  tags:
+  - NGINX Manager
+- name: Resellers
+  tags:
+  - Account Enhancement Limit
+  - Account Limits
+  - Account Permissions
+  - Account Settings
+  - Reseller Account Management
+- name: Security
+  tags:
+  - WHM Access
+- name: Server Administration
+  tags:
+  - Configuration Clusters
+  - Configurations
+  - Connected Applications
+  - Connections
+  - cPanel Analytics
+  - License Management
+  - Notifications
+  - Plugin-Based Features
+  - Security
+  - Server Nodes
+  - Server Profiles
+  - Services
+  - System Information
+  - Updates
+- name: SSL Certificates
+  tags:
+  - Auto-Generated Certificates
+  - cPanel Account Settings
+  - SSL Server Settings
+- name: System Package Management
+  tags:
+  - Install or Uninstall Package
+  - List Package Information
+  - Package Manager Settings
+- name: Transfers
+  tags:
+  - cPanel Account Transfer
+  - Transfer Configuration
+  - Transfer Monitoring
+- name: UserData
+  tags:
+  - UserData
+- name: Web Server Configuration
+  tags:
+  - EasyApache Settings
+  - PHP
+  - PHP-FPM
+- name: Web Server Security (ModSecurity)
+  tags:
+  - Rule Settings
+  - Rule Vendor Settings
+  - Server Settings
