@@ -5716,6 +5716,14 @@ components:
           example: 1
           type: integer
       type: object
+    MarketProviderProductMetaDataType:
+      anyOf:
+      - $ref: '#/components/schemas/MarketProviderProductMetaData'
+      - $ref: '#/components/schemas/SSLMarketProviderProductMetaData'
+      discriminator:
+        mapping:
+          ssl_certificate: '#/components/schemas/SSLMarketProviderProductMetaData'
+        propertyName: product_group
     SSLMarketProviderProductMetaData:
       allOf:
       - $ref: '#/components/schemas/MarketProviderProductMetaData'
@@ -5835,14 +5843,6 @@ components:
             - 1
             type: integer
       type: object
-    MarketProviderProductMetaDataType:
-      anyOf:
-      - $ref: '#/components/schemas/MarketProviderProductMetaData'
-      - $ref: '#/components/schemas/SSLMarketProviderProductMetaData'
-      discriminator:
-        mapping:
-          ssl_certificate: '#/components/schemas/SSLMarketProviderProductMetaData'
-        propertyName: product_group
     SSLCertificateMarketItem:
       allOf:
       - $ref: '#/components/schemas/MarketItem'

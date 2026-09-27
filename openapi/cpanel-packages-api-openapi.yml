@@ -4546,47 +4546,46 @@ paths:
       x-cpanel-available-version: '56'
 components:
   schemas:
-    Service:
-      description: 'The [cPanel Service Daemon](https://go.cpanel.net/ThecPanelWHMServiceDaemons) that monitors the feature.
+    Role:
+      anyOf:
+      - properties:
+          match:
+            description: 'Whether to require all roles in the roles parameter to match the server''s roles.
+
+
+              * `all` - Require the server to match all roles in the roles parameter to display the feature. (AND condition)
+
+              * `any` - Require the server to match any role in the roles parameter to display the feature. (OR condition)'
+            enum:
+            - any
+            example: any
+            type: string
+          roles:
+            description: The array of role names.
+            example:
+            - MailLocal
+            - MailSend
+            items:
+              type: string
+            type: array
+        type: object
+      - example: MailSend
+        type: string
+      description: 'The feature''s server role.
 
 
         **Warning:**
 
 
-        The server creates this parameter automatically. Do **not** edit this parameter''s value. We do not support customizations to this parameter.
+        The server creates this parameter automatically. Do **not** edit this parameter''s value. We do **not** support customizations to this parameter.
 
 
         **Note:**
 
 
-        * This icon only appears on servers with the service enabled.
+        * The icon only appears in the interface if the server configuration uses this role.
 
-        * For a complete list of service daemons, read our [cPanel Service Daemons](https://go.cpanel.net/ThecPanelWHMServiceDaemons) documentation.'
-      example: mysql
-      oneOf:
-      - properties:
-          match:
-            description: 'Whether to require all services in the services parameter to match enabled services on the server.
-
-
-              * `all` - Require the server to match **all** services under the `services` key to display the feature. (AND condition)
-
-              * `any` - Require the server to match any service under the `services` key to display the feature. (OR condition)'
-            enum:
-            - any
-            example: any
-            type: string
-          services:
-            description: An array of services.
-            example:
-            - mysql
-            - ftp
-            items:
-              type: string
-            type: array
-        type: object
-      - example: mysql
-        type: string
+        * For more information about roles and server configurations, read our [How to Use Server Profiles](https://go.cpanel.net/howtouseserverprofiles) documentation.'
     Image:
       description: An individual WHM feature.
       properties:
@@ -4761,6 +4760,67 @@ components:
       - itemorder
       - url
       type: object
+    Service:
+      description: 'The [cPanel Service Daemon](https://go.cpanel.net/ThecPanelWHMServiceDaemons) that monitors the feature.
+
+
+        **Warning:**
+
+
+        The server creates this parameter automatically. Do **not** edit this parameter''s value. We do not support customizations to this parameter.
+
+
+        **Note:**
+
+
+        * This icon only appears on servers with the service enabled.
+
+        * For a complete list of service daemons, read our [cPanel Service Daemons](https://go.cpanel.net/ThecPanelWHMServiceDaemons) documentation.'
+      example: mysql
+      oneOf:
+      - properties:
+          match:
+            description: 'Whether to require all services in the services parameter to match enabled services on the server.
+
+
+              * `all` - Require the server to match **all** services under the `services` key to display the feature. (AND condition)
+
+              * `any` - Require the server to match any service under the `services` key to display the feature. (OR condition)'
+            enum:
+            - any
+            example: any
+            type: string
+          services:
+            description: An array of services.
+            example:
+            - mysql
+            - ftp
+            items:
+              type: string
+            type: array
+        type: object
+      - example: mysql
+        type: string
+    Raw:
+      description: Raw data for template directives.
+      properties:
+        itemdesc:
+          description: A valid [Template Toolkit](https://go.cpanel.net/tmpltoolkit) directive.
+          example: '[% PROCESS ''menu/plugins_list.tmpl'' target=''mainFrame'' -%]'
+          type: string
+        type:
+          description: 'The object''s type.
+
+
+            * `raw` - The only possible value. Raw data for template directives.'
+          enum:
+          - raw
+          example: raw
+          type: string
+      required:
+      - type
+      - itemdesc
+      type: object
     Group:
       description: A group of features.
       properties:
@@ -4885,66 +4945,6 @@ components:
       - group
       - groupdesc
       - grouporder
-      type: object
-    Role:
-      anyOf:
-      - properties:
-          match:
-            description: 'Whether to require all roles in the roles parameter to match the server''s roles.
-
-
-              * `all` - Require the server to match all roles in the roles parameter to display the feature. (AND condition)
-
-              * `any` - Require the server to match any role in the roles parameter to display the feature. (OR condition)'
-            enum:
-            - any
-            example: any
-            type: string
-          roles:
-            description: The array of role names.
-            example:
-            - MailLocal
-            - MailSend
-            items:
-              type: string
-            type: array
-        type: object
-      - example: MailSend
-        type: string
-      description: 'The feature''s server role.
-
-
-        **Warning:**
-
-
-        The server creates this parameter automatically. Do **not** edit this parameter''s value. We do **not** support customizations to this parameter.
-
-
-        **Note:**
-
-
-        * The icon only appears in the interface if the server configuration uses this role.
-
-        * For more information about roles and server configurations, read our [How to Use Server Profiles](https://go.cpanel.net/howtouseserverprofiles) documentation.'
-    Raw:
-      description: Raw data for template directives.
-      properties:
-        itemdesc:
-          description: A valid [Template Toolkit](https://go.cpanel.net/tmpltoolkit) directive.
-          example: '[% PROCESS ''menu/plugins_list.tmpl'' target=''mainFrame'' -%]'
-          type: string
-        type:
-          description: 'The object''s type.
-
-
-            * `raw` - The only possible value. Raw data for template directives.'
-          enum:
-          - raw
-          example: raw
-          type: string
-      required:
-      - type
-      - itemdesc
       type: object
     Subitem:
       description: A subsection of an individual WHM feature.

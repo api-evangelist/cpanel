@@ -3946,7 +3946,7 @@ paths:
 
 
         When you disable the DNS role, the system **disables** this function.'
-      operationId: DNS-has_local_authority
+      operationId: getHasLocalAuthority
       parameters:
       - description: 'The domain to check whether the local server is authoritative for the domain''s DNS records.
 
@@ -4054,6 +4054,8 @@ paths:
         source: https://hostname.example.com:2087/cpsess##########/json-api/has_local_authority?api.version=1&domain=example.com
       x-cpanel-api-version: WHM API 1
       x-cpanel-available-version: '78'
+      x-operation-id-source: normalized
+      x-operation-id-original: DNS-has_local_authority
     servers:
     - description: A server running WHM.
       url: https://{host}:{port}/json-api
@@ -4179,7 +4181,7 @@ paths:
       description: 'This function returns whether `ALIAS` and `ANAME` records are available and the value of the running PowerDNS (PDNS) `resolver` setting, if any exists.
 
         For more information, read our `ALIAS` documentation.'
-      operationId: DNS-is_alias_available
+      operationId: getIsAliasAvailable
       responses:
         '200':
           content:
@@ -4263,6 +4265,8 @@ paths:
         source: https://hostname.example.com:2087/cpsess##########/json-api/is_alias_available?api.version=1
       x-cpanel-api-version: WHM API 1
       x-cpanel-available-version: cPanel 122
+      x-operation-id-source: normalized
+      x-operation-id-original: DNS-is_alias_available
     servers:
     - description: A server running WHM.
       url: https://{host}:{port}/json-api
@@ -4280,7 +4284,7 @@ paths:
         HTTPS records are defined in RFC 9460 and provide service parameters for HTTPS endpoints.
 
         For more information, read our DNS Zone Manager documentation.'
-      operationId: DNS-is_https_available
+      operationId: getIsHttpsAvailable
       responses:
         '200':
           content:
@@ -4342,6 +4346,8 @@ paths:
         source: https://hostname.example.com:2087/cpsess##########/json-api/is_https_available?api.version=1
       x-cpanel-api-version: WHM API 1
       x-cpanel-available-version: cPanel 122
+      x-operation-id-source: normalized
+      x-operation-id-original: DNS-is_https_available
     servers:
     - description: A server running WHM.
       url: https://{host}:{port}/json-api
@@ -4359,7 +4365,7 @@ paths:
         SVCB records are defined in RFC 9460 and provide service binding and aliasing for arbitrary services.
 
         For more information, read our DNS Zone Manager documentation.'
-      operationId: DNS-is_svcb_available
+      operationId: getIsSvcbAvailable
       responses:
         '200':
           content:
@@ -4421,6 +4427,8 @@ paths:
         source: https://hostname.example.com:2087/cpsess##########/json-api/is_svcb_available?api.version=1
       x-cpanel-api-version: WHM API 1
       x-cpanel-available-version: cPanel 122
+      x-operation-id-source: normalized
+      x-operation-id-original: DNS-is_svcb_available
     servers:
     - description: A server running WHM.
       url: https://{host}:{port}/json-api
@@ -6360,10 +6368,20 @@ paths:
           description: The WHM port.
 components:
   schemas:
-    ResponseControl:
-      allOf:
-      - $ref: '#/components/schemas/ResponseControlOrComment'
-      title: Control
+    Payload:
+      description: The zone’s content.
+      items:
+        discriminator:
+          mapping:
+            comment: '#/components/schemas/ResponseComment'
+            control: '#/components/schemas/ResponseControl'
+            record: '#/components/schemas/ResponseRR'
+          propertyName: type
+        oneOf:
+        - $ref: '#/components/schemas/ResponseRR'
+        - $ref: '#/components/schemas/ResponseControl'
+        - $ref: '#/components/schemas/ResponseComment'
+      type: array
     ResponseBase:
       properties:
         line_index:
@@ -6386,20 +6404,24 @@ components:
           - comment
           type: string
       type: object
-    Payload:
-      description: The zone’s content.
-      items:
-        discriminator:
-          mapping:
-            comment: '#/components/schemas/ResponseComment'
-            control: '#/components/schemas/ResponseControl'
-            record: '#/components/schemas/ResponseRR'
-          propertyName: type
-        oneOf:
-        - $ref: '#/components/schemas/ResponseRR'
-        - $ref: '#/components/schemas/ResponseControl'
-        - $ref: '#/components/schemas/ResponseComment'
-      type: array
+    ResponseControlOrComment:
+      allOf:
+      - $ref: '#/components/schemas/ResponseBase'
+      - properties:
+          text_b64:
+            description: The line’s text, encoded to base64.
+            example: OyBab25lIGZpbGUgZm9yIHRleGFzLmNvbQ==
+            format: base64
+            type: string
+        type: object
+    ResponseComment:
+      allOf:
+      - $ref: '#/components/schemas/ResponseControlOrComment'
+      title: Comment
+    ResponseControl:
+      allOf:
+      - $ref: '#/components/schemas/ResponseControlOrComment'
+      title: Control
     ResponseRR:
       allOf:
       - $ref: '#/components/schemas/ResponseBase'
@@ -6427,20 +6449,32 @@ components:
             type: integer
         type: object
       title: Resource Record
-    ResponseComment:
+    asfdb:
       allOf:
-      - $ref: '#/components/schemas/ResponseControlOrComment'
-      title: Comment
-    ResponseControlOrComment:
-      allOf:
-      - $ref: '#/components/schemas/ResponseBase'
       - properties:
-          text_b64:
-            description: The line’s text, encoded to base64.
-            example: OyBab25lIGZpbGUgZm9yIHRleGFzLmNvbQ==
-            format: base64
+          hostname:
+            description: The database servers' hostname.
+            example: afs.example.com
+            type: string
+          subtype:
+            description: The AFS cell type. A 16-bit integer that represents the type of AFS cell. For example, a value of 1 indicates an AFS version 3.0 Volume Location Server.
+            example: 1
+            type: integer
+          type:
+            description: 'The [DNS record type](https://en.wikipedia.org/wiki/List_of_DNS_record_types).
+
+              * `AFSDB` — AFSDB records store the location of an AFS cell''s database servers.'
+            example: AFSDB
             type: string
         type: object
+      - $ref: '#/components/schemas/record'
+      description: 'An object representing AFSDB record data.
+
+
+        **Note:**
+
+
+        For more information about AFSDB records, read [RFC 1183 at IANA](http://tools.ietf.org/html/rfc1183).'
     DnsEditZoneParameterTypeALIAS:
       allOf:
       - $ref: '#/components/schemas/DnsEditZoneParameterBase'
@@ -6462,6 +6496,46 @@ components:
             type: string
         required:
         - alias
+        type: object
+    a:
+      allOf:
+      - properties:
+          address:
+            description: The zone record's IPv4 address.
+            example: 192.168.0.20
+            type: string
+          type:
+            description: 'The [DNS record type](https://en.wikipedia.org/wiki/List_of_DNS_record_types).
+
+              * `A` — A records store IPv4 addresses. Use them to map a hostname to an IPv4 address.'
+            example: A
+            type: string
+        type: object
+      - $ref: '#/components/schemas/record'
+      description: 'An object representing A record data.
+
+
+        **Note:**
+
+
+        For more information about A records, read [RFC 1035 at IANA](http://tools.ietf.org/html/rfc1035).'
+    DnsEditZoneParameterTypePTR:
+      allOf:
+      - $ref: '#/components/schemas/DnsEditZoneParameterBase'
+      - properties:
+          ptrdname:
+            description: 'A pointer to a canonical name (CNAME).
+
+
+              **Note:**
+
+
+              * Do **not** omit any necessary trailing periods.
+
+              * For more information about PTR records, read [RFC 1035 at IANA](http://tools.ietf.org/html/rfc1035).'
+            example: hostname.example.com
+            format: domain
+            type: string
         type: object
     DnsAddZoneParameterTypeRP:
       allOf:
@@ -6493,42 +6567,94 @@ components:
             format: domain
             type: string
         type: object
-    DnsEditZoneParameterTypeA:
+    DnsAddZoneParameterTypeMX:
       allOf:
-      - $ref: '#/components/schemas/DnsEditZoneParameterBase'
+      - $ref: '#/components/schemas/DnsAddZoneParameterBase'
       - properties:
-          address:
-            description: 'The zone record''s IPv4 address.
+          exchange:
+            description: The server's location's canonical name (CNAME).
+            example: mail.example.com
+            format: domain
+            type: string
+          preference:
+            description: 'The record''s priority order.
 
 
               **Note:**
 
 
-              For more information about A records, read [RFC 1035 at IANA](http://tools.ietf.org/html/rfc1035).'
-            example: 192.168.0.20
-            format: ipv4
+              * Lower values have a higher priority order.
+
+              * For more information about MX records, read [RFC 1035 at IANA](http://tools.ietf.org/html/rfc1035).'
+            example: 10
+            type: integer
+        type: object
+    DnsEditZoneParameterTypeCAA:
+      allOf:
+      - $ref: '#/components/schemas/DnsEditZoneParameterBase'
+      - properties:
+          flag:
+            description: 'Whether the Certificate Authority (CA) will issue an SSL certificate if the CAA resource record contains unknown property tags.
+
+
+              * `0` - The CA will issue an SSL certificate.
+
+              * `1` - The CA will **not** issue an SSL certificate.
+
+
+              For more information about CAA record flags and property tags, read the [RFC 6844 documentation](https://tools.ietf.org/html/rfc6844#section-3).'
+            enum:
+            - 0
+            - 1
+            example: 0
+            type: integer
+          tag:
+            description: 'The CAA record''s property type.
+
+
+              * `issue` - Authorize a CA to issue a certificate for the domain.
+
+              * `issuewild` - Authorize a CA to issue a wildcard certificate for the domain.
+
+              * `iodef` - Specify a URL to which a CA may report policy violations.'
+            enum:
+            - issue
+            - issuewild
+            - iodef
+            example: issue
+            type: string
+          value:
+            description: 'The CA''s domain or URL. This is a valid [SSL provider](https://sslmate.com/labs/caa/),
+
+              `mailto` URL, or a standard URL.
+
+
+              **Note:**
+
+
+              If you use `iodef` as the `tag` parameter''s value, enter a URL that a CA can use to report issues as this parameter''s value.'
+            example: exampleca.com
             type: string
         required:
-        - address
+        - flag
+        - tag
+        - value
         type: object
-    DnsAddZoneParameterTypeSRV:
+    srv:
       allOf:
-      - $ref: '#/components/schemas/DnsAddZoneParameterBase'
       - properties:
           port:
             description: The target host's port.
             example: 389
             type: integer
           priority:
-            description: 'The target host''s priority preference.
+            description: 'The target host''s preference. An integer that represents the target host''s priority order.
 
 
               **Note:**
 
 
-              * Lower numbers have a higher priority order.
-
-              * For more information about SRV records, read [RFC 2782 at IANA](http://tools.ietf.org/html/rfc2782).'
+              Lower numbers have a higher priority order.'
             example: 0
             type: integer
           target:
@@ -6536,319 +6662,119 @@ components:
             example: service.example.com
             format: domain
             type: string
+          type:
+            description: 'The [DNS record type](https://en.wikipedia.org/wiki/List_of_DNS_record_types).
+
+              * `SRV` — SRV records store the service location records for newer protocols (for example, Autodiscover).'
+            example: SRV
+            type: string
           weight:
-            description: A relative weight. The system uses this value to rank entries with the same `priority` value.
+            description: A relative weight. The system uses this value to rank entries with the same `priority` value. An integer that represents the target host's weight against other hosts with the same `priority` value.
             example: 2
             type: integer
         type: object
-    DnsAddZoneParameterTypeNS:
-      allOf:
-      - $ref: '#/components/schemas/DnsAddZoneParameterBase'
-      - properties:
-          nsdname:
-            description: 'The domain''s authoritative nameserver.
-
-
-              **Note:**
-
-
-              For more information about NS records, read [RFC 1035 at IANA](http://tools.ietf.org/html/rfc1035).'
-            example: ns1.example.com
-            format: domain
-            type: string
-        type: object
-    dname:
-      allOf:
-      - properties:
-          dname:
-            description: The delegation name (DNAME) alias.
-            example: hostname.dev.example.com
-            type: string
-          type:
-            description: 'The [DNS record type](https://en.wikipedia.org/wiki/List_of_DNS_record_types).
-
-              * `DNAME` — DNAME records create an alias for a hostname and its subnames.'
-            example: DNAME
-            type: string
-        type: object
       - $ref: '#/components/schemas/record'
-      description: 'An object representing DNAME record data.
+      description: 'An object representing SRV record data.
 
 
         **Note:**
 
 
-        For more information about DNAME records, read [RFC 2672 at IANA](http://tools.ietf.org/html/rfc2672).'
-    DnsEditZoneParameterTypeAAAA:
-      allOf:
-      - $ref: '#/components/schemas/DnsEditZoneParameterBase'
-      - properties:
-          address:
-            description: 'The zone record''s IPv6 address.
-
-
-              **Note:**
-
-
-              * You **must** uuencode the colons (`:`) in IPv6 addresses in your function calls.
-
-              * For more information about AAAA records, read [RFC 3596 at IANA](http://tools.ietf.org/html/rfc3596).'
-            example: 2001:1:42:1::2a
-            format: ipv6
-            type: string
-        required:
-        - address
-        type: object
-    DnsEditZoneParameterType:
-      anyOf:
-      - $ref: '#/components/schemas/DnsEditZoneParameterTypeA'
-      - $ref: '#/components/schemas/DnsEditZoneParameterTypeA6'
-      - $ref: '#/components/schemas/DnsEditZoneParameterTypeAAAA'
-      - $ref: '#/components/schemas/DnsEditZoneParameterTypeAFSDB'
-      - $ref: '#/components/schemas/DnsEditZoneParameterTypeALIAS'
-      - $ref: '#/components/schemas/DnsEditZoneParameterTypeCAA'
-      - $ref: '#/components/schemas/DnsEditZoneParameterTypeCNAME'
-      - $ref: '#/components/schemas/DnsEditZoneParameterTypeDNAME'
-      - $ref: '#/components/schemas/DnsEditZoneParameterTypeDS'
-      - $ref: '#/components/schemas/DnsEditZoneParameterTypeHINFO'
-      - $ref: '#/components/schemas/DnsEditZoneParameterTypeLOC'
-      - $ref: '#/components/schemas/DnsEditZoneParameterTypeMX'
-      - $ref: '#/components/schemas/DnsEditZoneParameterTypeNS'
-      - $ref: '#/components/schemas/DnsEditZoneParameterTypePTR'
-      - $ref: '#/components/schemas/DnsEditZoneParameterTypeRP'
-      - $ref: '#/components/schemas/DnsEditZoneParameterTypeSOA'
-      - $ref: '#/components/schemas/DnsEditZoneParameterTypeSRV'
-      - $ref: '#/components/schemas/DnsEditZoneParameterTypeTXT'
-      discriminator:
-        mapping:
-          A: '#/components/schemas/DnsEditZoneParameterTypeA'
-          A6: '#/components/schemas/DnsEditZoneParameterTypeA6'
-          AAAA: '#/components/schemas/DnsEditZoneParameterTypeAAAA'
-          AFSDB: '#/components/schemas/DnsEditZoneParameterTypeAFSDB'
-          ALIAS: '#/components/schemas/DnsEditZoneParameterTypeALIAS'
-          CAA: '#/components/schemas/DnsEditZoneParameterTypeCAA'
-          CNAME: '#/components/schemas/DnsEditZoneParameterTypeCNAME'
-          DNAME: '#/components/schemas/DnsEditZoneParameterTypeDNAME'
-          DS: '#/components/schemas/DnsEditZoneParameterTypeDS'
-          HINFO: '#/components/schemas/DnsEditZoneParameterTypeHINFO'
-          LOC: '#/components/schemas/DnsEditZoneParameterTypeLOC'
-          MX: '#/components/schemas/DnsEditZoneParameterTypeMX'
-          NS: '#/components/schemas/DnsEditZoneParameterTypeNS'
-          PTR: '#/components/schemas/DnsEditZoneParameterTypePTR'
-          RP: '#/components/schemas/DnsEditZoneParameterTypeRP'
-          SOA: '#/components/schemas/DnsEditZoneParameterTypeSOA'
-          SRV: '#/components/schemas/DnsEditZoneParameterTypeSRV'
-          TXT: '#/components/schemas/DnsEditZoneParameterTypeTXT'
-        propertyName: type
-    record:
-      properties:
-        Line:
-          description: The zone record's line number.
-          example: 1
-          type: integer
-        class:
-          description: 'The record''s class.
-
-            - IN
-
-            - Very rarely, another valid DNS record class.'
-          example: IN
-          type: string
-        name:
-          description: The record's name.
-          example: hostname.example.com
-          type: string
-        ttl:
-          description: The record's Time To Live (TTL).
-          example: 86400
-          type: integer
-      type: object
-    caa:
+        For more information about SRV records, read [RFC 2782 at IANA](http://tools.ietf.org/html/rfc2782).'
+    a6:
       allOf:
       - properties:
-          flag:
-            description: 'Whether the CA will issue an SSL certificate if the CAA resource record contains unknown property tags.
-
-              * `0` - Non-critical. The CAA Resource Record contains unknown property tags, and the CA issued an SSL certificate.
-
-              * `1` - Critical. The CAA Resource Record contains unknown property tags, and the CA did **not** issue an SSL certificate.'
-            example: 0
+          prefix:
+            description: The record's prefix length.
+            example: 48
             type: integer
-          tag:
-            description: 'The CAA record''s property type.
-
-              * `issue` - A CA issued a certificate for the domain.
-
-              * `issuewild` - A CA issued a wildcard certificate for the domain.
-
-              * `iodef` - The user specified a URL to which a CA may report policy violations.'
-            example: issue
+          refer:
+            description: The record's address suffix.
+            example: 0::0
             type: string
           type:
             description: 'The [DNS record type](https://en.wikipedia.org/wiki/List_of_DNS_record_types).
 
-              * `CAA` — CAA records control which certificate authorities can issue SSL certificates for a domain.'
-            example: CAA
-            type: string
-          value:
-            description: 'The CA''s domain or URL.
+              * `A6` — A6 records store IPv6 addresses.
 
-              * A valid [SSL provider](https://sslmate.com/labs/caa/).
 
-              * A mailto URL or a standard URL.'
-            example: totallyrealca.tld
+              **Important:**
+
+
+              A6 records are **deprecated**. We strongly **recommend** that you use [AAAA](http://tools.ietf.org/html/rfc3596) records to store IPv6 addresses.'
+            example: A6
             type: string
         type: object
       - $ref: '#/components/schemas/record'
-      description: 'An object representing CAA record data.
+      description: 'An object representing A6 record data.
 
 
-        **Note:**
+        **Important:**
 
 
-        For more information about CAA record flags and property tags, read the [RFC 6844](https://tools.ietf.org/html/rfc6844#section-3) documentation.'
-    DnsEditZoneParameterTypeTXT:
+        A6 records are **deprecated**. We strongly **recommend** that you use [AAAA](http://tools.ietf.org/html/rfc3596) records to store IPv6 addresses.'
+    txt:
       allOf:
-      - $ref: '#/components/schemas/DnsEditZoneParameterBase'
       - properties:
           txtdata:
-            description: 'The TXT record''s data.
-
-
-              **Note:**
-
-
-              * This value **must** include beginning and ending quotes (`""`).
-
-              * Do **not** URI-encode the quotes.
-
-              * For more information about TXT records, read [RFC 1464 at IANA](http://tools.ietf.org/html/rfc1464).'
-            example: '"v=spf1 a -all"'
+            description: The TXT record's data.
+            example: v=spf1 a -all
             type: string
-        type: object
-    DnsEditZoneParameterTypeAFSDB:
-      allOf:
-      - $ref: '#/components/schemas/DnsEditZoneParameterBase'
-      - properties:
-          hostname:
-            description: The database servers' hostname.
-            example: hostname.example.com
-            format: domain
+          type:
+            description: 'The [DNS record type](https://en.wikipedia.org/wiki/List_of_DNS_record_types).
+
+              * `TXT` — TXT records store descriptive text or useful records (for example, SPF or DKIM records).'
+            example: TXT
             type: string
-          subtype:
-            description: 'The 16-bit integer of an AFS cell type.
+          unencoded:
+            description: 'Whether the TXT record''s data is encoded.
 
+              * `1` — Encoded.
 
-              For example, specify `1` to signify an AFS version 3.0 Volume Location Server.
-
-
-              **Note:**
-
-
-              * You **must** uuencode the colons (`:`) in IPv6 addresses in your function calls.
-
-              * For more information about AFSDB records, read [RFC 1183 at IANA](http://tools.ietf.org/html/rfc1183).'
+              * `0` — **Not** encoded.'
             example: 1
             type: integer
-        required:
-        - subtype
-        - hostname
         type: object
-    DnsAddZoneParameterTypeALIAS:
+      - $ref: '#/components/schemas/record'
+      description: 'An object representing TXT record data.
+
+
+        **Note:**
+
+
+        For more information about TXT records, read [RFC 1464 at IANA](http://tools.ietf.org/html/rfc1464).'
+    mx:
       allOf:
-      - $ref: '#/components/schemas/DnsAddZoneParameterBase'
       - properties:
-          alias:
-            description: 'The hostname you want to point to.
+          exchange:
+            description: The server's location's canonical name (CNAME).
+            example: mail.example.com
+            type: string
+          preference:
+            description: 'The record''s preference. An integer that represents the record''s priority order.
 
 
               **Note:**
 
 
-              We strongly recommend that you do not use this function.
-
-              Using the ALIAS DNS record may result in unexpected behavior, including website downtimes outside of your control, inconsistency in the handling of the record, and security vulnerabilities.
-
-              This record is only available if you enable access to it and use PowerDNS.'
-            example: hostname.example.com
-            format: domain
-            type: string
-        type: object
-    hinfo:
-      allOf:
-      - properties:
-          cpu:
-            description: The host's CPU type.
-            example: INTEL-386
-            type: string
-          os:
-            description: The host's operating system.
-            example: UNIX
-            type: string
+              Lower values have a higher priority order.'
+            example: 10
+            type: integer
           type:
             description: 'The [DNS record type](https://en.wikipedia.org/wiki/List_of_DNS_record_types).
 
-              * `HINFO` — HINFO records specify a host''s CPU and OS types.'
-            example: HINFO
+              * `MX` — MX records point a domain name to its MTAs.'
+            example: MX
             type: string
         type: object
       - $ref: '#/components/schemas/record'
-      description: 'An object representing HINFO record data.
+      description: 'An object representing MX record data.
 
 
         **Note:**
 
 
-        For more information about HINFO records, read [RFC 1700 at IANA](http://tools.ietf.org/html/rfc1700.txt).'
-    loc:
-      allOf:
-      - properties:
-          altitude:
-            description: The location's altitude. The location's altitude above sea level, in meters, and the m character.
-            example: 178m
-            type: string
-          horiz_pre:
-            description: The location's horizontal precision, in meters.
-            example: 10
-            minimum: 0
-            type: integer
-          latitude:
-            description: The location's latitude.
-            example: 41 51 54.305 N
-            type: string
-          longitude:
-            description: The location's longitude.
-            example: 87 36 47.95 W
-            type: string
-          size:
-            description: The diameter of a sphere that encloses the entire location, in meters.
-            example: 10
-            minimum: 0
-            type: integer
-          type:
-            description: 'The [DNS record type](https://en.wikipedia.org/wiki/List_of_DNS_record_types).
-
-              * `LOC` — LOC records store a hostname''s geographical location.'
-            example: LOC
-            type: string
-          version:
-            description: The record's version number. You **must** set this value to `0`.
-            example: 0
-            type: integer
-          vert_pre:
-            description: The location's vertical precision, in meters.
-            example: 10
-            minimum: 0
-            type: integer
-        type: object
-      - $ref: '#/components/schemas/record'
-      description: 'An object representing LOC record data.
-
-
-        **Note:**
-
-
-        For more information about LOC records, read [RFC 1876 at IANA](http://tools.ietf.org/html/rfc1876).'
+        For more information about MX records, read [RFC 1035 at IANA](http://tools.ietf.org/html/rfc1035).'
     cname:
       allOf:
       - properties:
@@ -6883,81 +6809,27 @@ components:
 
 
         For more information about CNAME records, read [RFC 1035 at IANA](http://tools.ietf.org/html/rfc1035).'
-    a:
+    DnsAddZoneParameterTypeAAAA:
       allOf:
+      - $ref: '#/components/schemas/DnsAddZoneParameterBase'
       - properties:
           address:
-            description: The zone record's IPv4 address.
-            example: 192.168.0.20
-            type: string
-          type:
-            description: 'The [DNS record type](https://en.wikipedia.org/wiki/List_of_DNS_record_types).
-
-              * `A` — A records store IPv4 addresses. Use them to map a hostname to an IPv4 address.'
-            example: A
-            type: string
-        type: object
-      - $ref: '#/components/schemas/record'
-      description: 'An object representing A record data.
+            description: 'The zone record''s IPv6 address.
 
 
-        **Note:**
+              **Note:**
 
 
-        For more information about A records, read [RFC 1035 at IANA](http://tools.ietf.org/html/rfc1035).'
-    soa:
-      allOf:
-      - properties:
-          Lines:
-            description: The number of lines in the SOA section.
-            example: 4
-            minimum: 0
-            type: integer
-          expire:
-            description: The amount of time to wait before the secondary server attempts to complete a zone transfer, in seconds.
-            example: 3600000
-            minimum: 0
-            type: integer
-          mname:
-            description: The domain's authoritative nameserver.
-            example: ns1.example.com
-            type: string
-          refresh:
-            description: The amount of time to wait before the secondary DNS server queries the primary DNS server's SOA records for changes, in seconds.
-            example: 1440
-            minimum: 0
-            type: integer
-          retry:
-            description: The amount of time to wait before the secondary server retries a failed zone transfer, in seconds.
-            example: 1440
-            minimum: 0
-            type: integer
-          rname:
-            description: The Responsible Person's (RP's) email address.
-            example: user.example.com.
-            type: string
-          serial:
-            description: The zone file's revision number.
-            example: 2013122501
-            type: integer
-          type:
-            description: 'The [DNS record type](https://en.wikipedia.org/wiki/List_of_DNS_record_types).
+              * You **must** uuencode the colons (`:`) in IPv6 addresses in your function calls.
 
-              * `SOA` — SOA records designate the beginning of a zone of authority.'
-            example: SOA
+              * For more information about AAAA records, read [RFC 3596 at IANA](http://tools.ietf.org/html/rfc3596).'
+            example: 2001:1:42:1::2a
+            format: ipv6
             type: string
         type: object
-      - $ref: '#/components/schemas/record'
-      description: 'An object representing SOA record data.
-
-
-        **Note:**
-
-
-        For more information about SOA records, read [RFC 1035 at IANA](http://tools.ietf.org/html/rfc1035).'
-    DnsEditZoneParameterTypeSRV:
+    DnsAddZoneParameterTypeSRV:
       allOf:
-      - $ref: '#/components/schemas/DnsEditZoneParameterBase'
+      - $ref: '#/components/schemas/DnsAddZoneParameterBase'
       - properties:
           port:
             description: The target host's port.
@@ -6984,41 +6856,6 @@ components:
             description: A relative weight. The system uses this value to rank entries with the same `priority` value.
             example: 2
             type: integer
-        type: object
-    DnsAddZoneParameterTypeDNAME:
-      allOf:
-      - $ref: '#/components/schemas/DnsAddZoneParameterBase'
-      - properties:
-          dname:
-            description: 'The delegation name (DNAME) alias.
-
-
-              **Note:**
-
-
-              For more information about DNAME records, read [RFC 2672 at IANA](http://tools.ietf.org/html/rfc2672).'
-            example: hostname.example.com
-            format: domain
-            type: string
-        type: object
-    DnsAddZoneParameterTypeTXT:
-      allOf:
-      - $ref: '#/components/schemas/DnsAddZoneParameterBase'
-      - properties:
-          txtdata:
-            description: 'The TXT record''s data.
-
-
-              **Note:**
-
-
-              * This value **must** include beginning and ending quotes (`""`).
-
-              * Do **not** URI-encode the quotes.
-
-              * For more information about TXT records, read [RFC 1464 at IANA](http://tools.ietf.org/html/rfc1464).'
-            example: '"v=spf1 a -all"'
-            type: string
         type: object
     DnsAddZoneParameterTypeLOC:
       allOf:
@@ -7072,62 +6909,6 @@ components:
             minimum: 1
             type: integer
         type: object
-    DnsEditZoneParameterTypeCNAME:
-      allOf:
-      - $ref: '#/components/schemas/DnsEditZoneParameterBase'
-      - properties:
-          cname:
-            description: 'The canonical name (CNAME) alias.
-
-
-              **Note:**
-
-
-              For more information about CNAME records, read [RFC 1035 at IANA](http://tools.ietf.org/html/rfc1035).'
-            example: hostname.example.com
-            format: domain
-            type: string
-          flatten:
-            description: 'Whether to resolve the specified CNAME value with the record''s IP address.
-
-
-              If you do **not** also set the `flatten_to` parameter, the system will attempt to resolve the CNAME automatically.
-
-
-              * `1` - Flattened.
-
-              * `0` - Not flattened (the function will **fail**).
-
-
-              **Note:**
-
-
-              Only use this parameter when you alter the zone''s `root` record.'
-            enum:
-            - 0
-            - 1
-            example: 1
-            type: integer
-          flatten_to:
-            description: 'The IP address that the specified CNAME will resolve to.
-
-
-              **Note:**
-
-
-              You **must** use the `flatten` parameter with this parameter.'
-            oneOf:
-            - description: A valid IPv4 address.
-              example: 192.0.2.27
-              format: ipv4
-              type: string
-            - description: A valid IPv6 address.
-              example: 2001:0db8:85a3:0042:1000:8a2e:0370:7334
-              format: ipv6
-              type: string
-        required:
-        - cname
-        type: object
     DnsAddZoneParameterTypeCAA:
       allOf:
       - $ref: '#/components/schemas/DnsAddZoneParameterBase'
@@ -7175,98 +6956,153 @@ components:
             example: exampleca.com
             type: string
         type: object
-    asfdb:
+    DnsEditZoneParameterTypeDNAME:
       allOf:
+      - $ref: '#/components/schemas/DnsEditZoneParameterBase'
+      - properties:
+          dname:
+            description: 'The delegation name (DNAME) alias.
+
+
+              **Note:**
+
+
+              For more information about DNAME records, read [RFC 2672 at IANA](http://tools.ietf.org/html/rfc2672).'
+            example: hostname.example.com
+            format: domain
+            type: string
+        required:
+        - dname
+        type: object
+    DnsEditZoneParameterTypeAFSDB:
+      allOf:
+      - $ref: '#/components/schemas/DnsEditZoneParameterBase'
       - properties:
           hostname:
             description: The database servers' hostname.
-            example: afs.example.com
+            example: hostname.example.com
+            format: domain
             type: string
           subtype:
-            description: The AFS cell type. A 16-bit integer that represents the type of AFS cell. For example, a value of 1 indicates an AFS version 3.0 Volume Location Server.
+            description: 'The 16-bit integer of an AFS cell type.
+
+
+              For example, specify `1` to signify an AFS version 3.0 Volume Location Server.
+
+
+              **Note:**
+
+
+              * You **must** uuencode the colons (`:`) in IPv6 addresses in your function calls.
+
+              * For more information about AFSDB records, read [RFC 1183 at IANA](http://tools.ietf.org/html/rfc1183).'
             example: 1
             type: integer
+        required:
+        - subtype
+        - hostname
+        type: object
+    ptr:
+      allOf:
+      - properties:
+          ptrdname:
+            description: A pointer to a canonical name (CNAME).
+            example: hostname.example.com.
+            type: string
           type:
             description: 'The [DNS record type](https://en.wikipedia.org/wiki/List_of_DNS_record_types).
 
-              * `AFSDB` — AFSDB records store the location of an AFS cell''s database servers.'
-            example: AFSDB
+              * `PTR` — PTR records point to a CNAME.'
+            example: PTR
             type: string
         type: object
       - $ref: '#/components/schemas/record'
-      description: 'An object representing AFSDB record data.
+      description: 'An object representing PTR record data.
 
 
         **Note:**
 
 
-        For more information about AFSDB records, read [RFC 1183 at IANA](http://tools.ietf.org/html/rfc1183).'
-    DnsAddZoneParameterTypeSOA:
+        For more information about PTR records, read [RFC 1035 at IANA](http://tools.ietf.org/html/rfc1035).'
+    ds:
       allOf:
-      - $ref: '#/components/schemas/DnsAddZoneParameterBase'
       - properties:
-          Lines:
-            description: The number of lines in the SOA section.
-            example: 4
-            minimum: 1
+          algorithm:
+            description: 'The record''s algorithm number.
+
+              * `1` — RSAMD5
+
+              * `2` — Diffie-Hellman
+
+              * `3` — DSA/SHA-1
+
+              * `4` — Elliptic Curve
+
+              * `5` — RSA/SHA-1
+
+              * `7` - RSASHA1-NSEC3-SHA1
+
+              * `8` - RSA/SHA-256
+
+              * `10` - RSA/SHA-512
+
+              * `13` - ECDSA Curve P-256 with SHA-256
+
+              * `14` - ECDSA Curve P-384 with SHA-384
+
+              * `252` — Indirect
+
+              * `253` — Private DNS
+
+              * `254` — Private OID'
+            example: 5
             type: integer
-          expire:
-            description: The amount of time, in seconds, to wait before the secondary server attempts to complete a zone transfer.
-            example: 3600000
-            minimum: 1
+          digtype:
+            description: 'The record''s digest type.
+
+              * `1` — SHA-1
+
+              * `2` — SHA-256
+
+              * `4` — SHA-384'
+            example: 1
             type: integer
-          mname:
-            description: The domain's authoritative nameserver.
-            example: ns1.host.example.com
-            format: domain
+          keyname:
+            description: The record's KeyTag value.
+            example: 2642
+            type: integer
+          type:
+            description: 'The [DNS record type](https://en.wikipedia.org/wiki/List_of_DNS_record_types).
+
+              * `DS` — DS records specify a record''s delegation signer.'
+            example: DS
             type: string
-          refresh:
-            description: The amount of time, in seconds, to wait before the secondary DNS server queries the primary DNS server's SOA records for changes.
-            example: 1440
-            minimum: 1
-            type: integer
-          retry:
-            description: The amount of time, in seconds, to wait before the secondary server retries a failed zone transfer.
-            example: 14400
-            minimum: 1
-            type: integer
-          rname:
-            description: 'The Responsible Person''s (RP) email address.
-
-
-              **Note:**
-
-
-              * Replace the `@` symbol with a period (`.`).
-
-              * Do **not** omit any necessary trailing periods.'
-            example: email.host.example.com
-            type: string
-          serial:
-            description: 'The zone file''s revision number.
-
-
-              **Note:**
-
-
-              For more information about SOA records, read [RFC 1035 at IANA](http://tools.ietf.org/html/rfc1035).'
-            example: 2013122501
-            type: integer
         type: object
-    DnsAddZoneParameterTypeA:
+      - $ref: '#/components/schemas/record'
+      description: 'An object representing DS record data.
+
+
+        **Note:**
+
+
+        For more information about DS records, read [RFC 4034 at IANA](http://tools.ietf.org/html/rfc4034).'
+    DnsEditZoneParameterTypeHINFO:
       allOf:
-      - $ref: '#/components/schemas/DnsAddZoneParameterBase'
+      - $ref: '#/components/schemas/DnsEditZoneParameterBase'
       - properties:
-          address:
-            description: 'The zone record''s IPv4 address.
+          cpu:
+            description: 'The host''s CPU type.
 
 
               **Note:**
 
 
-              For more information about A records, read [RFC 1035 at IANA](http://tools.ietf.org/html/rfc1035).'
-            example: 192.168.0.20
-            format: ipv4
+              For more information about HINFO records, read [RFC 1700 at IANA](http://tools.ietf.org/html/rfc1700.txt).'
+            example: INTEL-386
+            type: string
+          os:
+            description: The host's operating system.
+            example: UNIX
             type: string
         type: object
     DnsEditZoneParameterTypeDS:
@@ -7344,32 +7180,403 @@ components:
             example: 2642
             type: integer
         type: object
-    rp:
+    DnsEditZoneParameterTypeTXT:
+      allOf:
+      - $ref: '#/components/schemas/DnsEditZoneParameterBase'
+      - properties:
+          txtdata:
+            description: 'The TXT record''s data.
+
+
+              **Note:**
+
+
+              * This value **must** include beginning and ending quotes (`""`).
+
+              * Do **not** URI-encode the quotes.
+
+              * For more information about TXT records, read [RFC 1464 at IANA](http://tools.ietf.org/html/rfc1464).'
+            example: '"v=spf1 a -all"'
+            type: string
+        type: object
+    DnsEditZoneParameterTypeCNAME:
+      allOf:
+      - $ref: '#/components/schemas/DnsEditZoneParameterBase'
+      - properties:
+          cname:
+            description: 'The canonical name (CNAME) alias.
+
+
+              **Note:**
+
+
+              For more information about CNAME records, read [RFC 1035 at IANA](http://tools.ietf.org/html/rfc1035).'
+            example: hostname.example.com
+            format: domain
+            type: string
+          flatten:
+            description: 'Whether to resolve the specified CNAME value with the record''s IP address.
+
+
+              If you do **not** also set the `flatten_to` parameter, the system will attempt to resolve the CNAME automatically.
+
+
+              * `1` - Flattened.
+
+              * `0` - Not flattened (the function will **fail**).
+
+
+              **Note:**
+
+
+              Only use this parameter when you alter the zone''s `root` record.'
+            enum:
+            - 0
+            - 1
+            example: 1
+            type: integer
+          flatten_to:
+            description: 'The IP address that the specified CNAME will resolve to.
+
+
+              **Note:**
+
+
+              You **must** use the `flatten` parameter with this parameter.'
+            oneOf:
+            - description: A valid IPv4 address.
+              example: 192.0.2.27
+              format: ipv4
+              type: string
+            - description: A valid IPv6 address.
+              example: 2001:0db8:85a3:0042:1000:8a2e:0370:7334
+              format: ipv6
+              type: string
+        required:
+        - cname
+        type: object
+    soa:
       allOf:
       - properties:
-          mbox:
+          Lines:
+            description: The number of lines in the SOA section.
+            example: 4
+            minimum: 0
+            type: integer
+          expire:
+            description: The amount of time to wait before the secondary server attempts to complete a zone transfer, in seconds.
+            example: 3600000
+            minimum: 0
+            type: integer
+          mname:
+            description: The domain's authoritative nameserver.
+            example: ns1.example.com
+            type: string
+          refresh:
+            description: The amount of time to wait before the secondary DNS server queries the primary DNS server's SOA records for changes, in seconds.
+            example: 1440
+            minimum: 0
+            type: integer
+          retry:
+            description: The amount of time to wait before the secondary server retries a failed zone transfer, in seconds.
+            example: 1440
+            minimum: 0
+            type: integer
+          rname:
             description: The Responsible Person's (RP's) email address.
             example: user.example.com.
             type: string
-          txtdname:
-            description: The RP's domain name.
-            example: mx1.host.example.com.
-            type: string
+          serial:
+            description: The zone file's revision number.
+            example: 2013122501
+            type: integer
           type:
             description: 'The [DNS record type](https://en.wikipedia.org/wiki/List_of_DNS_record_types).
 
-              * `RP` — RP records store a domain''s Responsible Person''s information.'
-            example: RP
+              * `SOA` — SOA records designate the beginning of a zone of authority.'
+            example: SOA
             type: string
         type: object
       - $ref: '#/components/schemas/record'
-      description: 'An object representing RP record data.
+      description: 'An object representing SOA record data.
 
 
         **Note:**
 
 
-        For more information about RP records, read [RFC 1183 at IANA](https://tools.ietf.org/html/rfc1183).'
+        For more information about SOA records, read [RFC 1035 at IANA](http://tools.ietf.org/html/rfc1035).'
+    dname:
+      allOf:
+      - properties:
+          dname:
+            description: The delegation name (DNAME) alias.
+            example: hostname.dev.example.com
+            type: string
+          type:
+            description: 'The [DNS record type](https://en.wikipedia.org/wiki/List_of_DNS_record_types).
+
+              * `DNAME` — DNAME records create an alias for a hostname and its subnames.'
+            example: DNAME
+            type: string
+        type: object
+      - $ref: '#/components/schemas/record'
+      description: 'An object representing DNAME record data.
+
+
+        **Note:**
+
+
+        For more information about DNAME records, read [RFC 2672 at IANA](http://tools.ietf.org/html/rfc2672).'
+    hinfo:
+      allOf:
+      - properties:
+          cpu:
+            description: The host's CPU type.
+            example: INTEL-386
+            type: string
+          os:
+            description: The host's operating system.
+            example: UNIX
+            type: string
+          type:
+            description: 'The [DNS record type](https://en.wikipedia.org/wiki/List_of_DNS_record_types).
+
+              * `HINFO` — HINFO records specify a host''s CPU and OS types.'
+            example: HINFO
+            type: string
+        type: object
+      - $ref: '#/components/schemas/record'
+      description: 'An object representing HINFO record data.
+
+
+        **Note:**
+
+
+        For more information about HINFO records, read [RFC 1700 at IANA](http://tools.ietf.org/html/rfc1700.txt).'
+    DnsAddZoneParameterTypeALIAS:
+      allOf:
+      - $ref: '#/components/schemas/DnsAddZoneParameterBase'
+      - properties:
+          alias:
+            description: 'The hostname you want to point to.
+
+
+              **Note:**
+
+
+              We strongly recommend that you do not use this function.
+
+              Using the ALIAS DNS record may result in unexpected behavior, including website downtimes outside of your control, inconsistency in the handling of the record, and security vulnerabilities.
+
+              This record is only available if you enable access to it and use PowerDNS.'
+            example: hostname.example.com
+            format: domain
+            type: string
+        type: object
+    sshfp:
+      allOf:
+      - properties:
+          algorithm:
+            description: 'The public key''s algorithm number.
+
+              * `1` — RSA
+
+              * `2` — DSS'
+            example: 1
+            type: integer
+          fptype:
+            description: 'The public key''s fingerprint type.
+
+              * `1` — SHA-1'
+            example: 1
+            type: integer
+          type:
+            description: "The [DNS record type](https://en.wikipedia.org/wiki/List_of_DNS_record_types).\n* `SSHFP` — SSHFP records store a domain's SSH public host key's fingerprint.\n\n**Warning:**\n\n  We do **not** currently support the SSHFP DNS record type."
+            example: SSHFP
+            type: string
+        type: object
+      - $ref: '#/components/schemas/record'
+      description: 'An object representing SSHFP record data.
+
+
+        **Warning:**
+
+
+        We do **not** currently support this DNS record type.
+
+
+        **Note:**
+
+
+        For more information about SSHFP records, read [RFC 4255 at IANA](http://tools.ietf.org/html/rfc4255).'
+    DnsAddZoneParameterTypeNS:
+      allOf:
+      - $ref: '#/components/schemas/DnsAddZoneParameterBase'
+      - properties:
+          nsdname:
+            description: 'The domain''s authoritative nameserver.
+
+
+              **Note:**
+
+
+              For more information about NS records, read [RFC 1035 at IANA](http://tools.ietf.org/html/rfc1035).'
+            example: ns1.example.com
+            format: domain
+            type: string
+        type: object
+    DnsAddZoneParameterTypeAFSDB:
+      allOf:
+      - $ref: '#/components/schemas/DnsAddZoneParameterBase'
+      - properties:
+          hostname:
+            description: The database servers' hostname.
+            example: hostname.example.com
+            format: domain
+            type: string
+          subtype:
+            description: 'The 16-bit integer of an AFS cell type.
+
+
+              For example, specify `1` to signify an AFS version 3.0 Volume Location Server.
+
+
+              **Note:**
+
+
+              For more information about AFSDB records, read [RFC 1183 at IANA](http://tools.ietf.org/html/rfc1183).'
+            example: 1
+            type: integer
+        type: object
+    DnsAddZoneParameterTypeDS:
+      allOf:
+      - $ref: '#/components/schemas/DnsAddZoneParameterBase'
+      - properties:
+          algorithm:
+            description: 'The record''s algorithm number.
+
+
+              * `1` - RSAMD5
+
+              * `2` - Diffie-Hellman
+
+              * `3` - DSA/SHA-1
+
+              * `4` - Elliptic Curve
+
+              * `5` - RSA/SHA-1
+
+              * `7` - RSASHA1-NSEC3-SHA1
+
+              * `8` - RSA/SHA-256
+
+              * `10` - RSA/SHA-512
+
+              * `13` - ECDSA Curve P-256 with SHA-256
+
+              * `14` - ECDSA Curve P-384 with SHA-384
+
+              * `252` - Indirect
+
+              * `253` - Private DNS
+
+              * `254` - Private OID'
+            enum:
+            - 1
+            - 2
+            - 3
+            - 4
+            - 5
+            - 7
+            - 8
+            - 10
+            - 13
+            - 14
+            - 252
+            - 253
+            - 254
+            example: 5
+            type: integer
+          digtype:
+            description: 'The record''s digest type.
+
+
+              * `1` — SHA-1
+
+              * `2` — SHA-256
+
+              * `4` — SHA-384'
+            enum:
+            - 1
+            - 2
+            - 4
+            example: 1
+            type: integer
+          keyname:
+            description: 'The record''s KeyTag value.
+
+
+              **Note:**
+
+
+              For more information about DS records, read [RFC 4034 at IANA](http://tools.ietf.org/html/rfc4034).'
+            example: 2642
+            type: integer
+        type: object
+    DnsAddZoneParameterTypeCNAME:
+      allOf:
+      - $ref: '#/components/schemas/DnsAddZoneParameterBase'
+      - properties:
+          cname:
+            description: 'The canonical name (CNAME) alias.
+
+
+              **Note:**
+
+
+              For more information about CNAME records, read [RFC 1035 at IANA](http://tools.ietf.org/html/rfc1035).'
+            example: hostname.example.com
+            format: domain
+            type: string
+          flatten:
+            description: 'Whether to resolve the specified CNAME value with the record''s IP address.
+
+
+              If you do **not** also set the `flatten_to` parameter, the system will attempt to resolve the CNAME automatically.
+
+
+              * `1` - Flattened.
+
+              * `0` - Not flattened (the function will **fail**).
+
+
+              **Note:**
+
+
+              Only use this parameter when you alter the zone''s `root` record.'
+            enum:
+            - 0
+            - 1
+            example: 1
+            type: integer
+          flatten_to:
+            description: 'The IP address that the specified CNAME will resolve to.
+
+
+              **Note:**
+
+
+              You **must** use the `flatten` parameter with this parameter.'
+            oneOf:
+            - description: A valid IPv4 address.
+              example: 192.0.2.27
+              format: ipv4
+              type: string
+            - description: A valid IPv6 address.
+              example: 2001:0db8:85a3:0042:1000:8a2e:0370:7334
+              format: ipv6
+              type: string
+        type: object
     ns:
       allOf:
       - properties:
@@ -7517,38 +7724,254 @@ components:
       - line
       - ttl
       type: object
-    mx:
+    rp:
       allOf:
       - properties:
-          exchange:
-            description: The server's location's canonical name (CNAME).
-            example: mail.example.com
+          mbox:
+            description: The Responsible Person's (RP's) email address.
+            example: user.example.com.
             type: string
-          preference:
-            description: 'The record''s preference. An integer that represents the record''s priority order.
-
-
-              **Note:**
-
-
-              Lower values have a higher priority order.'
-            example: 10
-            type: integer
+          txtdname:
+            description: The RP's domain name.
+            example: mx1.host.example.com.
+            type: string
           type:
             description: 'The [DNS record type](https://en.wikipedia.org/wiki/List_of_DNS_record_types).
 
-              * `MX` — MX records point a domain name to its MTAs.'
-            example: MX
+              * `RP` — RP records store a domain''s Responsible Person''s information.'
+            example: RP
             type: string
         type: object
       - $ref: '#/components/schemas/record'
-      description: 'An object representing MX record data.
+      description: 'An object representing RP record data.
 
 
         **Note:**
 
 
-        For more information about MX records, read [RFC 1035 at IANA](http://tools.ietf.org/html/rfc1035).'
+        For more information about RP records, read [RFC 1183 at IANA](https://tools.ietf.org/html/rfc1183).'
+    DnsEditZoneParameterType:
+      anyOf:
+      - $ref: '#/components/schemas/DnsEditZoneParameterTypeA'
+      - $ref: '#/components/schemas/DnsEditZoneParameterTypeA6'
+      - $ref: '#/components/schemas/DnsEditZoneParameterTypeAAAA'
+      - $ref: '#/components/schemas/DnsEditZoneParameterTypeAFSDB'
+      - $ref: '#/components/schemas/DnsEditZoneParameterTypeALIAS'
+      - $ref: '#/components/schemas/DnsEditZoneParameterTypeCAA'
+      - $ref: '#/components/schemas/DnsEditZoneParameterTypeCNAME'
+      - $ref: '#/components/schemas/DnsEditZoneParameterTypeDNAME'
+      - $ref: '#/components/schemas/DnsEditZoneParameterTypeDS'
+      - $ref: '#/components/schemas/DnsEditZoneParameterTypeHINFO'
+      - $ref: '#/components/schemas/DnsEditZoneParameterTypeLOC'
+      - $ref: '#/components/schemas/DnsEditZoneParameterTypeMX'
+      - $ref: '#/components/schemas/DnsEditZoneParameterTypeNS'
+      - $ref: '#/components/schemas/DnsEditZoneParameterTypePTR'
+      - $ref: '#/components/schemas/DnsEditZoneParameterTypeRP'
+      - $ref: '#/components/schemas/DnsEditZoneParameterTypeSOA'
+      - $ref: '#/components/schemas/DnsEditZoneParameterTypeSRV'
+      - $ref: '#/components/schemas/DnsEditZoneParameterTypeTXT'
+      discriminator:
+        mapping:
+          A: '#/components/schemas/DnsEditZoneParameterTypeA'
+          A6: '#/components/schemas/DnsEditZoneParameterTypeA6'
+          AAAA: '#/components/schemas/DnsEditZoneParameterTypeAAAA'
+          AFSDB: '#/components/schemas/DnsEditZoneParameterTypeAFSDB'
+          ALIAS: '#/components/schemas/DnsEditZoneParameterTypeALIAS'
+          CAA: '#/components/schemas/DnsEditZoneParameterTypeCAA'
+          CNAME: '#/components/schemas/DnsEditZoneParameterTypeCNAME'
+          DNAME: '#/components/schemas/DnsEditZoneParameterTypeDNAME'
+          DS: '#/components/schemas/DnsEditZoneParameterTypeDS'
+          HINFO: '#/components/schemas/DnsEditZoneParameterTypeHINFO'
+          LOC: '#/components/schemas/DnsEditZoneParameterTypeLOC'
+          MX: '#/components/schemas/DnsEditZoneParameterTypeMX'
+          NS: '#/components/schemas/DnsEditZoneParameterTypeNS'
+          PTR: '#/components/schemas/DnsEditZoneParameterTypePTR'
+          RP: '#/components/schemas/DnsEditZoneParameterTypeRP'
+          SOA: '#/components/schemas/DnsEditZoneParameterTypeSOA'
+          SRV: '#/components/schemas/DnsEditZoneParameterTypeSRV'
+          TXT: '#/components/schemas/DnsEditZoneParameterTypeTXT'
+        propertyName: type
+    DnsAddZoneParameterTypeA:
+      allOf:
+      - $ref: '#/components/schemas/DnsAddZoneParameterBase'
+      - properties:
+          address:
+            description: 'The zone record''s IPv4 address.
+
+
+              **Note:**
+
+
+              For more information about A records, read [RFC 1035 at IANA](http://tools.ietf.org/html/rfc1035).'
+            example: 192.168.0.20
+            format: ipv4
+            type: string
+        type: object
+    caa:
+      allOf:
+      - properties:
+          flag:
+            description: 'Whether the CA will issue an SSL certificate if the CAA resource record contains unknown property tags.
+
+              * `0` - Non-critical. The CAA Resource Record contains unknown property tags, and the CA issued an SSL certificate.
+
+              * `1` - Critical. The CAA Resource Record contains unknown property tags, and the CA did **not** issue an SSL certificate.'
+            example: 0
+            type: integer
+          tag:
+            description: 'The CAA record''s property type.
+
+              * `issue` - A CA issued a certificate for the domain.
+
+              * `issuewild` - A CA issued a wildcard certificate for the domain.
+
+              * `iodef` - The user specified a URL to which a CA may report policy violations.'
+            example: issue
+            type: string
+          type:
+            description: 'The [DNS record type](https://en.wikipedia.org/wiki/List_of_DNS_record_types).
+
+              * `CAA` — CAA records control which certificate authorities can issue SSL certificates for a domain.'
+            example: CAA
+            type: string
+          value:
+            description: 'The CA''s domain or URL.
+
+              * A valid [SSL provider](https://sslmate.com/labs/caa/).
+
+              * A mailto URL or a standard URL.'
+            example: totallyrealca.tld
+            type: string
+        type: object
+      - $ref: '#/components/schemas/record'
+      description: 'An object representing CAA record data.
+
+
+        **Note:**
+
+
+        For more information about CAA record flags and property tags, read the [RFC 6844](https://tools.ietf.org/html/rfc6844#section-3) documentation.'
+    DnsAddZoneParameterTypeHINFO:
+      allOf:
+      - $ref: '#/components/schemas/DnsAddZoneParameterBase'
+      - properties:
+          cpu:
+            description: 'The host''s CPU type.
+
+
+              **Note:**
+
+
+              For more information about HINFO records, read [RFC 1700 at IANA](http://tools.ietf.org/html/rfc1700.txt).'
+            example: INTEL-386
+            type: string
+          os:
+            description: The host's operating system.
+            example: UNIX
+            type: string
+        type: object
+    DnsEditZoneParameterTypeA6:
+      allOf:
+      - $ref: '#/components/schemas/DnsEditZoneParameterBase'
+      - description: '
+
+          A6 records are **deprecated**. We **strongly** recommend that you use AAAA records to
+
+          store IPv6 addresses.'
+        properties:
+          prefix:
+            deprecated: true
+            description: The record's prefix length.
+            example: 48
+            minimum: 1
+            type: integer
+          refer:
+            deprecated: true
+            description: 'The record''s address suffix.
+
+
+              **Note:**
+
+
+              You **must** uuencode the colons (`:`) in IPv6 addresses in your function calls.'
+            example: 0::0
+            type: string
+        required:
+        - prefix
+        - refer
+        type: object
+    getzonerecordResponseBase:
+      discriminator:
+        mapping:
+          A: '#/components/schemas/getzonerecordResponseTypeA'
+          A6: '#/components/schemas/getzonerecordResponseTypeA6'
+          AAAA: '#/components/schemas/getzonerecordResponseTypeAAAA'
+          AFSDB: '#/components/schemas/getzonerecordResponseTypeAFSDB'
+          ALIAS: '#/components/schemas/getzonerecordResponseTypeALIAS'
+          CAA: '#/components/schemas/getzonerecordResponseTypeCAA'
+          CNAME: '#/components/schemas/getzonerecordResponseTypeCNAME'
+          DNAME: '#/components/schemas/getzonerecordResponseTypeDNAME'
+          DS: '#/components/schemas/getzonerecordResponseTypeDS'
+          HINFO: '#/components/schemas/getzonerecordResponseTypeHINFO'
+          LOC: '#/components/schemas/getzonerecordResponseTypeLOC'
+          MX: '#/components/schemas/getzonerecordResponseTypeMX'
+          NS: '#/components/schemas/getzonerecordResponseTypeNS'
+          PTR: '#/components/schemas/getzonerecordResponseTypePTR'
+          RP: '#/components/schemas/getzonerecordResponseTypeRP'
+          SOA: '#/components/schemas/getzonerecordResponseTypeSOA'
+          SRV: '#/components/schemas/getzonerecordResponseTypeSRV'
+          SSHFP: '#/components/schemas/getzonerecordResponseTypeSSHFP'
+          TXT: '#/components/schemas/getzonerecordResponseTypeTXT'
+        propertyName: type
+      properties:
+        Line:
+          description: The zone record's file line number.
+          example: 24
+          minimum: 1
+          type: integer
+        class:
+          description: The record's class.
+          example: IN
+          oneOf:
+          - enum:
+            - IN
+            type: string
+          - description: A valid DNS record class.
+            type: string
+        name:
+          description: The record's name.
+          example: hostname.example.com.
+          format: domain
+          type: string
+        ttl:
+          description: The record's Time To Live (TTL), in seconds.
+          example: 86400
+          minimum: 1
+          type: integer
+        type:
+          description: "The DNS record type.\n* `A` - A records store IPv4 addresses. Use them to map a hostname to an IPv4 address.\n* `A6`- A6 records store IPv6 addresses.\n* `AAAA` - AAAA records store IPv6 addresses.\n* `AFSDB` - AFSDB records store the location of an AFS cell's database servers.\n* `ALIAS` - ALIAS records create an alias to another hostname, but can coexist with other records on that name. We strongly discourage using this record type.\n* `CAA` - CAA records control which certificate authorities can issue SSL certificates for a domain.\n* `CNAME` - CNAME records create an alias to another hostname.\n* `DNAME` - DNAME records create an alias for a hostname and its subnames.\n* `DS` - DS records specify a record's delegation signer.\n* `HINFO` - HINFO records specify a host's CPU and OS types.\n* `LOC` - LOC records store a hostname's geographical location.\n* `MX` - MX records point a domain name to its MTAs.\n* `NS` - NS records store a domain's authoritative nameservers.\n* `PTR` - PTR records point to a CNAME.\n* `RP` - RP records store a domain's Responsible Person's information.\n* `SOA` - SOA records designate the beginning of a zone of authority.\n* `SRV` - SRV records store the service location records for newer protocols (for example, Autodiscover).\n* `SSHFP` - SSHFP records store a domain's SSH public host key's fingerprint.\n* `TXT` - TXT records store descriptive text or useful records (for example, SPF or DKIM records).\n\n **Warning:**\n\n  We do not currently support the SSHFP DNS record type.\n\nThis function will return a differently depending on which record type you query. Select a zone\nrecord type from the menu to view each set of return data:"
+          enum:
+          - A
+          - AAAA
+          - AFSDB
+          - ALIAS
+          - CAA
+          - CNAME
+          - DNAME
+          - DS
+          - HINFO
+          - LOC
+          - MX
+          - NS
+          - PTR
+          - RP
+          - SOA
+          - SRV
+          - SSHFP
+          - TXT
+          example: A
+          type: string
+      type: object
     DnsAddZoneParameterBase:
       properties:
         class:
@@ -7658,141 +8081,6 @@ components:
       - name
       - class
       type: object
-    srv:
-      allOf:
-      - properties:
-          port:
-            description: The target host's port.
-            example: 389
-            type: integer
-          priority:
-            description: 'The target host''s preference. An integer that represents the target host''s priority order.
-
-
-              **Note:**
-
-
-              Lower numbers have a higher priority order.'
-            example: 0
-            type: integer
-          target:
-            description: The service's target host.
-            example: service.example.com
-            format: domain
-            type: string
-          type:
-            description: 'The [DNS record type](https://en.wikipedia.org/wiki/List_of_DNS_record_types).
-
-              * `SRV` — SRV records store the service location records for newer protocols (for example, Autodiscover).'
-            example: SRV
-            type: string
-          weight:
-            description: A relative weight. The system uses this value to rank entries with the same `priority` value. An integer that represents the target host's weight against other hosts with the same `priority` value.
-            example: 2
-            type: integer
-        type: object
-      - $ref: '#/components/schemas/record'
-      description: 'An object representing SRV record data.
-
-
-        **Note:**
-
-
-        For more information about SRV records, read [RFC 2782 at IANA](http://tools.ietf.org/html/rfc2782).'
-    sshfp:
-      allOf:
-      - properties:
-          algorithm:
-            description: 'The public key''s algorithm number.
-
-              * `1` — RSA
-
-              * `2` — DSS'
-            example: 1
-            type: integer
-          fptype:
-            description: 'The public key''s fingerprint type.
-
-              * `1` — SHA-1'
-            example: 1
-            type: integer
-          type:
-            description: "The [DNS record type](https://en.wikipedia.org/wiki/List_of_DNS_record_types).\n* `SSHFP` — SSHFP records store a domain's SSH public host key's fingerprint.\n\n**Warning:**\n\n  We do **not** currently support the SSHFP DNS record type."
-            example: SSHFP
-            type: string
-        type: object
-      - $ref: '#/components/schemas/record'
-      description: 'An object representing SSHFP record data.
-
-
-        **Warning:**
-
-
-        We do **not** currently support this DNS record type.
-
-
-        **Note:**
-
-
-        For more information about SSHFP records, read [RFC 4255 at IANA](http://tools.ietf.org/html/rfc4255).'
-    txt:
-      allOf:
-      - properties:
-          txtdata:
-            description: The TXT record's data.
-            example: v=spf1 a -all
-            type: string
-          type:
-            description: 'The [DNS record type](https://en.wikipedia.org/wiki/List_of_DNS_record_types).
-
-              * `TXT` — TXT records store descriptive text or useful records (for example, SPF or DKIM records).'
-            example: TXT
-            type: string
-          unencoded:
-            description: 'Whether the TXT record''s data is encoded.
-
-              * `1` — Encoded.
-
-              * `0` — **Not** encoded.'
-            example: 1
-            type: integer
-        type: object
-      - $ref: '#/components/schemas/record'
-      description: 'An object representing TXT record data.
-
-
-        **Note:**
-
-
-        For more information about TXT records, read [RFC 1464 at IANA](http://tools.ietf.org/html/rfc1464).'
-    aaaa:
-      allOf:
-      - properties:
-          address:
-            description: The zone record's IPv6 address.
-            example: 2001:1:42:1::2a
-            type: string
-          type:
-            description: 'The [DNS record type](https://en.wikipedia.org/wiki/List_of_DNS_record_types).
-
-              * `AAAA` — AAAA records store IPv6 addresses.
-
-
-              **Important:**
-
-
-              A6 records are **deprecated**. We strongly **recommend** that you use [AAAA](http://tools.ietf.org/html/rfc3596) records to store IPv6 addresses.'
-            example: AAAA
-            type: string
-        type: object
-      - $ref: '#/components/schemas/record'
-      description: 'An object representing AAAA record data.
-
-
-        **Note:**
-
-
-        For more information about AAAA records, read [RFC 3596 at IANA](http://tools.ietf.org/html/rfc3596).'
     DnsAddZoneParameterType:
       anyOf:
       - $ref: '#/components/schemas/DnsAddZoneParameterTypeA'
@@ -7834,42 +8122,313 @@ components:
           SRV: '#/components/schemas/DnsAddZoneParameterTypeSRV'
           TXT: '#/components/schemas/DnsAddZoneParameterTypeTXT'
         propertyName: type
-    DnsAddZoneParameterTypeMX:
+    loc:
+      allOf:
+      - properties:
+          altitude:
+            description: The location's altitude. The location's altitude above sea level, in meters, and the m character.
+            example: 178m
+            type: string
+          horiz_pre:
+            description: The location's horizontal precision, in meters.
+            example: 10
+            minimum: 0
+            type: integer
+          latitude:
+            description: The location's latitude.
+            example: 41 51 54.305 N
+            type: string
+          longitude:
+            description: The location's longitude.
+            example: 87 36 47.95 W
+            type: string
+          size:
+            description: The diameter of a sphere that encloses the entire location, in meters.
+            example: 10
+            minimum: 0
+            type: integer
+          type:
+            description: 'The [DNS record type](https://en.wikipedia.org/wiki/List_of_DNS_record_types).
+
+              * `LOC` — LOC records store a hostname''s geographical location.'
+            example: LOC
+            type: string
+          version:
+            description: The record's version number. You **must** set this value to `0`.
+            example: 0
+            type: integer
+          vert_pre:
+            description: The location's vertical precision, in meters.
+            example: 10
+            minimum: 0
+            type: integer
+        type: object
+      - $ref: '#/components/schemas/record'
+      description: 'An object representing LOC record data.
+
+
+        **Note:**
+
+
+        For more information about LOC records, read [RFC 1876 at IANA](http://tools.ietf.org/html/rfc1876).'
+    DnsAddZoneParameterTypeDNAME:
       allOf:
       - $ref: '#/components/schemas/DnsAddZoneParameterBase'
       - properties:
-          exchange:
-            description: The server's location's canonical name (CNAME).
-            example: mail.example.com
-            format: domain
-            type: string
-          preference:
-            description: 'The record''s priority order.
+          dname:
+            description: 'The delegation name (DNAME) alias.
 
 
               **Note:**
 
 
-              * Lower values have a higher priority order.
+              For more information about DNAME records, read [RFC 2672 at IANA](http://tools.ietf.org/html/rfc2672).'
+            example: hostname.example.com
+            format: domain
+            type: string
+        type: object
+    DnsAddZoneParameterTypeA6:
+      allOf:
+      - $ref: '#/components/schemas/DnsAddZoneParameterBase'
+      - properties:
+          prefix:
+            deprecated: true
+            description: 'The record''s prefix length.
 
-              * For more information about MX records, read [RFC 1035 at IANA](http://tools.ietf.org/html/rfc1035).'
-            example: 10
+
+              **Important:**
+
+
+              A6 records are **deprecated**. We **strongly** recommend that you use AAAA records to
+
+              store IPv6 addresses.'
+            example: 48
+            minimum: 1
+            type: integer
+          refer:
+            deprecated: true
+            description: 'The record''s IPv6 address suffix.
+
+
+              **Note:**
+
+
+              You **must** uuencode the colons (`:`) in IPv6 addresses in your function calls.'
+            example: 0::0
+            type: string
+        type: object
+    DnsAddZoneParameterTypeSOA:
+      allOf:
+      - $ref: '#/components/schemas/DnsAddZoneParameterBase'
+      - properties:
+          Lines:
+            description: The number of lines in the SOA section.
+            example: 4
+            minimum: 1
+            type: integer
+          expire:
+            description: The amount of time, in seconds, to wait before the secondary server attempts to complete a zone transfer.
+            example: 3600000
+            minimum: 1
+            type: integer
+          mname:
+            description: The domain's authoritative nameserver.
+            example: ns1.host.example.com
+            format: domain
+            type: string
+          refresh:
+            description: The amount of time, in seconds, to wait before the secondary DNS server queries the primary DNS server's SOA records for changes.
+            example: 1440
+            minimum: 1
+            type: integer
+          retry:
+            description: The amount of time, in seconds, to wait before the secondary server retries a failed zone transfer.
+            example: 14400
+            minimum: 1
+            type: integer
+          rname:
+            description: 'The Responsible Person''s (RP) email address.
+
+
+              **Note:**
+
+
+              * Replace the `@` symbol with a period (`.`).
+
+              * Do **not** omit any necessary trailing periods.'
+            example: email.host.example.com
+            type: string
+          serial:
+            description: 'The zone file''s revision number.
+
+
+              **Note:**
+
+
+              For more information about SOA records, read [RFC 1035 at IANA](http://tools.ietf.org/html/rfc1035).'
+            example: 2013122501
             type: integer
         type: object
-    DnsEditZoneParameterTypeNS:
+    record:
+      properties:
+        Line:
+          description: The zone record's line number.
+          example: 1
+          type: integer
+        class:
+          description: 'The record''s class.
+
+            - IN
+
+            - Very rarely, another valid DNS record class.'
+          example: IN
+          type: string
+        name:
+          description: The record's name.
+          example: hostname.example.com
+          type: string
+        ttl:
+          description: The record's Time To Live (TTL).
+          example: 86400
+          type: integer
+      type: object
+    DnsEditZoneParameterTypeA:
       allOf:
       - $ref: '#/components/schemas/DnsEditZoneParameterBase'
       - properties:
-          nsdname:
-            description: 'The domain''s authoritative nameserver.
+          address:
+            description: 'The zone record''s IPv4 address.
 
 
               **Note:**
 
 
-              For more information about NS records, read [RFC 1035 at IANA](http://tools.ietf.org/html/rfc1035).'
-            example: ns1.example.com
+              For more information about A records, read [RFC 1035 at IANA](http://tools.ietf.org/html/rfc1035).'
+            example: 192.168.0.20
+            format: ipv4
+            type: string
+        required:
+        - address
+        type: object
+    DnsEditZoneParameterTypeSOA:
+      allOf:
+      - $ref: '#/components/schemas/DnsEditZoneParameterBase'
+      - properties:
+          expire:
+            description: The amount of time, in seconds, to wait before the secondary server attempts to complete a zone transfer.
+            example: 3600000
+            minimum: 1
+            type: integer
+          lines:
+            description: The number of lines in the SOA section.
+            example: 4
+            minimum: 1
+            type: integer
+          mname:
+            description: The domain's authoritative nameserver.
+            example: ns1.host.example.com
             format: domain
+            type: string
+          refresh:
+            description: The amount of time, in seconds, to wait before the secondary DNS server queries the primary DNS server's SOA records for changes.
+            example: 1440
+            minimum: 1
+            type: integer
+          retry:
+            description: The amount of time, in seconds, to wait before the secondary server retries a failed zone transfer.
+            example: 14400
+            minimum: 1
+            type: integer
+          rname:
+            description: 'The Responsible Person''s (RP) email address.
+
+
+              **Note:**
+
+
+              * Replace the `@` symbol with a period (`.`).
+
+              * Do **not** omit any necessary trailing periods.'
+            example: email.host.example.com
+            type: string
+          serial:
+            description: 'The zone file''s revision number.
+
+
+              **Note:**
+
+
+              For more information about SOA records, read [RFC 1035 at IANA](http://tools.ietf.org/html/rfc1035).'
+            example: 2013122501
+            type: integer
+        type: object
+    DnsEditZoneParameterTypeSRV:
+      allOf:
+      - $ref: '#/components/schemas/DnsEditZoneParameterBase'
+      - properties:
+          port:
+            description: The target host's port.
+            example: 389
+            type: integer
+          priority:
+            description: 'The target host''s priority preference.
+
+
+              **Note:**
+
+
+              * Lower numbers have a higher priority order.
+
+              * For more information about SRV records, read [RFC 2782 at IANA](http://tools.ietf.org/html/rfc2782).'
+            example: 0
+            type: integer
+          target:
+            description: The service's target host.
+            example: service.example.com
+            format: domain
+            type: string
+          weight:
+            description: A relative weight. The system uses this value to rank entries with the same `priority` value.
+            example: 2
+            type: integer
+        type: object
+    DnsEditZoneParameterTypeAAAA:
+      allOf:
+      - $ref: '#/components/schemas/DnsEditZoneParameterBase'
+      - properties:
+          address:
+            description: 'The zone record''s IPv6 address.
+
+
+              **Note:**
+
+
+              * You **must** uuencode the colons (`:`) in IPv6 addresses in your function calls.
+
+              * For more information about AAAA records, read [RFC 3596 at IANA](http://tools.ietf.org/html/rfc3596).'
+            example: 2001:1:42:1::2a
+            format: ipv6
+            type: string
+        required:
+        - address
+        type: object
+    DnsAddZoneParameterTypeTXT:
+      allOf:
+      - $ref: '#/components/schemas/DnsAddZoneParameterBase'
+      - properties:
+          txtdata:
+            description: 'The TXT record''s data.
+
+
+              **Note:**
+
+
+              * This value **must** include beginning and ending quotes (`""`).
+
+              * Do **not** URI-encode the quotes.
+
+              * For more information about TXT records, read [RFC 1464 at IANA](http://tools.ietf.org/html/rfc1464).'
+            example: '"v=spf1 a -all"'
             type: string
         type: object
     DnsEditZoneParameterTypeLOC:
@@ -7924,331 +8483,6 @@ components:
             minimum: 1
             type: integer
         type: object
-    DnsAddZoneParameterTypeHINFO:
-      allOf:
-      - $ref: '#/components/schemas/DnsAddZoneParameterBase'
-      - properties:
-          cpu:
-            description: 'The host''s CPU type.
-
-
-              **Note:**
-
-
-              For more information about HINFO records, read [RFC 1700 at IANA](http://tools.ietf.org/html/rfc1700.txt).'
-            example: INTEL-386
-            type: string
-          os:
-            description: The host's operating system.
-            example: UNIX
-            type: string
-        type: object
-    ds:
-      allOf:
-      - properties:
-          algorithm:
-            description: 'The record''s algorithm number.
-
-              * `1` — RSAMD5
-
-              * `2` — Diffie-Hellman
-
-              * `3` — DSA/SHA-1
-
-              * `4` — Elliptic Curve
-
-              * `5` — RSA/SHA-1
-
-              * `7` - RSASHA1-NSEC3-SHA1
-
-              * `8` - RSA/SHA-256
-
-              * `10` - RSA/SHA-512
-
-              * `13` - ECDSA Curve P-256 with SHA-256
-
-              * `14` - ECDSA Curve P-384 with SHA-384
-
-              * `252` — Indirect
-
-              * `253` — Private DNS
-
-              * `254` — Private OID'
-            example: 5
-            type: integer
-          digtype:
-            description: 'The record''s digest type.
-
-              * `1` — SHA-1
-
-              * `2` — SHA-256
-
-              * `4` — SHA-384'
-            example: 1
-            type: integer
-          keyname:
-            description: The record's KeyTag value.
-            example: 2642
-            type: integer
-          type:
-            description: 'The [DNS record type](https://en.wikipedia.org/wiki/List_of_DNS_record_types).
-
-              * `DS` — DS records specify a record''s delegation signer.'
-            example: DS
-            type: string
-        type: object
-      - $ref: '#/components/schemas/record'
-      description: 'An object representing DS record data.
-
-
-        **Note:**
-
-
-        For more information about DS records, read [RFC 4034 at IANA](http://tools.ietf.org/html/rfc4034).'
-    DnsAddZoneParameterTypeA6:
-      allOf:
-      - $ref: '#/components/schemas/DnsAddZoneParameterBase'
-      - properties:
-          prefix:
-            deprecated: true
-            description: 'The record''s prefix length.
-
-
-              **Important:**
-
-
-              A6 records are **deprecated**. We **strongly** recommend that you use AAAA records to
-
-              store IPv6 addresses.'
-            example: 48
-            minimum: 1
-            type: integer
-          refer:
-            deprecated: true
-            description: 'The record''s IPv6 address suffix.
-
-
-              **Note:**
-
-
-              You **must** uuencode the colons (`:`) in IPv6 addresses in your function calls.'
-            example: 0::0
-            type: string
-        type: object
-    DnsEditZoneParameterTypeHINFO:
-      allOf:
-      - $ref: '#/components/schemas/DnsEditZoneParameterBase'
-      - properties:
-          cpu:
-            description: 'The host''s CPU type.
-
-
-              **Note:**
-
-
-              For more information about HINFO records, read [RFC 1700 at IANA](http://tools.ietf.org/html/rfc1700.txt).'
-            example: INTEL-386
-            type: string
-          os:
-            description: The host's operating system.
-            example: UNIX
-            type: string
-        type: object
-    DnsAddZoneParameterTypeDS:
-      allOf:
-      - $ref: '#/components/schemas/DnsAddZoneParameterBase'
-      - properties:
-          algorithm:
-            description: 'The record''s algorithm number.
-
-
-              * `1` - RSAMD5
-
-              * `2` - Diffie-Hellman
-
-              * `3` - DSA/SHA-1
-
-              * `4` - Elliptic Curve
-
-              * `5` - RSA/SHA-1
-
-              * `7` - RSASHA1-NSEC3-SHA1
-
-              * `8` - RSA/SHA-256
-
-              * `10` - RSA/SHA-512
-
-              * `13` - ECDSA Curve P-256 with SHA-256
-
-              * `14` - ECDSA Curve P-384 with SHA-384
-
-              * `252` - Indirect
-
-              * `253` - Private DNS
-
-              * `254` - Private OID'
-            enum:
-            - 1
-            - 2
-            - 3
-            - 4
-            - 5
-            - 7
-            - 8
-            - 10
-            - 13
-            - 14
-            - 252
-            - 253
-            - 254
-            example: 5
-            type: integer
-          digtype:
-            description: 'The record''s digest type.
-
-
-              * `1` — SHA-1
-
-              * `2` — SHA-256
-
-              * `4` — SHA-384'
-            enum:
-            - 1
-            - 2
-            - 4
-            example: 1
-            type: integer
-          keyname:
-            description: 'The record''s KeyTag value.
-
-
-              **Note:**
-
-
-              For more information about DS records, read [RFC 4034 at IANA](http://tools.ietf.org/html/rfc4034).'
-            example: 2642
-            type: integer
-        type: object
-    DnsEditZoneParameterTypeA6:
-      allOf:
-      - $ref: '#/components/schemas/DnsEditZoneParameterBase'
-      - description: '
-
-          A6 records are **deprecated**. We **strongly** recommend that you use AAAA records to
-
-          store IPv6 addresses.'
-        properties:
-          prefix:
-            deprecated: true
-            description: The record's prefix length.
-            example: 48
-            minimum: 1
-            type: integer
-          refer:
-            deprecated: true
-            description: 'The record''s address suffix.
-
-
-              **Note:**
-
-
-              You **must** uuencode the colons (`:`) in IPv6 addresses in your function calls.'
-            example: 0::0
-            type: string
-        required:
-        - prefix
-        - refer
-        type: object
-    getzonerecordResponseBase:
-      discriminator:
-        mapping:
-          A: '#/components/schemas/getzonerecordResponseTypeA'
-          A6: '#/components/schemas/getzonerecordResponseTypeA6'
-          AAAA: '#/components/schemas/getzonerecordResponseTypeAAAA'
-          AFSDB: '#/components/schemas/getzonerecordResponseTypeAFSDB'
-          ALIAS: '#/components/schemas/getzonerecordResponseTypeALIAS'
-          CAA: '#/components/schemas/getzonerecordResponseTypeCAA'
-          CNAME: '#/components/schemas/getzonerecordResponseTypeCNAME'
-          DNAME: '#/components/schemas/getzonerecordResponseTypeDNAME'
-          DS: '#/components/schemas/getzonerecordResponseTypeDS'
-          HINFO: '#/components/schemas/getzonerecordResponseTypeHINFO'
-          LOC: '#/components/schemas/getzonerecordResponseTypeLOC'
-          MX: '#/components/schemas/getzonerecordResponseTypeMX'
-          NS: '#/components/schemas/getzonerecordResponseTypeNS'
-          PTR: '#/components/schemas/getzonerecordResponseTypePTR'
-          RP: '#/components/schemas/getzonerecordResponseTypeRP'
-          SOA: '#/components/schemas/getzonerecordResponseTypeSOA'
-          SRV: '#/components/schemas/getzonerecordResponseTypeSRV'
-          SSHFP: '#/components/schemas/getzonerecordResponseTypeSSHFP'
-          TXT: '#/components/schemas/getzonerecordResponseTypeTXT'
-        propertyName: type
-      properties:
-        Line:
-          description: The zone record's file line number.
-          example: 24
-          minimum: 1
-          type: integer
-        class:
-          description: The record's class.
-          example: IN
-          oneOf:
-          - enum:
-            - IN
-            type: string
-          - description: A valid DNS record class.
-            type: string
-        name:
-          description: The record's name.
-          example: hostname.example.com.
-          format: domain
-          type: string
-        ttl:
-          description: The record's Time To Live (TTL), in seconds.
-          example: 86400
-          minimum: 1
-          type: integer
-        type:
-          description: "The DNS record type.\n* `A` - A records store IPv4 addresses. Use them to map a hostname to an IPv4 address.\n* `A6`- A6 records store IPv6 addresses.\n* `AAAA` - AAAA records store IPv6 addresses.\n* `AFSDB` - AFSDB records store the location of an AFS cell's database servers.\n* `ALIAS` - ALIAS records create an alias to another hostname, but can coexist with other records on that name. We strongly discourage using this record type.\n* `CAA` - CAA records control which certificate authorities can issue SSL certificates for a domain.\n* `CNAME` - CNAME records create an alias to another hostname.\n* `DNAME` - DNAME records create an alias for a hostname and its subnames.\n* `DS` - DS records specify a record's delegation signer.\n* `HINFO` - HINFO records specify a host's CPU and OS types.\n* `LOC` - LOC records store a hostname's geographical location.\n* `MX` - MX records point a domain name to its MTAs.\n* `NS` - NS records store a domain's authoritative nameservers.\n* `PTR` - PTR records point to a CNAME.\n* `RP` - RP records store a domain's Responsible Person's information.\n* `SOA` - SOA records designate the beginning of a zone of authority.\n* `SRV` - SRV records store the service location records for newer protocols (for example, Autodiscover).\n* `SSHFP` - SSHFP records store a domain's SSH public host key's fingerprint.\n* `TXT` - TXT records store descriptive text or useful records (for example, SPF or DKIM records).\n\n **Warning:**\n\n  We do not currently support the SSHFP DNS record type.\n\nThis function will return a differently depending on which record type you query. Select a zone\nrecord type from the menu to view each set of return data:"
-          enum:
-          - A
-          - AAAA
-          - AFSDB
-          - ALIAS
-          - CAA
-          - CNAME
-          - DNAME
-          - DS
-          - HINFO
-          - LOC
-          - MX
-          - NS
-          - PTR
-          - RP
-          - SOA
-          - SRV
-          - SSHFP
-          - TXT
-          example: A
-          type: string
-      type: object
-    DnsAddZoneParameterTypeAAAA:
-      allOf:
-      - $ref: '#/components/schemas/DnsAddZoneParameterBase'
-      - properties:
-          address:
-            description: 'The zone record''s IPv6 address.
-
-
-              **Note:**
-
-
-              * You **must** uuencode the colons (`:`) in IPv6 addresses in your function calls.
-
-              * For more information about AAAA records, read [RFC 3596 at IANA](http://tools.ietf.org/html/rfc3596).'
-            example: 2001:1:42:1::2a
-            format: ipv6
-            type: string
-        type: object
     DnsEditZoneParameterTypeRP:
       allOf:
       - $ref: '#/components/schemas/DnsEditZoneParameterBase'
@@ -8279,171 +8513,6 @@ components:
             format: domain
             type: string
         type: object
-    DnsAddZoneParameterTypePTR:
-      allOf:
-      - $ref: '#/components/schemas/DnsAddZoneParameterBase'
-      - properties:
-          ptrdname:
-            description: 'A pointer to a canonical name (CNAME).
-
-
-              **Note:**
-
-
-              * Do **not** omit any necessary trailing periods.
-
-              * For more information about NS records, read [RFC 1035 at IANA](http://tools.ietf.org/html/rfc1035).'
-            example: hostname.example.com
-            format: domain
-            type: string
-          zone:
-            description: The new reverse DNS zone's name.
-            example: 0.168.192.in-addr.arpa
-            type: string
-        type: object
-    DnsEditZoneParameterTypeDNAME:
-      allOf:
-      - $ref: '#/components/schemas/DnsEditZoneParameterBase'
-      - properties:
-          dname:
-            description: 'The delegation name (DNAME) alias.
-
-
-              **Note:**
-
-
-              For more information about DNAME records, read [RFC 2672 at IANA](http://tools.ietf.org/html/rfc2672).'
-            example: hostname.example.com
-            format: domain
-            type: string
-        required:
-        - dname
-        type: object
-    DnsEditZoneParameterTypePTR:
-      allOf:
-      - $ref: '#/components/schemas/DnsEditZoneParameterBase'
-      - properties:
-          ptrdname:
-            description: 'A pointer to a canonical name (CNAME).
-
-
-              **Note:**
-
-
-              * Do **not** omit any necessary trailing periods.
-
-              * For more information about PTR records, read [RFC 1035 at IANA](http://tools.ietf.org/html/rfc1035).'
-            example: hostname.example.com
-            format: domain
-            type: string
-        type: object
-    a6:
-      allOf:
-      - properties:
-          prefix:
-            description: The record's prefix length.
-            example: 48
-            type: integer
-          refer:
-            description: The record's address suffix.
-            example: 0::0
-            type: string
-          type:
-            description: 'The [DNS record type](https://en.wikipedia.org/wiki/List_of_DNS_record_types).
-
-              * `A6` — A6 records store IPv6 addresses.
-
-
-              **Important:**
-
-
-              A6 records are **deprecated**. We strongly **recommend** that you use [AAAA](http://tools.ietf.org/html/rfc3596) records to store IPv6 addresses.'
-            example: A6
-            type: string
-        type: object
-      - $ref: '#/components/schemas/record'
-      description: 'An object representing A6 record data.
-
-
-        **Important:**
-
-
-        A6 records are **deprecated**. We strongly **recommend** that you use [AAAA](http://tools.ietf.org/html/rfc3596) records to store IPv6 addresses.'
-    DnsAddZoneParameterTypeAFSDB:
-      allOf:
-      - $ref: '#/components/schemas/DnsAddZoneParameterBase'
-      - properties:
-          hostname:
-            description: The database servers' hostname.
-            example: hostname.example.com
-            format: domain
-            type: string
-          subtype:
-            description: 'The 16-bit integer of an AFS cell type.
-
-
-              For example, specify `1` to signify an AFS version 3.0 Volume Location Server.
-
-
-              **Note:**
-
-
-              For more information about AFSDB records, read [RFC 1183 at IANA](http://tools.ietf.org/html/rfc1183).'
-            example: 1
-            type: integer
-        type: object
-    DnsEditZoneParameterTypeSOA:
-      allOf:
-      - $ref: '#/components/schemas/DnsEditZoneParameterBase'
-      - properties:
-          expire:
-            description: The amount of time, in seconds, to wait before the secondary server attempts to complete a zone transfer.
-            example: 3600000
-            minimum: 1
-            type: integer
-          lines:
-            description: The number of lines in the SOA section.
-            example: 4
-            minimum: 1
-            type: integer
-          mname:
-            description: The domain's authoritative nameserver.
-            example: ns1.host.example.com
-            format: domain
-            type: string
-          refresh:
-            description: The amount of time, in seconds, to wait before the secondary DNS server queries the primary DNS server's SOA records for changes.
-            example: 1440
-            minimum: 1
-            type: integer
-          retry:
-            description: The amount of time, in seconds, to wait before the secondary server retries a failed zone transfer.
-            example: 14400
-            minimum: 1
-            type: integer
-          rname:
-            description: 'The Responsible Person''s (RP) email address.
-
-
-              **Note:**
-
-
-              * Replace the `@` symbol with a period (`.`).
-
-              * Do **not** omit any necessary trailing periods.'
-            example: email.host.example.com
-            type: string
-          serial:
-            description: 'The zone file''s revision number.
-
-
-              **Note:**
-
-
-              For more information about SOA records, read [RFC 1035 at IANA](http://tools.ietf.org/html/rfc1035).'
-            example: 2013122501
-            type: integer
-        type: object
     DnsEditZoneParameterTypeMX:
       allOf:
       - $ref: '#/components/schemas/DnsEditZoneParameterBase'
@@ -8466,133 +8535,72 @@ components:
             example: 10
             type: integer
         type: object
-    DnsAddZoneParameterTypeCNAME:
+    DnsAddZoneParameterTypePTR:
       allOf:
       - $ref: '#/components/schemas/DnsAddZoneParameterBase'
       - properties:
-          cname:
-            description: 'The canonical name (CNAME) alias.
+          ptrdname:
+            description: 'A pointer to a canonical name (CNAME).
 
 
               **Note:**
 
 
-              For more information about CNAME records, read [RFC 1035 at IANA](http://tools.ietf.org/html/rfc1035).'
+              * Do **not** omit any necessary trailing periods.
+
+              * For more information about NS records, read [RFC 1035 at IANA](http://tools.ietf.org/html/rfc1035).'
             example: hostname.example.com
             format: domain
             type: string
-          flatten:
-            description: 'Whether to resolve the specified CNAME value with the record''s IP address.
-
-
-              If you do **not** also set the `flatten_to` parameter, the system will attempt to resolve the CNAME automatically.
-
-
-              * `1` - Flattened.
-
-              * `0` - Not flattened (the function will **fail**).
-
-
-              **Note:**
-
-
-              Only use this parameter when you alter the zone''s `root` record.'
-            enum:
-            - 0
-            - 1
-            example: 1
-            type: integer
-          flatten_to:
-            description: 'The IP address that the specified CNAME will resolve to.
-
-
-              **Note:**
-
-
-              You **must** use the `flatten` parameter with this parameter.'
-            oneOf:
-            - description: A valid IPv4 address.
-              example: 192.0.2.27
-              format: ipv4
-              type: string
-            - description: A valid IPv6 address.
-              example: 2001:0db8:85a3:0042:1000:8a2e:0370:7334
-              format: ipv6
-              type: string
+          zone:
+            description: The new reverse DNS zone's name.
+            example: 0.168.192.in-addr.arpa
+            type: string
         type: object
-    DnsEditZoneParameterTypeCAA:
+    DnsEditZoneParameterTypeNS:
       allOf:
       - $ref: '#/components/schemas/DnsEditZoneParameterBase'
       - properties:
-          flag:
-            description: 'Whether the Certificate Authority (CA) will issue an SSL certificate if the CAA resource record contains unknown property tags.
-
-
-              * `0` - The CA will issue an SSL certificate.
-
-              * `1` - The CA will **not** issue an SSL certificate.
-
-
-              For more information about CAA record flags and property tags, read the [RFC 6844 documentation](https://tools.ietf.org/html/rfc6844#section-3).'
-            enum:
-            - 0
-            - 1
-            example: 0
-            type: integer
-          tag:
-            description: 'The CAA record''s property type.
-
-
-              * `issue` - Authorize a CA to issue a certificate for the domain.
-
-              * `issuewild` - Authorize a CA to issue a wildcard certificate for the domain.
-
-              * `iodef` - Specify a URL to which a CA may report policy violations.'
-            enum:
-            - issue
-            - issuewild
-            - iodef
-            example: issue
-            type: string
-          value:
-            description: 'The CA''s domain or URL. This is a valid [SSL provider](https://sslmate.com/labs/caa/),
-
-              `mailto` URL, or a standard URL.
+          nsdname:
+            description: 'The domain''s authoritative nameserver.
 
 
               **Note:**
 
 
-              If you use `iodef` as the `tag` parameter''s value, enter a URL that a CA can use to report issues as this parameter''s value.'
-            example: exampleca.com
+              For more information about NS records, read [RFC 1035 at IANA](http://tools.ietf.org/html/rfc1035).'
+            example: ns1.example.com
+            format: domain
             type: string
-        required:
-        - flag
-        - tag
-        - value
         type: object
-    ptr:
+    aaaa:
       allOf:
       - properties:
-          ptrdname:
-            description: A pointer to a canonical name (CNAME).
-            example: hostname.example.com.
+          address:
+            description: The zone record's IPv6 address.
+            example: 2001:1:42:1::2a
             type: string
           type:
             description: 'The [DNS record type](https://en.wikipedia.org/wiki/List_of_DNS_record_types).
 
-              * `PTR` — PTR records point to a CNAME.'
-            example: PTR
+              * `AAAA` — AAAA records store IPv6 addresses.
+
+
+              **Important:**
+
+
+              A6 records are **deprecated**. We strongly **recommend** that you use [AAAA](http://tools.ietf.org/html/rfc3596) records to store IPv6 addresses.'
+            example: AAAA
             type: string
         type: object
       - $ref: '#/components/schemas/record'
-      description: 'An object representing PTR record data.
+      description: 'An object representing AAAA record data.
 
 
         **Note:**
 
 
-        For more information about PTR records, read [RFC 1035 at IANA](http://tools.ietf.org/html/rfc1035).'
+        For more information about AAAA records, read [RFC 3596 at IANA](http://tools.ietf.org/html/rfc3596).'
   securitySchemes:
     BasicAuth:
       scheme: basic

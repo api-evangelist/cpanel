@@ -47,6 +47,9 @@ access: 3rd-Party
 position: Consuming
 created: '2025-02-09'
 modified: '2026-09-05'
+x-docs-platform: redocly
+x-docs-platform-confidence: high
+x-docs-platform-checked: 2026-09-24
 tags:
 - Control Panel
 - DNS

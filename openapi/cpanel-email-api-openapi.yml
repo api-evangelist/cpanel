@@ -12051,6 +12051,113 @@ paths:
       x-cpanel-available-version: cPanel 11.52
 components:
   schemas:
+    trace_deliveryResponseBase:
+      properties:
+        address:
+          description: The email address of an email message recipient.
+          example: username@example.com
+          format: email
+          type: string
+        type:
+          description: 'A type of trace node. The system returns this value to indicate the **end** of routing.
+
+            * `bounce` - The system rejected the email''s delivery.
+
+            * `command` - The system will run a command when it receives an email.
+
+            * `defer` - The system deferred the email.
+
+            * `discard` - The system discarded the email.
+
+            * `error` - The system encountered an error.
+
+            * `local_delivery` - The system sent the email to a local mailbox.
+
+            * `remote_delivery` - The system sent the email via Simple Mail Transfer Protocol (SMTP).
+
+            * `routed` - The system routed the email elsewhere.
+
+
+            **Note:**
+
+            * The structure of the `destinations` return changes depending on the `type` return value.
+
+            * The `routed` type can return any other type''s data structure as part of the `destinations` return value.
+
+
+            For more information, see the return structure for each `type` return value below:'
+          example: local_delivery
+          type: string
+    trace_deliveryTypeDescription:
+      description: 'A type of trace node. The system returns this value to indicate the **end** of routing.
+
+        * `bounce` - The system rejected the email''s delivery.
+
+        * `command` - The system will run a command when it receives an email.
+
+        * `defer` - The system deferred the email.
+
+        * `discard` - The system discarded the email.
+
+        * `error` - The system encountered an error.
+
+        * `local_delivery` - The system sent the email to a local mailbox.
+
+        * `remote_delivery` - The system sent the email via Simple Mail Transfer Protocol (SMTP).
+
+        * `routed` - The system routed the email elsewhere.
+
+
+        **Note:**
+
+        * The structure of the `destinations` return changes depending on the `type` return value.
+
+        * The `routed` type can return any other type''s data structure as part of the `destinations` return value.'
+      example: local_delivery
+      type: string
+    trace_deliveryResponseLocalDelivery:
+      allOf:
+      - $ref: '#/components/schemas/trace_deliveryResponseBase'
+      - properties:
+          destinations:
+            properties:
+              mailbox:
+                description: The mailbox where the system sent the email.
+                example: user@example.com
+                format: email
+                type: string
+              type:
+                $ref: '#/components/schemas/trace_deliveryTypeDescription'
+            type: object
+        type: object
+    trace_deliveryResponseDefer:
+      allOf:
+      - $ref: '#/components/schemas/trace_deliveryResponseBase'
+      - properties:
+          destinations:
+            properties:
+              message:
+                description: A message that the system sends when it defers the email.
+                example: The system deferred the message.
+                type: string
+              type:
+                $ref: '#/components/schemas/trace_deliveryTypeDescription'
+            type: object
+        type: object
+    trace_deliveryResponseCommand:
+      allOf:
+      - $ref: '#/components/schemas/trace_deliveryResponseBase'
+      - properties:
+          destinations:
+            properties:
+              command:
+                description: A command that the system runs when it receives the email.
+                example: /usr/local/cpanel/bin/autorespond user@example.com /home/cpmailuser/.autorespond
+                type: string
+              type:
+                $ref: '#/components/schemas/trace_deliveryTypeDescription'
+            type: object
+        type: object
     trace_deliveryType:
       anyOf:
       - $ref: '#/components/schemas/trace_deliveryResponseBounce'
@@ -12123,21 +12230,6 @@ components:
                 $ref: '#/components/schemas/trace_deliveryTypeDescription'
             type: object
         type: object
-    trace_deliveryResponseLocalDelivery:
-      allOf:
-      - $ref: '#/components/schemas/trace_deliveryResponseBase'
-      - properties:
-          destinations:
-            properties:
-              mailbox:
-                description: The mailbox where the system sent the email.
-                example: user@example.com
-                format: email
-                type: string
-              type:
-                $ref: '#/components/schemas/trace_deliveryTypeDescription'
-            type: object
-        type: object
     trace_deliveryResponseRemoteDelivery:
       allOf:
       - $ref: '#/components/schemas/trace_deliveryResponseBase'
@@ -12155,98 +12247,6 @@ components:
                   $ref: '#/components/schemas/trace_deliveryTypeDescription'
               type: object
             type: array
-    trace_deliveryResponseBase:
-      properties:
-        address:
-          description: The email address of an email message recipient.
-          example: username@example.com
-          format: email
-          type: string
-        type:
-          description: 'A type of trace node. The system returns this value to indicate the **end** of routing.
-
-            * `bounce` - The system rejected the email''s delivery.
-
-            * `command` - The system will run a command when it receives an email.
-
-            * `defer` - The system deferred the email.
-
-            * `discard` - The system discarded the email.
-
-            * `error` - The system encountered an error.
-
-            * `local_delivery` - The system sent the email to a local mailbox.
-
-            * `remote_delivery` - The system sent the email via Simple Mail Transfer Protocol (SMTP).
-
-            * `routed` - The system routed the email elsewhere.
-
-
-            **Note:**
-
-            * The structure of the `destinations` return changes depending on the `type` return value.
-
-            * The `routed` type can return any other type''s data structure as part of the `destinations` return value.
-
-
-            For more information, see the return structure for each `type` return value below:'
-          example: local_delivery
-          type: string
-    trace_deliveryTypeDescription:
-      description: 'A type of trace node. The system returns this value to indicate the **end** of routing.
-
-        * `bounce` - The system rejected the email''s delivery.
-
-        * `command` - The system will run a command when it receives an email.
-
-        * `defer` - The system deferred the email.
-
-        * `discard` - The system discarded the email.
-
-        * `error` - The system encountered an error.
-
-        * `local_delivery` - The system sent the email to a local mailbox.
-
-        * `remote_delivery` - The system sent the email via Simple Mail Transfer Protocol (SMTP).
-
-        * `routed` - The system routed the email elsewhere.
-
-
-        **Note:**
-
-        * The structure of the `destinations` return changes depending on the `type` return value.
-
-        * The `routed` type can return any other type''s data structure as part of the `destinations` return value.'
-      example: local_delivery
-      type: string
-    trace_deliveryResponseCommand:
-      allOf:
-      - $ref: '#/components/schemas/trace_deliveryResponseBase'
-      - properties:
-          destinations:
-            properties:
-              command:
-                description: A command that the system runs when it receives the email.
-                example: /usr/local/cpanel/bin/autorespond user@example.com /home/cpmailuser/.autorespond
-                type: string
-              type:
-                $ref: '#/components/schemas/trace_deliveryTypeDescription'
-            type: object
-        type: object
-    trace_deliveryResponseDefer:
-      allOf:
-      - $ref: '#/components/schemas/trace_deliveryResponseBase'
-      - properties:
-          destinations:
-            properties:
-              message:
-                description: A message that the system sends when it defers the email.
-                example: The system deferred the message.
-                type: string
-              type:
-                $ref: '#/components/schemas/trace_deliveryTypeDescription'
-            type: object
-        type: object
   securitySchemes:
     BasicAuth:
       scheme: basic

@@ -208,7 +208,7 @@ paths:
   /get_in_product_survey_url:
     get:
       description: This function returns whether to display the in-product survey banner and the survey link.
-      operationId: InProductSurvey-get_in_product_survey_url
+      operationId: getGetInProductSurveyUrl
       parameters: []
       responses:
         '200':
@@ -304,6 +304,8 @@ paths:
         source: https://hostname.example.com:2087/cpsess##########/json-api/get_in_product_survey_url?api.version=1
       x-cpanel-api-version: WHM API 1
       x-cpanel-available-version: '86'
+      x-operation-id-source: normalized
+      x-operation-id-original: InProductSurvey-get_in_product_survey_url
     servers:
     - description: A server running WHM.
       url: https://{host}:{port}/json-api

@@ -1185,176 +1185,6 @@ paths:
       x-cpanel-available-version: cPanel 11.42
 components:
   schemas:
-    Contents:
-      properties:
-        all_aliases_valid:
-          description: 'Whether a valid SSL certificate exists on the domain''s aliases.
-
-
-            * `1` — A valid SSL certificate exists.
-
-            * `0` — A valid SSL certificate does **not** exist.
-
-
-            **Note:**
-
-
-            This return **only** appears if you set the `return_https_redirects_status` parameter to `1`.'
-          enum:
-          - 1
-          - 0
-          type: integer
-        can_https_redirect:
-          description: 'Whether a valid SSL certificate exists or AutoSSL runs on the domain.
-
-
-            * `1` — A valid SSL certificate exists or AutoSSL runs.
-
-            * `0` — A valid SSL certificate does **not** exist and AutoSSL does **not** run.
-
-
-            **Note:**
-
-
-            This return **only** appears if you set the `return_https_redirects_status` parameter to `1`.'
-          enum:
-          - 1
-          - 0
-          type: integer
-        documentroot:
-          description: The absolute path to the domain's document root.
-          format: path
-          type: string
-        domain:
-          description: The domain's name.
-          format: domain
-          type: string
-        group:
-          description: The domain's group.
-          type: string
-        hascgi:
-          description: 'Whether CGI is enabled for the domain.
-
-
-            * `1` — Enabled.
-
-            * `0` — Disabled.'
-          enum:
-          - 1
-          - 0
-          type: integer
-        homedir:
-          description: The absolute path to the cPanel account's home directory.
-          format: path
-          type: string
-        ip:
-          description: The domain's IPv4 address.
-          format: ipv4
-          type: string
-        ipv6:
-          description: 'The domain''s IPv6 address.
-
-
-            * null — The account does **not** use IPv6.'
-          format: ipv6
-          type:
-          - string
-          - 'null'
-        is_https_redirecting:
-          description: 'Whether the domain redirects to `https`.
-
-
-            * `1` — The domain redirects to `https`.
-
-            * `0` — The domain does **not** redirect to `https`.
-
-
-            **Note:**
-
-
-            This return **only** appears if you set the `return_https_redirects_status` parameter to `1`.'
-          enum:
-          - 1
-          - 0
-          type: integer
-        is_temporary:
-          description: 'Whether the domain is a temporary domain.
-
-            * `1` — The domain is temporary.
-
-            * `0` — The domain is not temporary.'
-          enum:
-          - 1
-          - 0
-          type: integer
-        no_cache_update:
-          description: 'Whether the domain is subject to cache updates.
-
-
-            * `1` — The domain updates caches.
-
-            * `0` — The domain does **not** update caches.'
-          enum:
-          - 1
-          - 0
-          type: integer
-        owner:
-          description: The WHM account (`root` or a reseller) that owns the cPanel account.
-          type: string
-        serveradmin:
-          description: The domain's administrator's contact email address.
-          format: email
-          type: string
-        serveralias:
-          description: A space-separated list of the domain's aliases.
-          format: domain
-          type: string
-        servername:
-          description: The domain's identifier on the server.
-          format: domain
-          type: string
-        type:
-          description: 'The type of domain:
-
-
-            * `addon_domain` — The domain is an addon domain.
-
-            * `sub_domain` — The domain is a subdomain.
-
-            * `parked_domain` — The domain is a parked domain (domain alias).'
-          enum:
-          - addon_domain
-          - sub_domain
-          - parked_domains
-          type: string
-        usecanonicalname:
-          description: 'The domain''s Canonical Name (CNAME) setting.
-
-
-            * `On` — Use the domain''s CNAME.
-
-            * `Off` — Do **not** use the domain''s CNAME.'
-          enum:
-          - 'On'
-          - 'Off'
-          type: string
-        user:
-          description: The cPanel account's username.
-          format: username
-          type: string
-        userdirprotect:
-          description: 'The domain''s [Apache `mod_userdir` Tweak](https://go.cpanel.net/whmdocsApachemod_userdirTweak)
-
-            setting.
-
-
-            * `1` — Enabled.
-
-            * `0` — Disabled.'
-          enum:
-          - 1
-          - 0
-          type: integer
     MainDomainContents:
       properties:
         all_aliases_valid:
@@ -1542,6 +1372,10 @@ components:
           - 1
           - 0
           type: integer
+    ListOutput:
+      anyOf:
+      - $ref: '#/components/schemas/Contents'
+      - $ref: '#/components/schemas/MainDomainContents'
     HashOutput:
       properties:
         addon_domains:
@@ -1561,10 +1395,176 @@ components:
           items:
             $ref: '#/components/schemas/Contents'
       type: object
-    ListOutput:
-      anyOf:
-      - $ref: '#/components/schemas/Contents'
-      - $ref: '#/components/schemas/MainDomainContents'
+    Contents:
+      properties:
+        all_aliases_valid:
+          description: 'Whether a valid SSL certificate exists on the domain''s aliases.
+
+
+            * `1` — A valid SSL certificate exists.
+
+            * `0` — A valid SSL certificate does **not** exist.
+
+
+            **Note:**
+
+
+            This return **only** appears if you set the `return_https_redirects_status` parameter to `1`.'
+          enum:
+          - 1
+          - 0
+          type: integer
+        can_https_redirect:
+          description: 'Whether a valid SSL certificate exists or AutoSSL runs on the domain.
+
+
+            * `1` — A valid SSL certificate exists or AutoSSL runs.
+
+            * `0` — A valid SSL certificate does **not** exist and AutoSSL does **not** run.
+
+
+            **Note:**
+
+
+            This return **only** appears if you set the `return_https_redirects_status` parameter to `1`.'
+          enum:
+          - 1
+          - 0
+          type: integer
+        documentroot:
+          description: The absolute path to the domain's document root.
+          format: path
+          type: string
+        domain:
+          description: The domain's name.
+          format: domain
+          type: string
+        group:
+          description: The domain's group.
+          type: string
+        hascgi:
+          description: 'Whether CGI is enabled for the domain.
+
+
+            * `1` — Enabled.
+
+            * `0` — Disabled.'
+          enum:
+          - 1
+          - 0
+          type: integer
+        homedir:
+          description: The absolute path to the cPanel account's home directory.
+          format: path
+          type: string
+        ip:
+          description: The domain's IPv4 address.
+          format: ipv4
+          type: string
+        ipv6:
+          description: 'The domain''s IPv6 address.
+
+
+            * null — The account does **not** use IPv6.'
+          format: ipv6
+          type:
+          - string
+          - 'null'
+        is_https_redirecting:
+          description: 'Whether the domain redirects to `https`.
+
+
+            * `1` — The domain redirects to `https`.
+
+            * `0` — The domain does **not** redirect to `https`.
+
+
+            **Note:**
+
+
+            This return **only** appears if you set the `return_https_redirects_status` parameter to `1`.'
+          enum:
+          - 1
+          - 0
+          type: integer
+        is_temporary:
+          description: 'Whether the domain is a temporary domain.
+
+            * `1` — The domain is temporary.
+
+            * `0` — The domain is not temporary.'
+          enum:
+          - 1
+          - 0
+          type: integer
+        no_cache_update:
+          description: 'Whether the domain is subject to cache updates.
+
+
+            * `1` — The domain updates caches.
+
+            * `0` — The domain does **not** update caches.'
+          enum:
+          - 1
+          - 0
+          type: integer
+        owner:
+          description: The WHM account (`root` or a reseller) that owns the cPanel account.
+          type: string
+        serveradmin:
+          description: The domain's administrator's contact email address.
+          format: email
+          type: string
+        serveralias:
+          description: A space-separated list of the domain's aliases.
+          format: domain
+          type: string
+        servername:
+          description: The domain's identifier on the server.
+          format: domain
+          type: string
+        type:
+          description: 'The type of domain:
+
+
+            * `addon_domain` — The domain is an addon domain.
+
+            * `sub_domain` — The domain is a subdomain.
+
+            * `parked_domain` — The domain is a parked domain (domain alias).'
+          enum:
+          - addon_domain
+          - sub_domain
+          - parked_domains
+          type: string
+        usecanonicalname:
+          description: 'The domain''s Canonical Name (CNAME) setting.
+
+
+            * `On` — Use the domain''s CNAME.
+
+            * `Off` — Do **not** use the domain''s CNAME.'
+          enum:
+          - 'On'
+          - 'Off'
+          type: string
+        user:
+          description: The cPanel account's username.
+          format: username
+          type: string
+        userdirprotect:
+          description: 'The domain''s [Apache `mod_userdir` Tweak](https://go.cpanel.net/whmdocsApachemod_userdirTweak)
+
+            setting.
+
+
+            * `1` — Enabled.
+
+            * `0` — Disabled.'
+          enum:
+          - 1
+          - 0
+          type: integer
   securitySchemes:
     BasicAuth:
       scheme: basic

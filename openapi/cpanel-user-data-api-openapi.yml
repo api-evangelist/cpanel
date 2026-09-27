@@ -318,7 +318,7 @@ paths:
   /get_scoped_userdata:
     get:
       description: This function retrieves all userdata key/value pairs within the specified scope.
-      operationId: UserData-get_scoped_userdata
+      operationId: getGetScopedUserdata
       parameters:
       - description: The scope name whose userdata you wish to retrieve.
         in: query
@@ -382,6 +382,8 @@ paths:
         source: https://hostname.example.com:2087/cpsess##########/json-api/get_scoped_userdata?api.version=1&scope=example_scope
       x-cpanel-api-version: WHM API 1
       x-cpanel-available-version: '86'
+      x-operation-id-source: normalized
+      x-operation-id-original: UserData-get_scoped_userdata
     servers:
     - description: A server running WHM.
       url: https://{host}:{port}/json-api
@@ -395,7 +397,7 @@ paths:
   /set_scoped_userdata:
     get:
       description: This function sets (creates or updates) a userdata key/value pair within the specified scope and returns the full updated mapping.
-      operationId: UserData-set_scoped_userdata
+      operationId: getSetScopedUserdata
       parameters:
       - description: The scope name to modify.
         in: query
@@ -489,6 +491,8 @@ paths:
         source: https://hostname.example.com:2087/cpsess##########/json-api/set_scoped_userdata?api.version=1&scope=example_scope&key=theme&value=dark
       x-cpanel-api-version: WHM API 1
       x-cpanel-available-version: '86'
+      x-operation-id-source: normalized
+      x-operation-id-original: UserData-set_scoped_userdata
     servers:
     - description: A server running WHM.
       url: https://{host}:{port}/json-api
