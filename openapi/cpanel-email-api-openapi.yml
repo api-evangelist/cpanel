@@ -12051,6 +12051,41 @@ paths:
       x-cpanel-available-version: cPanel 11.52
 components:
   schemas:
+    trace_deliveryResponseDefer:
+      allOf:
+      - $ref: '#/components/schemas/trace_deliveryResponseBase'
+      - properties:
+          destinations:
+            properties:
+              message:
+                description: A message that the system sends when it defers the email.
+                example: The system deferred the message.
+                type: string
+              type:
+                $ref: '#/components/schemas/trace_deliveryTypeDescription'
+            type: object
+        type: object
+    trace_deliveryResponseDiscard:
+      allOf:
+      - $ref: '#/components/schemas/trace_deliveryResponseBase'
+      - properties:
+          destinations:
+            properties:
+              aliasfile:
+                description: 'The file path on the system where Exim searched for the `address` return value''s aliases.
+
+
+                  **Note:**
+
+
+                  The function **only** returns this value if an alias exists for the `address` value.'
+                example: /etc/valiases/example.com
+                format: path
+                type: string
+              type:
+                $ref: '#/components/schemas/trace_deliveryTypeDescription'
+            type: object
+        type: object
     trace_deliveryResponseBase:
       properties:
         address:
@@ -12088,6 +12123,20 @@ components:
             For more information, see the return structure for each `type` return value below:'
           example: local_delivery
           type: string
+    trace_deliveryResponseBounce:
+      allOf:
+      - $ref: '#/components/schemas/trace_deliveryResponseBase'
+      - properties:
+          destinations:
+            properties:
+              message:
+                description: A message that the system sends when it rejects the delivery of an email.
+                example: The system rejected the message.
+                type: string
+              type:
+                $ref: '#/components/schemas/trace_deliveryTypeDescription'
+            type: object
+        type: object
     trace_deliveryTypeDescription:
       description: 'A type of trace node. The system returns this value to indicate the **end** of routing.
 
@@ -12115,49 +12164,6 @@ components:
         * The `routed` type can return any other type''s data structure as part of the `destinations` return value.'
       example: local_delivery
       type: string
-    trace_deliveryResponseLocalDelivery:
-      allOf:
-      - $ref: '#/components/schemas/trace_deliveryResponseBase'
-      - properties:
-          destinations:
-            properties:
-              mailbox:
-                description: The mailbox where the system sent the email.
-                example: user@example.com
-                format: email
-                type: string
-              type:
-                $ref: '#/components/schemas/trace_deliveryTypeDescription'
-            type: object
-        type: object
-    trace_deliveryResponseDefer:
-      allOf:
-      - $ref: '#/components/schemas/trace_deliveryResponseBase'
-      - properties:
-          destinations:
-            properties:
-              message:
-                description: A message that the system sends when it defers the email.
-                example: The system deferred the message.
-                type: string
-              type:
-                $ref: '#/components/schemas/trace_deliveryTypeDescription'
-            type: object
-        type: object
-    trace_deliveryResponseCommand:
-      allOf:
-      - $ref: '#/components/schemas/trace_deliveryResponseBase'
-      - properties:
-          destinations:
-            properties:
-              command:
-                description: A command that the system runs when it receives the email.
-                example: /usr/local/cpanel/bin/autorespond user@example.com /home/cpmailuser/.autorespond
-                type: string
-              type:
-                $ref: '#/components/schemas/trace_deliveryTypeDescription'
-            type: object
-        type: object
     trace_deliveryType:
       anyOf:
       - $ref: '#/components/schemas/trace_deliveryResponseBounce'
@@ -12195,36 +12201,15 @@ components:
                 $ref: '#/components/schemas/trace_deliveryTypeDescription'
             type: object
         type: object
-    trace_deliveryResponseBounce:
+    trace_deliveryResponseCommand:
       allOf:
       - $ref: '#/components/schemas/trace_deliveryResponseBase'
       - properties:
           destinations:
             properties:
-              message:
-                description: A message that the system sends when it rejects the delivery of an email.
-                example: The system rejected the message.
-                type: string
-              type:
-                $ref: '#/components/schemas/trace_deliveryTypeDescription'
-            type: object
-        type: object
-    trace_deliveryResponseDiscard:
-      allOf:
-      - $ref: '#/components/schemas/trace_deliveryResponseBase'
-      - properties:
-          destinations:
-            properties:
-              aliasfile:
-                description: 'The file path on the system where Exim searched for the `address` return value''s aliases.
-
-
-                  **Note:**
-
-
-                  The function **only** returns this value if an alias exists for the `address` value.'
-                example: /etc/valiases/example.com
-                format: path
+              command:
+                description: A command that the system runs when it receives the email.
+                example: /usr/local/cpanel/bin/autorespond user@example.com /home/cpmailuser/.autorespond
                 type: string
               type:
                 $ref: '#/components/schemas/trace_deliveryTypeDescription'
@@ -12247,6 +12232,21 @@ components:
                   $ref: '#/components/schemas/trace_deliveryTypeDescription'
               type: object
             type: array
+    trace_deliveryResponseLocalDelivery:
+      allOf:
+      - $ref: '#/components/schemas/trace_deliveryResponseBase'
+      - properties:
+          destinations:
+            properties:
+              mailbox:
+                description: The mailbox where the system sent the email.
+                example: user@example.com
+                format: email
+                type: string
+              type:
+                $ref: '#/components/schemas/trace_deliveryTypeDescription'
+            type: object
+        type: object
   securitySchemes:
     BasicAuth:
       scheme: basic

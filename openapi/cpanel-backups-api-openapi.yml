@@ -4560,36 +4560,6 @@ paths:
       x-cpanel-available-version: '11.38'
 components:
   schemas:
-    BackupDestinationGetResponseCustom:
-      allOf:
-      - $ref: '#/components/schemas/BackupDestinationGetResponseBase'
-      - properties:
-          host:
-            description: The remote server's hostname.
-            example: backups.example.com
-            format: domain
-            type: string
-          path:
-            description: The path to the backups directory on the remote server.
-            example: /backups
-            format: path
-            type: string
-          script:
-            description: The absolute file path of the user-supplied transport solution script.
-            example: /home/backups/beammeupscotty.pl
-            format: path
-            type: string
-          timeout:
-            description: The session timeout, in seconds.
-            example: 300
-            maximum: 300
-            minimum: 30
-            type: integer
-          username:
-            description: The remote server account's username.
-            example: username
-            type: string
-        type: object
     BackupDestinationGetResponseFTP:
       allOf:
       - $ref: '#/components/schemas/BackupDestinationGetResponseBase'
@@ -4629,29 +4599,152 @@ components:
             example: username
             type: string
         type: object
-    BackupDestinationGetResponseBackblaze:
+    GoogleDriveBackupDestinationResponse:
       allOf:
-      - $ref: '#/components/schemas/BackupDestinationGetResponseBase'
+      - $ref: '#/components/schemas/BackupDestinationResponse'
       - properties:
-          application_key:
-            description: The application key's name.
-            example: A123b45CD678e9
+          client_id:
+            description: The Google Drive client ID.
+            example: aBcdeFgHIjK123
             type: string
-          application_key_id:
-            description: The application key ID that authenticates the Backblaze B2 account.
-            example: 12a345B678c9
+          client_secret:
+            description: The Google Drive client secret.
+            example: aBcde123FgHIjK456
             type: string
-          bucket_id:
-            description: The bucket's ID.
-            example: a12b34cd5678e9f
+          folder:
+            default: ''
+            description: The path to the backups directory, relative to the root directory, on the remote server.
+            example: subfolder
             type: string
-          bucket_name:
-            description: The bucket's name.
-            example: ChockFullOfNuts
+          timeout:
+            default: 30
+            description: The session timeout, in seconds.
+            example: 300
+            maximum: 300
+            minimum: 30
+            type: integer
+        type: object
+    CustomBackupDestinationResponse:
+      allOf:
+      - $ref: '#/components/schemas/BackupDestinationResponse'
+      - properties:
+          host:
+            description: The remote server's hostname.
+            example: backups.example.com
+            format: domain
             type: string
           path:
             description: The path to the backups directory on the remote server.
             example: /backups
+            format: path
+            type: string
+          script:
+            description: The absolute file path of the user-supplied transport solution script.
+            example: /home/backups/beammeupscotty.pl
+            type: string
+          timeout:
+            default: 30
+            description: The session timeout, in seconds.
+            example: 300
+            maximum: 300
+            minimum: 30
+            type: integer
+          username:
+            description: The remote server account's username.
+            example: username
+            type: string
+        type: object
+    S3CompatibleBackupDestinationResponse:
+      allOf:
+      - $ref: '#/components/schemas/BackupDestinationResponse'
+      - properties:
+          aws_access_key_id:
+            description: The S3-compatible provider key ID.
+            example: s123456789
+            type: string
+          bucket:
+            description: The S3-compatible bucket.
+            example: ChockFullOfNuts
+            type: string
+          folder:
+            default: ''
+            description: The path to the backups directory, relative to the root directory, on the remote server.
+            example: subfolder
+            type: string
+          host:
+            description: The S3-compatible provider's server.
+            example: www.s3example.com
+            type: string
+          timeout:
+            default: 30
+            description: The session timeout, in seconds.
+            example: 300
+            maximum: 300
+            minimum: 30
+            type: integer
+        type: object
+    SFTPBackupDestinationResponse:
+      allOf:
+      - $ref: '#/components/schemas/BackupDestinationResponse'
+      - properties:
+          authtype:
+            description: 'The authorization type.
+
+              * `password`
+
+              * `key`'
+            enum:
+            - password
+            - key
+            example: password
+          host:
+            description: The remote server's hostname.
+            example: backups.example.com
+            format: domain
+            type: string
+          path:
+            description: The path to the backups directory on the remote server.
+            example: /backups
+            format: path
+            type: string
+          port:
+            default: 21
+            description: The remote server's FTP port.
+            example: 21
+            maximum: 65535
+            minimum: 1
+            type: integer
+          privatekey:
+            description: If the `authtype` return's value is `key`, the absolute path to the private key file.
+            example: /home/backups/key
+            type: string
+          timeout:
+            default: 30
+            description: The session timeout, in seconds.
+            example: 300
+            maximum: 300
+            minimum: 30
+            type: integer
+          username:
+            description: The remote server account's username.
+            example: username
+            type: string
+        type: object
+    BackupDestinationGetResponseAmazonS3:
+      allOf:
+      - $ref: '#/components/schemas/BackupDestinationGetResponseBase'
+      - properties:
+          aws_access_key_id:
+            description: The Amazon S3 Access Key ID.
+            example: s123456789
+            type: string
+          bucket:
+            description: The Amazon S3™ bucket.
+            example: ChockFullOfNuts
+            type: string
+          folder:
+            description: The path to the backups directory, relative to the root directory, on the remote server.
+            example: subfolder
             format: path
             type: string
           timeout:
@@ -4703,114 +4796,7 @@ components:
             example: username
             type: string
         type: object
-    LocalBackupDestinationResponse:
-      allOf:
-      - $ref: '#/components/schemas/BackupDestinationResponse'
-      - properties:
-          mount:
-            default: 0
-            description: 'Whether the path is mounted.
-
-              * `1` - The path is mounted.
-
-              * `0` - The path is **not** mounted.'
-            enum:
-            - 1
-            - 0
-            example: 0
-            type: integer
-          no_mount_fail:
-            default: 0
-            description: 'Whether to fail the backup attempt if the mount fails.
-
-              * `1` - Fail the backup attempt.
-
-              * `0` - Do **not** fail the backup attempt.'
-            enum:
-            - 1
-            - 0
-            example: 0
-            type: integer
-          path:
-            description: The absolute path to the backups directory.
-            example: /home/backups
-            format: path
-            type: string
-        type: object
-    BackupDestinationSetParameterBackblaze:
-      allOf:
-      - $ref: '#/components/schemas/BackupDestinationSetParameterBase'
-      - properties:
-          application_key:
-            description: The application key's name.
-            example: A123b45CD678e9
-            type: string
-          application_key_id:
-            description: The application key ID that authenticates the Backblaze B2 account.
-            example: 12a345B678c9
-            type: string
-          bucket_id:
-            description: The bucket's ID.
-            example: a12b34cd5678e9f
-            type: string
-          bucket_name:
-            description: The bucket's name.
-            example: ChockFullOfNuts
-            type: string
-          path:
-            description: The path to the backups directory on the remote server.
-            example: backups
-            format: path
-            type: string
-          timeout:
-            default: 30
-            description: The session timeout, in seconds.
-            example: 300
-            maximum: 300
-            minimum: 30
-            type: integer
-        required:
-        - application_key
-        - application_key_id
-        - bucket_id
-        - bucket_name
-        type: object
-    BackupDestinationSetParameterAmazonS3:
-      allOf:
-      - $ref: '#/components/schemas/BackupDestinationSetParameterBase'
-      - properties:
-          aws_access_key_id:
-            description: The Amazon S3 Access Key ID.
-            example: s123456789
-            type: string
-          bucket:
-            description: The Amazon S3™ bucket.
-            example: ChockFullOfNuts
-            type: string
-          folder:
-            default: ''
-            description: The path to the backups directory, relative to the root directory, on the remote server.
-            example: subfolder
-            format: path
-            type: string
-          password:
-            description: The Amazon S3 Access Key's password.
-            example: 123456luggage
-            type: string
-          timeout:
-            default: 30
-            description: The session timeout, in seconds.
-            example: 300
-            maximum: 300
-            minimum: 30
-            type: integer
-        required:
-        - bucket
-        - aws_access_key_id
-        - timeout
-        - password
-        type: object
-    SFTPBackupDestinationResponse:
+    RsyncBackupDestinationResponse:
       allOf:
       - $ref: '#/components/schemas/BackupDestinationResponse'
       - properties:
@@ -4835,9 +4821,9 @@ components:
             format: path
             type: string
           port:
-            default: 21
+            default: 22
             description: The remote server's FTP port.
-            example: 21
+            example: 22
             maximum: 65535
             minimum: 1
             type: integer
@@ -4904,106 +4890,62 @@ components:
           example: Local
           type: string
       type: object
-    RsyncBackupDestinationResponse:
+    BackupDestinationSetParameterType:
+      anyOf:
+      - $ref: '#/components/schemas/BackupDestinationSetParameterAmazonS3'
+      - $ref: '#/components/schemas/BackupDestinationSetParameterBackblaze'
+      - $ref: '#/components/schemas/BackupDestinationSetParameterCustom'
+      - $ref: '#/components/schemas/BackupDestinationSetParameterFTP'
+      - $ref: '#/components/schemas/BackupDestinationSetParameterGoogleDrive'
+      - $ref: '#/components/schemas/BackupDestinationSetParameterLocal'
+      - $ref: '#/components/schemas/BackupDestinationSetParameterRsync'
+      - $ref: '#/components/schemas/BackupDestinationSetParameterS3Compatible'
+      - $ref: '#/components/schemas/BackupDestinationSetParameterSFTP'
+      - $ref: '#/components/schemas/BackupDestinationSetParameterWebDAV'
+      discriminator:
+        mapping:
+          AmazonS3: '#/components/schemas/BackupDestinationSetParameterAmazonS3'
+          Backblaze: '#/components/schemas/BackupDestinationSetParameterBackblaze'
+          Custom: '#/components/schemas/BackupDestinationSetParameterCustom'
+          FTP: '#/components/schemas/BackupDestinationSetParameterFTP'
+          GoogleDrive: '#/components/schemas/BackupDestinationSetParameterGoogleDrive'
+          Local: '#/components/schemas/BackupDestinationSetParameterLocal'
+          Rsync: '#/components/schemas/BackupDestinationSetParameterRsync'
+          S3Compatible: '#/components/schemas/BackupDestinationSetParameterS3Compatible'
+          SFTP: '#/components/schemas/BackupDestinationSetParameterSFTP'
+          WebDAV: '#/components/schemas/BackupDestinationSetParameterWebDAV'
+        propertyName: type
+    BackupDestinationGetResponseLocal:
       allOf:
-      - $ref: '#/components/schemas/BackupDestinationResponse'
+      - $ref: '#/components/schemas/BackupDestinationGetResponseBase'
       - properties:
-          authtype:
-            description: 'The authorization type.
+          mount:
+            description: 'Whether the path is mounted.
 
-              * `password`
+              * `1` - The path is mounted.
 
-              * `key`'
+              * `0` - The path is **not** mounted.'
             enum:
-            - password
-            - key
-            example: password
-          host:
-            description: The remote server's hostname.
-            example: backups.example.com
-            format: domain
-            type: string
+            - 1
+            - 0
+            example: 0
+            type: integer
+          no_mount_fail:
+            description: 'Whether to fail the backup attempt if the mount fails.
+
+              * `1` - Fail the backup attempt.
+
+              * `0` - Do **not** fail the backup attempt.'
+            enum:
+            - 1
+            - 0
+            example: 0
+            type: integer
           path:
-            description: The path to the backups directory on the remote server.
-            example: /backups
+            description: The absolute path to the backups directory.
+            example: /home/backups
             format: path
             type: string
-          port:
-            default: 22
-            description: The remote server's FTP port.
-            example: 22
-            maximum: 65535
-            minimum: 1
-            type: integer
-          privatekey:
-            description: If the `authtype` return's value is `key`, the absolute path to the private key file.
-            example: /home/backups/key
-            type: string
-          timeout:
-            default: 30
-            description: The session timeout, in seconds.
-            example: 300
-            maximum: 300
-            minimum: 30
-            type: integer
-          username:
-            description: The remote server account's username.
-            example: username
-            type: string
-        type: object
-    BackupDestinationSetParameterGoogleDrive:
-      allOf:
-      - $ref: '#/components/schemas/BackupDestinationSetParameterBase'
-      - properties:
-          client_id:
-            description: The Google Drive client ID.
-            example: aBcdeFgHIjK123
-            type: string
-          client_secret:
-            description: The Google Drive client secret.
-            example: aBcde123FgHIjK456
-            type: string
-          folder:
-            default: ''
-            description: The path to the backups directory, relative to the root directory, on the remote server.
-            example: subfolder
-            format: path
-            type: string
-          timeout:
-            default: 30
-            description: The session timeout, in seconds.
-            example: 300
-            maximum: 300
-            minimum: 30
-            type: integer
-        required:
-        - client_id
-        - client_secret
-        type: object
-    GoogleDriveBackupDestinationResponse:
-      allOf:
-      - $ref: '#/components/schemas/BackupDestinationResponse'
-      - properties:
-          client_id:
-            description: The Google Drive client ID.
-            example: aBcdeFgHIjK123
-            type: string
-          client_secret:
-            description: The Google Drive client secret.
-            example: aBcde123FgHIjK456
-            type: string
-          folder:
-            default: ''
-            description: The path to the backups directory, relative to the root directory, on the remote server.
-            example: subfolder
-            type: string
-          timeout:
-            default: 30
-            description: The session timeout, in seconds.
-            example: 300
-            maximum: 300
-            minimum: 30
-            type: integer
         type: object
     BackupDestinationResponseType:
       anyOf:
@@ -5063,6 +5005,131 @@ components:
             minimum: 30
             type: integer
         type: object
+    BackupDestinationGetResponseCustom:
+      allOf:
+      - $ref: '#/components/schemas/BackupDestinationGetResponseBase'
+      - properties:
+          host:
+            description: The remote server's hostname.
+            example: backups.example.com
+            format: domain
+            type: string
+          path:
+            description: The path to the backups directory on the remote server.
+            example: /backups
+            format: path
+            type: string
+          script:
+            description: The absolute file path of the user-supplied transport solution script.
+            example: /home/backups/beammeupscotty.pl
+            format: path
+            type: string
+          timeout:
+            description: The session timeout, in seconds.
+            example: 300
+            maximum: 300
+            minimum: 30
+            type: integer
+          username:
+            description: The remote server account's username.
+            example: username
+            type: string
+        type: object
+    BackupDestinationSetParameterCustom:
+      allOf:
+      - $ref: '#/components/schemas/BackupDestinationSetParameterBase'
+      - properties:
+          host:
+            description: The remote server's hostname.
+            example: backups.example.com
+            format: domain
+            type: string
+          password:
+            description: The remote server account's password.
+            example: 123456luggage
+            type: string
+          path:
+            description: The path to the backups directory on the remote server.
+            example: /backups
+            format: path
+            type: string
+          script:
+            description: The absolute file path of the user-supplied transport solution script.
+            example: /home/backups/beammeupscotty.pl
+            format: path
+            type: string
+          timeout:
+            default: 30
+            description: The session timeout, in seconds.
+            example: 300
+            maximum: 300
+            minimum: 30
+            type: integer
+          username:
+            description: The remote server account's username.
+            example: username
+            type: string
+        required:
+        - script
+        - host
+        - path
+        - username
+        - password
+        type: object
+    BackupDestinationSetParameterWebDAV:
+      allOf:
+      - $ref: '#/components/schemas/BackupDestinationSetParameterBase'
+      - properties:
+          host:
+            description: The remote server's hostname.
+            example: backups.example.com
+            format: domain
+            type: string
+          password:
+            description: The remote server account's password.
+            example: 123456luggage
+            type: string
+          path:
+            description: The path to the backups directory on the remote server.
+            example: /backups
+            format: path
+            type: string
+          port:
+            default: 21
+            description: The remote server's FTP port.
+            example: 21
+            maximum: 65535
+            minimum: 1
+            type: integer
+          ssl:
+            default: 1
+            description: 'Whether to use SSL.
+
+              * `1` - Use SSL.
+
+              * `0` - Do **not** use SSL.'
+            enum:
+            - 1
+            - 0
+            example: 1
+            type: integer
+          timeout:
+            default: 30
+            description: The session timeout, in seconds.
+            example: 300
+            maximum: 300
+            minimum: 30
+            type: integer
+          username:
+            description: The remote server account's username.
+            example: username
+            type: string
+        required:
+        - host
+        - path
+        - username
+        - password
+        type: object
     FTPBackupDestinationResponse:
       allOf:
       - $ref: '#/components/schemas/BackupDestinationResponse'
@@ -5104,30 +5171,6 @@ components:
             description: The remote server account's username.
             example: username
             type: string
-        type: object
-    BackupDestinationGetResponseGoogleDrive:
-      allOf:
-      - $ref: '#/components/schemas/BackupDestinationGetResponseBase'
-      - properties:
-          client_id:
-            description: The Google Drive client ID.
-            example: aBcdeFgHIjK123
-            type: string
-          client_secret:
-            description: The Google Drive client secret.
-            example: aBcde123FgHIjK456
-            type: string
-          folder:
-            description: The path to the backups directory, relative to the root directory, on the remote server.
-            example: subfolder
-            format: path
-            type: string
-          timeout:
-            description: The session timeout, in seconds.
-            example: 300
-            maximum: 300
-            minimum: 30
-            type: integer
         type: object
     BackupDestinationGetResponseRsync:
       allOf:
@@ -5175,6 +5218,101 @@ components:
             example: username
             type: string
         type: object
+    BackupDestinationSetParameterRsync:
+      allOf:
+      - $ref: '#/components/schemas/BackupDestinationSetParameterBase'
+      - properties:
+          authtype:
+            description: 'The authorization type.
+
+              * `password`
+
+              * `key`'
+            enum:
+            - password
+            - key
+            example: password
+          host:
+            description: The remote server's hostname.
+            example: backups.example.com
+            format: domain
+            type: string
+          passphrase:
+            description: If the `authtype` parameter's value is `key`, the private key file's passphrase.
+            example: 123456luggage
+            type: string
+          password:
+            description: If the `authtype` parameter's value is `password`, the remote server account's password.
+            example: 123456luggage
+            type: string
+          path:
+            description: The path to the backups directory on the remote server.
+            example: /backups
+            format: path
+            type: string
+          port:
+            default: 22
+            description: The remote server's FTP port.
+            example: 22
+            maximum: 65535
+            minimum: 1
+            type: integer
+          privatekey:
+            description: If the `authtype` parameter's value is `key`, the absolute path to the private key file.
+            example: /home/backups/key
+            format: path
+            type: string
+          timeout:
+            default: 30
+            description: The session timeout, in seconds.
+            example: 300
+            maximum: 300
+            minimum: 30
+            type: integer
+          username:
+            description: The remote server account's username.
+            example: username
+            type: string
+        required:
+        - host
+        - path
+        - username
+        - authtype
+        type: object
+    LocalBackupDestinationResponse:
+      allOf:
+      - $ref: '#/components/schemas/BackupDestinationResponse'
+      - properties:
+          mount:
+            default: 0
+            description: 'Whether the path is mounted.
+
+              * `1` - The path is mounted.
+
+              * `0` - The path is **not** mounted.'
+            enum:
+            - 1
+            - 0
+            example: 0
+            type: integer
+          no_mount_fail:
+            default: 0
+            description: 'Whether to fail the backup attempt if the mount fails.
+
+              * `1` - Fail the backup attempt.
+
+              * `0` - Do **not** fail the backup attempt.'
+            enum:
+            - 1
+            - 0
+            example: 0
+            type: integer
+          path:
+            description: The absolute path to the backups directory.
+            example: /home/backups
+            format: path
+            type: string
+        type: object
     BackupDestinationSetParameterS3Compatible:
       allOf:
       - $ref: '#/components/schemas/BackupDestinationSetParameterBase'
@@ -5214,6 +5352,256 @@ components:
         - aws_access_key_id
         - timeout
         - password
+        type: object
+    BackupDestinationGetResponseSFTP:
+      allOf:
+      - $ref: '#/components/schemas/BackupDestinationGetResponseBase'
+      - properties:
+          authtype:
+            description: 'The authorization type.
+
+              * `password`
+
+              * `key`'
+            enum:
+            - password
+            - key
+            example: password
+          host:
+            description: The remote server's hostname.
+            example: backups.example.com
+            format: domain
+            type: string
+          path:
+            description: The path to the backups directory on the remote server.
+            example: /backups
+            format: path
+            type: string
+          port:
+            description: The remote server's FTP port.
+            example: 21
+            maximum: 65535
+            minimum: 1
+            type: integer
+          privatekey:
+            description: If the `authtype` return's value is `key`, the absolute path to the private key file.
+            example: /home/backups/key
+            format: path
+            type: string
+          timeout:
+            description: The session timeout, in seconds.
+            example: 300
+            maximum: 300
+            minimum: 30
+            type: integer
+          username:
+            description: The remote server account's username.
+            example: username
+            type: string
+        type: object
+    BackupDestinationSetParameterBackblaze:
+      allOf:
+      - $ref: '#/components/schemas/BackupDestinationSetParameterBase'
+      - properties:
+          application_key:
+            description: The application key's name.
+            example: A123b45CD678e9
+            type: string
+          application_key_id:
+            description: The application key ID that authenticates the Backblaze B2 account.
+            example: 12a345B678c9
+            type: string
+          bucket_id:
+            description: The bucket's ID.
+            example: a12b34cd5678e9f
+            type: string
+          bucket_name:
+            description: The bucket's name.
+            example: ChockFullOfNuts
+            type: string
+          path:
+            description: The path to the backups directory on the remote server.
+            example: backups
+            format: path
+            type: string
+          timeout:
+            default: 30
+            description: The session timeout, in seconds.
+            example: 300
+            maximum: 300
+            minimum: 30
+            type: integer
+        required:
+        - application_key
+        - application_key_id
+        - bucket_id
+        - bucket_name
+        type: object
+    BackupDestinationGetResponseS3Compatible:
+      allOf:
+      - $ref: '#/components/schemas/BackupDestinationGetResponseBase'
+      - properties:
+          aws_access_key_id:
+            description: The S3-compatible provider key ID.
+            example: s123456789
+            type: string
+          bucket:
+            description: The S3-compatible bucket.
+            example: ChockFullOfNuts
+            type: string
+          folder:
+            description: The path to the backups directory, relative to the root directory, on the remote server.
+            example: subfolder
+            type: string
+          host:
+            description: The S3-compatible provider's server.
+            example: www.s3example.com
+            format: domain
+            type: string
+          timeout:
+            description: The session timeout, in seconds.
+            example: 300
+            maximum: 300
+            minimum: 30
+            type: integer
+        type: object
+    BackupDestinationSetParameterSFTP:
+      allOf:
+      - $ref: '#/components/schemas/BackupDestinationSetParameterBase'
+      - properties:
+          authtype:
+            description: 'The authorization type.
+
+              * `password`
+
+              * `key`'
+            enum:
+            - password
+            - key
+            example: password
+          host:
+            description: The remote server's hostname.
+            example: backups.example.com
+            format: domain
+            type: string
+          passphrase:
+            description: If the `authtype` parameter's value is `key`, the private key file's passphrase.
+            example: 123456luggage
+            type: string
+          password:
+            description: If the `authtype` parameter's value is `password`, the remote server account's password.
+            example: 123456luggage
+            type: string
+          path:
+            description: The path to the backups directory on the remote server.
+            example: /backups
+            format: path
+            type: string
+          port:
+            default: 21
+            description: The remote server's FTP port.
+            example: 21
+            maximum: 65535
+            minimum: 1
+            type: integer
+          privatekey:
+            description: If the `authtype` parameter's value is `key`, the absolute path to the private key file.
+            example: /home/backups/key
+            format: path
+            type: string
+          timeout:
+            default: 30
+            description: The session timeout, in seconds.
+            example: 300
+            maximum: 300
+            minimum: 30
+            type: integer
+          username:
+            description: The remote server account's username.
+            example: username
+            type: string
+        required:
+        - host
+        - path
+        - username
+        - authtype
+        type: object
+    BackupDestinationGetResponseBackblaze:
+      allOf:
+      - $ref: '#/components/schemas/BackupDestinationGetResponseBase'
+      - properties:
+          application_key:
+            description: The application key's name.
+            example: A123b45CD678e9
+            type: string
+          application_key_id:
+            description: The application key ID that authenticates the Backblaze B2 account.
+            example: 12a345B678c9
+            type: string
+          bucket_id:
+            description: The bucket's ID.
+            example: a12b34cd5678e9f
+            type: string
+          bucket_name:
+            description: The bucket's name.
+            example: ChockFullOfNuts
+            type: string
+          path:
+            description: The path to the backups directory on the remote server.
+            example: /backups
+            format: path
+            type: string
+          timeout:
+            description: The session timeout, in seconds.
+            example: 300
+            maximum: 300
+            minimum: 30
+            type: integer
+        type: object
+    WebDAVBackupDestinationResponse:
+      allOf:
+      - $ref: '#/components/schemas/BackupDestinationResponse'
+      - properties:
+          host:
+            description: The remote server's hostname.
+            example: backups.example.com
+            format: domain
+            type: string
+          path:
+            description: The path to the backups directory on the remote server.
+            example: /backups
+            format: path
+            type: string
+          port:
+            default: 21
+            description: The remote server's FTP port.
+            example: 21
+            maximum: 65535
+            minimum: 1
+            type: integer
+          ssl:
+            default: 1
+            description: 'Whether to use SSL.
+
+              * `1` - Use SSL.
+
+              * `0` - Do **not** use SSL.'
+            enum:
+            - 1
+            - 0
+            example: 1
+            type: integer
+          timeout:
+            default: 30
+            description: The session timeout, in seconds.
+            example: 300
+            maximum: 300
+            minimum: 30
+            type: integer
+          username:
+            description: The remote server account's username.
+            example: username
+            type: string
         type: object
     BackupDestinationSetParameterBase:
       properties:
@@ -5318,41 +5706,64 @@ components:
       required:
       - id
       type: object
-    BackupDestinationSetParameterLocal:
+    BackupDestinationGetResponseGoogleDrive:
+      allOf:
+      - $ref: '#/components/schemas/BackupDestinationGetResponseBase'
+      - properties:
+          client_id:
+            description: The Google Drive client ID.
+            example: aBcdeFgHIjK123
+            type: string
+          client_secret:
+            description: The Google Drive client secret.
+            example: aBcde123FgHIjK456
+            type: string
+          folder:
+            description: The path to the backups directory, relative to the root directory, on the remote server.
+            example: subfolder
+            format: path
+            type: string
+          timeout:
+            description: The session timeout, in seconds.
+            example: 300
+            maximum: 300
+            minimum: 30
+            type: integer
+        type: object
+    BackupDestinationSetParameterAmazonS3:
       allOf:
       - $ref: '#/components/schemas/BackupDestinationSetParameterBase'
       - properties:
-          mount:
-            default: 0
-            description: 'Whether the path is mounted.
-
-              * `1` - The path is mounted.
-
-              * `0` - The path is **not** mounted.'
-            enum:
-            - 1
-            - 0
-            example: 0
-            type: integer
-          no_mount_fail:
-            default: 0
-            description: 'Whether to fail the backup attempt if the mount fails.
-
-              * `1` - Fail the backup attempt.
-
-              * `0` - Do **not** fail the backup attempt.'
-            enum:
-            - 1
-            - 0
-            example: 0
-            type: integer
-          path:
-            description: The absolute path to the backups directory.
-            example: /home/backups
+          aws_access_key_id:
+            description: The Amazon S3 Access Key ID.
+            example: s123456789
+            type: string
+          bucket:
+            description: The Amazon S3™ bucket.
+            example: ChockFullOfNuts
+            type: string
+          folder:
+            default: ''
+            description: The path to the backups directory, relative to the root directory, on the remote server.
+            example: subfolder
             format: path
             type: string
+          password:
+            description: The Amazon S3 Access Key's password.
+            example: 123456luggage
+            type: string
+          timeout:
+            default: 30
+            description: The session timeout, in seconds.
+            example: 300
+            maximum: 300
+            minimum: 30
+            type: integer
         required:
-        - path
+        - bucket
+        - aws_access_key_id
+        - timeout
+        - password
         type: object
     AmazonS3BackupDestinationResponse:
       allOf:
@@ -5379,36 +5790,6 @@ components:
             minimum: 30
             type: integer
         type: object
-    CustomBackupDestinationResponse:
-      allOf:
-      - $ref: '#/components/schemas/BackupDestinationResponse'
-      - properties:
-          host:
-            description: The remote server's hostname.
-            example: backups.example.com
-            format: domain
-            type: string
-          path:
-            description: The path to the backups directory on the remote server.
-            example: /backups
-            format: path
-            type: string
-          script:
-            description: The absolute file path of the user-supplied transport solution script.
-            example: /home/backups/beammeupscotty.pl
-            type: string
-          timeout:
-            default: 30
-            description: The session timeout, in seconds.
-            example: 300
-            maximum: 300
-            minimum: 30
-            type: integer
-          username:
-            description: The remote server account's username.
-            example: username
-            type: string
-        type: object
     BackupDestinationGetResponse:
       anyOf:
       - $ref: '#/components/schemas/BackupDestinationGetResponseAmazonS3'
@@ -5434,106 +5815,6 @@ components:
           SFTP: '#/components/schemas/BackupDestinationGetResponseSFTP'
           WebDAV: '#/components/schemas/BackupDestinationGetResponseWebDAV'
         propertyName: type
-    S3CompatibleBackupDestinationResponse:
-      allOf:
-      - $ref: '#/components/schemas/BackupDestinationResponse'
-      - properties:
-          aws_access_key_id:
-            description: The S3-compatible provider key ID.
-            example: s123456789
-            type: string
-          bucket:
-            description: The S3-compatible bucket.
-            example: ChockFullOfNuts
-            type: string
-          folder:
-            default: ''
-            description: The path to the backups directory, relative to the root directory, on the remote server.
-            example: subfolder
-            type: string
-          host:
-            description: The S3-compatible provider's server.
-            example: www.s3example.com
-            type: string
-          timeout:
-            default: 30
-            description: The session timeout, in seconds.
-            example: 300
-            maximum: 300
-            minimum: 30
-            type: integer
-        type: object
-    BackupDestinationSetParameterType:
-      anyOf:
-      - $ref: '#/components/schemas/BackupDestinationSetParameterAmazonS3'
-      - $ref: '#/components/schemas/BackupDestinationSetParameterBackblaze'
-      - $ref: '#/components/schemas/BackupDestinationSetParameterCustom'
-      - $ref: '#/components/schemas/BackupDestinationSetParameterFTP'
-      - $ref: '#/components/schemas/BackupDestinationSetParameterGoogleDrive'
-      - $ref: '#/components/schemas/BackupDestinationSetParameterLocal'
-      - $ref: '#/components/schemas/BackupDestinationSetParameterRsync'
-      - $ref: '#/components/schemas/BackupDestinationSetParameterS3Compatible'
-      - $ref: '#/components/schemas/BackupDestinationSetParameterSFTP'
-      - $ref: '#/components/schemas/BackupDestinationSetParameterWebDAV'
-      discriminator:
-        mapping:
-          AmazonS3: '#/components/schemas/BackupDestinationSetParameterAmazonS3'
-          Backblaze: '#/components/schemas/BackupDestinationSetParameterBackblaze'
-          Custom: '#/components/schemas/BackupDestinationSetParameterCustom'
-          FTP: '#/components/schemas/BackupDestinationSetParameterFTP'
-          GoogleDrive: '#/components/schemas/BackupDestinationSetParameterGoogleDrive'
-          Local: '#/components/schemas/BackupDestinationSetParameterLocal'
-          Rsync: '#/components/schemas/BackupDestinationSetParameterRsync'
-          S3Compatible: '#/components/schemas/BackupDestinationSetParameterS3Compatible'
-          SFTP: '#/components/schemas/BackupDestinationSetParameterSFTP'
-          WebDAV: '#/components/schemas/BackupDestinationSetParameterWebDAV'
-        propertyName: type
-    BackupDestinationGetResponseSFTP:
-      allOf:
-      - $ref: '#/components/schemas/BackupDestinationGetResponseBase'
-      - properties:
-          authtype:
-            description: 'The authorization type.
-
-              * `password`
-
-              * `key`'
-            enum:
-            - password
-            - key
-            example: password
-          host:
-            description: The remote server's hostname.
-            example: backups.example.com
-            format: domain
-            type: string
-          path:
-            description: The path to the backups directory on the remote server.
-            example: /backups
-            format: path
-            type: string
-          port:
-            description: The remote server's FTP port.
-            example: 21
-            maximum: 65535
-            minimum: 1
-            type: integer
-          privatekey:
-            description: If the `authtype` return's value is `key`, the absolute path to the private key file.
-            example: /home/backups/key
-            format: path
-            type: string
-          timeout:
-            description: The session timeout, in seconds.
-            example: 300
-            maximum: 300
-            minimum: 30
-            type: integer
-          username:
-            description: The remote server account's username.
-            example: username
-            type: string
-        type: object
     BackupDestinationGetResponseBase:
       properties:
         disable_reason:
@@ -5581,67 +5862,24 @@ components:
           example: Local
           type: string
       type: object
-    BackupDestinationGetResponseAmazonS3:
+    BackupDestinationSetParameterGoogleDrive:
       allOf:
-      - $ref: '#/components/schemas/BackupDestinationGetResponseBase'
+      - $ref: '#/components/schemas/BackupDestinationSetParameterBase'
       - properties:
-          aws_access_key_id:
-            description: The Amazon S3 Access Key ID.
-            example: s123456789
+          client_id:
+            description: The Google Drive client ID.
+            example: aBcdeFgHIjK123
             type: string
-          bucket:
-            description: The Amazon S3™ bucket.
-            example: ChockFullOfNuts
+          client_secret:
+            description: The Google Drive client secret.
+            example: aBcde123FgHIjK456
             type: string
           folder:
+            default: ''
             description: The path to the backups directory, relative to the root directory, on the remote server.
             example: subfolder
             format: path
             type: string
-          timeout:
-            description: The session timeout, in seconds.
-            example: 300
-            maximum: 300
-            minimum: 30
-            type: integer
-        type: object
-    BackupDestinationSetParameterWebDAV:
-      allOf:
-      - $ref: '#/components/schemas/BackupDestinationSetParameterBase'
-      - properties:
-          host:
-            description: The remote server's hostname.
-            example: backups.example.com
-            format: domain
-            type: string
-          password:
-            description: The remote server account's password.
-            example: 123456luggage
-            type: string
-          path:
-            description: The path to the backups directory on the remote server.
-            example: /backups
-            format: path
-            type: string
-          port:
-            default: 21
-            description: The remote server's FTP port.
-            example: 21
-            maximum: 65535
-            minimum: 1
-            type: integer
-          ssl:
-            default: 1
-            description: 'Whether to use SSL.
-
-              * `1` - Use SSL.
-
-              * `0` - Do **not** use SSL.'
-            enum:
-            - 1
-            - 0
-            example: 1
-            type: integer
           timeout:
             default: 30
             description: The session timeout, in seconds.
@@ -5649,75 +5887,9 @@ components:
             maximum: 300
             minimum: 30
             type: integer
-          username:
-            description: The remote server account's username.
-            example: username
-            type: string
         required:
-        - host
-        - path
-        - username
-        - password
-        type: object
-    BackupDestinationGetResponseS3Compatible:
-      allOf:
-      - $ref: '#/components/schemas/BackupDestinationGetResponseBase'
-      - properties:
-          aws_access_key_id:
-            description: The S3-compatible provider key ID.
-            example: s123456789
-            type: string
-          bucket:
-            description: The S3-compatible bucket.
-            example: ChockFullOfNuts
-            type: string
-          folder:
-            description: The path to the backups directory, relative to the root directory, on the remote server.
-            example: subfolder
-            type: string
-          host:
-            description: The S3-compatible provider's server.
-            example: www.s3example.com
-            format: domain
-            type: string
-          timeout:
-            description: The session timeout, in seconds.
-            example: 300
-            maximum: 300
-            minimum: 30
-            type: integer
-        type: object
-    BackupDestinationGetResponseLocal:
-      allOf:
-      - $ref: '#/components/schemas/BackupDestinationGetResponseBase'
-      - properties:
-          mount:
-            description: 'Whether the path is mounted.
-
-              * `1` - The path is mounted.
-
-              * `0` - The path is **not** mounted.'
-            enum:
-            - 1
-            - 0
-            example: 0
-            type: integer
-          no_mount_fail:
-            description: 'Whether to fail the backup attempt if the mount fails.
-
-              * `1` - Fail the backup attempt.
-
-              * `0` - Do **not** fail the backup attempt.'
-            enum:
-            - 1
-            - 0
-            example: 0
-            type: integer
-          path:
-            description: The absolute path to the backups directory.
-            example: /home/backups
-            format: path
-            type: string
+        - client_id
+        - client_secret
         type: object
     BackupDestinationSetParameterFTP:
       allOf:
@@ -5770,213 +5942,41 @@ components:
         - username
         - password
         type: object
-    BackupDestinationSetParameterCustom:
+    BackupDestinationSetParameterLocal:
       allOf:
       - $ref: '#/components/schemas/BackupDestinationSetParameterBase'
       - properties:
-          host:
-            description: The remote server's hostname.
-            example: backups.example.com
-            format: domain
-            type: string
-          password:
-            description: The remote server account's password.
-            example: 123456luggage
-            type: string
-          path:
-            description: The path to the backups directory on the remote server.
-            example: /backups
-            format: path
-            type: string
-          script:
-            description: The absolute file path of the user-supplied transport solution script.
-            example: /home/backups/beammeupscotty.pl
-            format: path
-            type: string
-          timeout:
-            default: 30
-            description: The session timeout, in seconds.
-            example: 300
-            maximum: 300
-            minimum: 30
-            type: integer
-          username:
-            description: The remote server account's username.
-            example: username
-            type: string
-        required:
-        - script
-        - host
-        - path
-        - username
-        - password
-        type: object
-    BackupDestinationSetParameterRsync:
-      allOf:
-      - $ref: '#/components/schemas/BackupDestinationSetParameterBase'
-      - properties:
-          authtype:
-            description: 'The authorization type.
+          mount:
+            default: 0
+            description: 'Whether the path is mounted.
 
-              * `password`
+              * `1` - The path is mounted.
 
-              * `key`'
-            enum:
-            - password
-            - key
-            example: password
-          host:
-            description: The remote server's hostname.
-            example: backups.example.com
-            format: domain
-            type: string
-          passphrase:
-            description: If the `authtype` parameter's value is `key`, the private key file's passphrase.
-            example: 123456luggage
-            type: string
-          password:
-            description: If the `authtype` parameter's value is `password`, the remote server account's password.
-            example: 123456luggage
-            type: string
-          path:
-            description: The path to the backups directory on the remote server.
-            example: /backups
-            format: path
-            type: string
-          port:
-            default: 22
-            description: The remote server's FTP port.
-            example: 22
-            maximum: 65535
-            minimum: 1
-            type: integer
-          privatekey:
-            description: If the `authtype` parameter's value is `key`, the absolute path to the private key file.
-            example: /home/backups/key
-            format: path
-            type: string
-          timeout:
-            default: 30
-            description: The session timeout, in seconds.
-            example: 300
-            maximum: 300
-            minimum: 30
-            type: integer
-          username:
-            description: The remote server account's username.
-            example: username
-            type: string
-        required:
-        - host
-        - path
-        - username
-        - authtype
-        type: object
-    BackupDestinationSetParameterSFTP:
-      allOf:
-      - $ref: '#/components/schemas/BackupDestinationSetParameterBase'
-      - properties:
-          authtype:
-            description: 'The authorization type.
-
-              * `password`
-
-              * `key`'
-            enum:
-            - password
-            - key
-            example: password
-          host:
-            description: The remote server's hostname.
-            example: backups.example.com
-            format: domain
-            type: string
-          passphrase:
-            description: If the `authtype` parameter's value is `key`, the private key file's passphrase.
-            example: 123456luggage
-            type: string
-          password:
-            description: If the `authtype` parameter's value is `password`, the remote server account's password.
-            example: 123456luggage
-            type: string
-          path:
-            description: The path to the backups directory on the remote server.
-            example: /backups
-            format: path
-            type: string
-          port:
-            default: 21
-            description: The remote server's FTP port.
-            example: 21
-            maximum: 65535
-            minimum: 1
-            type: integer
-          privatekey:
-            description: If the `authtype` parameter's value is `key`, the absolute path to the private key file.
-            example: /home/backups/key
-            format: path
-            type: string
-          timeout:
-            default: 30
-            description: The session timeout, in seconds.
-            example: 300
-            maximum: 300
-            minimum: 30
-            type: integer
-          username:
-            description: The remote server account's username.
-            example: username
-            type: string
-        required:
-        - host
-        - path
-        - username
-        - authtype
-        type: object
-    WebDAVBackupDestinationResponse:
-      allOf:
-      - $ref: '#/components/schemas/BackupDestinationResponse'
-      - properties:
-          host:
-            description: The remote server's hostname.
-            example: backups.example.com
-            format: domain
-            type: string
-          path:
-            description: The path to the backups directory on the remote server.
-            example: /backups
-            format: path
-            type: string
-          port:
-            default: 21
-            description: The remote server's FTP port.
-            example: 21
-            maximum: 65535
-            minimum: 1
-            type: integer
-          ssl:
-            default: 1
-            description: 'Whether to use SSL.
-
-              * `1` - Use SSL.
-
-              * `0` - Do **not** use SSL.'
+              * `0` - The path is **not** mounted.'
             enum:
             - 1
             - 0
-            example: 1
+            example: 0
             type: integer
-          timeout:
-            default: 30
-            description: The session timeout, in seconds.
-            example: 300
-            maximum: 300
-            minimum: 30
+          no_mount_fail:
+            default: 0
+            description: 'Whether to fail the backup attempt if the mount fails.
+
+              * `1` - Fail the backup attempt.
+
+              * `0` - Do **not** fail the backup attempt.'
+            enum:
+            - 1
+            - 0
+            example: 0
             type: integer
-          username:
-            description: The remote server account's username.
-            example: username
+          path:
+            description: The absolute path to the backups directory.
+            example: /home/backups
+            format: path
             type: string
+        required:
+        - path
         type: object
   securitySchemes:
     BasicAuth:

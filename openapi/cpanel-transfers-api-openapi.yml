@@ -2278,6 +2278,255 @@ paths:
       x-cpanel-available-version: '11.44'
 components:
   schemas:
+    Transfers_EnqueueTransferItem_Type_PackageRemoteRoot:
+      allOf:
+      - $ref: '#/components/schemas/Transfers_EnqueueTransferItem_Base'
+      - properties:
+          package:
+            description: The package's name.
+            example: user_package
+            type: string
+        required:
+        - package
+        type: object
+    Transfers_EnqueueTransferItem_Type_AccountLocal_or_AccountRemoteRoot:
+      allOf:
+      - $ref: '#/components/schemas/Transfers_EnqueueTransferItem_Type_Account_Base'
+      - properties:
+          force:
+            description: 'Whether to overwrite an account with an identical username.
+
+
+              * `1` — Overwrite the account.
+
+              * `0` — Do **not** overwrite the account.
+
+
+              This parameter performs the following actions:
+
+
+              * Restores the cPanel account on the destination server.
+
+              * Overwrites all account settings, data, and databases.
+
+              * Ignores errors and warnings for naming conflicts.
+
+
+              **Note:**
+
+
+              * The values you enter for the `user` and `localuser` parameters **must** match.
+
+              * You cannot use this parameter if you called the WHM API 1 `create_remote_root_transfer_session` function with the `unrestricted_restore` parameter set to `1`.'
+            enum:
+            - 0
+            - 1
+            example: 1
+            type: integer
+        type: object
+    Transfers_EnqueueTransferItem_Type_FeatureListRemoteRoot:
+      allOf:
+      - $ref: '#/components/schemas/Transfers_EnqueueTransferItem_Base'
+      - properties:
+          featurelist:
+            description: The feature list's name.
+            example: user_features
+            type: string
+        required:
+        - featurelist
+        type: object
+    Transfers_EnqueueTransferItem_Type_LegacyAccountBackup:
+      allOf:
+      - $ref: '#/components/schemas/Transfers_EnqueueTransferItem_Base'
+      - properties:
+          mysql_dbs_to_restore:
+            description: 'A comma-separated list of MySQL databases to restore, which will overwrite those databases on the account.
+
+
+              **Note:**
+
+
+              The default behavior is to select and overwrite all databases.
+
+
+              **Warning:**
+
+
+              The _Restricted Restore_ feature does not allow an account to overwrite data that it does not own. If the transfer session''s `unrestricted_restore` parameter has a value of `0`, this parameter is ignored.'
+            example: msdb1,msdb2,msdb3
+            type: string
+          overwrite_all_dbs:
+            description: 'Whether to allow the system to overwrite all of the account''s databases with the databases in the backup file.
+
+
+              * `1` — Overwrite.
+
+              * `0` — Do **not** overwrite.
+
+
+              **Note:**
+
+
+              You may use only **one** of the following parameters:
+
+
+              * `overwrite_all_dbs`
+
+              * `overwrite_sameowner_dbs`
+
+              * Both the `mysql_dbs_to_restore` and `pgsql_dbs_to_restore` parameters.
+
+
+              If you do not use any of these parameters, the system will restore all of the databases on the account, but will **not** overwrite any of them.
+
+
+              **Warning:**
+
+
+              The _Restricted Restore_ feature does not allow an account to overwrite data that it does not own. If the transfer session''s `unrestricted_restore` parameter has a value of `0`, the `overwrite_all_dbs` parameter will automatically change to a value of `0` and the `overwrite_sameowner_dbs` parameter will change to a value of `1`. This prevents the restore system from overwriting databases that the account does not own.'
+            enum:
+            - 0
+            - 1
+            type: integer
+          overwrite_sameowner_dbs:
+            description: 'Whether to allow the system to overwrite the account''s existing databases with the databases in the backup file.
+
+
+              * `1` — Overwrite.
+
+              * `0` — Do **not** overwrite.'
+            enum:
+            - 0
+            - 1
+            type: integer
+          overwrite_sameowner_dbusers:
+            description: 'Whether to allow the system to overwrite the account''s existing database users with the database users in the backup file.
+
+
+              * `1` — Overwrite.
+
+              * `0` — Do **not** overwrite.'
+            enum:
+            - 0
+            - 1
+            type: integer
+          pgsql_dbs_to_restore:
+            description: 'A comma-separated list of PostgreSQL® databases to restore, which will overwrite those databases on the account.
+
+
+              **Note:**
+
+
+              The default behavior is to select and overwrite all databases.
+
+
+              **Warning:**
+
+
+              The _Restricted Restore_ feature does not allow an account to overwrite data that it does not own. If the transfer session''s `unrestricted_restore` parameter has a value of `0`, this parameter is ignored.'
+            example: pgdb1,pgdb2,pgdb3
+            type: string
+          restoreall:
+            description: 'Whether to recreate the account on the target server.
+
+
+              * `1` — Recreate.
+
+              * `0` — Do **not** recreate.'
+            enum:
+            - 0
+            - 1
+            type: integer
+          restorebwdata:
+            description: 'Whether to restore bandwidth data.
+
+
+              * `1` — Restore.
+
+              * `0` — Do **not** restore.'
+            enum:
+            - 0
+            - 1
+            type: integer
+          restoreip:
+            description: 'Whether to assign the account''s dedicated IP address that is stored in the backup file.
+
+
+              * `1` — Assign.
+
+              * `0` — Do **not** assign.'
+            enum:
+            - 0
+            - 1
+            type: integer
+          restoremail:
+            description: 'Whether to restore the account''s mail data.
+
+
+              * `1` — Restore.
+
+              * `0` — Do **not** restore.'
+            enum:
+            - 0
+            - 1
+            type: integer
+          restoremysql:
+            description: 'Whether to restore MySQL® database data.
+
+
+              * `1` — Restore.
+
+              * `0` — Do **not** restore.'
+            enum:
+            - 0
+            - 1
+            type: integer
+          restoresubs:
+            description: 'Whether to restore the account''s subdomains.
+
+
+              * `1` — Restore.
+
+              * `0` — Do **not** restore.'
+            enum:
+            - 0
+            - 1
+            type: integer
+          restoretype:
+            description: 'The backup type to restore.
+
+
+              * `monthly`
+
+              * `weekly`
+
+              * `daily`'
+            enum:
+            - monthly
+            - weekly
+            - daily
+            example: daily
+            type: string
+          unrestricted_restore:
+            description: 'Whether to bypass the *Restricted Restore* system.
+
+
+              * `1` — Bypass.
+
+              * `0` — Do **not** bypass.'
+            enum:
+            - 0
+            - 1
+            type: integer
+          user:
+            description: The account's username.
+            example: user
+            format: username
+            type: string
+        required:
+        - user
+        - restoretype
+        type: object
     Transfers_EnqueueTransferItem_Type_Account_Base:
       allOf:
       - $ref: '#/components/schemas/Transfers_EnqueueTransferItem_Base'
@@ -2500,17 +2749,6 @@ components:
         - user
         - localuser
         type: object
-    Transfers_EnqueueTransferItem_Type_FeatureListRemoteRoot:
-      allOf:
-      - $ref: '#/components/schemas/Transfers_EnqueueTransferItem_Base'
-      - properties:
-          featurelist:
-            description: The feature list's name.
-            example: user_features
-            type: string
-        required:
-        - featurelist
-        type: object
     Transfers_EnqueueTransferItem_Type_AccountRemoteRoot:
       allOf:
       - $ref: '#/components/schemas/Transfers_EnqueueTransferItem_Type_AccountLocal_or_AccountRemoteRoot'
@@ -2540,69 +2778,6 @@ components:
             - 1
             example: 1
             type: integer
-    Transfers_EnqueueTransferItem_Type_PackageRemoteRoot:
-      allOf:
-      - $ref: '#/components/schemas/Transfers_EnqueueTransferItem_Base'
-      - properties:
-          package:
-            description: The package's name.
-            example: user_package
-            type: string
-        required:
-        - package
-        type: object
-    Transfers_EnqueueTransferItem_Type_AccountLocal_or_AccountRemoteRoot:
-      allOf:
-      - $ref: '#/components/schemas/Transfers_EnqueueTransferItem_Type_Account_Base'
-      - properties:
-          force:
-            description: 'Whether to overwrite an account with an identical username.
-
-
-              * `1` — Overwrite the account.
-
-              * `0` — Do **not** overwrite the account.
-
-
-              This parameter performs the following actions:
-
-
-              * Restores the cPanel account on the destination server.
-
-              * Overwrites all account settings, data, and databases.
-
-              * Ignores errors and warnings for naming conflicts.
-
-
-              **Note:**
-
-
-              * The values you enter for the `user` and `localuser` parameters **must** match.
-
-              * You cannot use this parameter if you called the WHM API 1 `create_remote_root_transfer_session` function with the `unrestricted_restore` parameter set to `1`.'
-            enum:
-            - 0
-            - 1
-            example: 1
-            type: integer
-        type: object
-    schemas-Transfers_EnqueueTransferItem_Type:
-      anyOf:
-      - $ref: '#/components/schemas/Transfers_EnqueueTransferItem_Type_AccountLocal_or_AccountRemoteRoot'
-      - $ref: '#/components/schemas/Transfers_EnqueueTransferItem_Type_AccountRemoteRoot'
-      - $ref: '#/components/schemas/Transfers_EnqueueTransferItem_Type_Account_Base'
-      - $ref: '#/components/schemas/Transfers_EnqueueTransferItem_Type_FeatureListRemoteRoot'
-      - $ref: '#/components/schemas/Transfers_EnqueueTransferItem_Type_LegacyAccountBackup'
-      - $ref: '#/components/schemas/Transfers_EnqueueTransferItem_Type_PackageRemoteRoot'
-      discriminator:
-        mapping:
-          AccountLocal: '#/components/schemas/Transfers_EnqueueTransferItem_Type_AccountLocal_or_AccountRemoteRoot'
-          AccountRemoteRoot: '#/components/schemas/Transfers_EnqueueTransferItem_Type_AccountRemoteRoot'
-          AccountRemoteUser: '#/components/schemas/Transfers_EnqueueTransferItem_Type_Account_Base'
-          FeatureListRemoteRoot: '#/components/schemas/Transfers_EnqueueTransferItem_Type_FeatureListRemoteRoot'
-          LegacyAccountBackup: '#/components/schemas/Transfers_EnqueueTransferItem_Type_LegacyAccountBackup'
-          PackageRemoteRoot: '#/components/schemas/Transfers_EnqueueTransferItem_Type_PackageRemoteRoot'
-        propertyName: module
     Transfers_EnqueueTransferItem_Base:
       properties:
         module:
@@ -2653,198 +2828,23 @@ components:
       - transfer_session_id
       - module
       type: object
-    Transfers_EnqueueTransferItem_Type_LegacyAccountBackup:
-      allOf:
-      - $ref: '#/components/schemas/Transfers_EnqueueTransferItem_Base'
-      - properties:
-          mysql_dbs_to_restore:
-            description: 'A comma-separated list of MySQL databases to restore, which will overwrite those databases on the account.
-
-
-              **Note:**
-
-
-              The default behavior is to select and overwrite all databases.
-
-
-              **Warning:**
-
-
-              The _Restricted Restore_ feature does not allow an account to overwrite data that it does not own. If the transfer session''s `unrestricted_restore` parameter has a value of `0`, this parameter is ignored.'
-            example: msdb1,msdb2,msdb3
-            type: string
-          overwrite_all_dbs:
-            description: 'Whether to allow the system to overwrite all of the account''s databases with the databases in the backup file.
-
-
-              * `1` — Overwrite.
-
-              * `0` — Do **not** overwrite.
-
-
-              **Note:**
-
-
-              You may use only **one** of the following parameters:
-
-
-              * `overwrite_all_dbs`
-
-              * `overwrite_sameowner_dbs`
-
-              * Both the `mysql_dbs_to_restore` and `pgsql_dbs_to_restore` parameters.
-
-
-              If you do not use any of these parameters, the system will restore all of the databases on the account, but will **not** overwrite any of them.
-
-
-              **Warning:**
-
-
-              The _Restricted Restore_ feature does not allow an account to overwrite data that it does not own. If the transfer session''s `unrestricted_restore` parameter has a value of `0`, the `overwrite_all_dbs` parameter will automatically change to a value of `0` and the `overwrite_sameowner_dbs` parameter will change to a value of `1`. This prevents the restore system from overwriting databases that the account does not own.'
-            enum:
-            - 0
-            - 1
-            type: integer
-          overwrite_sameowner_dbs:
-            description: 'Whether to allow the system to overwrite the account''s existing databases with the databases in the backup file.
-
-
-              * `1` — Overwrite.
-
-              * `0` — Do **not** overwrite.'
-            enum:
-            - 0
-            - 1
-            type: integer
-          overwrite_sameowner_dbusers:
-            description: 'Whether to allow the system to overwrite the account''s existing database users with the database users in the backup file.
-
-
-              * `1` — Overwrite.
-
-              * `0` — Do **not** overwrite.'
-            enum:
-            - 0
-            - 1
-            type: integer
-          pgsql_dbs_to_restore:
-            description: 'A comma-separated list of PostgreSQL® databases to restore, which will overwrite those databases on the account.
-
-
-              **Note:**
-
-
-              The default behavior is to select and overwrite all databases.
-
-
-              **Warning:**
-
-
-              The _Restricted Restore_ feature does not allow an account to overwrite data that it does not own. If the transfer session''s `unrestricted_restore` parameter has a value of `0`, this parameter is ignored.'
-            example: pgdb1,pgdb2,pgdb3
-            type: string
-          restoreall:
-            description: 'Whether to recreate the account on the target server.
-
-
-              * `1` — Recreate.
-
-              * `0` — Do **not** recreate.'
-            enum:
-            - 0
-            - 1
-            type: integer
-          restorebwdata:
-            description: 'Whether to restore bandwidth data.
-
-
-              * `1` — Restore.
-
-              * `0` — Do **not** restore.'
-            enum:
-            - 0
-            - 1
-            type: integer
-          restoreip:
-            description: 'Whether to assign the account''s dedicated IP address that is stored in the backup file.
-
-
-              * `1` — Assign.
-
-              * `0` — Do **not** assign.'
-            enum:
-            - 0
-            - 1
-            type: integer
-          restoremail:
-            description: 'Whether to restore the account''s mail data.
-
-
-              * `1` — Restore.
-
-              * `0` — Do **not** restore.'
-            enum:
-            - 0
-            - 1
-            type: integer
-          restoremysql:
-            description: 'Whether to restore MySQL® database data.
-
-
-              * `1` — Restore.
-
-              * `0` — Do **not** restore.'
-            enum:
-            - 0
-            - 1
-            type: integer
-          restoresubs:
-            description: 'Whether to restore the account''s subdomains.
-
-
-              * `1` — Restore.
-
-              * `0` — Do **not** restore.'
-            enum:
-            - 0
-            - 1
-            type: integer
-          restoretype:
-            description: 'The backup type to restore.
-
-
-              * `monthly`
-
-              * `weekly`
-
-              * `daily`'
-            enum:
-            - monthly
-            - weekly
-            - daily
-            example: daily
-            type: string
-          unrestricted_restore:
-            description: 'Whether to bypass the *Restricted Restore* system.
-
-
-              * `1` — Bypass.
-
-              * `0` — Do **not** bypass.'
-            enum:
-            - 0
-            - 1
-            type: integer
-          user:
-            description: The account's username.
-            example: user
-            format: username
-            type: string
-        required:
-        - user
-        - restoretype
-        type: object
+    schemas-Transfers_EnqueueTransferItem_Type:
+      anyOf:
+      - $ref: '#/components/schemas/Transfers_EnqueueTransferItem_Type_AccountLocal_or_AccountRemoteRoot'
+      - $ref: '#/components/schemas/Transfers_EnqueueTransferItem_Type_AccountRemoteRoot'
+      - $ref: '#/components/schemas/Transfers_EnqueueTransferItem_Type_Account_Base'
+      - $ref: '#/components/schemas/Transfers_EnqueueTransferItem_Type_FeatureListRemoteRoot'
+      - $ref: '#/components/schemas/Transfers_EnqueueTransferItem_Type_LegacyAccountBackup'
+      - $ref: '#/components/schemas/Transfers_EnqueueTransferItem_Type_PackageRemoteRoot'
+      discriminator:
+        mapping:
+          AccountLocal: '#/components/schemas/Transfers_EnqueueTransferItem_Type_AccountLocal_or_AccountRemoteRoot'
+          AccountRemoteRoot: '#/components/schemas/Transfers_EnqueueTransferItem_Type_AccountRemoteRoot'
+          AccountRemoteUser: '#/components/schemas/Transfers_EnqueueTransferItem_Type_Account_Base'
+          FeatureListRemoteRoot: '#/components/schemas/Transfers_EnqueueTransferItem_Type_FeatureListRemoteRoot'
+          LegacyAccountBackup: '#/components/schemas/Transfers_EnqueueTransferItem_Type_LegacyAccountBackup'
+          PackageRemoteRoot: '#/components/schemas/Transfers_EnqueueTransferItem_Type_PackageRemoteRoot'
+        propertyName: module
   securitySchemes:
     BasicAuth:
       scheme: basic

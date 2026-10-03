@@ -2294,18 +2294,6 @@ components:
                   example: teamUser is on vacation
                   type: string
       type: object
-    Services:
-      properties:
-        email:
-          example: 500*2**20
-          type: string
-        ftp:
-          example: 1
-          type: integer
-        webdisk:
-          example: rw
-          type: string
-      type: object
     TeamArray:
       items:
         properties:
@@ -2359,6 +2347,18 @@ components:
             example: teamuser
             type: string
       type: array
+    Services:
+      properties:
+        email:
+          example: 500*2**20
+          type: string
+        ftp:
+          example: 1
+          type: integer
+        webdisk:
+          example: rw
+          type: string
+      type: object
   securitySchemes:
     BasicAuth:
       scheme: basic

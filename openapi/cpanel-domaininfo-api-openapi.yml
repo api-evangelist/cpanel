@@ -1185,6 +1185,25 @@ paths:
       x-cpanel-available-version: cPanel 11.42
 components:
   schemas:
+    HashOutput:
+      properties:
+        addon_domains:
+          description: An array of objects containing information about each addon domain.
+          items:
+            $ref: '#/components/schemas/Contents'
+        main_domain:
+          description: An array of objects containing information about the main domain.
+          items:
+            $ref: '#/components/schemas/MainDomainContents'
+        parked_domains:
+          description: An array of objects containing information about each parked domain.
+          items:
+            $ref: '#/components/schemas/Contents'
+        sub_domains:
+          description: An array of objects containing information about each subdomain.
+          items:
+            $ref: '#/components/schemas/Contents'
+      type: object
     MainDomainContents:
       properties:
         all_aliases_valid:
@@ -1372,29 +1391,6 @@ components:
           - 1
           - 0
           type: integer
-    ListOutput:
-      anyOf:
-      - $ref: '#/components/schemas/Contents'
-      - $ref: '#/components/schemas/MainDomainContents'
-    HashOutput:
-      properties:
-        addon_domains:
-          description: An array of objects containing information about each addon domain.
-          items:
-            $ref: '#/components/schemas/Contents'
-        main_domain:
-          description: An array of objects containing information about the main domain.
-          items:
-            $ref: '#/components/schemas/MainDomainContents'
-        parked_domains:
-          description: An array of objects containing information about each parked domain.
-          items:
-            $ref: '#/components/schemas/Contents'
-        sub_domains:
-          description: An array of objects containing information about each subdomain.
-          items:
-            $ref: '#/components/schemas/Contents'
-      type: object
     Contents:
       properties:
         all_aliases_valid:
@@ -1565,6 +1561,10 @@ components:
           - 1
           - 0
           type: integer
+    ListOutput:
+      anyOf:
+      - $ref: '#/components/schemas/Contents'
+      - $ref: '#/components/schemas/MainDomainContents'
   securitySchemes:
     BasicAuth:
       scheme: basic

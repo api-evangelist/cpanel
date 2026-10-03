@@ -387,6 +387,52 @@ paths:
       x-cpanel-available-version: WordPress Manager 3.0
 components:
   schemas:
+    RestoreInProgress:
+      properties:
+        any_running:
+          description: 'Whether the system is processing a backup restoration.
+
+
+            * `1` - Restoration in progress. This is the only possible value.'
+          enum:
+          - 1
+          type: integer
+        sites:
+          description: 'Information about the site that the system is actively restoring.
+
+
+            **Note:**
+
+
+            We have not implemented this return.'
+          items:
+            properties:
+              id:
+                description: 'The restore process''s unique ID.
+
+
+                  * `null` is the only possible value.
+
+                  * We have not implemented this return.'
+                enum:
+                - null
+                type:
+                - string
+                - 'null'
+              site:
+                description: The WordPress site's URL without the protocol prefix.
+                format: domain
+                type: string
+              type:
+                description: 'The active process type.
+
+
+                  * `restore` is the only possible value.'
+                enum:
+                - restore
+                type: string
+            type: object
+          type: array
     RestoreNotInProgress:
       properties:
         any_running:
@@ -463,52 +509,6 @@ components:
 
             * We have not implemented this return.'
           type: object
-    RestoreInProgress:
-      properties:
-        any_running:
-          description: 'Whether the system is processing a backup restoration.
-
-
-            * `1` - Restoration in progress. This is the only possible value.'
-          enum:
-          - 1
-          type: integer
-        sites:
-          description: 'Information about the site that the system is actively restoring.
-
-
-            **Note:**
-
-
-            We have not implemented this return.'
-          items:
-            properties:
-              id:
-                description: 'The restore process''s unique ID.
-
-
-                  * `null` is the only possible value.
-
-                  * We have not implemented this return.'
-                enum:
-                - null
-                type:
-                - string
-                - 'null'
-              site:
-                description: The WordPress site's URL without the protocol prefix.
-                format: domain
-                type: string
-              type:
-                description: 'The active process type.
-
-
-                  * `restore` is the only possible value.'
-                enum:
-                - restore
-                type: string
-            type: object
-          type: array
   securitySchemes:
     BasicAuth:
       scheme: basic

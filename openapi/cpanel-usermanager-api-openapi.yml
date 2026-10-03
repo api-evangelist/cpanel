@@ -4200,14 +4200,6 @@ paths:
       x-cpanel-available-version: cPanel 56
 components:
   schemas:
-    SubaccountMergeCandidatesEmpty:
-      properties:
-        merge_candidates:
-          description: An array of objects that represents the service accounts that the system could merge for this subaccount.
-          items:
-            type: object
-          type: array
-      type: object
     SubaccountMergeCandidates:
       properties:
         merge_candidates:
@@ -4216,6 +4208,386 @@ components:
             allOf:
             - $ref: '#/components/schemas/EditUserSubaccountBase'
             - $ref: '#/components/schemas/SubaccountMergeCandidatesEmpty'
+          type: array
+      type: object
+    SubaccountMergeCandidatesEmpty:
+      properties:
+        merge_candidates:
+          description: An array of objects that represents the service accounts that the system could merge for this subaccount.
+          items:
+            type: object
+          type: array
+      type: object
+    CreateUserResponse:
+      allOf:
+      - $ref: '#/components/schemas/SubaccountBase'
+      - properties:
+          dismissed_merge_candidates:
+            description: An array of objects containing service candidates that the system dismissed from merges.
+            items:
+              $ref: '#/components/schemas/SubaccountBase'
+            type: array
+          has_expired_invite:
+            description: 'Whether an expired account login invitation exists.
+
+              * `1` - Expired account invitation exists.
+
+              * `0` - Expired account invitation does **not** exist.'
+            enum:
+            - 0
+            - 1
+            example: 0
+            type: integer
+          has_invite:
+            description: 'Whether an account login invitation exists.
+
+              * `1` - Account invitation exists.
+
+              * `0` - Account invitation does **not** exist.'
+            enum:
+            - 0
+            - 1
+            example: 0
+            type: integer
+          invite_expiration:
+            description: When the invitation expires. A date in Unix time format.
+            example: 1591718154
+            format: unix_timestamp
+            type: integer
+          merge_candidates:
+            description: 'An array of objects that represents the service accounts that the system could merge for
+
+              this subaccount.'
+            items:
+              $ref: '#/components/schemas/SubaccountBase'
+            type: array
+        type: object
+    ServiceAccount:
+      properties:
+        alternate_email:
+          description: An alternate email address for the subaccount's user.
+          example: user@example.com
+          format: email
+          type:
+          - string
+          - 'null'
+        avatar_url:
+          description: The user's subaccount profile photo.
+          example: https://img.example.com/avatars/example.jpg
+          format: url
+          type:
+          - string
+          - 'null'
+        can_delete:
+          description: 'Whether the cPanel account user can delete the subaccount.
+
+            * `1` - Can delete.
+
+            * `0` - Cannot delete.'
+          enum:
+          - 0
+          - 1
+          example: 0
+          type: integer
+        can_set_password:
+          description: "Whether the cPanel account user can change the subaccount's password.\n* `1` - Can change.\n* `0` - Cannot change.\n\n**Note:**\n\n  The function returns a `0` value for subaccounts that inherit their password from the cPanel account."
+          enum:
+          - 0
+          - 1
+          example: 1
+          type: integer
+        can_set_quota:
+          description: 'Whether the cPanel account user can change the subaccount''s disk usage quota.
+
+            * `1` - Can change.
+
+            * `0` - Cannot change.'
+          enum:
+          - 0
+          - 1
+          example: 0
+          type: integer
+        dismissed:
+          description: "Whether the cPanel account user dismissed the merge prompt for the service account.\n* `1` - Dismissed.\n* `0` - Did not dismiss.\n\n**Note:**\n\n  Only service accounts return this value."
+          enum:
+          - 0
+          - 1
+          example: 1
+          type: integer
+        domain:
+          description: The subaccount user's associated domain.
+          example: example.com
+          format: domain
+          type:
+          - string
+          - 'null'
+        full_username:
+          description: The subaccount's username and domain name. A valid username, the `@` character, and the associated domain.
+          example: user@example.com
+          type: string
+        guid:
+          description: The subaccount unique identifier.
+          example: N4641:EXAMPLE.COM:564CC8A7:A82EA007D8348AC631C0170F9418EC1DEB0D164CC5A722A87C55EF5DD2AD98D4
+          type: string
+        has_siblings:
+          description: 'Whether the service account shares a `full_username` value with another service account.
+
+            * `1` - Shares.
+
+            * `0` - Does not share.'
+          enum:
+          - 0
+          - 1
+          example: 0
+          type: integer
+        issues:
+          description: Information about any issues or problems with the subaccount.
+          items:
+            properties:
+              area:
+                description: The affected section of cPanel & WHM.
+                example: quota
+                type: string
+              limit:
+                description: The set quota megabyte (MB) limit for the affected subaccount.
+                example: 1500
+                minimum: 0
+                type: integer
+              message:
+                description: The description of the issue.
+                example: Your account is over quota.
+                type: string
+              service:
+                description: The affected service.
+                enum:
+                - email
+                - ftp
+                - webdisk
+                example: email
+                type: string
+              type:
+                description: The type of issue.
+                enum:
+                - error
+                - info
+                - warning
+                example: info
+                type: string
+              used:
+                description: The number of megabytes (MB) that the account currently uses.
+                example: 2000
+                minimum: 0
+                type: integer
+            type: object
+          type: array
+        merge_candidates:
+          description: An array of service account objects that the system could merge for this subaccount.
+          items:
+            $ref: '#/components/schemas/ServiceAccount'
+          type: array
+        parent_type:
+          description: 'The type of account that could own the service account.
+
+            * `sub` - A subaccount.
+
+            * `hypothetical` - A hypothetical subaccount that does not yet exist, but the user could create as part of a merge.
+
+            * `null` - Not a merge candidate.'
+          enum:
+          - sub
+          - hypothetical
+          example: hypothetical
+          type:
+          - string
+          - 'null'
+        phone_number:
+          description: The subaccount user's phone number. A valid phone number that conforms to [ITU-T's E.164-recommended standard](https://en.wikipedia.org/wiki/ITU-T) for the representation of telephone numbers.
+          example: '+15551234567'
+          type:
+          - string
+          - 'null'
+        real_name:
+          description: 'The name of the subaccount''s user.
+
+            * A first name, a last name, or a first name and last name.
+
+            * An empty or null string.'
+          example: John Doe
+          type:
+          - string
+          - 'null'
+        services:
+          description: Information about the subaccount's access to email, FTP, and Web Disk.
+          properties:
+            email:
+              description: Information that indicates the subaccount's email status.
+              properties:
+                enabled:
+                  description: 'Whether the subaccount can access Webmail, POP, and IMAP services.
+
+                    * `1` - Can access.
+
+                    * `0` - Cannot access.'
+                  enum:
+                  - 0
+                  - 1
+                  example: 1
+                  type: integer
+                quota:
+                  description: The maximum amount of disk space allocated to subaccount's email account, in megabytes (MB).
+                  example: 100
+                  minimum: 0
+                  type: integer
+              type: object
+            ftp:
+              description: This object contains the information that indicates the subaccount's FTP status.
+              properties:
+                enabled:
+                  description: 'Whether the subaccount can access FTP.
+
+                    * `1` - Can access.
+
+                    * `0` - Cannot access.'
+                  enum:
+                  - 0
+                  - 1
+                  example: 0
+                  type: integer
+                homedir:
+                  description: The subaccount's FTP home directory, relative to the cPanel account's home directory.
+                  example: /subaccount
+                  format: path
+                  type: string
+                quota:
+                  description: 'The subaccount''s FTP disk space quota.
+
+                    * `1` to `999999` - The maximum disk space that the subaccount may use, in megabytes (MB).
+
+                    * `0` - Unlimited.'
+                  example: 100
+                  maximum: 999999
+                  minimum: 0
+                  type: integer
+              type: object
+            special:
+              description: 'Whether the account is a system-created special account that the user cannot remove.
+
+                * `1` - A special account.
+
+                * `0` - Not a special account.'
+              enum:
+              - 0
+              - 1
+              example: 1
+              type: integer
+            webdisk:
+              description: This object contains information that indicates the subaccount's Web Disk status.
+              properties:
+                enabled:
+                  description: 'Whether the subaccount can access Web Disk.
+
+                    * `1` - Can access.
+
+                    * `0` - Cannot access.'
+                  enum:
+                  - 0
+                  - 1
+                  example: 0
+                  type: integer
+                enabledigest:
+                  description: 'Whether the subaccount''s Web Disk service has enabled Digest Authentication.
+
+                    * `1` - Digest Authentication is enabled.
+
+                    * `0` - Digest Authentication is not enabled.'
+                  enum:
+                  - 0
+                  - 1
+                  example: 0
+                  type: integer
+                homedir:
+                  description: The subaccount's Web Disk home directory, relative to the cPanel account's home directory.
+                  example: /bob
+                  format: path
+                  type: string
+                perms:
+                  description: 'Whether to grant write permissions to the subaccount.
+
+                    * `ro` - Read-only permissions.
+
+                    * `rw` - Read and write permissions.'
+                  enum:
+                  - ro
+                  - rw
+                  example: rw
+                  type: string
+                private:
+                  description: 'Whether to set the Web Disk directory''s permissions to public or private.
+
+                    * `1` - Private (0700).
+
+                    * `0` - Public (0755).'
+                  enum:
+                  - 0
+                  - 1
+                  example: 0
+                  type: integer
+              type: object
+          type: object
+        special:
+          description: 'Whether the account is a system-created special account that the user **cannot** remove.
+
+            * `1` - A special account.
+
+            * `0` - Not a special account.'
+          enum:
+          - 0
+          - 1
+          example: 0
+          type: integer
+        sub_account_exists:
+          description: "Whether a subaccount exists with the same username.\n* `1` - Exists.\n* `0` - Does not exist.\n\n**Note:**\n\n  The function returns a null value if the account is not a service account."
+          enum:
+          - 0
+          - 1
+          example: 0
+          type: integer
+        synced_password:
+          description: "Whether the user has synchronized the passwords for each of the subaccount's service accounts.\n* `1` - Synchronized.\n* `0` - Not synchronized.\n\n**Note:**\n\n  The function returns a null value if the account is not a subaccount."
+          enum:
+          - 0
+          - 1
+          example: 0
+          type: integer
+        type:
+          description: 'The type of account.
+
+            * `cpanel` - The cPanel account.
+
+            * `hypothetical` - A hypothetical subaccount that does not exist, but that the user could create as part of a merge.
+
+            * `service` - A service account.
+
+            * `sub` - A subaccount.'
+          enum:
+          - cpanel
+          - hypothetical
+          - service
+          - sub
+          example: sub
+          type: string
+        username:
+          description: The username for the subaccount.
+          example: example
+          format: username
+          type: string
+      type: object
+    LookupServiceAccountSubaccountMergeCandidatesEmpty:
+      properties:
+        merge_candidates:
+          description: An array of objects that represents the service accounts that the system could merge for this subaccount.
+          items:
+            type: object
           type: array
       type: object
     SubaccountBase:
@@ -4541,341 +4913,6 @@ components:
           type: string
         username:
           description: The subaccount's username.
-          example: example
-          type: string
-      type: object
-    LookupServiceAccountSubaccountMergeCandidatesEmpty:
-      properties:
-        merge_candidates:
-          description: An array of objects that represents the service accounts that the system could merge for this subaccount.
-          items:
-            type: object
-          type: array
-      type: object
-    EditUserSubaccountBase:
-      properties:
-        alternate_email:
-          description: An alternate email address for the subaccount's user.
-          example: user@example.com
-          format: email
-          type: string
-        avatar_url:
-          description: The user's subaccount profile photo.
-          example: https://img.example.com/avatars/example.jpg
-          format: url
-          type: string
-        can_delete:
-          description: 'Whether the cPanel account user can delete the subaccount.
-
-
-            * `1` - Can delete.
-
-            * `0` - **Cannot** delete.'
-          enum:
-          - 0
-          - 1
-          example: 0
-          type: integer
-        can_set_password:
-          description: "Whether the cPanel account user can change the subaccount's password.\n\n* `1` - Can change.\n* `0` - **Cannot** change.\n\n**Note:**\n\n  The function returns a `0` value for subaccounts that inherit their password from the cPanel account."
-          enum:
-          - 0
-          - 1
-          example: 1
-          type: integer
-        can_set_quota:
-          description: 'Whether the cPanel account user can change the subaccount''s disk usage quota.
-
-
-            * `1` - Can change.
-
-            * `0` - **Cannot** change.'
-          enum:
-          - 0
-          - 1
-          example: 0
-          type: integer
-        dismissed:
-          description: "Whether the cPanel account user dismissed the merge prompt for the service account.\n\n**Note:**\n\n  **Only** service accounts return this value.\n\n* `1` - Dismissed.\n* `0` - Did **not** dismiss."
-          enum:
-          - 0
-          - 1
-          example: 1
-          type: integer
-        domain:
-          description: 'The Subaccount user''s associated domain.
-
-
-            A domain that the cPanel account owns.'
-          example: example.com
-          format: domain
-          type: string
-        full_username:
-          description: The subaccount's username and domain name.
-          example: user@example.com
-          type: string
-        guid:
-          description: The subaccount unique identifier.
-          example: N4641:EXAMPLE.COM:564CC8A7:A82EA007D8348AC631C0170F9418EC1DEB0D164CC5A722A87C55EF5DD2AD98D4
-          type: string
-        has_expired_invite:
-          description: 'Whether an expired account login invitation exists.
-
-
-            * `1` - Expired account invitation exists.
-
-            * `0` - Expired account invitation does **not** exist.'
-          enum:
-          - 0
-          - 1
-          example: 0
-          type: integer
-        has_invite:
-          description: 'Whether an account login invitation exists.
-
-
-            * `1` - Account invitation exists.
-
-            * `0` - Account invitation does **not** exist.'
-          enum:
-          - 0
-          - 1
-          example: 0
-          type: integer
-        has_siblings:
-          description: 'Whether the service account shares a `full_username` value with another service account.
-
-
-            * `1` - Shares.
-
-            * `0` - Does **not** share.'
-          enum:
-          - 0
-          - 1
-          example: 0
-          type: integer
-        invite_expiration:
-          description: When the invitation expires.
-          example: 1591718154
-          format: unix_timestamp
-          type: integer
-        issues:
-          description: Information about any issues or problems with the subaccount.
-          items:
-            properties:
-              area:
-                description: The affected section of cPanel & WHM.
-                example: quota
-                type: string
-              limit:
-                description: The set quota megabyte (MB) limit for the affected subaccount.
-                example: 1500
-                type: integer
-              message:
-                description: The description of the issue.
-                example: Your account is over quota.
-                type: string
-              service:
-                description: 'The affected service.
-
-                  * `email`
-
-                  * `ftp`
-
-                  * `webdisk`'
-                enum:
-                - email
-                - ftp
-                - webdisk
-                example: email
-                type: string
-              type:
-                description: 'The type of issue.
-
-                  * `error`
-
-                  * `warning`
-
-                  * `info`'
-                enum:
-                - error
-                - warning
-                - info
-                example: info
-                type: string
-              used:
-                description: The number of megabytes (MB) that the account currently uses.
-                example: 2000
-                type: integer
-            type: object
-          type: array
-        parent_type:
-          description: 'The type of account that could own the service account.
-
-
-            * `sub` - A subaccount.
-
-            * `hypothetical` - A hypothetical subaccount that does **not** yet exist, but the user could create as part of a merge.
-
-            * `null`- **Not** a merge candidate.'
-          example: hypothetical
-          type: string
-        phone_number:
-          description: 'The subaccount user''s phone number.
-
-
-            The number conforms to the [ITU-T](https://en.wikipedia.org/wiki/ITU-T)''s [E.164](https://en.wikipedia.org/wiki/E.164)-recommended standard for the representation of telephone numbers.'
-          example: '+15551234567'
-          type: string
-        real_name:
-          description: 'The name of the subaccount''s user.
-
-
-            * A first name, a last name, or a first name and last name.
-
-            * An empty string.'
-          example: John Doe
-          type: string
-        services:
-          description: This object contains information about the subaccount's access to email, FTP, and Web Disk.
-          properties:
-            email:
-              description: This object contains the information that indicates the subaccount's email status.
-              properties:
-                enabled:
-                  description: 'Whether the subaccount can access Webmail, POP, and IMAP services.
-
-
-                    * `1` - Can access.
-
-                    * `0` - **Cannot** access.'
-                  enum:
-                  - 0
-                  - 1
-                  example: 1
-                  type: integer
-                quota:
-                  description: "The maximum amount of disk space, in megabytes (MB), allocated to the subaccount's email account.\n\n**Note:**\n\n  This function will not return `0` as a value."
-                  example: 100
-                  type: integer
-              type: object
-            ftp:
-              description: This object contains the information that indicates the subaccount's FTP status.
-              properties:
-                enabled:
-                  description: 'Whether the subaccount can access FTP.
-
-
-                    * `1` - Can access.
-
-                    * `0` - **Cannot** access.'
-                  enum:
-                  - 0
-                  - 1
-                  example: 0
-                  type: integer
-                homedir:
-                  description: The subaccount's FTP home directory.
-                  example: /subaccount
-                  format: path
-                  type: string
-                quota:
-                  description: 'The maximum amount disk space, in megabytes (MB), that the subaccount may use.
-
-
-                    * A positive integer between `1` and `999999`
-
-                    * `0` - Unlimited.'
-                  example: 100
-                  type: integer
-              type: object
-            webdisk:
-              description: This object contains information that indicates the subaccount's Web Disk status.
-              properties:
-                enabled:
-                  description: 'Whether the subaccount can access Web Disk.
-
-
-                    * `1` - Can access.
-
-                    * `0` - **Cannot** access.'
-                  enum:
-                  - 0
-                  - 1
-                  example: 0
-                  type: integer
-                homedir:
-                  description: The subaccount's Web Disk home directory.
-                  example: /bob
-                  format: path
-                  type: string
-                perms:
-                  description: 'Whether to grant write permissions to the subaccount.
-
-
-                    * `ro` - Read-only permissions.
-
-                    * `rw` - Read and write permissions.'
-                  enum:
-                  - ro
-                  - rw
-                  example: rw
-                  type: string
-                private:
-                  description: 'Whether to set the Web Disk directory''s permissions to public or private.
-
-
-                    * `1` - Private (`0700`).
-
-                    * `0` - Public (`0755`).'
-                  enum:
-                  - 0
-                  - 1
-                  example: 0
-                  type: integer
-              type: object
-          type: object
-        special:
-          description: 'Whether the account is a system-created special account that the user **cannot** remove.
-
-
-            * `1` - A special account.
-
-            * `0` - **Not** a special account.'
-          enum:
-          - 0
-          - 1
-          example: 1
-          type: integer
-        sub_account_exists:
-          description: "Whether a subaccount exists with the same username.\n\n* `1` - Exists.\n* `0` - Does **not** exist.\n\n**Note:**\n\n  The function returns a `null` value if the account is **not** a service account."
-          enum:
-          - 0
-          - 1
-          example: 0
-          type: integer
-        synced_password:
-          description: "Whether the user has synchronized the passwords for each of the subaccount's service accounts.\n\n* `1` - Synchronized.\n* `0` - **Not** synchronized.\n\n**Note:**\n\n  The function returns a `null` value if the account is **not** a subaccount."
-          enum:
-          - 0
-          - 1
-          example: 0
-          type: integer
-        type:
-          description: 'The type of account.
-
-
-            * `sub` - A subaccount.
-
-            * `hypothetical` - A hypothetical subaccount that does **not** exist, but that the user could create as part of a merge.
-
-            * `service` - A service account.
-
-            * `cpanel` - The cPanel account.'
-          example: sub
-          type: string
-        username:
-          description: "The username for the subaccount.\n\n* Length - 64 characters.\n* Characters - `a-z`, `A-Z`, `0-9`, dot (`.`), hyphen (`-`), underscore (`_`).\n\n**Note:**\n\n  This value does **not** include the domain name."
           example: example
           type: string
       type: object
@@ -5216,35 +5253,32 @@ components:
             - $ref: '#/components/schemas/LookupServiceAccountSubaccountMergeCandidatesEmpty'
           type: array
       type: object
-    ServiceAccount:
+    EditUserSubaccountBase:
       properties:
         alternate_email:
           description: An alternate email address for the subaccount's user.
           example: user@example.com
           format: email
-          type:
-          - string
-          - 'null'
+          type: string
         avatar_url:
           description: The user's subaccount profile photo.
           example: https://img.example.com/avatars/example.jpg
           format: url
-          type:
-          - string
-          - 'null'
+          type: string
         can_delete:
           description: 'Whether the cPanel account user can delete the subaccount.
 
+
             * `1` - Can delete.
 
-            * `0` - Cannot delete.'
+            * `0` - **Cannot** delete.'
           enum:
           - 0
           - 1
           example: 0
           type: integer
         can_set_password:
-          description: "Whether the cPanel account user can change the subaccount's password.\n* `1` - Can change.\n* `0` - Cannot change.\n\n**Note:**\n\n  The function returns a `0` value for subaccounts that inherit their password from the cPanel account."
+          description: "Whether the cPanel account user can change the subaccount's password.\n\n* `1` - Can change.\n* `0` - **Cannot** change.\n\n**Note:**\n\n  The function returns a `0` value for subaccounts that inherit their password from the cPanel account."
           enum:
           - 0
           - 1
@@ -5253,46 +5287,78 @@ components:
         can_set_quota:
           description: 'Whether the cPanel account user can change the subaccount''s disk usage quota.
 
+
             * `1` - Can change.
 
-            * `0` - Cannot change.'
+            * `0` - **Cannot** change.'
           enum:
           - 0
           - 1
           example: 0
           type: integer
         dismissed:
-          description: "Whether the cPanel account user dismissed the merge prompt for the service account.\n* `1` - Dismissed.\n* `0` - Did not dismiss.\n\n**Note:**\n\n  Only service accounts return this value."
+          description: "Whether the cPanel account user dismissed the merge prompt for the service account.\n\n**Note:**\n\n  **Only** service accounts return this value.\n\n* `1` - Dismissed.\n* `0` - Did **not** dismiss."
           enum:
           - 0
           - 1
           example: 1
           type: integer
         domain:
-          description: The subaccount user's associated domain.
+          description: 'The Subaccount user''s associated domain.
+
+
+            A domain that the cPanel account owns.'
           example: example.com
           format: domain
-          type:
-          - string
-          - 'null'
+          type: string
         full_username:
-          description: The subaccount's username and domain name. A valid username, the `@` character, and the associated domain.
+          description: The subaccount's username and domain name.
           example: user@example.com
           type: string
         guid:
           description: The subaccount unique identifier.
           example: N4641:EXAMPLE.COM:564CC8A7:A82EA007D8348AC631C0170F9418EC1DEB0D164CC5A722A87C55EF5DD2AD98D4
           type: string
-        has_siblings:
-          description: 'Whether the service account shares a `full_username` value with another service account.
+        has_expired_invite:
+          description: 'Whether an expired account login invitation exists.
 
-            * `1` - Shares.
 
-            * `0` - Does not share.'
+            * `1` - Expired account invitation exists.
+
+            * `0` - Expired account invitation does **not** exist.'
           enum:
           - 0
           - 1
           example: 0
+          type: integer
+        has_invite:
+          description: 'Whether an account login invitation exists.
+
+
+            * `1` - Account invitation exists.
+
+            * `0` - Account invitation does **not** exist.'
+          enum:
+          - 0
+          - 1
+          example: 0
+          type: integer
+        has_siblings:
+          description: 'Whether the service account shares a `full_username` value with another service account.
+
+
+            * `1` - Shares.
+
+            * `0` - Does **not** share.'
+          enum:
+          - 0
+          - 1
+          example: 0
+          type: integer
+        invite_expiration:
+          description: When the invitation expires.
+          example: 1591718154
+          format: unix_timestamp
           type: integer
         issues:
           description: Information about any issues or problems with the subaccount.
@@ -5305,14 +5371,19 @@ components:
               limit:
                 description: The set quota megabyte (MB) limit for the affected subaccount.
                 example: 1500
-                minimum: 0
                 type: integer
               message:
                 description: The description of the issue.
                 example: Your account is over quota.
                 type: string
               service:
-                description: The affected service.
+                description: 'The affected service.
+
+                  * `email`
+
+                  * `ftp`
+
+                  * `webdisk`'
                 enum:
                 - email
                 - ftp
@@ -5320,77 +5391,73 @@ components:
                 example: email
                 type: string
               type:
-                description: The type of issue.
+                description: 'The type of issue.
+
+                  * `error`
+
+                  * `warning`
+
+                  * `info`'
                 enum:
                 - error
-                - info
                 - warning
+                - info
                 example: info
                 type: string
               used:
                 description: The number of megabytes (MB) that the account currently uses.
                 example: 2000
-                minimum: 0
                 type: integer
             type: object
-          type: array
-        merge_candidates:
-          description: An array of service account objects that the system could merge for this subaccount.
-          items:
-            $ref: '#/components/schemas/ServiceAccount'
           type: array
         parent_type:
           description: 'The type of account that could own the service account.
 
+
             * `sub` - A subaccount.
 
-            * `hypothetical` - A hypothetical subaccount that does not yet exist, but the user could create as part of a merge.
+            * `hypothetical` - A hypothetical subaccount that does **not** yet exist, but the user could create as part of a merge.
 
-            * `null` - Not a merge candidate.'
-          enum:
-          - sub
-          - hypothetical
+            * `null`- **Not** a merge candidate.'
           example: hypothetical
-          type:
-          - string
-          - 'null'
+          type: string
         phone_number:
-          description: The subaccount user's phone number. A valid phone number that conforms to [ITU-T's E.164-recommended standard](https://en.wikipedia.org/wiki/ITU-T) for the representation of telephone numbers.
+          description: 'The subaccount user''s phone number.
+
+
+            The number conforms to the [ITU-T](https://en.wikipedia.org/wiki/ITU-T)''s [E.164](https://en.wikipedia.org/wiki/E.164)-recommended standard for the representation of telephone numbers.'
           example: '+15551234567'
-          type:
-          - string
-          - 'null'
+          type: string
         real_name:
           description: 'The name of the subaccount''s user.
 
+
             * A first name, a last name, or a first name and last name.
 
-            * An empty or null string.'
+            * An empty string.'
           example: John Doe
-          type:
-          - string
-          - 'null'
+          type: string
         services:
-          description: Information about the subaccount's access to email, FTP, and Web Disk.
+          description: This object contains information about the subaccount's access to email, FTP, and Web Disk.
           properties:
             email:
-              description: Information that indicates the subaccount's email status.
+              description: This object contains the information that indicates the subaccount's email status.
               properties:
                 enabled:
                   description: 'Whether the subaccount can access Webmail, POP, and IMAP services.
 
+
                     * `1` - Can access.
 
-                    * `0` - Cannot access.'
+                    * `0` - **Cannot** access.'
                   enum:
                   - 0
                   - 1
                   example: 1
                   type: integer
                 quota:
-                  description: The maximum amount of disk space allocated to subaccount's email account, in megabytes (MB).
+                  description: "The maximum amount of disk space, in megabytes (MB), allocated to the subaccount's email account.\n\n**Note:**\n\n  This function will not return `0` as a value."
                   example: 100
-                  minimum: 0
                   type: integer
               type: object
             ftp:
@@ -5399,73 +5466,53 @@ components:
                 enabled:
                   description: 'Whether the subaccount can access FTP.
 
+
                     * `1` - Can access.
 
-                    * `0` - Cannot access.'
+                    * `0` - **Cannot** access.'
                   enum:
                   - 0
                   - 1
                   example: 0
                   type: integer
                 homedir:
-                  description: The subaccount's FTP home directory, relative to the cPanel account's home directory.
+                  description: The subaccount's FTP home directory.
                   example: /subaccount
                   format: path
                   type: string
                 quota:
-                  description: 'The subaccount''s FTP disk space quota.
+                  description: 'The maximum amount disk space, in megabytes (MB), that the subaccount may use.
 
-                    * `1` to `999999` - The maximum disk space that the subaccount may use, in megabytes (MB).
+
+                    * A positive integer between `1` and `999999`
 
                     * `0` - Unlimited.'
                   example: 100
-                  maximum: 999999
-                  minimum: 0
                   type: integer
               type: object
-            special:
-              description: 'Whether the account is a system-created special account that the user cannot remove.
-
-                * `1` - A special account.
-
-                * `0` - Not a special account.'
-              enum:
-              - 0
-              - 1
-              example: 1
-              type: integer
             webdisk:
               description: This object contains information that indicates the subaccount's Web Disk status.
               properties:
                 enabled:
                   description: 'Whether the subaccount can access Web Disk.
 
+
                     * `1` - Can access.
 
-                    * `0` - Cannot access.'
-                  enum:
-                  - 0
-                  - 1
-                  example: 0
-                  type: integer
-                enabledigest:
-                  description: 'Whether the subaccount''s Web Disk service has enabled Digest Authentication.
-
-                    * `1` - Digest Authentication is enabled.
-
-                    * `0` - Digest Authentication is not enabled.'
+                    * `0` - **Cannot** access.'
                   enum:
                   - 0
                   - 1
                   example: 0
                   type: integer
                 homedir:
-                  description: The subaccount's Web Disk home directory, relative to the cPanel account's home directory.
+                  description: The subaccount's Web Disk home directory.
                   example: /bob
                   format: path
                   type: string
                 perms:
                   description: 'Whether to grant write permissions to the subaccount.
+
 
                     * `ro` - Read-only permissions.
 
@@ -5478,9 +5525,10 @@ components:
                 private:
                   description: 'Whether to set the Web Disk directory''s permissions to public or private.
 
-                    * `1` - Private (0700).
 
-                    * `0` - Public (0755).'
+                    * `1` - Private (`0700`).
+
+                    * `0` - Public (`0755`).'
                   enum:
                   - 0
                   - 1
@@ -5491,23 +5539,24 @@ components:
         special:
           description: 'Whether the account is a system-created special account that the user **cannot** remove.
 
+
             * `1` - A special account.
 
-            * `0` - Not a special account.'
+            * `0` - **Not** a special account.'
           enum:
           - 0
           - 1
-          example: 0
+          example: 1
           type: integer
         sub_account_exists:
-          description: "Whether a subaccount exists with the same username.\n* `1` - Exists.\n* `0` - Does not exist.\n\n**Note:**\n\n  The function returns a null value if the account is not a service account."
+          description: "Whether a subaccount exists with the same username.\n\n* `1` - Exists.\n* `0` - Does **not** exist.\n\n**Note:**\n\n  The function returns a `null` value if the account is **not** a service account."
           enum:
           - 0
           - 1
           example: 0
           type: integer
         synced_password:
-          description: "Whether the user has synchronized the passwords for each of the subaccount's service accounts.\n* `1` - Synchronized.\n* `0` - Not synchronized.\n\n**Note:**\n\n  The function returns a null value if the account is not a subaccount."
+          description: "Whether the user has synchronized the passwords for each of the subaccount's service accounts.\n\n* `1` - Synchronized.\n* `0` - **Not** synchronized.\n\n**Note:**\n\n  The function returns a `null` value if the account is **not** a subaccount."
           enum:
           - 0
           - 1
@@ -5516,70 +5565,21 @@ components:
         type:
           description: 'The type of account.
 
-            * `cpanel` - The cPanel account.
 
-            * `hypothetical` - A hypothetical subaccount that does not exist, but that the user could create as part of a merge.
+            * `sub` - A subaccount.
+
+            * `hypothetical` - A hypothetical subaccount that does **not** exist, but that the user could create as part of a merge.
 
             * `service` - A service account.
 
-            * `sub` - A subaccount.'
-          enum:
-          - cpanel
-          - hypothetical
-          - service
-          - sub
+            * `cpanel` - The cPanel account.'
           example: sub
           type: string
         username:
-          description: The username for the subaccount.
+          description: "The username for the subaccount.\n\n* Length - 64 characters.\n* Characters - `a-z`, `A-Z`, `0-9`, dot (`.`), hyphen (`-`), underscore (`_`).\n\n**Note:**\n\n  This value does **not** include the domain name."
           example: example
-          format: username
           type: string
       type: object
-    CreateUserResponse:
-      allOf:
-      - $ref: '#/components/schemas/SubaccountBase'
-      - properties:
-          dismissed_merge_candidates:
-            description: An array of objects containing service candidates that the system dismissed from merges.
-            items:
-              $ref: '#/components/schemas/SubaccountBase'
-            type: array
-          has_expired_invite:
-            description: 'Whether an expired account login invitation exists.
-
-              * `1` - Expired account invitation exists.
-
-              * `0` - Expired account invitation does **not** exist.'
-            enum:
-            - 0
-            - 1
-            example: 0
-            type: integer
-          has_invite:
-            description: 'Whether an account login invitation exists.
-
-              * `1` - Account invitation exists.
-
-              * `0` - Account invitation does **not** exist.'
-            enum:
-            - 0
-            - 1
-            example: 0
-            type: integer
-          invite_expiration:
-            description: When the invitation expires. A date in Unix time format.
-            example: 1591718154
-            format: unix_timestamp
-            type: integer
-          merge_candidates:
-            description: 'An array of objects that represents the service accounts that the system could merge for
-
-              this subaccount.'
-            items:
-              $ref: '#/components/schemas/SubaccountBase'
-            type: array
-        type: object
   securitySchemes:
     BasicAuth:
       scheme: basic
