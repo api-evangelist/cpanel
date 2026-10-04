@@ -4826,78 +4826,19 @@ paths:
       x-cpanel-available-version: '58'
 components:
   schemas:
-    Int0Max999999NullOrUnlimited:
+    IntPosOrUnlimited:
       example: unlimited
       oneOf:
       - enum:
-        - null
-      - enum:
         - unlimited
         type: string
-      - maximum: 999999
-        minimum: 1
-        type: integer
-    diskSchema:
-      allOf:
-      - $ref: '#/components/schemas/nearReachedBaseSchema'
-      - properties:
-          fraction:
-            type:
-            - number
-            - 'null'
-          near:
-            enum:
-            - 0
-            - 1
-            type:
-            - integer
-            - 'null'
-          reached:
-            enum:
-            - 0
-            - 1
-            type:
-            - integer
-            - 'null'
-          threshold_blocks:
-            description: The block threshold used for the resource limit check.
-            example: 10485760
-            type:
-            - integer
-            - 'null'
-    Int0-999999NullOrUnlimited:
-      example: unlimited
-      oneOf:
-      - enum:
-        - null
-      - enum:
-        - unlimited
-        type: string
-      - maximum: 999999
-        minimum: 0
+      - minimum: 0
         type: integer
     IntPosNullOrUnlimited:
       example: unlimited
       oneOf:
       - enum:
         - null
-      - enum:
-        - unlimited
-        type: string
-      - minimum: 0
-        type: integer
-    Int999999OrUnlimited:
-      example: unlimited
-      oneOf:
-      - enum:
-        - unlimited
-        type: string
-      - maximum: 999999
-        minimum: 0
-        type: integer
-    IntPosOrUnlimited:
-      example: unlimited
-      oneOf:
       - enum:
         - unlimited
         type: string
@@ -4934,6 +4875,65 @@ components:
           example: 1
           type: integer
       type: object
+    Int999999OrUnlimited:
+      example: unlimited
+      oneOf:
+      - enum:
+        - unlimited
+        type: string
+      - maximum: 999999
+        minimum: 0
+        type: integer
+    Int0-999999NullOrUnlimited:
+      example: unlimited
+      oneOf:
+      - enum:
+        - null
+      - enum:
+        - unlimited
+        type: string
+      - maximum: 999999
+        minimum: 0
+        type: integer
+    diskSchema:
+      allOf:
+      - $ref: '#/components/schemas/nearReachedBaseSchema'
+      - properties:
+          fraction:
+            type:
+            - number
+            - 'null'
+          near:
+            enum:
+            - 0
+            - 1
+            type:
+            - integer
+            - 'null'
+          reached:
+            enum:
+            - 0
+            - 1
+            type:
+            - integer
+            - 'null'
+          threshold_blocks:
+            description: The block threshold used for the resource limit check.
+            example: 10485760
+            type:
+            - integer
+            - 'null'
+    Int0Max999999NullOrUnlimited:
+      example: unlimited
+      oneOf:
+      - enum:
+        - null
+      - enum:
+        - unlimited
+        type: string
+      - maximum: 999999
+        minimum: 1
+        type: integer
   securitySchemes:
     BasicAuth:
       scheme: basic

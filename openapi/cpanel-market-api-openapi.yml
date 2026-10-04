@@ -5584,6 +5584,133 @@ paths:
           description: The WHM port.
 components:
   schemas:
+    SSLMarketProviderProductMetaData:
+      allOf:
+      - $ref: '#/components/schemas/MarketProviderProductMetaData'
+      - properties:
+          x_certificate_term:
+            description: An array that indicates the length of time and unit of time that the product secures for.
+            example:
+            - '1'
+            - year
+            items:
+              type: string
+            type: array
+          x_identity_verification:
+            additionalProperties:
+              description: Contains additional properties that vary between products.
+              x-additionalPropertiesName: certificate_properties
+            description: Defines a schema for identity verification information for OV and EV certificates.
+            properties:
+              label:
+                description: The display name of the property.
+                example: Dun & Bradstreet D-U-N-S (Data Universal Numbering System) Number
+                type: string
+              name:
+                description: The name of the property.
+                example: duns_number
+                type: string
+            type: object
+          x_max_http_redirects:
+            description: The maximum number of HTTP redirections that the provider allows during a Domain Control Validation (DCV) check of the domain or domains in the certificate.
+            minimum: 1
+            type: integer
+          x_payment_trigger:
+            description: 'Indicates whether the provider charges immediately or when they issue the Secure Sockets Layer (SSL) certificate.
+
+
+              * `checkout` — Collect payment and finalize immediately after checkout. Any failures to issue the certificate must prompt a separate refund.
+
+              * `issuance` — Collect payment when the provider issues the certificate to the user.
+
+
+              **Note:**
+
+
+              For more information, read the _For certificate orders_ section of our [Guide to cPanel Market Provider Modules](https://go.cpanel.net/featureshowcasemarket) documentation.'
+            enum:
+            - checkout
+            - issuance
+            type: string
+          x_price_per_domain:
+            description: The product's price per domain.
+            example: 3
+            minimum: 1
+            type: number
+          x_price_per_domain_maximum:
+            description: The maximum `x_price_per_domain` value.
+            example: 30
+            minimum: 1
+            type: number
+          x_price_per_domain_minimum:
+            description: The minimum `x_price_per_domain` value.
+            example: 3
+            minimum: 1
+            type: number
+          x_price_per_wildcard_domain:
+            description: The price per domain for a wildcard certificate.
+            example: 99
+            minimum: 1
+            type: number
+          x_price_per_wildcard_domain_maximum:
+            description: The maximum `x_prive_per_wildcard_domain` value.
+            example: 30
+            minimum: 1
+            type: number
+          x_price_per_wildcard_domain_minimum:
+            description: The minimum `x_prive_per_wildcard_domain` value.
+            example: 99
+            minimum: 1
+            type: number
+          x_ssl_per_domain_pricing:
+            description: 'Whether the provider uses per-domain pricing for this certificate.
+
+              * `1` — Uses per-domain pricing.
+
+              * `0` — Does **not** use per-domain pricing.'
+            enum:
+            - 0
+            - 1
+            type: integer
+          x_supports_dns_dcv:
+            description: 'Whether this product supports DNS-based DCV.
+
+              * `1` — Supports DNS DCV.
+
+              * `0` — Does `not` support DNS DCV.'
+            enum:
+            - 0
+            - 1
+            type: integer
+          x_validation_type:
+            description: The validation type.
+            example: ev
+            type: string
+          x_warn_after:
+            description: A length of time, in seconds, after which the cPanel interface warns the user that a problem may exist with the order. The warning suggests that they contact the cPanel Market provider's support contact.
+            example: 14400
+            minimum: 1
+            type: integer
+          x_wildcard_parent_domain_free:
+            description: 'Indicates if a wildcard domain includes its parent domain. For example, `*.example.com` would include the `example.com` parent domain.
+
+
+              * `1` — The domain does include its parent domain.
+
+              * `0` — The domain does **not** include its parent domain.'
+            enum:
+            - 0
+            - 1
+            type: integer
+      type: object
+    MarketProviderProductMetaDataType:
+      anyOf:
+      - $ref: '#/components/schemas/MarketProviderProductMetaData'
+      - $ref: '#/components/schemas/SSLMarketProviderProductMetaData'
+      discriminator:
+        mapping:
+          ssl_certificate: '#/components/schemas/SSLMarketProviderProductMetaData'
+        propertyName: product_group
     MarketProviderProductMetaData:
       properties:
         base_name:
@@ -5716,397 +5843,10 @@ components:
           example: 1
           type: integer
       type: object
-    SSLMarketProviderProductMetaData:
-      allOf:
-      - $ref: '#/components/schemas/MarketProviderProductMetaData'
-      - properties:
-          x_certificate_term:
-            description: An array that indicates the length of time and unit of time that the product secures for.
-            example:
-            - '1'
-            - year
-            items:
-              type: string
-            type: array
-          x_identity_verification:
-            additionalProperties:
-              description: Contains additional properties that vary between products.
-              x-additionalPropertiesName: certificate_properties
-            description: Defines a schema for identity verification information for OV and EV certificates.
-            properties:
-              label:
-                description: The display name of the property.
-                example: Dun & Bradstreet D-U-N-S (Data Universal Numbering System) Number
-                type: string
-              name:
-                description: The name of the property.
-                example: duns_number
-                type: string
-            type: object
-          x_max_http_redirects:
-            description: The maximum number of HTTP redirections that the provider allows during a Domain Control Validation (DCV) check of the domain or domains in the certificate.
-            minimum: 1
-            type: integer
-          x_payment_trigger:
-            description: 'Indicates whether the provider charges immediately or when they issue the Secure Sockets Layer (SSL) certificate.
-
-
-              * `checkout` — Collect payment and finalize immediately after checkout. Any failures to issue the certificate must prompt a separate refund.
-
-              * `issuance` — Collect payment when the provider issues the certificate to the user.
-
-
-              **Note:**
-
-
-              For more information, read the _For certificate orders_ section of our [Guide to cPanel Market Provider Modules](https://go.cpanel.net/featureshowcasemarket) documentation.'
-            enum:
-            - checkout
-            - issuance
-            type: string
-          x_price_per_domain:
-            description: The product's price per domain.
-            example: 3
-            minimum: 1
-            type: number
-          x_price_per_domain_maximum:
-            description: The maximum `x_price_per_domain` value.
-            example: 30
-            minimum: 1
-            type: number
-          x_price_per_domain_minimum:
-            description: The minimum `x_price_per_domain` value.
-            example: 3
-            minimum: 1
-            type: number
-          x_price_per_wildcard_domain:
-            description: The price per domain for a wildcard certificate.
-            example: 99
-            minimum: 1
-            type: number
-          x_price_per_wildcard_domain_maximum:
-            description: The maximum `x_prive_per_wildcard_domain` value.
-            example: 30
-            minimum: 1
-            type: number
-          x_price_per_wildcard_domain_minimum:
-            description: The minimum `x_prive_per_wildcard_domain` value.
-            example: 99
-            minimum: 1
-            type: number
-          x_ssl_per_domain_pricing:
-            description: 'Whether the provider uses per-domain pricing for this certificate.
-
-              * `1` — Uses per-domain pricing.
-
-              * `0` — Does **not** use per-domain pricing.'
-            enum:
-            - 0
-            - 1
-            type: integer
-          x_supports_dns_dcv:
-            description: 'Whether this product supports DNS-based DCV.
-
-              * `1` — Supports DNS DCV.
-
-              * `0` — Does `not` support DNS DCV.'
-            enum:
-            - 0
-            - 1
-            type: integer
-          x_validation_type:
-            description: The validation type.
-            example: ev
-            type: string
-          x_warn_after:
-            description: A length of time, in seconds, after which the cPanel interface warns the user that a problem may exist with the order. The warning suggests that they contact the cPanel Market provider's support contact.
-            example: 14400
-            minimum: 1
-            type: integer
-          x_wildcard_parent_domain_free:
-            description: 'Indicates if a wildcard domain includes its parent domain. For example, `*.example.com` would include the `example.com` parent domain.
-
-
-              * `1` — The domain does include its parent domain.
-
-              * `0` — The domain does **not** include its parent domain.'
-            enum:
-            - 0
-            - 1
-            type: integer
-      type: object
-    MarketProviderProductMetaDataType:
+    MarketItemType:
       anyOf:
-      - $ref: '#/components/schemas/MarketProviderProductMetaData'
-      - $ref: '#/components/schemas/SSLMarketProviderProductMetaData'
-      discriminator:
-        mapping:
-          ssl_certificate: '#/components/schemas/SSLMarketProviderProductMetaData'
-        propertyName: product_group
-    MarketItem:
-      description: A product available from one of the cPanel Market providers.
-      properties:
-        billing_type:
-          description: 'The type of billing used with the product.
-
-
-            * `none` - The product is free.
-
-            * `one-time` - Use of the product requires a one-time payment.
-
-            * `monthly` - Use of the product requires a monthly subscription payment.
-
-            * `yearly` - Use of the product requires a yearly subscription payment.'
-          enum:
-          - none
-          - one-time
-          - monthly
-          - yearly
-          type: string
-        description:
-          description: A description of the product.
-          example: An Extended Validation (EV) SSL certificate signed by cPanel.
-          type: string
-        display_name:
-          description: The product's display name.
-          example: EV Certificate by cPanel.
-          type: string
-        icon:
-          description: The icon to display in the product list.
-          format: base64 image
-          type: string
-        icon_mime_type:
-          description: The icon's image format.
-          example: image/svg+xml
-          format: MIME
-          type: string
-        max_users:
-          description: The maximum number of users the system will allow for the product.
-          type:
-          - integer
-          - 'null'
-        maximum_server_price:
-          description: The maximum price that the system will allow for the product.
-          example: '20'
-          format: currency
-          type:
-          - string
-          - 'null'
-        minimum_server_price:
-          description: The minimum price that the system will allow for the product.
-          example: '3'
-          format: currency
-          type:
-          - string
-          - 'null'
-        price:
-          description: 'The product''s price.
-
-            * `null` - The item does not possess a static price.'
-          example: '6'
-          format: currency
-          minimum: 1
-          type:
-          - string
-          - 'null'
-        price_unit:
-          description: The currency code of the product's price.
-          example: USD
-          format: ISO-4217
-          type: string
-        product:
-          description: The human-readable product name. Use this in displays to the user.
-          example: Comodo EV Certificate
-          type: string
-        product_category:
-          example: N/A
-          type: string
-        product_group:
-          description: The product's group.
-          example: ssl_certificate
-          type: string
-        product_id:
-          description: The product's ID.
-          example: '12345'
-          type: string
-        provider_display_name:
-          description: The cPanel Market provider's display name.
-          example: cPanel Store
-          type: string
-        provider_name:
-          description: The cPanel Market provider's name.
-          example: cPStore
-          type: string
-        requires_ip:
-          default: '0'
-          description: 'Whether product require an IP address.
-
-            * `1` - The product requires an IP address.
-
-            * `0` - The product does **NOT** require an IP address.'
-          enum:
-          - '1'
-          - '0'
-          example: '0'
-          type: string
-      type: object
-    MarketProviderMetaData:
-      properties:
-        display_name:
-          description: Metadata information about the product's display name.
-          properties:
-            read_only:
-              description: 'Whether the attribute is read-only.
-
-                * `1` — The attribute is read-only.
-
-                * `0` — System administrators can edit the attribute.'
-              enum:
-              - 0
-              - 1
-              example: 1
-          type: object
-        enabled:
-          description: Metadata information about whether the product is enabled in the Market.
-          properties:
-            read_only:
-              description: 'Whether the attribute is read-only.
-
-                * `1` — The attribute is read-only.
-
-                * `0` — System administrators can edit the attribute.'
-              enum:
-              - 0
-              - 1
-              example: 1
-          type: object
-        icon:
-          description: Metadata information about the product's icon file.
-          properties:
-            read_only:
-              description: 'Whether the attribute is read-only.
-
-                * `1` — The attribute is read-only.
-
-                * `0` — System administrators can edit the attribute.'
-              enum:
-              - 0
-              - 1
-              example: 1
-          type: object
-        icon_mime_type:
-          description: Metadata information about the icon's mime type.
-          properties:
-            read_only:
-              description: 'Whether the attribute is read-only.
-
-                * `1` — The attribute is read-only.
-
-                * `0` — System administrators can edit the attribute.'
-              enum:
-              - 0
-              - 1
-              example: 1
-          type: object
-        minimum_server_price:
-          description: Metadata information about the minimum server price for the certificate.
-          properties:
-            read_only:
-              description: 'Whether the attribute is read-only.
-
-                * `1` — The attribute is read-only.
-
-                * `0` — System administrators can edit the attribute.'
-              enum:
-              - 0
-              - 1
-              example: 1
-          type: object
-        price:
-          description: Metadata information about the product's price.
-          properties:
-            read_only:
-              description: 'Whether the attribute is read-only.
-
-                * `1` — The attribute is read-only.
-
-                * `0` — System administrators can edit the attribute.'
-              enum:
-              - 0
-              - 1
-              example: 1
-          type: object
-        price_unit:
-          description: Metadata information about the product's price per unit.
-          properties:
-            read_only:
-              description: 'Whether the attribute is read-only.
-
-                * `1` — The attribute is read-only.
-
-                * `0` — System administrators can edit the attribute.'
-              enum:
-              - 0
-              - 1
-              example: 1
-          type: object
-        product_description:
-          description: Metadata information about the product's description.
-          properties:
-            read_only:
-              description: 'Whether the attribute is read-only.
-
-                * `1` — The attribute is read-only.
-
-                * `0` — System administrators can edit the attribute.'
-              enum:
-              - 0
-              - 1
-              example: 1
-          type: object
-        product_group:
-          description: Metadata information about the product's group label.
-          properties:
-            read_only:
-              description: 'Whether the attribute is read-only.
-
-                * `1` — The attribute is read-only.
-
-                * `0` — System administrators can edit the attribute.'
-              enum:
-              - 0
-              - 1
-              example: 1
-          type: object
-        product_id:
-          description: Metadata information about the product's ID.
-          properties:
-            read_only:
-              description: 'Whether the attribute is read-only.
-
-                * `1` — The attribute is read-only.
-
-                * `0` — System administrators can edit the attribute.'
-              enum:
-              - 0
-              - 1
-              example: 1
-          type: object
-        recommended:
-          description: Metadata information about whether the product is recommended.
-          properties:
-            read_only:
-              description: 'Whether the attribute is read-only.
-
-                * `1` — The attribute is read-only.
-
-                * `0` — System administrators can edit the attribute.'
-              enum:
-              - 0
-              - 1
-              example: 1
-          type: object
-      type: object
+      - $ref: '#/components/schemas/MarketItem'
+      - $ref: '#/components/schemas/SSLCertificateMarketItem'
     SSLMarketProviderMetaData:
       allOf:
       - $ref: '#/components/schemas/MarketProviderMetaData'
@@ -6477,10 +6217,270 @@ components:
             type: integer
         type: object
       description: An SSL certificate product available from one of the cPanel Market providers.
-    MarketItemType:
-      anyOf:
-      - $ref: '#/components/schemas/MarketItem'
-      - $ref: '#/components/schemas/SSLCertificateMarketItem'
+    MarketProviderMetaData:
+      properties:
+        display_name:
+          description: Metadata information about the product's display name.
+          properties:
+            read_only:
+              description: 'Whether the attribute is read-only.
+
+                * `1` — The attribute is read-only.
+
+                * `0` — System administrators can edit the attribute.'
+              enum:
+              - 0
+              - 1
+              example: 1
+          type: object
+        enabled:
+          description: Metadata information about whether the product is enabled in the Market.
+          properties:
+            read_only:
+              description: 'Whether the attribute is read-only.
+
+                * `1` — The attribute is read-only.
+
+                * `0` — System administrators can edit the attribute.'
+              enum:
+              - 0
+              - 1
+              example: 1
+          type: object
+        icon:
+          description: Metadata information about the product's icon file.
+          properties:
+            read_only:
+              description: 'Whether the attribute is read-only.
+
+                * `1` — The attribute is read-only.
+
+                * `0` — System administrators can edit the attribute.'
+              enum:
+              - 0
+              - 1
+              example: 1
+          type: object
+        icon_mime_type:
+          description: Metadata information about the icon's mime type.
+          properties:
+            read_only:
+              description: 'Whether the attribute is read-only.
+
+                * `1` — The attribute is read-only.
+
+                * `0` — System administrators can edit the attribute.'
+              enum:
+              - 0
+              - 1
+              example: 1
+          type: object
+        minimum_server_price:
+          description: Metadata information about the minimum server price for the certificate.
+          properties:
+            read_only:
+              description: 'Whether the attribute is read-only.
+
+                * `1` — The attribute is read-only.
+
+                * `0` — System administrators can edit the attribute.'
+              enum:
+              - 0
+              - 1
+              example: 1
+          type: object
+        price:
+          description: Metadata information about the product's price.
+          properties:
+            read_only:
+              description: 'Whether the attribute is read-only.
+
+                * `1` — The attribute is read-only.
+
+                * `0` — System administrators can edit the attribute.'
+              enum:
+              - 0
+              - 1
+              example: 1
+          type: object
+        price_unit:
+          description: Metadata information about the product's price per unit.
+          properties:
+            read_only:
+              description: 'Whether the attribute is read-only.
+
+                * `1` — The attribute is read-only.
+
+                * `0` — System administrators can edit the attribute.'
+              enum:
+              - 0
+              - 1
+              example: 1
+          type: object
+        product_description:
+          description: Metadata information about the product's description.
+          properties:
+            read_only:
+              description: 'Whether the attribute is read-only.
+
+                * `1` — The attribute is read-only.
+
+                * `0` — System administrators can edit the attribute.'
+              enum:
+              - 0
+              - 1
+              example: 1
+          type: object
+        product_group:
+          description: Metadata information about the product's group label.
+          properties:
+            read_only:
+              description: 'Whether the attribute is read-only.
+
+                * `1` — The attribute is read-only.
+
+                * `0` — System administrators can edit the attribute.'
+              enum:
+              - 0
+              - 1
+              example: 1
+          type: object
+        product_id:
+          description: Metadata information about the product's ID.
+          properties:
+            read_only:
+              description: 'Whether the attribute is read-only.
+
+                * `1` — The attribute is read-only.
+
+                * `0` — System administrators can edit the attribute.'
+              enum:
+              - 0
+              - 1
+              example: 1
+          type: object
+        recommended:
+          description: Metadata information about whether the product is recommended.
+          properties:
+            read_only:
+              description: 'Whether the attribute is read-only.
+
+                * `1` — The attribute is read-only.
+
+                * `0` — System administrators can edit the attribute.'
+              enum:
+              - 0
+              - 1
+              example: 1
+          type: object
+      type: object
+    MarketItem:
+      description: A product available from one of the cPanel Market providers.
+      properties:
+        billing_type:
+          description: 'The type of billing used with the product.
+
+
+            * `none` - The product is free.
+
+            * `one-time` - Use of the product requires a one-time payment.
+
+            * `monthly` - Use of the product requires a monthly subscription payment.
+
+            * `yearly` - Use of the product requires a yearly subscription payment.'
+          enum:
+          - none
+          - one-time
+          - monthly
+          - yearly
+          type: string
+        description:
+          description: A description of the product.
+          example: An Extended Validation (EV) SSL certificate signed by cPanel.
+          type: string
+        display_name:
+          description: The product's display name.
+          example: EV Certificate by cPanel.
+          type: string
+        icon:
+          description: The icon to display in the product list.
+          format: base64 image
+          type: string
+        icon_mime_type:
+          description: The icon's image format.
+          example: image/svg+xml
+          format: MIME
+          type: string
+        max_users:
+          description: The maximum number of users the system will allow for the product.
+          type:
+          - integer
+          - 'null'
+        maximum_server_price:
+          description: The maximum price that the system will allow for the product.
+          example: '20'
+          format: currency
+          type:
+          - string
+          - 'null'
+        minimum_server_price:
+          description: The minimum price that the system will allow for the product.
+          example: '3'
+          format: currency
+          type:
+          - string
+          - 'null'
+        price:
+          description: 'The product''s price.
+
+            * `null` - The item does not possess a static price.'
+          example: '6'
+          format: currency
+          minimum: 1
+          type:
+          - string
+          - 'null'
+        price_unit:
+          description: The currency code of the product's price.
+          example: USD
+          format: ISO-4217
+          type: string
+        product:
+          description: The human-readable product name. Use this in displays to the user.
+          example: Comodo EV Certificate
+          type: string
+        product_category:
+          example: N/A
+          type: string
+        product_group:
+          description: The product's group.
+          example: ssl_certificate
+          type: string
+        product_id:
+          description: The product's ID.
+          example: '12345'
+          type: string
+        provider_display_name:
+          description: The cPanel Market provider's display name.
+          example: cPanel Store
+          type: string
+        provider_name:
+          description: The cPanel Market provider's name.
+          example: cPStore
+          type: string
+        requires_ip:
+          default: '0'
+          description: 'Whether product require an IP address.
+
+            * `1` - The product requires an IP address.
+
+            * `0` - The product does **NOT** require an IP address.'
+          enum:
+          - '1'
+          - '0'
+          example: '0'
+          type: string
+      type: object
   securitySchemes:
     BasicAuth:
       scheme: basic

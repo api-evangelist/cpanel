@@ -12051,20 +12051,6 @@ paths:
       x-cpanel-available-version: cPanel 11.52
 components:
   schemas:
-    trace_deliveryResponseDefer:
-      allOf:
-      - $ref: '#/components/schemas/trace_deliveryResponseBase'
-      - properties:
-          destinations:
-            properties:
-              message:
-                description: A message that the system sends when it defers the email.
-                example: The system deferred the message.
-                type: string
-              type:
-                $ref: '#/components/schemas/trace_deliveryTypeDescription'
-            type: object
-        type: object
     trace_deliveryResponseDiscard:
       allOf:
       - $ref: '#/components/schemas/trace_deliveryResponseBase'
@@ -12081,6 +12067,115 @@ components:
                   The function **only** returns this value if an alias exists for the `address` value.'
                 example: /etc/valiases/example.com
                 format: path
+                type: string
+              type:
+                $ref: '#/components/schemas/trace_deliveryTypeDescription'
+            type: object
+        type: object
+    trace_deliveryResponseRemoteDelivery:
+      allOf:
+      - $ref: '#/components/schemas/trace_deliveryResponseBase'
+      - properties:
+          destinations:
+            items:
+              properties:
+                mx:
+                  description: "An array of strings containing [mail exchanger (MX) information](https://en.wikipedia.org/wiki/MX_record).\n\nEach string contains information for a single mail exchanger (MX), including:\n * The server's hostname.\n * The server's resolving IP address.\n * The MX record's priority. The lower the value, the higher its priority.\n * Whether DNSSEC is enabled for the hostname."
+                  items:
+                    example: host.example.com [10.0.0.1] MX=20 dnssec=no
+                    type: string
+                  type: array
+                type:
+                  $ref: '#/components/schemas/trace_deliveryTypeDescription'
+              type: object
+            type: array
+    trace_deliveryResponseError:
+      allOf:
+      - $ref: '#/components/schemas/trace_deliveryResponseBase'
+      - properties:
+          destinations:
+            properties:
+              message:
+                description: An error message from the system.
+                example: The mail server could not deliver mail to user@example2.com. The account or domain may not exist, they may be blacklisted, or missing the proper dns entries.
+                type: string
+              result:
+                description: An error message.
+                example: DNS lookup of example2.com (MX) gave HOST_NOT_FOUND
+                type: string
+              type:
+                $ref: '#/components/schemas/trace_deliveryTypeDescription'
+            type: object
+        type: object
+    trace_deliveryTypeDescription:
+      description: 'A type of trace node. The system returns this value to indicate the **end** of routing.
+
+        * `bounce` - The system rejected the email''s delivery.
+
+        * `command` - The system will run a command when it receives an email.
+
+        * `defer` - The system deferred the email.
+
+        * `discard` - The system discarded the email.
+
+        * `error` - The system encountered an error.
+
+        * `local_delivery` - The system sent the email to a local mailbox.
+
+        * `remote_delivery` - The system sent the email via Simple Mail Transfer Protocol (SMTP).
+
+        * `routed` - The system routed the email elsewhere.
+
+
+        **Note:**
+
+        * The structure of the `destinations` return changes depending on the `type` return value.
+
+        * The `routed` type can return any other type''s data structure as part of the `destinations` return value.'
+      example: local_delivery
+      type: string
+    trace_deliveryResponseBounce:
+      allOf:
+      - $ref: '#/components/schemas/trace_deliveryResponseBase'
+      - properties:
+          destinations:
+            properties:
+              message:
+                description: A message that the system sends when it rejects the delivery of an email.
+                example: The system rejected the message.
+                type: string
+              type:
+                $ref: '#/components/schemas/trace_deliveryTypeDescription'
+            type: object
+        type: object
+    trace_deliveryType:
+      anyOf:
+      - $ref: '#/components/schemas/trace_deliveryResponseBounce'
+      - $ref: '#/components/schemas/trace_deliveryResponseCommand'
+      - $ref: '#/components/schemas/trace_deliveryResponseDefer'
+      - $ref: '#/components/schemas/trace_deliveryResponseDiscard'
+      - $ref: '#/components/schemas/trace_deliveryResponseError'
+      - $ref: '#/components/schemas/trace_deliveryResponseLocalDelivery'
+      - $ref: '#/components/schemas/trace_deliveryResponseRemoteDelivery'
+      discriminator:
+        mapping:
+          bounce: '#/components/schemas/trace_deliveryResponseBounce'
+          command: '#/components/schemas/trace_deliveryResponseCommand'
+          defer: '#/components/schemas/trace_deliveryResponseDefer'
+          discard: '#/components/schemas/trace_deliveryResponseDiscard'
+          error: '#/components/schemas/trace_deliveryResponseError'
+          local_delivery: '#/components/schemas/trace_deliveryResponseLocalDelivery'
+          remote_delivery: '#/components/schemas/trace_deliveryResponseRemoteDelivery'
+        propertyName: type
+    trace_deliveryResponseDefer:
+      allOf:
+      - $ref: '#/components/schemas/trace_deliveryResponseBase'
+      - properties:
+          destinations:
+            properties:
+              message:
+                description: A message that the system sends when it defers the email.
+                example: The system deferred the message.
                 type: string
               type:
                 $ref: '#/components/schemas/trace_deliveryTypeDescription'
@@ -12123,79 +12218,16 @@ components:
             For more information, see the return structure for each `type` return value below:'
           example: local_delivery
           type: string
-    trace_deliveryResponseBounce:
+    trace_deliveryResponseLocalDelivery:
       allOf:
       - $ref: '#/components/schemas/trace_deliveryResponseBase'
       - properties:
           destinations:
             properties:
-              message:
-                description: A message that the system sends when it rejects the delivery of an email.
-                example: The system rejected the message.
-                type: string
-              type:
-                $ref: '#/components/schemas/trace_deliveryTypeDescription'
-            type: object
-        type: object
-    trace_deliveryTypeDescription:
-      description: 'A type of trace node. The system returns this value to indicate the **end** of routing.
-
-        * `bounce` - The system rejected the email''s delivery.
-
-        * `command` - The system will run a command when it receives an email.
-
-        * `defer` - The system deferred the email.
-
-        * `discard` - The system discarded the email.
-
-        * `error` - The system encountered an error.
-
-        * `local_delivery` - The system sent the email to a local mailbox.
-
-        * `remote_delivery` - The system sent the email via Simple Mail Transfer Protocol (SMTP).
-
-        * `routed` - The system routed the email elsewhere.
-
-
-        **Note:**
-
-        * The structure of the `destinations` return changes depending on the `type` return value.
-
-        * The `routed` type can return any other type''s data structure as part of the `destinations` return value.'
-      example: local_delivery
-      type: string
-    trace_deliveryType:
-      anyOf:
-      - $ref: '#/components/schemas/trace_deliveryResponseBounce'
-      - $ref: '#/components/schemas/trace_deliveryResponseCommand'
-      - $ref: '#/components/schemas/trace_deliveryResponseDefer'
-      - $ref: '#/components/schemas/trace_deliveryResponseDiscard'
-      - $ref: '#/components/schemas/trace_deliveryResponseError'
-      - $ref: '#/components/schemas/trace_deliveryResponseLocalDelivery'
-      - $ref: '#/components/schemas/trace_deliveryResponseRemoteDelivery'
-      discriminator:
-        mapping:
-          bounce: '#/components/schemas/trace_deliveryResponseBounce'
-          command: '#/components/schemas/trace_deliveryResponseCommand'
-          defer: '#/components/schemas/trace_deliveryResponseDefer'
-          discard: '#/components/schemas/trace_deliveryResponseDiscard'
-          error: '#/components/schemas/trace_deliveryResponseError'
-          local_delivery: '#/components/schemas/trace_deliveryResponseLocalDelivery'
-          remote_delivery: '#/components/schemas/trace_deliveryResponseRemoteDelivery'
-        propertyName: type
-    trace_deliveryResponseError:
-      allOf:
-      - $ref: '#/components/schemas/trace_deliveryResponseBase'
-      - properties:
-          destinations:
-            properties:
-              message:
-                description: An error message from the system.
-                example: The mail server could not deliver mail to user@example2.com. The account or domain may not exist, they may be blacklisted, or missing the proper dns entries.
-                type: string
-              result:
-                description: An error message.
-                example: DNS lookup of example2.com (MX) gave HOST_NOT_FOUND
+              mailbox:
+                description: The mailbox where the system sent the email.
+                example: user@example.com
+                format: email
                 type: string
               type:
                 $ref: '#/components/schemas/trace_deliveryTypeDescription'
@@ -12210,38 +12242,6 @@ components:
               command:
                 description: A command that the system runs when it receives the email.
                 example: /usr/local/cpanel/bin/autorespond user@example.com /home/cpmailuser/.autorespond
-                type: string
-              type:
-                $ref: '#/components/schemas/trace_deliveryTypeDescription'
-            type: object
-        type: object
-    trace_deliveryResponseRemoteDelivery:
-      allOf:
-      - $ref: '#/components/schemas/trace_deliveryResponseBase'
-      - properties:
-          destinations:
-            items:
-              properties:
-                mx:
-                  description: "An array of strings containing [mail exchanger (MX) information](https://en.wikipedia.org/wiki/MX_record).\n\nEach string contains information for a single mail exchanger (MX), including:\n * The server's hostname.\n * The server's resolving IP address.\n * The MX record's priority. The lower the value, the higher its priority.\n * Whether DNSSEC is enabled for the hostname."
-                  items:
-                    example: host.example.com [10.0.0.1] MX=20 dnssec=no
-                    type: string
-                  type: array
-                type:
-                  $ref: '#/components/schemas/trace_deliveryTypeDescription'
-              type: object
-            type: array
-    trace_deliveryResponseLocalDelivery:
-      allOf:
-      - $ref: '#/components/schemas/trace_deliveryResponseBase'
-      - properties:
-          destinations:
-            properties:
-              mailbox:
-                description: The mailbox where the system sent the email.
-                example: user@example.com
-                format: email
                 type: string
               type:
                 $ref: '#/components/schemas/trace_deliveryTypeDescription'

@@ -4546,6 +4546,124 @@ paths:
       x-cpanel-available-version: '56'
 components:
   schemas:
+    Subitem:
+      description: A subsection of an individual WHM feature.
+      properties:
+        acl:
+          description: 'The subitem''s Access Control Lists (ACLs).
+
+
+            **Note:**
+
+
+            * Only WHM users who possess the specified ACLs can view or use the item.
+
+            * System administrators can configure users'' ACLs in WHM''s [*Edit Reseller Nameservers and Privileges*](https://go.cpanel.net/whmdocsEditResellerNameserversandPrivileges) interface (*WHM >> Home >> Resellers >> Edit Reseller Nameservers and Privileges*).
+
+            * For a complete list of available ACLs, read our [Guide to WHM Plugins - ACL Reference Chart](https://go.cpanel.net/ACLReferenceChart) documentation.'
+          example: ACL=all
+          type:
+          - string
+          - 'null'
+        breadcrumb:
+          description: 'A subitem''s parent feature''s location.
+
+
+            * The system uses this value to generate breadcrumbs at the top of each WHM interface.
+
+            * The subitem''s parent feature''s `url` value.'
+          example: /example_plugin/feature_name
+          format: url-path
+          type: string
+        dnsonly_ok:
+          description: 'The subitem''s status for [cPanel DNSOnly](https://go.cpanel.net/cpanel-dnsonly)™ servers.
+
+
+            * `dns` - The subitem appears on cPanel DNSOnly servers.
+
+            * `` - The subitem does not appear on cPanel DNSOnly servers.'
+          enum:
+          - dns
+          example: dns
+          type:
+          - string
+          - 'null'
+        file:
+          description: 'The icon file to display for the subitem.
+
+
+            **Note:**
+
+
+            * Icons for any WHM plugins exist separately from the server''s theme. For more information, read our [Guide to WHM Plugins - Plugin Files](https://go.cpanel.net/whmpluginfiles) documentation.
+
+            * A valid `.png` or `.svg` image file, relative to the theme''s icon directory.'
+          example: feature_name.png
+          type: string
+        group:
+          description: The group in which the subitem appears. This is a value of an existing group object.
+          example: group_name
+          type: string
+        itemdesc:
+          description: 'The subitem''s display name.
+
+
+            **Note:**
+
+
+            * You can localize this string to display it in the user''s preferred language in the WHM interface. For more information, read our [Guide to Locales](https://go.cpanel.net/guide-to-locales) documentation.'
+          example: $LANG{'Feature Name'}
+          type: string
+        key:
+          description: 'A key to uniquely identify WHM interfaces and their associated assets for the [cPanel Analytics](https://go.cpanel.net/analytics) program.
+
+
+            **Note:**
+
+
+            Generally, this value matches the `file` parameter''s value without the file''s extension.'
+          example: feature_name
+          type: string
+        parent:
+          description: The subitem's parent feature's display order in the WHM interface. This is the parent feature's `itemorder` value.
+          example: 1
+          minimum: 1
+          type: integer
+        searchtext:
+          description: A list search terms for the subitem, space delimited.
+          example: search keywords
+          type: string
+        target:
+          description: 'The area of the interface in which the subitem displays.
+
+
+            A valid HTML `<a>` target attribute.'
+          example: _blank
+          type: string
+        type:
+          description: 'The object''s type.
+
+
+            * `subitem` - The only possible value.'
+          enum:
+          - subitem
+          example: subitem
+          type: string
+        url:
+          description: The subitem's interface location. This path is relative to the `/usr/local/cpanel/` directory.
+          example: /example_plugin/feature_name
+          format: url-path
+          type: string
+      required:
+      - type
+      - acl
+      - breadcrumb
+      - dnsonly_ok
+      - file
+      - group
+      - parent
+      - url
+      type: object
     Raw:
       description: Raw data for template directives.
       properties:
@@ -4566,47 +4684,6 @@ components:
       - type
       - itemdesc
       type: object
-    Service:
-      description: 'The [cPanel Service Daemon](https://go.cpanel.net/ThecPanelWHMServiceDaemons) that monitors the feature.
-
-
-        **Warning:**
-
-
-        The server creates this parameter automatically. Do **not** edit this parameter''s value. We do not support customizations to this parameter.
-
-
-        **Note:**
-
-
-        * This icon only appears on servers with the service enabled.
-
-        * For a complete list of service daemons, read our [cPanel Service Daemons](https://go.cpanel.net/ThecPanelWHMServiceDaemons) documentation.'
-      example: mysql
-      oneOf:
-      - properties:
-          match:
-            description: 'Whether to require all services in the services parameter to match enabled services on the server.
-
-
-              * `all` - Require the server to match **all** services under the `services` key to display the feature. (AND condition)
-
-              * `any` - Require the server to match any service under the `services` key to display the feature. (OR condition)'
-            enum:
-            - any
-            example: any
-            type: string
-          services:
-            description: An array of services.
-            example:
-            - mysql
-            - ftp
-            items:
-              type: string
-            type: array
-        type: object
-      - example: mysql
-        type: string
     Image:
       description: An individual WHM feature.
       properties:
@@ -4781,46 +4858,6 @@ components:
       - itemorder
       - url
       type: object
-    Role:
-      anyOf:
-      - properties:
-          match:
-            description: 'Whether to require all roles in the roles parameter to match the server''s roles.
-
-
-              * `all` - Require the server to match all roles in the roles parameter to display the feature. (AND condition)
-
-              * `any` - Require the server to match any role in the roles parameter to display the feature. (OR condition)'
-            enum:
-            - any
-            example: any
-            type: string
-          roles:
-            description: The array of role names.
-            example:
-            - MailLocal
-            - MailSend
-            items:
-              type: string
-            type: array
-        type: object
-      - example: MailSend
-        type: string
-      description: 'The feature''s server role.
-
-
-        **Warning:**
-
-
-        The server creates this parameter automatically. Do **not** edit this parameter''s value. We do **not** support customizations to this parameter.
-
-
-        **Note:**
-
-
-        * The icon only appears in the interface if the server configuration uses this role.
-
-        * For more information about roles and server configurations, read our [How to Use Server Profiles](https://go.cpanel.net/howtouseserverprofiles) documentation.'
     Group:
       description: A group of features.
       properties:
@@ -4946,124 +4983,87 @@ components:
       - groupdesc
       - grouporder
       type: object
-    Subitem:
-      description: A subsection of an individual WHM feature.
-      properties:
-        acl:
-          description: 'The subitem''s Access Control Lists (ACLs).
+    Role:
+      anyOf:
+      - properties:
+          match:
+            description: 'Whether to require all roles in the roles parameter to match the server''s roles.
 
 
-            **Note:**
+              * `all` - Require the server to match all roles in the roles parameter to display the feature. (AND condition)
+
+              * `any` - Require the server to match any role in the roles parameter to display the feature. (OR condition)'
+            enum:
+            - any
+            example: any
+            type: string
+          roles:
+            description: The array of role names.
+            example:
+            - MailLocal
+            - MailSend
+            items:
+              type: string
+            type: array
+        type: object
+      - example: MailSend
+        type: string
+      description: 'The feature''s server role.
 
 
-            * Only WHM users who possess the specified ACLs can view or use the item.
-
-            * System administrators can configure users'' ACLs in WHM''s [*Edit Reseller Nameservers and Privileges*](https://go.cpanel.net/whmdocsEditResellerNameserversandPrivileges) interface (*WHM >> Home >> Resellers >> Edit Reseller Nameservers and Privileges*).
-
-            * For a complete list of available ACLs, read our [Guide to WHM Plugins - ACL Reference Chart](https://go.cpanel.net/ACLReferenceChart) documentation.'
-          example: ACL=all
-          type:
-          - string
-          - 'null'
-        breadcrumb:
-          description: 'A subitem''s parent feature''s location.
+        **Warning:**
 
 
-            * The system uses this value to generate breadcrumbs at the top of each WHM interface.
-
-            * The subitem''s parent feature''s `url` value.'
-          example: /example_plugin/feature_name
-          format: url-path
-          type: string
-        dnsonly_ok:
-          description: 'The subitem''s status for [cPanel DNSOnly](https://go.cpanel.net/cpanel-dnsonly)™ servers.
+        The server creates this parameter automatically. Do **not** edit this parameter''s value. We do **not** support customizations to this parameter.
 
 
-            * `dns` - The subitem appears on cPanel DNSOnly servers.
-
-            * `` - The subitem does not appear on cPanel DNSOnly servers.'
-          enum:
-          - dns
-          example: dns
-          type:
-          - string
-          - 'null'
-        file:
-          description: 'The icon file to display for the subitem.
+        **Note:**
 
 
-            **Note:**
+        * The icon only appears in the interface if the server configuration uses this role.
+
+        * For more information about roles and server configurations, read our [How to Use Server Profiles](https://go.cpanel.net/howtouseserverprofiles) documentation.'
+    Service:
+      description: 'The [cPanel Service Daemon](https://go.cpanel.net/ThecPanelWHMServiceDaemons) that monitors the feature.
 
 
-            * Icons for any WHM plugins exist separately from the server''s theme. For more information, read our [Guide to WHM Plugins - Plugin Files](https://go.cpanel.net/whmpluginfiles) documentation.
-
-            * A valid `.png` or `.svg` image file, relative to the theme''s icon directory.'
-          example: feature_name.png
-          type: string
-        group:
-          description: The group in which the subitem appears. This is a value of an existing group object.
-          example: group_name
-          type: string
-        itemdesc:
-          description: 'The subitem''s display name.
+        **Warning:**
 
 
-            **Note:**
+        The server creates this parameter automatically. Do **not** edit this parameter''s value. We do not support customizations to this parameter.
 
 
-            * You can localize this string to display it in the user''s preferred language in the WHM interface. For more information, read our [Guide to Locales](https://go.cpanel.net/guide-to-locales) documentation.'
-          example: $LANG{'Feature Name'}
-          type: string
-        key:
-          description: 'A key to uniquely identify WHM interfaces and their associated assets for the [cPanel Analytics](https://go.cpanel.net/analytics) program.
+        **Note:**
 
 
-            **Note:**
+        * This icon only appears on servers with the service enabled.
+
+        * For a complete list of service daemons, read our [cPanel Service Daemons](https://go.cpanel.net/ThecPanelWHMServiceDaemons) documentation.'
+      example: mysql
+      oneOf:
+      - properties:
+          match:
+            description: 'Whether to require all services in the services parameter to match enabled services on the server.
 
 
-            Generally, this value matches the `file` parameter''s value without the file''s extension.'
-          example: feature_name
-          type: string
-        parent:
-          description: The subitem's parent feature's display order in the WHM interface. This is the parent feature's `itemorder` value.
-          example: 1
-          minimum: 1
-          type: integer
-        searchtext:
-          description: A list search terms for the subitem, space delimited.
-          example: search keywords
-          type: string
-        target:
-          description: 'The area of the interface in which the subitem displays.
+              * `all` - Require the server to match **all** services under the `services` key to display the feature. (AND condition)
 
-
-            A valid HTML `<a>` target attribute.'
-          example: _blank
-          type: string
-        type:
-          description: 'The object''s type.
-
-
-            * `subitem` - The only possible value.'
-          enum:
-          - subitem
-          example: subitem
-          type: string
-        url:
-          description: The subitem's interface location. This path is relative to the `/usr/local/cpanel/` directory.
-          example: /example_plugin/feature_name
-          format: url-path
-          type: string
-      required:
-      - type
-      - acl
-      - breadcrumb
-      - dnsonly_ok
-      - file
-      - group
-      - parent
-      - url
-      type: object
+              * `any` - Require the server to match any service under the `services` key to display the feature. (OR condition)'
+            enum:
+            - any
+            example: any
+            type: string
+          services:
+            description: An array of services.
+            example:
+            - mysql
+            - ftp
+            items:
+              type: string
+            type: array
+        type: object
+      - example: mysql
+        type: string
   securitySchemes:
     BasicAuth:
       scheme: basic

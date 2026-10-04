@@ -3050,30 +3050,6 @@ paths:
       x-cpanel-available-version: '64'
 components:
   schemas:
-    Metadata:
-      properties:
-        command:
-          description: The method name called.
-          example: api_token_get_details
-          type: string
-        reason:
-          description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
-          example: OK
-          type: string
-        result:
-          description: '* `1` — Success.
-
-            * `0` – Failed. Check the `reason` field for more details.'
-          enum:
-          - 1
-          - 0
-          example: 1
-          type: integer
-        version:
-          description: The version of the API function.
-          example: 1
-          type: integer
-      type: object
     TokenDetails:
       properties:
         acls:
@@ -3126,6 +3102,30 @@ components:
           type:
           - array
           - 'null'
+      type: object
+    Metadata:
+      properties:
+        command:
+          description: The method name called.
+          example: api_token_get_details
+          type: string
+        reason:
+          description: The reason the API function failed when the `metadata.result` field is `0`. This field may display a success message when a function succeeds.
+          example: OK
+          type: string
+        result:
+          description: '* `1` — Success.
+
+            * `0` – Failed. Check the `reason` field for more details.'
+          enum:
+          - 1
+          - 0
+          example: 1
+          type: integer
+        version:
+          description: The version of the API function.
+          example: 1
+          type: integer
       type: object
   securitySchemes:
     BasicAuth:
