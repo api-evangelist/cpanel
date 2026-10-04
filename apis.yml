@@ -3272,6 +3272,9 @@ apis:
   - type: Authentication
     url: https://api.docs.cpanel.net/whm/tokens/
 common:
+- type: CapabilityMap
+  url: capabilities/cpanel-capability-edges.yml
+  name: cPanel Business Capability Map
 - type: Overlay
   url: overlays/cpanel-uapi-overlay.yaml
 - type: Overlay

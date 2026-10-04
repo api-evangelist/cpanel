@@ -1,0 +1,225 @@
+slug: cpanel
+provider: cPanel
+generated_by: planning/capability-mapping/scripts/classify_capabilities.py
+model: claude-opus-5
+frame:
+- Software & Technology
+min_confidence: 0.7
+capability_model:
+  source: https://github.com/vincentmakes/turbo-ea-capabilities
+  license: CC-BY-4.0
+  attribution: Turbo EA Capabilities by Vincent Verdet — Turbo EA, https://github.com/vincentmakes/turbo-ea-capabilities,
+    CC BY 4.0
+  notice: NOTICE
+edge_count: 21
+edges:
+- tag: IP Addresses
+  spec_file: cpanel-ip-addresses-api-openapi.yml
+  capability_id: BC-600.50
+  capability_id_l1: BC-600
+  capability_name: IT Infrastructure Management
+  confidence: 0.8
+  evidence: '"Add IP addresses"; "Return server''s IP addresses"; "Add IPv6 address range"'
+  reason: Server-wide IP and IPv6 range allocation to accounts is network infrastructure administration,
+    squarely IT infrastructure management (compute, storage, network).
+- tag: SSH Keys and Connections
+  spec_file: cpanel-ssh-keys-and-connections-api-openapi.yml
+  capability_id: BC-620.20
+  capability_id_l1: BC-620
+  capability_name: Identity & Access Management
+  confidence: 0.8
+  evidence: GET /generatesshkeypair 'Create SSH key pair'; GET /authorizesshkey 'Enable SSH key for server';
+    GET /deletesshkey 'Delete SSH key'
+  reason: Operations issue, authorise, import, list and delete SSH keys and access hashes — lifecycle
+    of privileged access credentials, i.e. identity and access management.
+- tag: Passwords
+  spec_file: cpanel-passwords-api-openapi.yml
+  capability_id: BC-620.20
+  capability_id_l1: BC-620
+  capability_name: Identity & Access Management
+  confidence: 0.78
+  evidence: '''Enable forced password update'', ''Return password strength'', ''Update cPanel account
+    password'''
+  reason: Operations manage account credentials — forced password change and password updates for hosting
+    accounts — which is identity and access (credential) management.
+- tag: ExternalAuthentication
+  spec_file: cpanel-externalauthentication-api-openapi.yml
+  capability_id: BC-620.20
+  capability_id_l1: BC-620
+  capability_name: Identity & Access Management
+  confidence: 0.75
+  evidence: '"Add external authentication link"; "Return server''s external authentication providers"'
+  reason: Manages federated identity links between cPanel accounts and external authentication providers
+    (SSO), which is identity and access management / federation rather than any domain business process.
+- tag: ModSecurity
+  spec_file: cpanel-modsecurity-api-openapi.yml
+  capability_id: BC-620
+  capability_id_l1: BC-620
+  capability_name: Cybersecurity Management
+  confidence: 0.75
+  evidence: '''modsec_add_rule  Add staged ModSecurity rule'', ''ModSecurity-enable_all_domains  Enable
+    ModSecurity for all domains'', ''modsec_add_vendor  Add ModSecurity vendor rules'''
+  reason: ModSecurity is the web application firewall; the operations enable/disable it per domain and
+    author, validate and deploy WAF rules. That is cybersecurity control management. L2 left null because
+    it straddles preventive security architecture and threat detection.
+- tag: SSL
+  spec_file: cpanel-ssl-api-openapi.yml
+  capability_id: BC-620
+  capability_id_l1: BC-620
+  capability_name: Cybersecurity Management
+  confidence: 0.75
+  evidence: GET /SSL/delete_cert 'Delete SSL certificate'; GET /SSL/fetch_cert_info 'Return SSL certificate
+    information'; GET /SSL/delete_csr 'Delete certificate signing request'
+  reason: Large surface for TLS certificate, CSR and private-key lifecycle plus AutoSSL control — transport
+    security administration under Cybersecurity Management. No candidate L2 cleanly covers certificate/PKI
+    management, so L1 only.
+- tag: Server Administration
+  spec_file: cpanel-server-administration-api-openapi.yml
+  capability_id: BC-600.40
+  capability_id_l1: BC-600
+  capability_name: IT Operations Management
+  confidence: 0.75
+  evidence: POST /add_configclusterserver 'Add configuration cluster server'; GET /configureservice 'Enable
+    or disable a service and its monitoring'; 'Enable monitoring for all services'
+  reason: 'WHM server-wide administration: enabling/disabling and monitoring system services, managing
+    configuration cluster servers, background process control. This is day-to-day IT operations of hosting
+    servers, not a line-of-business capability.'
+- tag: Team Users
+  spec_file: cpanel-team-users-api-openapi.yml
+  capability_id: BC-620.20
+  capability_id_l1: BC-620
+  capability_name: Identity & Access Management
+  confidence: 0.75
+  evidence: GET /Team/add_team_user  Add a team user; GET /Team/add_roles  Add roles to a team user; GET
+    /Team/password_reset_request  Sends a password reset request link to team user
+  reason: 'Full joiner-mover-leaver lifecycle for sub-accounts on a hosting account: create/edit/remove
+    users, grant and revoke roles, password reset, expiry. This is identity and access administration,
+    not HR employee management.'
+- tag: UserManager
+  spec_file: cpanel-usermanager-api-openapi.yml
+  capability_id: BC-620.20
+  capability_id_l1: BC-620
+  capability_name: Identity & Access Management
+  confidence: 0.75
+  evidence: '''Create Subaccount'', ''Delete Subaccount'', ''Update cPanel account password (User Manager)'',
+    ''Register service account to Subaccount'''
+  reason: Operations create, modify, delete and credential-manage sub-accounts and link service accounts
+    — account/credential lifecycle, i.e. identity and access management for the hosting platform.
+- tag: cPHulk
+  spec_file: cpanel-cphulk-api-openapi.yml
+  capability_id: BC-620.30
+  capability_id_l1: BC-620
+  capability_name: Threat Detection & Response Management
+  confidence: 0.75
+  evidence: cPHulk-get_cphulk_brutes  Return login security brute force attacks; cPHulk-flush_cphulk_login_history_for_ips  Remove
+    login security IP address block
+  reason: 'cPHulk is brute-force login protection: detecting attacks, listing failed logins, and blocking/unblocking
+    IPs — threat detection and response. Some overlap with identity/access controls keeps it below 0.9.'
+- tag: Version Control
+  spec_file: cpanel-version-control-api-openapi.yml
+  capability_id: BC-4200.40
+  capability_id_l1: BC-4200
+  capability_name: Software Construction Management
+  confidence: 0.72
+  evidence: '''Create Git repository'', ''Update Git repository settings'', ''Return Git repositories'''
+  reason: Provisioning and management of Git repositories is source-control practice, which falls under
+    Software Construction Management (source control, collaborative coding).
+- tag: 360 Monitoring
+  spec_file: cpanel-360-monitoring-api-openapi.yml
+  capability_id: BC-600.40
+  capability_id_l1: BC-600
+  capability_name: IT Operations Management
+  confidence: 0.7
+  evidence: '"Register the server with 360 Monitoring"; "Update 360 Monitoring agent polling settings"'
+  reason: Enrols a hosting server with a server-monitoring service and tunes agent polling intervals —
+    infrastructure monitoring administration, i.e. IT operations monitoring. Not product observability
+    of a SaaS service the vendor runs, so the cross-industry IT Operations capability is the better fit.
+- tag: ClamScanner
+  spec_file: cpanel-clamscanner-api-openapi.yml
+  capability_id: BC-620.30
+  capability_id_l1: BC-620
+  capability_name: Threat Detection & Response Management
+  confidence: 0.7
+  evidence: '''Start virus scan'', ''Start disinfecting files with viruses'', ''Return infected file list'''
+  reason: Operations drive antivirus scanning, infected-file listing and disinfection of hosted account
+    files — malware detection and remediation, closest to Threat Detection & Response. Some ambiguity
+    vs. vulnerability management keeps confidence moderate.
+- tag: DNS
+  spec_file: cpanel-dns-api-openapi.yml
+  capability_id: BC-600.50
+  capability_id_l1: BC-600
+  capability_name: IT Infrastructure Management
+  confidence: 0.7
+  evidence: '''DNS-mass_edit_zone  Update a DNS zone'', ''DNS-swap_ip_in_zones  Update IP addresses in
+    zone files'', ''DNS-has_local_authority  Return whether local DNS server is authoritative'''
+  reason: Operations create, parse and edit DNS zones and records and manage authoritative name resolution
+    — network infrastructure administration, i.e. IT Infrastructure Management.
+- tag: Databases
+  spec_file: cpanel-databases-api-openapi.yml
+  capability_id: BC-600.50
+  capability_id_l1: BC-600
+  capability_name: IT Infrastructure Management
+  confidence: 0.7
+  evidence: '"Return MySQL version", "Return MySQL databases", "Create remote MySQL profile"'
+  reason: Operations administer MySQL/MariaDB database servers, versions, users and remote DB profiles
+    on a hosting server — database/platform infrastructure administration, not a business data-governance
+    function.
+- tag: DynamicDNS
+  spec_file: cpanel-dynamicdns-api-openapi.yml
+  capability_id: BC-600.50
+  capability_id_l1: BC-600
+  capability_name: IT Infrastructure Management
+  confidence: 0.7
+  evidence: '"Create Dynamic DNS domain", "Delete Dynamic DNS domain", "Return Dynamic DNS domains"'
+  reason: Lifecycle management of dynamic DNS entries — network/DNS infrastructure administration.
+- tag: Email DNS Settings
+  spec_file: cpanel-email-dns-settings-api-openapi.yml
+  capability_id: BC-600.50
+  capability_id_l1: BC-600
+  capability_name: IT Infrastructure Management
+  confidence: 0.7
+  evidence: '"Create mail exchanger record", "Return mail exchanger records"'
+  reason: CRUD over MX DNS records for mail routing — DNS/network infrastructure configuration, not marketing
+    or communications management.
+- tag: NGINX Manager
+  spec_file: cpanel-nginx-manager-api-openapi.yml
+  capability_id: BC-600.50
+  capability_id_l1: BC-600
+  capability_name: IT Infrastructure Management
+  confidence: 0.7
+  evidence: '''nginxmanager_set_cache_config  Update NGINX caching status'' and ''nginxmanager_rebuild_cache_config  Update
+    NGINX configuration'''
+  reason: Configuration and cache management of the NGINX web server on the hosting fleet is squarely
+    web/infrastructure administration.
+- tag: PHP
+  spec_file: cpanel-php-api-openapi.yml
+  capability_id: BC-600
+  capability_id_l1: BC-600
+  capability_name: Information Technology Management
+  confidence: 0.7
+  evidence: '''Return installed PHP versions'', ''Return PHP version''s php.ini file'', ''Update PHP version''s
+    directives'', ''Return PHP version of all virtual hosts'''
+  reason: Manages PHP runtime versions, handlers and php.ini configuration across virtual hosts — server/platform
+    runtime administration, i.e. IT management. Evidence straddles infrastructure and application management
+    so no L2 is asserted.
+- tag: Security
+  spec_file: cpanel-security-api-openapi.yml
+  capability_id: BC-620
+  capability_id_l1: BC-620
+  capability_name: Cybersecurity Management
+  confidence: 0.7
+  evidence: GET /fetch_security_advice 'Return Security Advisor results'; GET /setminimumpasswordstrengths
+    'Update minimum password strength'
+  reason: Operations return server security advisory findings and set minimum password-strength policy
+    — security posture and policy configuration. Split between governance/policy and hardening advice,
+    so L1 only at moderate confidence.
+- tag: WHM Access
+  spec_file: cpanel-whm-access-api-openapi.yml
+  capability_id: BC-620.20
+  capability_id_l1: BC-620
+  capability_name: Identity & Access Management
+  confidence: 0.7
+  evidence: '''Restrict Access to WHM by CIDR list'', ''Clear all CIDR restrictions to login to cPanel
+    & WHM with the root password'''
+  reason: Controls privileged (root) administrative login access to the server control panel — privileged
+    access control, part of identity & access management.
