@@ -114,3 +114,41 @@ api_metering:
   note: >-
     Searched the pricing page, the FAQ on it, the developer documentation and both OpenAPI
     documents. No per-call price, no request quota and no API-tier distinction exists anywhere.
+x-canonical:
+  generated: '2026-10-08'
+  vocabulary: all/0-working/economics/plans-canonical.yml
+  models:
+  - hybrid
+  - subscription
+  units: []
+  plans:
+  - name: Solo
+    access: other
+    model: subscription
+    model_how: derived
+    units: []
+    periods: []
+  - name: Admin
+    access: other
+    model: subscription
+    model_how: derived
+    units: []
+    periods: []
+  - name: Pro
+    access: other
+    model: subscription
+    model_how: derived
+    units: []
+    periods: []
+  - name: Premier
+    access: other
+    model: hybrid
+    model_how: derived
+    units: []
+    periods: []
+  - name: WP Squared
+    access: other
+    model: hybrid
+    model_how: derived
+    units: []
+    periods: []

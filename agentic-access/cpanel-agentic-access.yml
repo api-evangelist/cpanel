@@ -1,4 +1,4 @@
-generated: '2026-09-16'
+generated: '2026-09-23'
 method: generated
 source: openapi/cpanel-360-monitoring-api-openapi.yml, openapi/cpanel-account-creation-api-openapi.yml,
   openapi/cpanel-account-enhancements-api-openapi.yml, openapi/cpanel-account-management-api-openapi.yml,
@@ -60,11 +60,11 @@ description: Recommended x-agentic-access execution contracts, classified heuris
 summary:
   operations: 1282
   by_action_class:
-    connected: 1242
-    acting: 40
+    connected: 1245
+    acting: 37
   by_consequence:
-    read: 1242
-    write: 39
+    read: 1245
+    write: 36
     physical: 1
   human_in_the_loop_required: 0
 operations:
@@ -8506,18 +8506,12 @@ operations:
   method: post
   operationId: Personalization-get
   x-agentic-access:
-    action-class: acting
-    consequence: write
-    subject: required
-    audience: null
+    action-class: connected
+    consequence: read
+    subject: optional
     token:
-      max-ttl: 900
-    escalation:
-      human-in-the-loop: conditional
-      triggers:
-      - abnormal
-      - high-value
-    audit: required
+      max-ttl: 3600
+    audit: none
 - path: /Personalization/set
   method: post
   operationId: Personalization-set
@@ -9522,18 +9516,12 @@ operations:
   method: post
   operationId: ConnectedApplications-fetch_connected_application
   x-agentic-access:
-    action-class: acting
-    consequence: write
-    subject: required
-    audience: null
+    action-class: connected
+    consequence: read
+    subject: optional
     token:
-      max-ttl: 900
-    escalation:
-      human-in-the-loop: conditional
-      triggers:
-      - abnormal
-      - high-value
-    audit: required
+      max-ttl: 3600
+    audit: none
 - path: /force_dedistribution_from_node
   method: get
   operationId: Cpanel-force_dedistribution_from_node
@@ -9778,18 +9766,12 @@ operations:
   method: post
   operationId: ConnectedApplications-list_connected_applications
   x-agentic-access:
-    action-class: acting
-    consequence: write
-    subject: required
-    audience: null
+    action-class: connected
+    consequence: read
+    subject: optional
     token:
-      max-ttl: 900
-    escalation:
-      human-in-the-loop: conditional
-      triggers:
-      - abnormal
-      - high-value
-    audit: required
+      max-ttl: 3600
+    audit: none
 - path: /list_linked_server_nodes
   method: get
   operationId: Cpanel-list_linked_server_nodes
