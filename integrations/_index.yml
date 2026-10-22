@@ -65,3 +65,16 @@
     detected: '2026-10-20'
   status: not-a-workflow
   arazzo: null
+- slug: cpanel-digital-ocean-own
+  label: Digital Ocean (own)
+  partner: digital-ocean
+  partner_name: Digital Ocean (own)
+  category: Blogs and Forums
+  type: marketplace
+  marketplace: own
+  channel: partner-built
+  evidence: https://marketplace.digitalocean.com/apps/cpanel-license
+  source: edge
+  relationship: platform-app
+  status: not-a-workflow
+  arazzo: null

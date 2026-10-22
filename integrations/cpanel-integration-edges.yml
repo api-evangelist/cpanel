@@ -60,6 +60,27 @@ edges:
     detected: '2026-10-20'
   detected_by: sweep-network-edge.py
   first_seen: '2026-10-20'
+- partner_name: Digital Ocean (own)
+  partner: digital-ocean
+  partner_match: mirror
+  mirror_match: domain
+  type: marketplace
+  relationship: platform-app
+  direction: third-party
+  channel: partner-built
+  marketplace: own
+  evidence: https://marketplace.digitalocean.com/apps/cpanel-license
+  mirror_of: digital-ocean/integrations/digital-ocean-integration-edges.yml
+  apps:
+  - cPanel & WHM® (License)
+  - WP Squared
+  - WP Squared (License)
+  - cPanel & WHM® for AlmaLinux 9
+  - cPanel & WHM® for Ubuntu
+  listing_count: 1
+  detected: '2026-10-21'
+  detected_by: mirror-platform-listings.py
+  category: Blogs and Forums
 generated: '2026-10-18'
 method: searched
 source:
@@ -82,3 +103,4 @@ checked:
 - https://www.peeringdb.com/api/fac
 - https://www.peeringdb.com/api/ix
 - https://www.peeringdb.com/api/net
+- digital-ocean/integrations/digital-ocean-integration-edges.yml
