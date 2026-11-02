@@ -1,0 +1,237 @@
+# Pricing transcribed from the provider's own page — see provenance. Numbers are quoted, not derived.
+generated: '2026-10-28'
+method: searched
+source: https://www.cpanel.net/pricing/
+sources:
+- https://www.cpanel.net/pricing/
+- https://cpanel.net/pricing/
+provenance:
+  tool: engine/economics/harvest_pricing.py
+  run: 20261028T141238
+  grounding: every price_text was found verbatim in the fetched page text
+audience: business-product
+pricing_basis: tiered-subscription
+delivery:
+  delivery: managed
+  method: page
+  read: '2026-10-28'
+published: true
+note: cPanel & WHM server control panel licensing by account count, licensed per server IP (self-hosted
+  software sold under licence).
+plan_count: 15
+currency: USD
+plans:
+- name: Solo
+  price_text: $ 29.99/mo
+  price: 29.99
+  currency: USD
+  period: month
+  unit: 1 Account
+  included_quota: 1 Account; Available on Cloud/VPS Only
+- name: Solo (annual)
+  price_text: $27.46 /mo
+  price: 27.46
+  currency: USD
+  period: month
+  unit: 1 Account
+  included_quota: Excl. VAT. | Billed Annually; Save 8.4% with annual billing
+- name: Admin
+  price_text: $ 35.99/mo
+  price: 35.99
+  currency: USD
+  period: month
+  unit: up to 5 Accounts
+  included_quota: Up to 5 Accounts; Available on Cloud/VPS Only
+- name: Admin (annual)
+  price_text: $32.96 /mo
+  price: 32.96
+  currency: USD
+  period: month
+  unit: up to 5 Accounts
+  included_quota: Excl. VAT. | Billed Annually
+- name: Pro
+  price_text: $ 53.99/mo
+  price: 53.99
+  currency: USD
+  period: month
+  unit: up to 30 Accounts
+  included_quota: Up to 30 Accounts; Available on Cloud/VPS Only
+- name: Pro (annual)
+  price_text: $49.46 /mo
+  price: 49.46
+  currency: USD
+  period: month
+  unit: up to 30 Accounts
+  included_quota: Excl. VAT. | Billed Annually
+- name: Premier
+  price_text: $69.99 /mo
+  price: 69.99
+  currency: USD
+  period: month
+  unit: up to 100 Accounts
+  included_quota: Up to 100 Accounts; Cloud/VPS & Metal/Dedicated
+  overage: Additional accounts $0.49 each
+- name: WP Squared
+  price_text: $84.99 /mo
+  price: 84.99
+  currency: USD
+  period: month
+  unit: 10 WordPress sites
+  included_quota: For 10 WordPress sites
+  overage: Then $0.40 for each additional
+- name: Add-on/extension
+  price_text: Starting from $45/mo
+  price: 45
+  currency: USD
+  period: month
+- name: Add-on/extension
+  price_text: Starting from $34.95/mo
+  price: 34.95
+  currency: USD
+  period: month
+- name: Add-on/extension
+  price_text: Starting from $16.80/mo
+  price: 16.8
+  currency: USD
+  period: month
+- name: Add-on/extension
+  price_text: Starting from $29.00/mo
+  price: 29
+  currency: USD
+  period: month
+- name: Add-on/extension
+  price_text: Starting from $3/mo
+  price: 3
+  currency: USD
+  period: month
+- name: Add-on/extension
+  price_text: Starting from $25/mo
+  price: 25
+  currency: USD
+  period: month
+- name: Add-on/extension
+  price_text: Starting from $8.95/mo
+  price: 8.95
+  currency: USD
+  period: month
+x-canonical:
+  generated: '2026-11-01'
+  vocabulary: engine/economics/plans-canonical.yml
+  models:
+  - hybrid
+  - subscription
+  units: []
+  plans:
+  - name: Solo
+    access: other
+    model: subscription
+    model_how: derived
+    units:
+    - other
+    periods:
+    - month
+  - name: Solo (annual)
+    access: other
+    model: subscription
+    model_how: derived
+    units:
+    - other
+    periods:
+    - month
+  - name: Admin
+    access: other
+    model: subscription
+    model_how: derived
+    units:
+    - other
+    periods:
+    - month
+  - name: Admin (annual)
+    access: other
+    model: subscription
+    model_how: derived
+    units:
+    - other
+    periods:
+    - month
+  - name: Pro
+    access: other
+    model: subscription
+    model_how: derived
+    units:
+    - other
+    periods:
+    - month
+  - name: Pro (annual)
+    access: other
+    model: subscription
+    model_how: derived
+    units:
+    - other
+    periods:
+    - month
+  - name: Premier
+    access: other
+    model: hybrid
+    model_how: derived
+    units:
+    - other
+    periods:
+    - month
+  - name: WP Squared
+    access: other
+    model: hybrid
+    model_how: derived
+    units:
+    - other
+    periods:
+    - month
+  - name: Add-on/extension
+    access: other
+    model: subscription
+    model_how: derived
+    units: []
+    periods:
+    - month
+  - name: Add-on/extension
+    access: other
+    model: subscription
+    model_how: derived
+    units: []
+    periods:
+    - month
+  - name: Add-on/extension
+    access: other
+    model: subscription
+    model_how: derived
+    units: []
+    periods:
+    - month
+  - name: Add-on/extension
+    access: other
+    model: subscription
+    model_how: derived
+    units: []
+    periods:
+    - month
+  - name: Add-on/extension
+    access: other
+    model: subscription
+    model_how: derived
+    units: []
+    periods:
+    - month
+  - name: Add-on/extension
+    access: other
+    model: subscription
+    model_how: derived
+    units: []
+    periods:
+    - month
+  - name: Add-on/extension
+    access: other
+    model: subscription
+    model_how: derived
+    units: []
+    periods:
+    - month
